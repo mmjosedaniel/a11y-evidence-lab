@@ -2,7 +2,7 @@
 
 ## Authority, status, and scope
 
-**Status:** Proposed architecture detail for the fourth workflow step, assessed on 2026-08-24. It applies the bounded LangChain evaluation role accepted in [ADR-0013](../decisions/ADR-0013-langchain-as-initial-rag-integration.md), but does not promote LangChain to a release dependency; accept an open decision; qualify a model, runtime, or provider; select an external API provider; authorize implementation; or permit generated output to establish accessibility, conformance, certification, or completed remediation.
+**Status:** Proposed architecture detail for the fourth workflow step, assessed on 2026-08-24 and aligned with the accepted MVP boundaries on 2026-08-25. It applies the bounded LangChain evaluation role accepted in [ADR-0013](../decisions/ADR-0013-langchain-as-initial-rag-integration.md) and the local/Groq provider decision in [ADR-0014](../decisions/ADR-0014-groq-as-mvp-external-generation-provider.md), but does not promote LangChain, Ollama, a local model, Groq, or the named Groq model to a release-qualified dependency; authorize implementation; or permit generated output to establish accessibility, conformance, certification, or completed remediation.
 
 The authoritative requirement IDs, wording, and statuses remain in [Evidence and review workflow requirements](../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#generated-explanations-and-remediation-proposals). This assessment owns no requirement IDs or statuses and cannot override an identified requirement or accepted ADR.
 
@@ -16,31 +16,31 @@ Support exactly three project-owned synthetic portfolio profiles. Each profile h
 | `form-input-label` | `label` | WCAG 2.2 SC 4.1.2 | Explain the missing programmatic label/name and propose an explicit visible-label association for the controlled fixture without inferring full WCAG non-conformance. The axe-rule mapping is not expanded to SC 3.3.2 or SC 1.3.1. |
 | `text-contrast` | `color-contrast` | WCAG 2.2 SC 1.4.3 | Explain the retained measured ratio and applicable recorded threshold, then propose adjusting the foreground, background, or both and measuring again. It must not claim that an unmeasured candidate color pair passes. |
 
-Process the profiles independently: one finding, one retrieval run, one model call, and at most one proposal at a time. Do not batch findings, combine scenarios in a prompt, or let evidence from one profile support another. Use the finding/evidence package from step 2 and the fixed passages from step 3. The proposed flow is:
+Process the profiles independently: one finding, one retrieval run, at most one eligible model call, and at most one proposal at a time. Do not batch findings, combine scenarios in a prompt, or let evidence from one profile support another. Use the finding/evidence package from step 2 and the fixed passages from step 3. The proposed flow is:
 
 1. Confirm that scan, evidence capture, and retrieval completed successfully and that the retrieval result is eligible under the policy below.
-2. Assemble one privacy-safe prompt from the normalized finding, at most five retrieved passages, fixed instructions, and one closed proposal-or-abstention schema.
-3. Invoke the selected model once through the application-owned provider contract. For the first local demonstration, evaluate a direct LangChain chat-model structured-output call; do not create an agent or graph.
+2. For an eligible package, assemble one privacy-safe prompt from the normalized finding, at most five retrieved passages, fixed instructions, and one closed candidate-proposal schema.
+3. Invoke the explicitly selected local or Groq model once through the same application-owned provider contract. Evaluate a direct LangChain chat-model structured-output call; do not create an agent or graph.
 4. Validate structure, supplied-reference membership, the closed claim taxonomy, required conditional language, and prohibited assertions with ordinary deterministic application logic.
 5. Publish a passing result as **AI-generated — pending human review**. Deterministic validation proves only structure and traceability; the step-5 reviewer decides whether each material claim is actually supported before accepting a plan.
 
-There is no automatic retry, critique call, second model, semantic-judge model, tool call, provider fallback, or pre-review human gate. This is sufficient to demonstrate the important technology path three times without designing a general accessibility assistant:
+There is no automatic retry, critique call, second model within a mode, semantic-judge model, tool call, provider fallback, or pre-review human gate. A failed local request never sends content to Groq; using Groq requires a new explicit per-run choice. This is sufficient to demonstrate the important technology path without designing a general accessibility assistant:
 
 `finding + retrieved guidance -> LangChain structured generation -> deterministic validation -> cited pending proposal -> human review`
 
 ## Retrieval-support eligibility
 
-Retrieval operation status and guidance-support state remain separate. The first product policy should be deliberately conservative:
+The enclosing workflow-operation state, retrieval-stage disposition, and evidence-sufficiency state remain separate. The accepted MVP policy is deliberately conservative, and the deterministic finding remains visible in every row below:
 
 | Retrieval result | Generation behavior |
 | --- | --- |
-| Completed and `supported` | Eligible for the single model call. |
-| Completed and `weak` | Controlled by a versioned per-profile policy. The proposed first policy routes weak support to an application-authored abstention without calling the model. |
-| Completed and `missing` or `conflicting` | Create an application-authored abstention without calling the model. Preserve the finding summary, support state, missing or conflicting source references, and required manual escalation. |
-| Completed and `unassessed` | Permit retrieval evaluation only. Do not create a product generation request or present an abstention as if support had been assessed. |
-| Failed operation or rejected stale/integrity-invalid input | Do not assign a support state, call the model, or label the outcome an abstention. Report the upstream failure. The first slice has no interactive cancellation or separate stale lifecycle state. |
+| Completed and `supported` with all required evidence present | Eligible for the one explicitly selected provider call and a cited proposal. |
+| Completed and `incomplete` | Do not call a model. Keep the finding visible and publish a deterministic abstention with the missing evidence and required manual review. |
+| Completed and `missing` | Do not call a model. Keep the finding visible and publish a deterministic abstention with the missing guidance and required manual review. |
+| Completed and `conflicting` | Do not call a model. Keep the finding and conflicting references visible and publish a deterministic abstention requiring manual review. |
+| Failed operation or rejected stale/integrity-invalid input | Do not assign an evidence-sufficiency state, call a model, or label the outcome an abstention. Report the upstream failure. The first slice has no interactive cancellation or separate stale lifecycle state. |
 
-For each profile, `supported` should mean that the frozen retrieval record contains the mapped normative success-criterion passage and the approved contextual or implementation guidance needed for that profile's bounded proposal, with valid checksums and no unresolved source conflict. Support is assessed independently per profile. It is not a similarity-score threshold or a statement that the page fails WCAG.
+For each profile, `supported` means that the frozen retrieval record contains the mapped normative success-criterion passage and the required contextual or implementation guidance for that profile's bounded proposal, with valid checksums, complete required evidence, and no unresolved source conflict. Evidence sufficiency is this eligibility state, not a similarity-score threshold, model confidence, or statement that the page fails WCAG.
 
 ## Minimum model-visible input
 
@@ -50,7 +50,7 @@ Keep run provenance outside the prompt when the model does not need it. The mode
 | --- | --- |
 | Finding evidence | Profile and rule identifiers; native result category; minimized observed facts; element type or role; stable evidence aliases; and only the profile-specific facts listed below. Exclude URLs, selectors, raw HTML, arbitrary page text, credentials, and user values. |
 | Retrieved guidance | Passage alias, exact retained passage text, source-authority label, source and section alias, and immutable snapshot identity for each admitted result. |
-| Generation rules | The closed claim kinds below; proposal/abstention branches; required references; conditional-remediation rule; evidence-sufficiency meanings; exact manual checks; and prohibited assertions. |
+| Generation rules | The closed claim kinds below; proposal/abstention branches; required references; conditional-remediation rule; evidence-sufficiency eligibility states; separate proposal-confidence labels; exact manual checks; and prohibited assertions. |
 | Request limits | Prompt/schema versions, bounded input and output sizes, fixed generation parameters, and an instruction that evidence and passages are untrusted data rather than commands. |
 
 The run envelope separately records the finding, evidence, retrieval, corpus, provider profile, model, prompt, schema, parameters, and input digest required by REQ-GEN-008 and the provider requirements. A required input that does not fit the selected context is blocked; it is never silently truncated.
@@ -98,9 +98,9 @@ Reference presence does not prove that the passage entails the claim. The pendin
 
 This is the minimal way to satisfy the intent of REQ-GEN-002 without adding a second model or a duplicate human review before the actual review step. A proposal is not semantically accepted merely because it reached `pending_review`.
 
-## Evidence sufficiency and scenario checks
+## Proposal confidence and scenario checks
 
-Evidence sufficiency remains categorical (`high`, `medium`, or `low`), never a model probability. The model proposes the category and reasons; deterministic rules may reject an invalid combination, and the reviewer decides whether the support is sufficient for acceptance. A proposal with an unresolved blocking contextual judgment will normally be `medium`. Missing evidence for the core conclusion is an abstention, not `low`.
+Evidence sufficiency is already fixed by retrieval eligibility: only a completed `supported` package with all required evidence may reach the model. The proposal carries a separate categorical confidence label (`high`, `medium`, or `low`) with explicit uncertainty reasons; it is not a model probability, retrieval score, or accessibility score. The model proposes the label, deterministic rules reject invalid combinations, and the reviewer may confirm or revise it. A proposal with an unresolved blocking contextual judgment will normally have `medium` confidence. Missing core evidence is an `incomplete`, `missing`, or `conflicting` evidence-sufficiency result and deterministic abstention, never merely `low` confidence.
 
 Each profile needs one blocking pre-acceptance definition and one later post-change definition:
 
@@ -114,17 +114,17 @@ A `pending`, `contradicts`, or `inconclusive` blocking result prevents acceptanc
 
 ## LangChain and provider boundary
 
-The application owns one normalized structured-generation request and one normalized proposal-or-abstention result. Local and external adapters must accept that same contract, preserve the same validation and provenance, and expose provider capability differences without changing domain records. Provider-specific SDK or wire objects stop at the adapter.
+The application owns one normalized eligible structured-generation request and one normalized candidate-proposal result from an invoked adapter. The application-owned generation stage separately exposes the final `proposal` or deterministic `abstention` branches: an evidence-sufficiency abstention bypasses both adapters and records that no model call occurred. The selected local adapter and fixed Groq adapter must accept the same eligible request and candidate-proposal contract, preserve the same validation and provenance, and expose provider capability differences without changing domain records. Provider-specific SDK or wire objects stop at the adapter.
 
-For the local portfolio pilot, evaluate `qwen3.5:4b` through Ollama only after it passes the reference-PC capacity gate. LangChain's JavaScript [model interface documents direct structured output](https://docs.langchain.com/oss/javascript/langchain/models#structured-output), and the [ChatOllama integration documents `withStructuredOutput`](https://docs.langchain.com/oss/javascript/integrations/chat/ollama#structured-output). The proposed slice should use that direct model operation behind the application contract, with one fixed prompt and no tools. Exact schema behavior still requires a conformance test; framework parsing does not replace application validation.
+For the local portfolio path, evaluate `qwen3.5:4b` through Ollama only after it passes the reference-PC capacity gate. LangChain's JavaScript [model interface documents direct structured output](https://docs.langchain.com/oss/javascript/langchain/models#structured-output), and the [ChatOllama integration documents `withStructuredOutput`](https://docs.langchain.com/oss/javascript/integrations/chat/ollama#structured-output). The proposed slice should use that direct model operation behind the application contract, with one fixed prompt and no tools. Exact schema behavior still requires a conformance test; framework parsing does not replace application validation.
 
-The first portfolio demonstration does not need an external provider implementation or comparison. It does need a contract that does not mention Ollama or Qwen. Before the product claims both local and API modes as supported, a later decision must select an external provider and that adapter must pass the shared conformance and privacy gates in ADR-0001 and REQ-LLM-004 through REQ-LLM-006. Neither provider may be an automatic fallback for the other.
+For the external path, [ADR-0014](../decisions/ADR-0014-groq-as-mvp-external-generation-provider.md) fixes Groq model ID `openai/gpt-oss-20b` with Groq strict Structured Outputs for MVP evaluation. Groq's [Structured Outputs documentation](https://console.groq.com/docs/structured-outputs) is the current capability authority; model availability and deprecation status must be rechecked before evaluation. Groq remains the provider even though its API is [mostly OpenAI compatible](https://console.groq.com/docs/openai) and the model namespace begins `openai/`. The Groq-specific request schema is an adapter detail, not a second canonical application contract or a schema-generation platform. Neither provider may be an automatic fallback for the other, and the two paths are exercised without a provider ranking or comparison claim.
 
 ## Model and evaluation boundary
 
-Use one capacity-qualified local configuration for the first demonstration. Do not download or screen 2B, 9B, or an external model merely to make the portfolio slice look comparative. If `qwen3.5:4b` fails capacity or the small quality pilot, replace it through the existing gates; do not add it as a fallback. A second-model comparison belongs to later model-selection evidence and remains governed by the canonical evaluation requirements.
+Use one capacity-screened local configuration and the fixed Groq configuration for the MVP demonstration. Do not download or screen 2B or 9B local alternatives merely to make the portfolio slice look comparative. If `qwen3.5:4b` fails capacity or the small quality pilot, replace it through the existing local gates; do not add it as a fallback. A second local model or another hosted provider remains outside this assessment.
 
-Reuse the same frozen evidence-and-retrieval cases rather than create a generation-only dataset. A provisional shared suite of **9–12 cases overall**—roughly three or four per profile—is enough for planning the portfolio demonstration; OD-009 retains authority over the final count. Include supported, contextual-judgment, and abstention or prohibited-claim behavior across the complete suite, with at least one incomplete-evidence contrast case. Measure separately:
+Use the compact fixed manifest accepted under OD-009: one supported happy-path generation package per scenario through the capacity-screened local configuration and the same three packages through Groq, for six generation calls total. Freeze all inputs and expected outcomes before seeing either model's results. Run one frozen representative `incomplete`, `missing`, or `conflicting` abstention package and the shared comparison checks once because they occur before provider invocation and do not need provider duplication. Observe separately:
 
 - schema and branch validity;
 - exact evidence and citation resolution;
@@ -133,7 +133,7 @@ Reuse the same frozen evidence-and-retrieval cases rather than create a generati
 - reviewer-confirmed semantic support and remediation usefulness; and
 - zero invented evidence, citations, check results, code changes, or accessibility/compliance/certification claims.
 
-This portfolio pilot demonstrates the integration; it does not select a release model or satisfy later official evaluation, reviewer-count, provider-comparison, or support-qualification gates. Do not add an LLM judge.
+This portfolio manifest demonstrates the two bounded integrations; it does not select a release model or satisfy statistical evaluation, reviewer-count, provider-comparison, support-qualification, or generalized quality gates. Do not add an LLM judge, aggregate score, leaderboard, or significance claim.
 
 ## Conceptual proposal record
 
@@ -142,9 +142,9 @@ This is a documentation-level projection of the canonical **Generation run** and
 | Record part | Minimum information |
 | --- | --- |
 | Identity and lineage | Generation and proposal IDs; exact profile/rule/success-criterion mapping; finding/evidence, retrieval-run, passage, and corpus-snapshot references; prompt, schema, and policy versions. |
-| Provider provenance | Selected local or external profile; adapter/runtime/model identity and immutable revision or digest; context and parameters; no-fallback state; operation status. |
-| Result branch | `proposal` or `abstention`; an application-authored abstention records that no model call occurred. |
-| Proposal content | Finding summary; closed typed claims; conditional remediation options; evidence and passage aliases; assumptions; evidence sufficiency and reasons. |
+| Provider provenance | Present only when an adapter was invoked: explicitly selected local or Groq mode; adapter/runtime/model identity and immutable revision or digest when available; context and parameters; no-fallback state; enclosing workflow-operation reference. |
+| Result branch | `proposal` or `abstention`. A proposal references the eligible provider result and validation outcome; an application-authored deterministic abstention records its policy reason, manual-review direction, and that no adapter or model call occurred. |
+| Proposal content | Finding summary; closed typed claims; conditional remediation options; evidence and passage aliases; assumptions; the deterministic `supported` eligibility reference; separate categorical confidence and uncertainty reasons. |
 | Manual work | The active profile's blocking contextual check and later post-change verification check, both unexecuted when generated. Human outcomes belong to manual-check result records. |
 | Validation and review state | Deterministic validation results, prohibited-claim checks, fixed limitations, and `AI-generated — pending human review`; semantic-support confirmation belongs to the later review action. |
 
@@ -161,11 +161,11 @@ Regeneration creates a linked run and proposal version; it never overwrites the 
 
 - The portfolio slice uses exactly three project-owned synthetic profiles: `informative-image-alt` (`image-alt`/SC 1.1.1), `form-input-label` (`label`/SC 4.1.2), and `text-contrast` (`color-contrast`/SC 1.4.3).
 - The accepted retrieval policy can identify a `supported` result without treating similarity as confidence or authority.
-- One concise finding, five short passages, and the small output schema fit the capacity-qualified local context without truncation.
-- OD-007 must finalize evidence-sufficiency meanings and OD-015 must select the serialized schema authority.
+- One concise finding, five short passages, and the small output schema fit the capacity-screened local context without truncation.
+- OD-007 and OD-015 are resolved for the MVP: the closed evidence-sufficiency states and minimal application-owned TypeScript/runtime-validation boundary are authoritative; exact record field names remain implementation detail.
 - Canonical review semantics place semantic-support confirmation in the step-5 decision; entry into `pending_review` proves only mechanical eligibility.
 - A deterministic policy abstention records that no provider call occurred, as defined by the canonical generation-run model.
-- Official evaluation and provider-support decisions remain separate from this non-promotable portfolio pilot.
+- Formal qualification, provider support, and release claims remain Deferred and separate from this non-promotable portfolio manifest.
 
 ## Risks
 
@@ -181,21 +181,21 @@ Regeneration creates a linked run and proposal version; it never overwrites the 
 - Agents, LangGraph orchestration, tool calls, web search, conversation memory, critique loops, model consensus, or automatic retries and fallback.
 - A semantic-judge model, pre-review human validation stage, fine-tuning, synthetic training generation, or production prompt management.
 - Source-code patches, repository access, automatic remediation, automatic rescanning, or claims that a change was applied.
-- A fourth scenario, multilingual or vision input, raw-page prompting, broad model comparison, or external-provider selection in this assessment.
+- A fourth scenario, multilingual or vision input, raw-page prompting, a second hosted provider, provider registry, or provider comparison.
 - Accessibility certification, legal-compliance interpretation, whole-page accessibility claims, or treating a proposal, citation, reviewer decision, or later scan as proof of conformance.
 
 ## Planning acceptance criteria
 
 This step is adequately defined for the three-profile portfolio slice when:
 
-- one supported finding from each of the `informative-image-alt`, `form-input-label`, and `text-contrast` profiles can independently produce one schema-valid pending proposal through the same provider-neutral LangChain path;
-- weak, missing, and conflicting support produce the documented abstention without a model call, unassessed support remains evaluation-only, and retrieval failure remains a failure;
+- one supported finding from each of the `informative-image-alt`, `form-input-label`, and `text-contrast` profiles can independently produce one schema-valid pending proposal through the same application-owned LangChain path in local mode and in Groq mode;
+- `incomplete`, `missing`, and `conflicting` support produce the documented deterministic abstention without a model call, while retrieval failure remains a failure with no support state;
 - every material claim uses the closed taxonomy and only exact supplied evidence and passage aliases;
 - deterministic checks reject malformed references and every prohibited assertion without adding a second model or repair call;
 - the pending view clearly separates scanner evidence, retrieved guidance, AI interpretation, and application-owned limitations;
 - the reviewer can inspect each exact passage and is required to confirm semantic support before approval or edit-and-accept;
 - each profile's contextual check blocks plan acceptance, its post-change verification remains visibly pending for the later rescan, and incomplete contrast evidence always abstains; and
-- the first local configuration fits the reference PC and the small pilot records exact provenance without claiming release support.
+- the selected local configuration passes the practical reference-PC capacity gate, the Groq path uses the exact dated evaluation model, and the six generation runs record exact provenance without provider ranking or release support claims.
 
 ## Documentation navigation
 

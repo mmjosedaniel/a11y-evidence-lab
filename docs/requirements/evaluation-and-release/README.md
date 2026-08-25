@@ -8,10 +8,10 @@ This family index routes the canonical evaluation and release-evidence requireme
 
 | Module | Canonical IDs and semantics | Responsibility |
 | --- | --- | --- |
-| [Evaluation and acceptance](EVALUATION_AND_ACCEPTANCE.md) | `REQ-EVAL-001` through `REQ-EVAL-013`, plus the stage-scoped portfolio and later-release acceptance targets | Evaluation datasets, metrics, provider comparison, qualification authority, acceptance hypotheses, and result interpretation. |
-| [Release inventory, evidence, and claims](RELEASE_INVENTORY_EVIDENCE_AND_CLAIMS.md) | `REQ-REL-001` through `REQ-REL-006` | Exact production inventory, artifact-bound evidence, packaged lifecycle validation, and independently scoped release claims. |
+| [Evaluation and acceptance](EVALUATION_AND_ACCEPTANCE.md) | `REQ-EVAL-001` through `REQ-EVAL-013`, plus the fixed MVP manifest and evaluation criteria | Accepted compact non-promotable local/Groq case manifest, separate bounded observations, and explicitly Deferred formal qualification. |
+| [Release inventory, evidence, and claims](RELEASE_INVENTORY_EVIDENCE_AND_CLAIMS.md) | `REQ-REL-001` through `REQ-REL-006` | Deferred future exact production inventory, artifact-bound evidence, packaged lifecycle validation, and independently scoped release claims. |
 
-Read only the focused module that owns the task. Evaluation evidence may support a release claim, but the two modules remain separate authorities and one does not imply the other passed.
+Read only the focused module that owns the task. The compact MVP evaluation is portfolio evidence and cannot qualify a release. A later release decision may define separate evidence, but one module never implies that the other passed.
 
 ## Documentation navigation
 

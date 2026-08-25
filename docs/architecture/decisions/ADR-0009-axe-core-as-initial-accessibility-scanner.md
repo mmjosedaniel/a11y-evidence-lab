@@ -9,6 +9,12 @@ The product needs a deterministic accessibility scanning engine that produces in
 
 axe-core is designed for automated web UI accessibility testing and integrates with Playwright through `@axe-core/playwright`. Playwright's official accessibility-testing guidance also states that automated tests detect only some common accessibility problems and should be combined with manual assessment and inclusive user testing.
 
+### MVP evidence and fixture amendment recorded 2026-08-25
+
+OD-003, OD-006, OD-009, and OD-019 narrow the original evaluation design. The native axe payload remains transient in Step 1 and is runtime-validated before handoff; Step 2 alone persists the minimized, allowlisted rule-specific source evidence and scanner provenance required for the selected scenario. The MVP does not persist a full sanitized native axe result.
+
+The fixed physical evidence surface is exactly the three accepted scenario profiles with one failing and one corrected logical revision each. The original 2026-08-23 decision named positive, negative, corrected, regressed, ambiguous, and manual-only fixture cases for every selected scenario. That broader fixture requirement is superseded for the MVP: expected fail/pass observations use the six frozen revisions, existing revisions may be paired to exercise deterministic comparison transitions, and shared bounded record/manual checks cover abstention, ambiguity, and contextual judgment without requiring extra fixture variants. Formal release promotion remains Deferred under OD-017.
+
 ## Considered options
 
 1. Use axe-core.
@@ -21,14 +27,14 @@ axe-core is designed for automated web UI accessibility testing and integrates w
 Use a pinned axe-core version, initially through `@axe-core/playwright`, as the deterministic accessibility scanning engine for evaluation only.
 
 - Pin and record the axe-core and integration versions, selected rules, tags, options, page-state inputs, and browser configuration.
-- Preserve sanitized axe source results independently from normalized findings and model-generated interpretation.
-- Runtime-validate and normalize axe result payloads before they enter canonical domain records; TypeScript or integration-package types are not evidence validation.
-- Retain violations and results requiring review; define explicit evidence-policy handling for incomplete, inapplicable, and passed results.
-- Validate every selected scenario's exact rule mapping and evidence fields against known positive, negative, corrected, regressed, ambiguous, and manual-only fixtures.
+- Keep the native axe result transient and distinguish it from normalized findings and model-generated interpretation. Step 2 persists only minimized, allowlisted rule-specific source evidence plus exact scanner provenance.
+- Runtime-validate the axe result payload before Step 1 hands it to Step 2; TypeScript or integration-package types are not evidence validation. Step 2 alone applies evidence policy and creates canonical domain records.
+- Retain the one selected violation and results requiring manual review, plus only the narrow corrected-state positive target observation required for comparison. Exclude unrelated passes and inapplicable results from durable MVP records.
+- Validate each selected scenario's exact rule mapping and evidence fields against its one frozen failing and one frozen corrected logical revision. Exercise regression, ambiguity, abstention, and manual judgment through permitted pairings and shared deterministic records/checks rather than additional fixture variants.
 - Treat rule-description, impact, target, node, and failure-summary fields as scanner output with recorded version provenance, not immutable project semantics.
 - Never translate an empty result set into an accessibility or conformance claim; manual and assistive-technology checks remain separate evidence.
 
-Promoting axe-core to the release stack requires repeatability, rule-coverage, evidence-completeness, sanitization, prohibited-claim, and upgrade-regression validation.
+Promoting axe-core to the release stack remains Deferred. The MVP records only the frozen expected rule observations, rule mapping, minimized-evidence behavior, manual-review boundary, and prohibited-claim checks from the six logical revisions and compact shared checks. Formal repeated-run evidence is Deferred, and these observations do not establish release qualification.
 
 ## Consequences
 

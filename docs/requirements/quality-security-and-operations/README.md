@@ -10,7 +10,7 @@ This family index routes the canonical quality, security, and operational requir
 | --- | --- | --- |
 | [Application accessibility](APPLICATION_ACCESSIBILITY.md) | `REQ-A11Y-001` through `REQ-A11Y-008` | Accessibility requirements for A11y Evidence Lab's own interface and supported workflows. |
 | [Privacy and security](PRIVACY_AND_SECURITY.md) | `REQ-SEC-001` through `REQ-SEC-021` | Data minimization, trust boundaries, local-only behavior, credentials, egress, renderer isolation, and security controls. |
-| [Reliability, reproducibility, and operations](RELIABILITY_REPRODUCIBILITY_AND_OPERATIONS.md) | `REQ-QUAL-001` through `REQ-QUAL-018` | First-slice reliability and reproducibility, plus trigger-gated concurrency, runtime-contract, lifecycle, inventory, and benchmark controls for later claims. |
+| [Reliability, reproducibility, and operations](RELIABILITY_REPRODUCIBILITY_AND_OPERATIONS.md) | `REQ-QUAL-001` through `REQ-QUAL-018` | Accepted minimal persistence, local diagnostics, runtime-boundary validation, practical capacity, and sequential operation behavior, plus explicitly Deferred performance, support, packaging, and release controls. |
 
 Read only the focused module that owns the task. When a concern crosses these boundaries, load each affected module rather than treating this index as a substitute for its requirement rows.
 

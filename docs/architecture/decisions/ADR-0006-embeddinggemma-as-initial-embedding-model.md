@@ -9,6 +9,10 @@ The local retrieval pipeline needs an embedding model that can index and query t
 
 The currently published Ollama `embeddinggemma` artifact is a compact, local text-embedding option. Published size and general-purpose retrieval claims do not establish fitness for WCAG, ACT, APG, scanner metadata, or the project's chunking strategy.
 
+### MVP acquisition and qualification amendment recorded 2026-08-25
+
+ADR-0015 and the accepted installation requirements replace the original general “model-provisioning workflow” assumption. For the MVP, acquisition is an explicit user-consented action delegated to the selected local runtime after source, identity, license, transfer/storage information, destination, and network use are disclosed; model files remain outside the repository and any installer. OD-009, OD-010, and OD-017 also replace formal release promotion and broad performance gates with the compact retrieval checks and one practical reference-PC screen. The original release direction remains history but is Deferred.
+
 ## Considered options
 
 1. Use a hosted embedding API.
@@ -19,14 +23,14 @@ The currently published Ollama `embeddinggemma` artifact is a compact, local tex
 
 Use `embeddinggemma` as the initial embedding model for evaluation only.
 
-- Acquire it through the accepted model-provisioning workflow and record its exact tag, full digest, dimensions, context limit, runtime version, license, and integrity metadata.
+- Acquire it explicitly through the selected local runtime, outside the repository and any installer, after the user receives the required source, identity, license, transfer/storage, destination, and network disclosure and consents. Record its exact tag, full digest, dimensions, context limit, runtime version, license, and available integrity metadata.
 - Apply the reference-PC capacity gate before full retrieval evaluation.
-- Evaluate it on the approved accessibility-guidance gold set using the accepted retrieval metrics and per-scenario reporting.
+- Evaluate it only on the compact frozen three-scenario retrieval subset and its one representative provider-independent insufficiency control, with descriptive per-case results rather than a statistical or promotion claim.
 - Verify that chunk lengths and query construction fit the model's effective input limit without silent truncation.
 - Rebuild indexes when the model, digest, preprocessing, chunking, or normalization changes; never reuse an index across incompatible embedding configurations.
 - Keep embedding local in the local-only mode. A hosted generation selection does not silently move embeddings to an external API.
 
-Promoting `embeddinggemma` to the release configuration requires passing retrieval-quality, reproducibility, latency, memory, disk, and sustained-workload gates. If it fails, replace it with another capacity-qualified local model and retain the same retrieval provenance contract.
+Promoting `embeddinggemma` to a release configuration is Deferred. For the MVP it must pass the bounded retrieval checks and practical reference-PC screen; if it fails, replace it with one smaller capacity-screened local candidate while retaining the same retrieval provenance contract.
 
 ## Consequences
 

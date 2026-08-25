@@ -9,6 +9,10 @@ The provider-neutral architecture needs one concrete local configuration with wh
 
 This decision selects the first model configuration to put through the capacity gate. It does not qualify a model for full evaluation or end users. The initial runtime is selected separately in [ADR-0005](ADR-0005-ollama-as-initial-local-model-runtime.md).
 
+### MVP narrowing amendment recorded 2026-08-25
+
+The original decision below preserved Qwen3.5 9B as a possible later capacity screen and quality-comparison participant and discussed a future release-qualified recommendation. OD-009, OD-010, OD-013, and OD-017 narrow the current portfolio MVP to one practical local configuration plus the fixed Groq evaluation path, with no local-model comparison, formal qualification, or release recommendation. Therefore `qwen3.5:9b` and any second local-model screen are Deferred for this MVP. The `qwen3.5:4b` configuration remains only the first model to put through the practical reference-PC screen; if it fails, select one smaller replacement rather than adding a comparison candidate. This amendment controls the original 9B and release-profile statements while preserving them as decision history.
+
 ## Considered options
 
 1. Begin capacity screening with Qwen3.5 9B as the larger quality-oriented option.
@@ -21,15 +25,15 @@ Use [`qwen3.5:4b`](https://ollama.com/library/qwen3.5%3A4b), through the initial
 
 Apply [ADR-0004](ADR-0004-reference-pc-capacity-gate-for-local-models.md) before treating the 4B configuration as an evaluation candidate. If it fails, exclude it and select a smaller configuration within the reference PC's capacity.
 
-[`qwen3.5:9b`](https://ollama.com/library/qwen3.5%3A9b), listed at 6.6 GB and 9.65B parameters in Q4_K_M, is only a later capacity-screen option. It enters the quality comparison only if it passes the capacity gate; otherwise it is excluded and replaced by another smaller, capacity-qualified configuration.
+[`qwen3.5:9b`](https://ollama.com/library/qwen3.5%3A9b), listed at 6.6 GB and 9.65B parameters in Q4_K_M, was originally retained as a later capacity-screen option that could enter quality comparison after passing the gate. The 2026-08-25 amendment Defers that option and any local-model comparison outside the MVP.
 
 Floating tags and displayed digest prefixes are insufficient for release integrity. Provisioning and evaluation must record the exact full digest, quantization, context, runtime version, generation parameters, and license.
 
 ## Consequences
 
 - Integration can begin with the lower-resource capacity screen without committing to an oversized comparison.
-- The release-qualified local profile may be 4B, a capacity-qualified 9B configuration, another smaller model, or no candidate until the gates are met.
-- A model recommendation shown during first-run setup is derived from accepted evaluation results, not from this dated bootstrap choice alone.
+- The original future direction allowed a release-qualified local profile to be 4B, a screened 9B configuration, another smaller model, or no candidate. Release qualification and the 9B option are Deferred for the MVP.
+- A future distributable product's model recommendation would require a later accepted evaluation and setup decision; the localhost portfolio MVP has no installer-managed first-run recommendation workflow.
 
 ## Related requirements
 

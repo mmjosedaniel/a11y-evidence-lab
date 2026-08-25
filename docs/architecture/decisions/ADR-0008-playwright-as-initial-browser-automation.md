@@ -9,6 +9,14 @@ The product needs repeatable browser execution for authorized controlled fixture
 
 Playwright provides browser automation, isolated browser contexts, a versioned browser lifecycle, navigation and network controls, and integration paths for accessibility engines. These capabilities are suitable for an initial evaluation but do not establish safe live-target scanning, packaging ownership, or cross-browser equivalence.
 
+### MVP distribution amendment recorded 2026-08-25
+
+ADR-0015 and OD-014 replace the original distributable-browser assumption for the portfolio MVP. The developer-run evaluation may provision Playwright's matching managed Chromium through the evaluated development setup, but it does not package a browser or define application-owned browser updates, signing, repair, or release support. OD-017 also defers release qualification. The original packaging and controlled security-update direction remains preserved below as future decision history and requires a new distribution decision before it applies.
+
+### MVP manifest-count clarification recorded 2026-08-25
+
+The compact manifest runs each frozen failing/corrected scenario definition once and checks its expected browser observation. The original repeated-run validation language below remains future evaluation history; formal repetitions and empirical repeatability claims are Deferred for this MVP. Pinning and provenance still provide the basis for reproduction without adding repeated executions to the accepted manifest.
+
 ## Considered options
 
 1. Use Selenium or WebDriver.
@@ -27,12 +35,12 @@ Use Playwright with a pinned Chromium configuration as the initial browser-autom
 - Validate deterministic fixture loading, repeatability, timeout and abort cleanup, crash recovery, resource limits, and sanitization boundaries. Validate interactive cancellation only if a later stage introduces it.
 - Do not enable live targets until the authorization, redirect, network, browser-isolation, and threat-model gates are accepted.
 
-Promoting Playwright to the release stack requires repeatability, security, application-accessibility, packaging, browser-update, and sustained-resource validation.
+Promoting Playwright to a release stack is Deferred. Under the 2026-08-25 clarifications, the MVP evaluation requires only the single-run frozen controlled-fixture observations, network-policy, cleanup, evidence, and practical-resource observations; repeated-run evaluation, packaging, browser-update ownership, broad application-accessibility qualification, and sustained-resource release gates require a later decision.
 
 ## Consequences
 
 - Page execution and browser state can be pinned and reproduced independently of generation.
-- The project must package or provision a compatible browser build and maintain a controlled security-update process.
+- The evaluation setup must use the matching recorded Playwright-managed browser build. The original requirement to package or provision a release browser and maintain an application-owned security-update process is Deferred for the MVP under the 2026-08-25 amendment.
 - Browser behavior and Playwright upgrades can change evidence and require regression testing.
 - Live targets and cross-browser support remain separate decisions.
 

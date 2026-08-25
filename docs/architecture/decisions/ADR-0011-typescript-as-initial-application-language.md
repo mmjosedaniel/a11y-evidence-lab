@@ -9,6 +9,10 @@ The planned application has several strongly structured boundaries: browser-scan
 
 TypeScript is a static type checker for JavaScript and has first-class support in the React and Playwright ecosystems. Static checking can improve application-scale correctness and editor tooling, but its types do not validate runtime values received from scanners, model providers, local services, storage, imports, or untrusted page content.
 
+### MVP scope amendment recorded 2026-08-25
+
+OD-015 narrows the runtime-contract work anticipated by the original decision. The MVP uses small TypeScript record definitions plus minimal runtime validation only where untrusted data enters from axe-core, Groq, the selected local model runtime, or persisted JSON. It does not require JSON Schema as a cross-system authority, code generation, a schema framework, migrations, multiple schema dialects, or a compatibility framework. TypeScript's erased compile-time types still do not validate those runtime values.
+
 ## Considered options
 
 1. Use TypeScript only for the UI and another language for the local service and workflow.
@@ -22,23 +26,24 @@ Use TypeScript as the primary application language for the initial evaluation im
 
 - Apply it to application-owned UI code, the local application service, shared domain contracts, provider and embedding adapters, retrieval integration, and the Playwright/axe-core module where the selected execution runtime supports the pinned dependencies.
 - Require strict, independently executed type checking. A transpiler, build tool, test runner, or editor that accepts TypeScript syntax does not replace a successful compiler type check.
-- Define application-owned, versioned domain contracts and runtime schemas. Validate and normalize every value crossing a process, HTTP, provider, scanner, storage, import, or other trust boundary before it enters domain logic.
+- Define the minimum application-owned record types needed by the six-step workflow. Runtime-validate and normalize native axe results, Groq responses, local-runtime responses, and canonical persisted JSON before they enter domain logic.
+- Do not introduce JSON Schema or another schema language as a second canonical contract merely for the MVP. Provider-required JSON Schema may describe the Groq request boundary, but the application-owned TypeScript record meaning remains authoritative and the returned value is still validated.
 - Keep React, Playwright, axe-core, Ollama, Chroma, model-provider SDK, and workflow-framework types outside canonical domain records. Integration-specific types terminate at their adapters.
 - Keep credentials, filesystem access, process control, model management, persistence, and privileged networking in the local application service, never in browser-delivered UI code. A later isolated helper requires its own demonstrated need and topology decision.
-- Pin and record the TypeScript compiler, JavaScript runtime, package manager, lockfile, and material dependency versions for every evaluation build.
-- Evaluate type-checking reliability, runtime validation, cancellation, error normalization, process isolation, local-only networking, packaging, startup, recovery, and representative resource use on the reference PC.
+- Pin and record the TypeScript compiler, JavaScript runtime, package manager, lockfile, and material dependency versions used by the MVP evaluation.
+- Evaluate strict type checking, the four runtime-validation boundaries, normalized failures, loopback isolation, startup, recovery, and practical reference-PC capacity. Cancellation frameworks, packaging, migrations, and broader compatibility qualification remain deferred.
 
 This decision does not select Node.js or another JavaScript runtime, a package manager, build tool, desktop container, installer technology, runtime-schema library, web-service framework, or database driver. [ADR-0013](ADR-0013-langchain-as-initial-rag-integration.md) separately accepts LangChain's bounded evaluation role; this language decision does not accept LangGraph or LangSmith.
 
-Promoting TypeScript to the release architecture requires successful evaluation of compiler and dependency pinning, runtime-schema coverage, supply-chain controls, native dependency and Windows packaging behavior, service lifecycle, diagnostics, zero-egress operation, and full-workload resource use.
+This evaluation decision does not qualify TypeScript or its toolchain as a release dependency. Any future release architecture requires a separate decision based on the distribution and support scope then accepted.
 
 ## Consequences
 
 - UI, service, browser-analysis, and contract code can share one language and compatible tooling while preserving explicit module boundaries.
-- Static checking can catch incompatible contract changes before execution, but runtime validation remains mandatory because evaluated types are not a security or data-integrity boundary.
+- Static checking can catch incompatible contract changes before execution, but the four untrusted MVP boundaries still require runtime validation because erased types are not a security or data-integrity boundary.
 - Some operating-system integrations may require a native module, helper process, or separately owned service whose security and lifecycle must be evaluated.
-- Chroma's TypeScript client uses a running Chroma service for the documented local setup, so TypeScript does not resolve Chroma's deployment, ownership, or packaging mode. That topology remains subject to ADR-0007 and OD-014.
-- Replacing TypeScript later would affect application-owned implementation code but must not change the versioned domain schemas, stored evidence meaning, or provider-neutral behavior.
+- Chroma's TypeScript client uses a running Chroma service for the documented local setup, so TypeScript does not resolve Chroma's evaluation topology or lifecycle. ADR-0016 also keeps the rebuildable vector index distinct from canonical JSON run records.
+- Replacing TypeScript later would affect application-owned implementation code but must not change record-version meaning, stored evidence meaning, or provider-neutral behavior.
 
 ## Primary references
 
@@ -54,6 +59,9 @@ Promoting TypeScript to the release architecture requires successful evaluation 
 - [ADR-0008: Playwright as the initial browser automation technology](ADR-0008-playwright-as-initial-browser-automation.md)
 - [ADR-0012: React as the initial user-interface library](ADR-0012-react-as-initial-user-interface-library.md)
 - [ADR-0013: LangChain as the initial RAG integration baseline](ADR-0013-langchain-as-initial-rag-integration.md)
+- [ADR-0014: Groq as the MVP external generation provider](ADR-0014-groq-as-mvp-external-generation-provider.md)
+- [ADR-0015: Localhost browser MVP execution](ADR-0015-localhost-browser-mvp-execution.md)
+- [ADR-0016: Filesystem run persistence](ADR-0016-filesystem-run-persistence.md)
 - [Evidence and review workflow requirements](../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md): `REQ-SCAN-*`
 - [Generation provider execution requirements](../../requirements/generation-provider-and-model-lifecycle/GENERATION_PROVIDER_EXECUTION.md): `REQ-LLM-*`
 - [Installation and model lifecycle requirements](../../requirements/generation-provider-and-model-lifecycle/INSTALLATION_AND_MODEL_LIFECYCLE.md): `REQ-INST-*`

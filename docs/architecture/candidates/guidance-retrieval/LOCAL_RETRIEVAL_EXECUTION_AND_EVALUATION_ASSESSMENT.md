@@ -6,7 +6,9 @@
 
 **Assessment date:** 2026-08-24.
 
-This focused assessment belongs to the [Accessibility guidance retrieval assessment family](README.md). It owns no requirement ID or status, selects no release dependency or framework, accepts no support gate, and does not authorize implementation. Canonical behavior remains in [Evidence and review workflow requirements — Corpus and retrieval](../../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#corpus-and-retrieval).
+**Decision alignment:** 2026-08-25.
+
+This focused assessment belongs to the [Accessibility guidance retrieval assessment family](README.md). It owns no requirement ID or status, selects no release dependency or framework, cannot change the accepted support gate, and does not authorize implementation. Canonical behavior remains in [Evidence and review workflow requirements — Corpus and retrieval](../../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#corpus-and-retrieval).
 
 The proposed retrieval evaluation contains exactly three project-owned synthetic scenario profiles, processed independently one finding and one query at a time:
 
@@ -16,7 +18,7 @@ The proposed retrieval evaluation contains exactly three project-owned synthetic
 | `form-input-label` | `label` | WCAG 2.2 SC 4.1.2 only |
 | `text-contrast` | `color-contrast` | WCAG 2.2 SC 1.4.3 |
 
-All three profiles are part of the [accepted first vertical slice](../../../requirements/PRODUCT_SCOPE_AND_GLOSSARY.md#first-vertical-slice) through OD-019. Their exact retrieval mechanism and support policy remain Proposed. The `label` rule itself is not mapped to SC 3.3.2 or SC 1.3.1, and no scanner result establishes complete success-criterion non-conformance.
+All three profiles are part of the [accepted first vertical slice](../../../requirements/PRODUCT_SCOPE_AND_GLOSSARY.md#first-vertical-slice) through OD-019. The closed W3C pack, evidence-sufficiency gate, compact evaluation boundary, minimal record-validation boundary, and manual segmentation rule are Accepted through their recorded decisions; the exact retrieval mechanism and technology candidates remain Proposed. The `label` rule itself is not mapped to SC 3.3.2 or SC 1.3.1, and no scanner result establishes complete success-criterion non-conformance.
 
 ## Minimal LangChain role for the portfolio demonstration
 
@@ -24,9 +26,9 @@ The architecture recommendation is to evaluate LangChain only as the visible com
 
 1. Adapt checksum-valid canonical passages to LangChain document values at the integration boundary while retaining application-owned passage IDs and filter metadata.
 2. Invoke the application-owned local embedding and Chroma adapters through one retriever or runnable composition and return fixed top-five results for one query.
-3. Hand ranked passage references to application-owned citation resolution and, for an accepted scenario with sufficient support, later structured generation.
+3. Hand ranked passage references to application-owned citation resolution and, only when required evidence is complete and retrieval completed as `supported`, later structured generation.
 
-This gives the portfolio a concrete LangChain RAG integration without making the framework the owner of source acquisition, chunking, query construction, passage identity, support-state policy, citations, or persistence. Do not add agents, tools, memory, multi-query expansion, framework loaders or splitters, or LangGraph. The integration must expose exact filters, ranked passage IDs, raw metric values, and errors; a convenience API that hides them is unsuitable. [ADR-0013](../../decisions/ADR-0013-langchain-as-initial-rag-integration.md) accepts this role for evaluation only, not as a release dependency. See the official [LangChain JavaScript vector-store integration overview](https://docs.langchain.com/oss/javascript/integrations/vectorstores/index) and [semantic-search tutorial](https://docs.langchain.com/oss/javascript/langchain/knowledge-base).
+This gives the portfolio a concrete LangChain RAG integration without making the framework the owner of source acquisition, passage segmentation, query construction, passage identity, support-state policy, citations, or persistence. Do not add agents, tools, memory, multi-query expansion, framework loaders or splitters, or LangGraph. The integration must expose exact filters, ranked passage IDs, raw metric values, and errors; a convenience API that hides them is unsuitable. [ADR-0013](../../decisions/ADR-0013-langchain-as-initial-rag-integration.md) accepts this role for evaluation only, not as a release dependency. See the official [LangChain JavaScript vector-store integration overview](https://docs.langchain.com/oss/javascript/integrations/vectorstores/index) and [semantic-search tutorial](https://docs.langchain.com/oss/javascript/langchain/knowledge-base).
 
 ## Local embedding and vector baseline
 
@@ -48,11 +50,11 @@ The published artifact size does not exclude the candidate on storage-size groun
 
 ### Chroma
 
-Evaluate one local Chroma endpoint and one write-once-by-convention collection for the frozen index identity. The endpoint's ownership and launch mechanism remain unselected. Generate embeddings in the application adapter and send explicit vectors; do not enable an implicit or external embedding function. Chroma remains a derived, disposable index containing passage IDs, vectors, and minimum filterable metadata. Canonical source artifacts, passage text, citation metadata, mapping inputs, and corpus manifests remain outside it.
+Evaluate one local Chroma endpoint and one write-once-by-convention collection for the frozen index identity. If this candidate is used, only the local application service owns and accesses the endpoint; its exact process-launch mechanism remains Proposed. Generate embeddings in the application adapter and send explicit vectors; do not enable an implicit or external embedding function. Chroma remains a derived, disposable index containing passage IDs, vectors, and minimum filterable metadata. Canonical source artifacts, passage text, citation metadata, mapping inputs, and corpus manifests remain outside it.
 
 The minimal profile binds the corpus snapshot, derivation profile, exact embedding digest and preprocessing, 768 dimensions, cosine metric, Chroma client/server versions, collection/index configuration, and filter schema. It uses only dense vector queries, exact metadata filters, and fixed `top-k=5`; an eligible set with fewer than five passages is not padded. Chroma's [collection configuration](https://docs.trychroma.com/docs/collections/configure) documents configurable distance and HNSW behavior, so approximate-search recall and ranked-ID stability across restart and rebuild remain evaluation questions.
 
-Chroma's documented [client path](https://docs.trychroma.com/docs/run-chroma/clients) uses a running local service. Its current [server configuration](https://docs.trychroma.com/reference/server-env-vars) documents `0.0.0.0` as the default listen address and no built-in authentication implementation in Chroma 1.x. For synthetic evaluation, configure `127.0.0.1`, keep the public-guidance collection unreachable from browser-delivered UI code, and verify zero non-loopback egress. If that containment cannot be demonstrated, Chroma fails evaluation. Process ownership, authentication for sensitive data, restart, cleanup, migration, repair, removal, and packaging remain OD-014 or distribution-stage decisions. Chroma's [metadata filtering](https://docs.trychroma.com/docs/querying-collections/metadata-filtering) and [precomputed-vector query path](https://docs.trychroma.com/docs/querying-collections/query-and-get) are sufficient. The [Chroma repository](https://github.com/chroma-core/chroma) records Apache-2.0 licensing; exact dependency and notice review remains required before distribution.
+Chroma's documented [client path](https://docs.trychroma.com/docs/run-chroma/clients) uses a running local service. Its current [server configuration](https://docs.trychroma.com/reference/server-env-vars) documents `0.0.0.0` as the default listen address and no built-in authentication implementation in Chroma 1.x. For synthetic evaluation, configure `127.0.0.1`, keep the public-guidance collection unreachable from browser-delivered UI code, and verify zero non-loopback retrieval egress. If that containment cannot be demonstrated, Chroma fails evaluation. Exact launch, restart, cleanup, repair, and removal behavior remain Proposed candidate details; installer and distribution packaging remain Deferred. Chroma's [metadata filtering](https://docs.trychroma.com/docs/querying-collections/metadata-filtering) and [precomputed-vector query path](https://docs.trychroma.com/docs/querying-collections/query-and-get) are sufficient. The [Chroma repository](https://github.com/chroma-core/chroma) records Apache-2.0 licensing; exact dependency and notice review remains required before distribution.
 
 ## Finding-to-query projection
 
@@ -136,7 +138,7 @@ The projection excludes target URLs, selectors, raw HTML, arbitrary page text, a
 5. Apply only a deterministic passage-ID tie-break for equal scores. Record every raw distance and metric; never convert similarity into confidence, authority, correctness, remediation quality, or conformance.
 6. Resolve passage IDs from the canonical corpus, verify passage and source checksums, and reject stale, missing, or incompatible results.
 7. Preserve ranked order while labeling each passage's normative or informative authority independently. Similarity rank never overrides source hierarchy.
-8. Construct citations from canonical metadata: publisher, document title and version, SC or Technique, exact heading/fragment, authority label, canonical URL, and immutable versioned URL when available. For a mutable URL, retain the corpus snapshot, source revision/acquisition identifier, and checksum needed to inspect the exact retained passage.
+8. Construct citations from canonical metadata: publisher, document title and version, SC or Technique, exact heading/fragment, authority label, canonical URL, immutable versioned URL when available, and the recorded copyright/attribution and use-condition metadata. For a mutable URL, retain the corpus snapshot, source revision/acquisition identifier, and checksum needed to inspect the exact retained passage.
 9. Apply one versioned deterministic support rule after passage resolution. Do not derive support from a similarity threshold alone.
 
 The exact hard filters and frozen guidance roles are:
@@ -151,13 +153,12 @@ For each role, the frozen gold mapping names one or more acceptable passage IDs.
 
 | Support state | Deterministic candidate meaning | Required handoff behavior |
 | --- | --- | --- |
-| **Supported** | All required roles are present, checksum-valid, correctly scoped, and free of unresolved material conflict. | Support-sufficient for one structured generation call using the selected accepted scenario and exact ranked passages. |
-| **Weak** | Some relevant guidance is present, but at least one required role is absent or only partially covered. | Policy-controlled. The frozen Proposed pilot policy requires abstention; a proposal-eligible weak policy requires a later accepted decision. |
-| **Missing** | No usable mapped guidance supports the core finding, the normative role is absent, or the required mapping boundary cannot be resolved. | Mandatory abstention; do not request generation. |
-| **Conflicting** | An unresolved material conflict remains after applying recorded authority and version rules. | Mandatory abstention with conflict references; do not request generation. |
-| **Unassessed** | Retrieval completed, but no approved support rule was applied. | Evaluation-only; make no product generation request and do not present it as supported. |
+| **Supported** | All required roles are present, checksum-valid, correctly scoped, and free of unresolved material conflict. | Support-sufficient for one structured generation call using the selected accepted scenario and exact ranked passages. Keep the deterministic finding visible. |
+| **Incomplete** | Some relevant guidance is present, but at least one required role is absent or only partially covered. | Deterministic abstention and manual-review direction; do not request generation and do not hide the finding. |
+| **Missing** | No usable mapped guidance supports the core finding, the normative role is absent, or the required mapping boundary cannot be resolved. | Deterministic abstention and manual-review direction; do not request generation and do not hide the finding. |
+| **Conflicting** | An unresolved material conflict remains after applying recorded authority and version rules. | Deterministic abstention with conflict references and manual-review direction; do not request generation and do not hide the finding. |
 
-A failed operation has no guidance-support state and produces no generation request. A stale or integrity-invalid input is rejected or fails the operation rather than creating another first-slice lifecycle state. Similarity distances remain ranking observations. This Proposed rule does not accept OD-009.
+A retrieval-stage error fails the enclosing workflow operation, has no guidance-support state, and produces no generation request, but the finding remains available in the retained minimized records. A stale or integrity-invalid input is rejected or fails the workflow operation rather than being mislabeled as missing support. Similarity distances remain ranking observations, not authority, sufficiency, confidence, or conformance evidence.
 
 ## Conceptual retrieval record
 
@@ -165,43 +166,40 @@ This is a documentation-level composition of the existing **Retrieval run**, **C
 
 | Component | Minimum retained information |
 | --- | --- |
-| Identity and operation | Retrieval-run and target-index IDs; start/completion time; first-slice `completed` or `failed` status; result or bounded error reference; configuration integrity metadata. The first slice has no interactive cancellation or separate stale state. |
-| Input lineage | Exact Step 2 **finding record**, **per-finding source-evidence item**, **normalized finding projection**, **rule manifest**, **approved scenario/rule-to-guidance mapping**, and eligible **scan-run publication record** references; query-projection version; exact privacy-safe query bytes and integrity digest; included/withheld categories; query-policy and redaction versions. |
-| Mapping boundary | Scenario-profile and mapping IDs/version; one selected SC; pinned axe and ACT mapping/boundary references with version, locator, acquisition/checksum, and review provenance; explicit excluded mappings. These are not ranked citations. |
-| Corpus scope | Corpus-snapshot and derivation-profile IDs; approved eight-artifact manifest; language, WCAG version, scenario/SC mapping; source and guidance-role filters; corpus/passage integrity checks. |
-| Embedding configuration | Embedding adapter and runtime versions; exact model tag and digest; artifact format/quantization and license reference; query prompt/preprocessing identity; dimensions and effective context limit; truncation policy. |
-| Index and ranking configuration | Store/client/server/index versions; collection identity; document preprocessing; cosine metric; complete filter representation; `top-k=5`; index configuration and activation version. |
-| Ranked passage reference | Rank; passage/source IDs; raw distance and metric; passage checksum; source title, publisher, authority type, standard/version, locator, canonical and immutable URLs, and citation display label. Passage text remains in the canonical corpus. |
-| Guidance-support assessment | Supported, weak, missing, conflicting, or unassessed state after a completed operation; assessment-rule and handoff-policy versions; required/present/absent role and passage references; reason codes; conflicts; resulting generation eligibility. This is not operation status or a model probability. |
+| Identity and execution | Retrieval-stage record ID; enclosing workflow-run reference; start/end time; bounded successful-result or error disposition; configuration version. This is not a second operation lifecycle. |
+| Input lineage | Finding, minimized source-evidence, normalized projection, scan, scenario/rule mapping, scenario ID, rule ID, fixture revision/state, and stable fixture-target-key references; exact privacy-safe query bytes and template version. A selector is never identity or query content. |
+| Corpus and retrieval configuration | Accepted corpus snapshot and passage-derivation IDs; embedding model/adapter and index identities; metric; exact filters; fixed `top-k=5`; support-rule version. |
+| Ranked passage reference | Rank, passage/source IDs, raw distance and metric, checksum, publisher/title, authority type, version, exact heading/fragment, canonical and immutable URLs when available, and visible attribution/use-condition metadata. Passage text remains in the canonical corpus. |
+| Guidance-support assessment | `supported`, `incomplete`, `missing`, or `conflicting`; required, present, and absent role references; conflicts/reason codes; generation eligibility and required manual-review direction. This is not operation status or a model probability. |
 
 Every ranked passage must resolve to the exact text and source version in the recorded snapshot. A corpus refresh, mapping change, index rebuild, or new evaluation creates new records and never rewrites historical lineage.
 
+The future implementation needs only application-owned TypeScript record definitions plus minimal runtime validation when scanner-derived input enters retrieval, when adapter output returns, and before canonical JSON is persisted or reopened. Compile-time types are not runtime validation. The MVP does not require a standalone JSON Schema, code generation, a schema framework, migration machinery, multiple serialization dialects, or a compatibility framework.
+
 ## Retrieval-quality evaluation before generation
 
-Use exactly these **six retrieval cases as the retrieval subset of the bounded shared Proposed evaluation suite**. They do not accept OD-009 or expand the accepted first vertical slice:
+OD-009 accepts a compact, fixed, non-promotable evaluation manifest. Retrieval is provider-independent, so its checks run once and their frozen results may support both the local-model and Groq generation cases; they are not duplicated per generation provider. Freeze every input, acceptable passage ID, expected support state, and expected handoff before observing model output.
 
-1. one complete `image-alt` / SC 1.1.1 Step 2 input, expected to retrieve all four required guidance roles and classify **supported**;
-2. one complete `label` / SC 4.1.2 Step 2 input, expected to retrieve its three required roles, preserve the excluded SC 3.3.2/1.3.1 boundary, and classify **supported**;
-3. one complete `color-contrast` / SC 1.4.3 Step 2 input, expected to retrieve its three required roles and classify **supported**;
-4. one controlled `image-alt` ranked set with the H67/decorative role withheld while the other required roles remain, expected to classify **weak** and abstain under the frozen pilot policy;
-5. one controlled ranked set with a deliberately documented material conflict that the authority/version rules cannot resolve, expected to classify **conflicting** and abstain; the conflict control is not an added corpus artifact or page fixture;
-6. one otherwise complete primary ranked set with no support rule applied, expected to remain **unassessed**, evaluation-only, and absent from product generation.
+The retrieval subset contains four bounded checks and no statistical sample expansion:
 
-Cases 1–3 evaluate the embedding, exact scenario filter, index, and ranking end to end. Cases 4–6 isolate deterministic support and handoff behavior without additional pages, sources, models, or retrieval variants. There is one failing finding/query per scenario in this retrieval subset. The accepted corrected contrast revision remains available to the later comparison step; retrieval adds no third contrast revision. Every case records the exact Step 2 inputs or controlled ranked set, exact retained query when applicable, mapping and corpus versions, required/acceptable passage IDs, distractors, expected support state and generation eligibility, rationale, and reviewer.
+1. one complete `image-alt` / SC 1.1.1 input, expected to retrieve all four required guidance roles and classify **supported**;
+2. one complete `label` / SC 4.1.2 input, expected to retrieve its three required roles, preserve the excluded SC 3.3.2/1.3.1 boundary, and classify **supported**;
+3. one complete `color-contrast` / SC 1.4.3 input, expected to retrieve its three required roles and classify **supported**;
+4. one frozen representative insufficiency package, selected before execution as **incomplete**, **missing**, or **conflicting**, expected to preserve the finding and abstain without a model call.
+
+Cases 1–3 exercise the proposed embedding, scenario filter, index, and ranking path. Case 4 is the one provider-independent abstention package accepted by the compact manifest; it introduces no page, corpus source, model, or provider variant. The other insufficiency states remain defined product behavior but are not additional fixed MVP executions. The accepted corrected revisions remain inputs to comparison, not extra retrieval cases. Each check records its exact Step 2 input or controlled ranked set, retained query when applicable, mapping/corpus versions, required and acceptable passage IDs, expected state/handoff, rationale, and reviewer.
 
 | Quality dimension | Initial criterion |
 | --- | --- |
-| Gold coverage | Every case has reviewed acceptable-passage mappings or an explicit weak/conflicting/unassessed expectation; all referenced passages resolve to the frozen snapshot. |
-| Relevance | For each of the three primary cases, report whether every required role appears in the top five and record Recall@5 plus concrete misses as descriptive pilot evidence. Defer Precision@5, nDCG@5, and promotion thresholds until a larger dataset makes them meaningful. |
-| Citation integrity | 100% of returned passage IDs resolve to checksum-valid canonical text, exact locators, source versions, URLs, and visible authority/attribution metadata. |
-| Filter correctness | 100% of returned passages belong to the selected snapshot, language, WCAG version, scenario, SC, source allowlist, and guidance roles; cross-profile returns fail the pilot. |
-| Mapping boundary | The `label` case records only SC 4.1.2 and never infers SC 3.3.2, SC 1.3.1, a missing visible label, or full non-conformance. |
-| Authority handling | 100% of passages retain correct normative/informative labels; ranking never changes authority or presents a Technique as a requirement. |
-| Support behavior | All six cases produce their expected states and handoff behavior; any false proposal-eligible weak, conflicting, or unassessed result fails the pilot. |
-| Repeatability | Repeating cases 1–3 under one pinned configuration returns the same ordered passage IDs, or exposes instability as an evaluation failure; floating-point values use an accepted comparison tolerance. |
-| Local operation | Indexing and retrieval complete with zero non-loopback egress; record cold/warm latency, indexing time, peak RAM/VRAM/disk, and lifecycle failures without setting performance gates before measurement. |
+| Frozen expectations | All four checks have reviewed inputs, expected passage roles/IDs, support state, and handoff fixed before any generation result is observed. |
+| Required-role retrieval | Each primary scenario returns every required role within the fixed top five; concrete misses are recorded descriptively, without a statistical promotion threshold. |
+| Citation integrity | Every returned passage ID resolves to checksum-valid canonical text, exact locator, source version, URL, authority label, and attribution/use-condition metadata. |
+| Filter correctness | Every return belongs to the selected snapshot, language, WCAG version, scenario, SC, source allowlist, and guidance roles; a cross-profile return fails the check. |
+| Mapping boundary | The `label` check records only SC 4.1.2 and never infers SC 3.3.2, SC 1.3.1, a missing visible label, or full non-conformance. |
+| Support behavior | The one shared representative insufficiency check preserves the finding and produces its frozen expected abstention/manual-review handoff with no model call. |
+| Practical local operation | The proposed local retrieval path completes on the reference PC without out-of-memory failure or making the UI unusable. Record observed limitations only; do not claim p95, thermal, production-performance, or release-support results. |
 
-Classify every miss as at least one of: corpus gap, source/version error, chunk-boundary loss, rule-mapping error, query-projection error, privacy withholding, filter error, embedding/prompt/truncation error, index/configuration error, approximate-ranking error, or genuine weak/conflicting guidance. Tune the corpus, mapping, chunks, query, filters, and base ranking before reconsidering the reranker deferred by ADR-0010.
+Classify a miss as a corpus/source-version, passage-boundary, rule-mapping, query-projection, privacy-withholding, filter, embedding/preprocessing, index/configuration, or approximate-ranking issue. Adjust the smallest responsible boundary before reconsidering the reranker deferred by ADR-0010. These controlled checks demonstrate the integration; they are not a leaderboard, statistical qualification, provider comparison, or public support claim.
 
 ## Meaningful alternatives
 
@@ -215,16 +213,16 @@ These are single-variable replacement candidates, not additional stages or confi
 ## Assumptions
 
 - EmbeddingGemma and Chroma are plausible evaluation candidates for the reference PC, not proven capacity fits or release dependencies.
-- The three pinned axe-to-SC mappings remain fixed during evaluation, and the eight-artifact English corpus receives an approved OD-004 disposition first.
+- The three pinned axe-to-SC mappings remain fixed during evaluation, and future acquisition of the accepted eight-artifact English pack satisfies its recorded W3C/WAI use conditions first.
 - Each accepted synthetic profile can supply the exact named Step 2 inputs without private content.
 - Retrieval quality and support-state behavior can be evaluated without a generative model or hosted service.
 
 ## Open questions
 
 - Will the ADR-0013 thin LangChain role preserve inspectable provenance and acceptable local resource use when evaluated against the framework-independent boundary?
-- Will OD-015 accept the deterministic query template, three vocabularies, retrieval-record shape, and compatibility rules proposed here?
-- Can the local Chroma endpoint satisfy loopback, renderer-separation, and zero-egress checks? Service ownership and distribution lifecycle remain deferred under OD-014.
-- What required-passage mappings, weak-support policy, repeatability tolerance, and later representative quality thresholds will OD-007, OD-009, and OD-017 accept after the six-case retrieval subset?
+- Can the local Chroma endpoint satisfy loopback, renderer-separation, and zero-retrieval-egress checks under application-service ownership? Its exact process launch remains Proposed and packaging remains Deferred.
+- What exact application-owned TypeScript field names and minimal runtime validator will implement the accepted conceptual record without introducing a schema framework?
+- What exact acceptable passage IDs will be frozen for each required role before the compact evaluation begins?
 - Will EmbeddingGemma's exact artifact, runtime, prompts, license, latency, and concurrent resource use pass the reference-PC and retrieval-quality gates?
 
 ## Risks
@@ -236,7 +234,7 @@ These are single-variable replacement candidates, not additional stages or confi
 - Chroma's approximate ranking, local-service exposure, crash recovery, or resource use may fail evaluation.
 - Mutable axe/ACT mappings could cause the `label` profile to regain unsupported criteria or silently change meaning.
 - SC 1.4.3 thresholds and exceptions depend on context that a minimal query intentionally omits; retrieval must not turn a scanner measurement into conformance proof.
-- Six controlled cases and hard scenario filters can overfit the demonstration and do not predict broad-corpus retrieval quality.
+- Four controlled checks and hard scenario filters can overfit the demonstration and do not predict broad-corpus retrieval quality.
 - Similarity distance may be mistaken for confidence, correctness, source authority, or accessibility conformance.
 
 ## Explicit non-goals
@@ -257,10 +255,11 @@ This retrieval-execution portion is adequately defined for the Proposed evaluati
 2. Exact scenario filters restrict each query to its selected passages from the eight-artifact corpus, while axe and ACT mapping inputs remain outside the ranked corpus.
 3. EmbeddingGemma and Chroma remain evaluation-only baselines that can request fixed `top-k=5` without web search, crawling, query rewriting, hybrid search, or reranking.
 4. Every result resolves to checksum-valid text, authority type, source version, exact locator, and inspectable citation metadata.
-5. Scenario-specific support roles and the supported, weak, missing, conflicting, and unassessed semantics are deterministic; weak follows a frozen abstention policy, missing/conflicting abstain, and unassessed is evaluation-only.
-6. The six-case retrieval subset covers three primary supported profiles plus one weak, one conflicting, and one unassessed control, with no extra contrast fixture or generative model.
+5. Scenario-specific support roles and the `supported`, `incomplete`, `missing`, and `conflicting` semantics are deterministic; only `supported` is proposal-eligible, while every insufficiency state preserves the finding and abstains without a model call.
+6. The fixed provider-independent retrieval subset covers three primary supported profiles plus one representative insufficiency control selected as `incomplete`, `missing`, or `conflicting`, with no extra fixture, source, generative model, provider duplication, or statistical expansion.
 7. LangChain remains a thin, replaceable ADR-0013 evaluation layer whose removal would not change canonical inputs, outputs, citations, support semantics, or evaluation meaning.
-8. Nothing in this assessment accepts OD-009, promotes an evaluation technology, expands canonical product scope, or claims accessibility, conformance, or certification.
+8. Application-owned TypeScript records and minimal runtime boundary validation are sufficient; no JSON Schema, code generation, schema framework, migration system, or compatibility layer is required.
+9. Nothing in this assessment uses the accepted evaluation manifest to promote an evaluation technology, expands canonical product scope, or claims accessibility, conformance, or certification.
 
 ## Documentation navigation
 

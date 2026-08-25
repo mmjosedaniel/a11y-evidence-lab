@@ -4,36 +4,44 @@ This directory contains Architecture Decision Records (ADRs) for significant tec
 
 ## Status
 
-The following decisions have been accepted at the scope stated in each record:
+The following current decisions have been accepted at the scope stated in each record:
 
 1. [ADR-0001: Interchangeable generation providers](ADR-0001-interchangeable-generation-providers.md)
-2. [ADR-0002: Windows installation and model acquisition](ADR-0002-windows-installation-and-model-acquisition.md)
-3. [ADR-0003: Initial local generation capacity-screen configuration](ADR-0003-initial-local-generation-evaluation-preset.md)
-4. [ADR-0004: Reference-PC capacity gate for local models](ADR-0004-reference-pc-capacity-gate-for-local-models.md)
-5. [ADR-0005: Ollama as the initial local model runtime](ADR-0005-ollama-as-initial-local-model-runtime.md)
-6. [ADR-0006: EmbeddingGemma as the initial embedding model](ADR-0006-embeddinggemma-as-initial-embedding-model.md)
-7. [ADR-0007: Chroma as the initial local vector store](ADR-0007-chroma-as-initial-local-vector-store.md)
-8. [ADR-0008: Playwright as the initial browser automation technology](ADR-0008-playwright-as-initial-browser-automation.md)
-9. [ADR-0009: axe-core as the initial accessibility scanner](ADR-0009-axe-core-as-initial-accessibility-scanner.md)
-10. [ADR-0010: Defer a local reranker](ADR-0010-defer-a-local-reranker.md)
-11. [ADR-0011: TypeScript as the initial application language](ADR-0011-typescript-as-initial-application-language.md)
-12. [ADR-0012: React as the initial user-interface library](ADR-0012-react-as-initial-user-interface-library.md)
-13. [ADR-0013: LangChain as the initial RAG integration baseline](ADR-0013-langchain-as-initial-rag-integration.md)
+2. [ADR-0003: Initial local generation capacity-screen configuration](ADR-0003-initial-local-generation-evaluation-preset.md)
+3. [ADR-0004: Reference-PC capacity gate for local models](ADR-0004-reference-pc-capacity-gate-for-local-models.md)
+4. [ADR-0005: Ollama as the initial local model runtime](ADR-0005-ollama-as-initial-local-model-runtime.md)
+5. [ADR-0006: EmbeddingGemma as the initial embedding model](ADR-0006-embeddinggemma-as-initial-embedding-model.md)
+6. [ADR-0007: Chroma as the initial local vector store](ADR-0007-chroma-as-initial-local-vector-store.md)
+7. [ADR-0008: Playwright as the initial browser automation technology](ADR-0008-playwright-as-initial-browser-automation.md)
+8. [ADR-0009: axe-core as the initial accessibility scanner](ADR-0009-axe-core-as-initial-accessibility-scanner.md)
+9. [ADR-0010: Defer a local reranker](ADR-0010-defer-a-local-reranker.md)
+10. [ADR-0011: TypeScript as the initial application language](ADR-0011-typescript-as-initial-application-language.md)
+11. [ADR-0012: React as the initial user-interface library](ADR-0012-react-as-initial-user-interface-library.md)
+12. [ADR-0013: LangChain as the initial RAG integration baseline](ADR-0013-langchain-as-initial-rag-integration.md)
+13. [ADR-0014: Groq as the MVP external generation provider](ADR-0014-groq-as-mvp-external-generation-provider.md)
+14. [ADR-0015: Localhost browser MVP execution](ADR-0015-localhost-browser-mvp-execution.md)
+15. [ADR-0016: Filesystem run persistence](ADR-0016-filesystem-run-persistence.md)
 
-`Accepted for evaluation` selects the first technology to measure after development is authorized; it does not mean implemented, bundled, supported, or release-qualified. `Accepted` records a binding project direction or, for ADR-0010, an explicit deferral. Release adoption remains subject to the gates and open decisions named by each record.
+`Accepted for evaluation` selects a bounded configuration to measure after development is authorized; it does not mean implemented, bundled, generally supported, or release-qualified. `Accepted` records a binding project direction or, for ADR-0010, an explicit deferral. ADR-0014 deliberately splits these scopes: Groq and the explicit dual-mode/no-fallback boundary are binding MVP decisions, while its exact model is only a fixed evaluation configuration. Release adoption remains subject to a later decision.
 
 Candidate technologies and architecture options not covered by these records remain proposals until an ADR or another authoritative project document explicitly records a decision.
 
-## Candidate decision topics — not accepted ADRs
+## Superseded decision history
 
-The Voxleaf reference review produced four future decision topics. They remain Proposed under [OD-015 through OD-018](../../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#decisions-required-before-development), have no reserved ADR numbers, and must not be treated as evaluation or implementation authority:
+[ADR-0002: Windows installation and model acquisition](ADR-0002-windows-installation-and-model-acquisition.md) was Accepted on 2026-08-23 and superseded for the MVP by ADR-0015 on 2026-08-25. It is preserved as history; an installer, launcher, Start menu entry, desktop container, signing, repair, update, and uninstall remain deferred and require a future decision.
 
-- Versioned serialized-contract authority.
-- Deterministic corpus derivation and source-locator authority.
-- Exact-profile evaluation and support qualification authority.
-- Work identity, cancellation, and stale-result containment.
+## Deferred decision topics
 
-The detailed [candidate architecture patterns](../CANDIDATE_ARCHITECTURE.md) and [Voxleaf implementation references](../candidates/VOXLEAF_IMPLEMENTATION_PATTERN_ASSESSMENT.md) are **Proposed** planning inputs only. They do not modify the accepted scope or status of any ADR. If a topic is accepted later, create the next sequential ADR at that time and update the requirements traceability; do not reinterpret these candidate documents or this topic list as decisions.
+The following topics are intentionally outside the portfolio MVP and have no reserved ADR numbers:
+
+- Distributable packaging and non-developer startup.
+- Formal release qualification, support matrix, and public performance claims.
+- Broader hardware compatibility and production retention, backup, migration, or synchronization.
+- Additional hosted providers, provider comparison, and generalized provider discovery.
+- Hosted tracing, telemetry, and analytics.
+- Workflow orchestration, concurrency, cancellation, checkpoints, and resume.
+
+The detailed [candidate architecture patterns](../CANDIDATE_ARCHITECTURE.md) and [Voxleaf implementation references](../candidates/VOXLEAF_IMPLEMENTATION_PATTERN_ASSESSMENT.md) are **Proposed** planning inputs only. They do not modify the accepted scope or status of any ADR. If a deferred topic is accepted later, create the next sequential ADR at that time and update requirements traceability; do not reinterpret candidate material as a decision.
 
 ## Conventions
 

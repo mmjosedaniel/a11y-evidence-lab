@@ -20,7 +20,7 @@ The accepted first portfolio slice is deliberately limited to three synthetic, p
 | `form-input-label` — missing accessible form-input name | One email input with nearby visible text but no programmatic association, then the same input with an explicit visible `label` | axe-core **label**; WCAG 2.2 SC 4.1.2. The rule does not by itself test SC 3.3.2 or the whole success criterion/page. |
 | `text-contrast` — insufficient text contrast | One 16 CSS px, weight-400 normal-text target rendered as `#888888` on `#ffffff`, then the same target as `#767676` on `#ffffff` | axe-core **color-contrast**; WCAG 2.2 SC 1.4.3 |
 
-Each scan operation selects exactly one scenario, one failing or corrected revision, one rule, and one intended target. The three families use the same pinned Playwright-managed Chromium profile but do not form a broad rule suite. No operation accepts an arbitrary URL, uploaded HTML, credential, authentication state, crawler input, or live page.
+Each scan execution within the single enclosing workflow operation selects exactly one scenario, one failing or corrected logical state, one rule, and one intended target. Before evaluation, the scenario content, expected rule result, stable fixture-target key, and browser/rule profile are frozen. This defines six logical states without requiring six projects, pages, or physical files; their eventual file layout remains an implementation detail. The three scenarios use the same pinned Playwright-managed Chromium profile but do not form a broad rule suite. No workflow operation accepts an arbitrary URL, uploaded HTML, credential, authentication state, crawler input, or live page.
 
 This is enough to supply three different kinds of deterministic evidence to the later retrieval and generation stages while keeping the portfolio focus on RAG, bounded LangChain integration, grounded generation, evaluation, human review, and rescan comparison. Broader rule or fixture coverage and any crawler remain deferred until demonstrated product need.
 
@@ -35,7 +35,7 @@ This is enough to supply three different kinds of deterministic evidence to the 
 
 Step 1 ends with a runtime-validated, **transient native scanner observation held in memory**. Step 2 exclusively owns evidence allowlisting, privacy sanitization, normalization, finding and evidence records, redaction information, and durable publication.
 
-All application-owned scan logic is proposed as ordinary modules in one local TypeScript application process. Playwright still launches and owns its managed Chromium process; the MVP does not add an application child worker, IPC protocol, process-tree supervisor, policy proxy, or microservice.
+All application-owned scan logic is proposed as ordinary modules in one local TypeScript service on the developer's machine. The user opens the React interface at a loopback address in Chrome or Edge; that unprivileged UI does not receive filesystem, secret, local-model-runtime, or Playwright authority. The local service launches and owns Playwright's managed Chromium process for the controlled scan. The MVP adds no installer, desktop wrapper, application child worker, IPC protocol, process-tree supervisor, policy proxy, or microservice.
 
 ## Documentation navigation
 

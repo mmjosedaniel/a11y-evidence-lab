@@ -10,7 +10,7 @@ The authoritative requirement IDs, wording, and recorded statuses for this workf
 
 ## Exact first portfolio slice
 
-The first slice should use exactly three project-owned controlled scenario families. Each family has one failing and one corrected revision, one axe rule, and one intended target:
+The first slice should use exactly three project-owned controlled scenarios. Each has one failing and one corrected logical state, one axe rule, and one intended target. These six states do not require six projects, pages, or files; physical fixture layout remains an implementation detail:
 
 | Scenario profile | Failing revision | Corrected revision | Direct mapping and limitation |
 | --- | --- | --- | --- |
@@ -22,7 +22,7 @@ This slice is intentionally smaller than a general evidence platform. It is enou
 
 `Playwright + axe-core -> deterministic evidence -> retrieval input -> RAG -> structured proposal -> human review -> rescan comparison`
 
-One scan operation processes only one selected scenario, one revision, one rule, and one intended target. The scanner cannot determine alternative-text appropriateness, label accuracy or instruction sufficiency, or readability in every user condition. Those remain explicit manual checks, and disappearance of an automated finding must not be presented as proof that a whole WCAG success criterion or page is accessible or conformant.
+Before evaluation, the content and expected rule result of each state, its stable fixture-target key, and its browser/rule profile are frozen. One scan execution within the single enclosing workflow operation processes only one selected scenario, one state, one rule, and one intended target. The scanner cannot determine alternative-text appropriateness, label accuracy or instruction sufficiency, or readability in every user condition. Those remain explicit manual checks, and disappearance of an automated finding must not be presented as proof that a whole WCAG success criterion or page is accessible or conformant.
 
 ## Smallest sufficient boundary
 
@@ -47,7 +47,7 @@ Step 2 is the single logical owner of the evidence transformation:
 5. Derive one versioned normalized finding projection from that source item.
 6. Calculate the retained source-evidence digest, normalized-projection digest, and configuration digest using the selected canonical serialization.
 7. For a corrected scan, retain only the narrow rule-specific positive same-target observation defined below; do not retain all native pass nodes.
-8. Construct one evidence publication bundle for local storage. The storage mechanism remains an open decision and does not change these logical responsibilities.
+8. Construct one evidence publication bundle for canonical machine-readable JSON in the run's local `data/runs/<timestamp-or-run-id>/` directory. A Markdown report may be derived for people, but it is never the sole source of truth.
 
 Sanitization, normalization, digest creation, and publication-record construction must not also occur in Step 1. Keeping one owner prevents two components from creating different “authoritative” evidence from the same scanner result. No message broker, worker protocol, event store, or separate evidence service is needed for this slice.
 
@@ -59,12 +59,12 @@ All three profiles retain only the common facts needed by the six-step demonstra
 
 - native rule ID, exact axe-core version, and native result bucket (`violations`, `passes`, `incomplete`, or `inapplicable`) without changing its semantics;
 - scanner-reported impact without inventing an order;
-- one structured affected-target locator and one fixture-owned, privacy-safe element key used only as a correlation input;
+- scenario ID, fixture revision, rule ID, one fixture-owned stable target key, and a supporting structured locator; the locator alone never establishes identity;
 - allowlisted axe check identifiers and a bounded failure or pass summary;
-- exact scenario, fixture revision, page-state, browser, scanner, rule-profile, sanitizer, and projection identities; and
+- exact scenario, fixture revision, page-state, browser/rule profile, scanner, sanitizer, and projection identities; and
 - explicit omitted, truncated, withheld, or insufficient markers.
 
-Native `node.html` is excluded by default. A portfolio excerpt, if needed, is a bounded sanitized representation defined by the selected rule profile. It removes URLs, arbitrary IDs and classes, unrelated attributes or text, event handlers, executable markup, and private values. The evidence policies do not retain the whole page, screenshot, accessibility tree, browser trace, network log, cookie, storage, credential, or form value. Arbitrary axe check `data` is rejected; only the contrast fields named below are allowed.
+Native `node.html` is excluded by default. A portfolio excerpt, if needed, is a bounded sanitized representation defined by the selected rule profile. It removes URLs, arbitrary IDs and classes, unrelated attributes or text, event handlers, executable markup, and private values. The evidence policies do not retain the whole page, full HTML, React virtual DOM, general DOM fingerprint, DOM or accessibility-tree snapshot, screenshot, browser trace, network log, cookie, storage, credential, input value, or arbitrary/private URL. Arbitrary axe check `data` is rejected; only the contrast fields named below are allowed.
 
 ### `image-alt` evidence profile
 
@@ -91,7 +91,7 @@ The failing finding and corrected positive target observation retain the same ta
 
 The failing revision is controlled 16 CSS px, weight-400 normal text with `#888888` foreground on `#ffffff`; the corrected revision uses `#767676` on `#ffffff` for the same target and fixed font/profile. In axe-core 4.13, the version-pinned [contrast evaluator](https://github.com/dequelabs/axe-core/blob/v4.13.0/lib/checks/color/color-contrast-evaluate.js) emits `contrastRatio` as a number and `expectedContrastRatio` as a ratio string such as `4.5:1`. Step 2 preserves both raw values exactly, validates their types and bounds, and deterministically parses only the expected ratio's numeric component into the failing finding projection or the corrected positive observation, as applicable. It does not recompute contrast or override the native result bucket.
 
-The failing projection and corrected positive observation therefore each retain the emitted numeric `contrastRatio`, the raw emitted `expectedContrastRatio`, its validated numeric component, and the deterministic normalizer version. Step 6 alone derives the comparison-only ordered **contrast margin** (normalized measured ratio minus normalized expected-ratio component) under a comparable profile and classifies `improved`, `persistent`, `regressed`, or `resolved`; capture does not calculate a margin or override the native bucket. A pass under the selected rule remains a narrow positive observation, not proof of readability in every condition or page conformance.
+The failing projection and corrected positive observation therefore each retain the emitted numeric `contrastRatio`, the raw emitted `expectedContrastRatio`, its validated numeric component, and the deterministic normalizer version. Step 6 alone derives the comparison-only ordered **contrast margin** (retained emitted numeric measured ratio minus the validated expected-ratio numeric component) under a comparable profile and classifies `improved`, `persistent`, `regressed`, or `resolved`; capture does not calculate a margin or override the native bucket. A pass under the selected rule remains a narrow positive observation, not proof of readability in every condition or page conformance.
 
 ## Narrow corrected-scan observations
 
@@ -103,7 +103,7 @@ This is a documentation-level composition of the existing **Scan run**, **Findin
 
 | Component | Minimum retained information | Purpose |
 | --- | --- | --- |
-| Scan-run publication record | Schema version; scan-run, target, authorization, scenario/fixture/revision, page-state, time, viewport, browser, scanner, selected rule profile, coverage, sanitizer, and configuration references; execution and publication eligibility; configuration digest. | Establishes which one of the six authorized states was scanned and what actually ran. |
+| Scan-run publication record | Schema version; scan-run, target, authorization, scenario/fixture/revision, page-state, time, viewport, browser, scanner, selected rule profile, coverage, sanitizer, and configuration references; execution and publication eligibility; configuration digest. | Establishes which logical state of the three authorized scenarios was scanned and what actually ran. |
 | Finding record | Finding, scan-run, rule-manifest, source-evidence, and normalized-projection references; native `violation` category; scanner impact; affected target; correlation-profile version and inputs. | Represents the one intended target reported by the selected rule in a failing revision. |
 | Per-finding source-evidence item | Evidence, scan, and finding references; common and rule-specific allowlisted native fields; structured target; sanitizer version; retained-content digest; omission markers. | Preserves what axe reported without storing the native payload or sharing one source item across findings. |
 | Normalized finding projection | Projection version; finding and source-evidence references; selected rule and `violation` category; element kind; one scenario fact (`missing text alternative`, `missing accessible name`, or `insufficient color contrast`); rule-specific values; deterministic ordering; projection digest. | Supplies stable, privacy-safe facts for display and retrieval while remaining traceable to source evidence. Contrast values remain measurements, not an independently calculated verdict. |
@@ -122,7 +122,7 @@ Scanner metadata remains informative source context. It is not a substitute for 
 
 ## Handoff to retrieval and later steps
 
-Step 2 publishes named references, not one flattened “RAG document.” Step 3 should assemble its privacy-safe retrieval input by resolving the **finding record**, **per-finding source-evidence item**, **normalized finding projection**, **rule manifest**, **approved scenario/rule-to-guidance mapping**, and the eligible **scan-run publication record**. The normalized projection supplies stable facts, but it is not sufficient lineage by itself. Step 3 owns the deterministic query representation and retrieval-run record.
+Step 2 publishes named references, not one flattened “RAG document.” Every valid deterministic finding remains available for display and local review regardless of later retrieval support; evidence sufficiency gates only whether Step 4 may call an LLM. Step 3 should assemble its privacy-safe retrieval input by resolving the **finding record**, **per-finding source-evidence item**, **normalized finding projection**, **rule manifest**, **approved scenario/rule-to-guidance mapping**, and the eligible **scan-run publication record**. The normalized projection supplies stable facts, but it is not sufficient lineage by itself. Step 3 owns the deterministic query representation and retrieval-run record.
 
 The same records support the remaining steps without mutation:
 
@@ -134,7 +134,7 @@ The same records support the remaining steps without mutation:
 
 The unredacted native result exists only in memory during Step 2 and is not written to logs, diagnostics, exports, temporary artifacts, vector storage, or traces. The evidence allowlist is applied before local persistence.
 
-A public demo must use only the project-owned synthetic fixture and synthetic review history. Private sessions, real customer pages, credentials, proprietary markup, and personal data must never become demo evidence. Digests and fixture keys are not anonymization and must not be derived from sensitive raw values.
+A public demo must use only the project-owned synthetic fixture and synthetic review history. Private sessions, real customer pages, credentials, proprietary markup, and personal data must never become demo evidence. Digests and fixture keys are not anonymization and must not be derived from sensitive raw values. MVP data remains on the developer's machine; deleting one run means deleting that run's local directory. The MVP adds no cloud storage, backup, sync, telemetry, analytics, database, or migration system.
 
 When the policy removes material evidence, record `withheld` or `insufficient`; do not reconstruct it with an LLM or weaken the policy to force a conclusion.
 
@@ -149,23 +149,22 @@ When the policy removes material evidence, record `withheld` or `insufficient`; 
 
 Assumptions:
 
-- The first evaluation uses exactly the three project-owned scenario families and six revisions described above, one main frame, one selected rule, and one intended target per scan.
-- Each family has a synthetic, non-sensitive element key stable across its two revisions. The key is only one correlation input and does not independently prove identity across unrelated scenarios.
+- The first evaluation uses exactly the three project-owned scenarios and their failing/corrected logical states described above, one main frame, one selected rule, and one intended target per scan.
+- Each scenario has a synthetic, non-sensitive target key stable across its two states. Correlation also requires the same scenario ID, rule ID, fixture revision relationship, browser/rule profile, and minimized evidence; the selector is supporting evidence only.
 - The image alternative, form-label meaning and instructions, and contrast readability remain manually reviewed because scanner output is narrower than those contextual judgments.
 - The contrast fixture uses the same normal-text target and fixed typography in both revisions; only the declared foreground changes from `#888888` to `#767676` against `#ffffff`.
 
-Open decisions remain limited to:
+Remaining Proposed implementation details are limited to:
 
-- the exact six fixture revisions, stable correlation inputs, and scenario-specific manual-check wording;
-- canonical serialization, digest algorithm, schema compatibility, and local persistence;
-- retention, deletion, export, and public-demo policies; and
-- the exact three rule-to-guidance corpus manifests and small evaluation criteria.
+- the physical fixture layout, exact state content, target-key values, and scenario-specific manual-check wording;
+- the small TypeScript record shapes, canonical JSON serialization details, digest algorithm, and atomic-write mechanics; and
+- the exact three rule-to-guidance corpus manifest entries and small evaluation examples.
 
 ## Explicit non-goals
 
 - Live or authenticated pages, arbitrary URLs or local files, crawling or a crawler implementation, any fourth fixture family or rule, broad WCAG coverage, multiple scanners, or cross-browser equivalence.
 - General DOM snapshots, screenshots, accessibility trees, HAR files, browser traces, or network capture.
-- Shared evidence de-duplication, a universal DOM evidence model, generalized pass retention, fuzzy matching, or historical analytics.
+- Shared evidence de-duplication, a universal DOM evidence model, generalized pass retention, fuzzy matching, general fingerprints, or historical analytics.
 - A worker service, queue, event-sourcing system, distributed pipeline, or production-scale storage design.
 - Using LangChain, an LLM, embedding model, or vector store for deterministic capture, sanitization, correlation, or comparison.
 - Automatic remediation, certification, compliance determination, or treating a passed rule as proof that a target, success criterion, or page is accessible.
@@ -182,7 +181,7 @@ This workflow step is defined adequately for later evaluation when:
 6. Step 3 can construct a privacy-safe reproducible query from the named record references without embedding opaque IDs or requiring raw page content.
 7. A same-scenario failing finding and corrected observation provide the evidence needed for later conservative comparison when all pair prerequisites and unique correlation pass; ambiguity produces `inconclusive`, while material pair mismatch produces `not comparable`.
 8. Evidence, guidance, generated interpretation, manual checks, and reviewer content remain separate and no record makes an accessibility, compliance, certification, or automatic-fix claim.
-9. Persistence, retention, schema, and release technologies remain visibly undecided, so this Proposed assessment does not accidentally authorize implementation or accept them.
+9. Canonical JSON is confined to one local run directory and validates at the persisted-JSON boundary; optional Markdown is derived. This Proposed assessment still selects no implementation library and promotes no evaluation technology to a release dependency.
 
 ## Primary sources
 

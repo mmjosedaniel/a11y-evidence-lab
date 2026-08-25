@@ -1,7 +1,14 @@
 # ADR-0002: Windows installation and model acquisition
 
-- **Status:** Accepted
+- **Status:** Superseded for the MVP by [ADR-0015](ADR-0015-localhost-browser-mvp-execution.md)
 - **Decision date:** 2026-08-23
+- **Superseded date:** 2026-08-25
+
+## Supersession notice
+
+[ADR-0015](ADR-0015-localhost-browser-mvp-execution.md) replaces this installer-and-launcher direction for the portfolio MVP with a developer-started local application service and a localhost UI opened in Chrome or Edge. Installer, launcher, Start menu, desktop-container, signing, update, repair, and uninstall work are deferred until demonstrated product need justifies a new distribution decision.
+
+The context, options, decision, and consequences below are retained as historical decision material. They are not current MVP requirements, and this record does not reactivate automatically if packaging is considered later.
 
 ## Context
 
@@ -36,6 +43,7 @@ When distributable-product development is authorized, distribute the product wit
 
 ## Related requirements
 
+- [ADR-0015: Localhost browser MVP execution](ADR-0015-localhost-browser-mvp-execution.md)
 - [Installation and model lifecycle requirements](../../requirements/generation-provider-and-model-lifecycle/INSTALLATION_AND_MODEL_LIFECYCLE.md): `REQ-INST-*`
 - [Generation provider execution requirements](../../requirements/generation-provider-and-model-lifecycle/GENERATION_PROVIDER_EXECUTION.md): `REQ-LLM-*`
 - [Privacy and security requirements](../../requirements/quality-security-and-operations/PRIVACY_AND_SECURITY.md): `REQ-SEC-*`

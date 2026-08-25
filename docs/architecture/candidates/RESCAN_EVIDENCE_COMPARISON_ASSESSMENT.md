@@ -2,7 +2,7 @@
 
 ## Authority, status, and scope
 
-**Status:** Proposed architecture detail for the controlled-fixture MVP as of 2026-08-24. This assessment owns no requirement IDs or statuses, accepts no open decision, promotes no evaluation technology to release adoption, selects no persistence or workflow technology, enables no live target, and does not authorize development.
+**Status:** Proposed architecture detail for the controlled-fixture MVP as of 2026-08-24, aligned with the accepted MVP boundaries recorded on 2026-08-25. This assessment owns no requirement IDs or statuses, does not override an accepted decision, promotes no evaluation technology to release adoption, selects no additional persistence or workflow technology, enables no live target, and does not authorize development.
 
 The authoritative requirements remain in [Evidence and review workflow requirements](../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#rescan-and-comparison). This document defines the smallest comparison slice needed to demonstrate the final step of the evidence-grounded RAG workflow across the three accepted controlled scenarios. It must not be interpreted as proof that a page is accessible, conformant, certified, or fixed.
 
@@ -10,23 +10,23 @@ The authoritative requirements remain in [Evidence and review workflow requireme
 
 Use ordinary deterministic application logic to compare one retained baseline scan with one later scan. Do not use an LLM, LangChain, embeddings, a DOM-diff library, a second scanner, or a separate comparison service. LangChain and the language model belong only in the bounded retrieval and generation steps; comparison should show that a reviewed proposal can be followed by independently observed scanner evidence.
 
-Each comparison operation selects exactly one controlled scenario profile, one baseline scan, one later scan, one axe rule, and one known fixture target. A comparable pair produces exactly one child finding outcome; a `not comparable` pair produces none. The product does not compare the three scenarios in bulk or aggregate them into a page result.
+Each comparison stage within the single enclosing workflow operation selects exactly one controlled scenario profile, one baseline scan, one later scan, one axe rule, and one known fixture target. A comparable pair produces exactly one child finding outcome; a `not comparable` pair produces none. The product does not compare the three scenarios in bulk or aggregate them into a page result.
 
 The primary portfolio narrative is repeated independently for each profile:
 
 `one failing synthetic baseline -> one reviewed correction -> one corrected synthetic rescan -> exact comparability check -> exact fixture-target correlation -> resolved scanner-evidence outcome`
 
-Each profile needs only its failing and corrected fixture revisions. Those two states can also be paired independently as failing to failing for `persistent` and corrected to failing for `regressed`. The contrast profile defines when a future failing-to-less-failing pair could be called `improved`, but the MVP does not require a third fixture revision or an `improved` demonstration.
+Each profile needs only its failing and corrected fixture revisions. Those two states can also be paired independently as failing to failing for `persistent` and corrected to failing for `regressed`. The contrast profile additionally requires one provider-independent deterministic record-level `improved` check using a frozen synthetic comparable pair whose later contrast margin is strictly higher but still failing. This check does not add a third fixture revision or another end-to-end fixture scenario.
 
 ## Three controlled comparison profiles
 
-The accepted MVP scope supplies the three synthetic, project-owned scenario families below. The exact comparison mechanics remain Proposed pending the applicable open decisions.
+The accepted MVP scope supplies the three synthetic, project-owned scenario families below. OD-008 accepts the minimal correlation identity; OD-012 accepts canonical JSON in one local directory per run; OD-015 accepts small TypeScript records with validation only at actual boundaries; and OD-018 accepts the three-state operation lifecycle. The exact field names, profile digests, comparison procedures, and interaction details below remain Proposed implementation details within those boundaries.
 
 | Profile | Failing and corrected states | Selected rule and direct mapping | Retained comparison evidence | Supported child outcomes |
 | --- | --- | --- | --- | --- |
-| `informative-image-alt` | The known informative image has no `alt` attribute; the corrected revision gives the same image a reviewed alternative. | axe-core `image-alt`; [WCAG 2.2 SC 1.1.1](https://www.w3.org/TR/WCAG22/#non-text-content). | Native bucket, rule/check identity, stable fixture-element key, locator, minimized `img`/`alt` state, and state-appropriate finding evidence or positive target observation. | Binary `resolved`, `persistent`, `regressed`, or `inconclusive`. The scanner does not judge alternative-text quality. |
-| `form-input-label` | The known email input has nearby visible text but no programmatic association and no non-empty accessible name; the corrected revision associates the same input with an explicit visible `label`. | axe-core `label`; [WCAG 2.2 SC 4.1.2](https://www.w3.org/TR/WCAG22/#name-role-value). | Native bucket, rule/check identity, stable fixture-element key, locator, element/input kind, minimized accessible-name and label-association facts, and state-appropriate finding evidence or positive target observation. | Binary `resolved`, `persistent`, `regressed`, or `inconclusive`. An automated finding or pass does not determine the whole success criterion, label quality, instructions, page conformance, or complete non-conformance. |
-| `text-contrast` | The known normal-text target is `#888888` on `#ffffff`; the corrected revision keeps the same target, content, font classification, and background but uses `#767676`. | axe-core `color-contrast`; [WCAG 2.2 SC 1.4.3](https://www.w3.org/TR/WCAG22/#contrast-minimum). | Native bucket plus axe-emitted foreground and background colors, `contrastRatio`, `expectedContrastRatio`, font size, font weight, stable fixture-element key, locator, and state-appropriate finding evidence or positive target observation. | `resolved`, `improved`, `persistent`, `regressed`, or `inconclusive` under the ordered-measure restrictions below. |
+| `informative-image-alt` | The known informative image has no `alt` attribute; the corrected revision gives the same image a reviewed alternative. | axe-core `image-alt`; [WCAG 2.2 SC 1.1.1](https://www.w3.org/TR/WCAG22/#non-text-content). | Native bucket, rule/check identity, stable fixture-target key, locator, minimized `img`/`alt` state, and state-appropriate finding evidence or positive target observation. | Binary `resolved`, `persistent`, `regressed`, or `inconclusive`. The scanner does not judge alternative-text quality. |
+| `form-input-label` | The known email input has nearby visible text but no programmatic association and no non-empty accessible name; the corrected revision associates the same input with an explicit visible `label`. | axe-core `label`; [WCAG 2.2 SC 4.1.2](https://www.w3.org/TR/WCAG22/#name-role-value). | Native bucket, rule/check identity, stable fixture-target key, locator, element/input kind, minimized accessible-name and label-association facts, and state-appropriate finding evidence or positive target observation. | Binary `resolved`, `persistent`, `regressed`, or `inconclusive`. An automated finding or pass does not determine the whole success criterion, label quality, instructions, page conformance, or complete non-conformance. |
+| `text-contrast` | The known normal-text target is `#888888` on `#ffffff`; the corrected revision keeps the same target, content, font classification, and background but uses `#767676`. | axe-core `color-contrast`; [WCAG 2.2 SC 1.4.3](https://www.w3.org/TR/WCAG22/#contrast-minimum). | Native bucket plus axe-emitted foreground and background colors, `contrastRatio`, `expectedContrastRatio`, font size, font weight, stable fixture-target key, locator, and state-appropriate finding evidence or positive target observation. | `resolved`, `improved`, `persistent`, `regressed`, or `inconclusive` under the ordered-measure restrictions below. |
 
 The profiles share these material invariants: exact fixture family, declared page-state profile, selected rule, known target key, viewport, locale, browser version, scanner and wrapper versions, rule-profile digest, sanitizer/evidence-profile version, and relevant rule coverage. The fixture revision and bounded target evidence intentionally changed by the reviewed correction are allowed differences.
 
@@ -34,12 +34,12 @@ The failing side supplies one finding and its per-finding source-evidence item. 
 
 ## Deterministic comparison sequence
 
-1. **Validate the source scans.** Both references must resolve to retained, published scans whose work operations completed and whose selected-rule and coverage data are complete. A missing, corrupt, failed, unpublished, or scan-incomplete input blocks or fails the comparison operation and produces no comparison outcome; the same applies to `cancelled` if a later lifecycle introduces that state.
+1. **Validate the source scans.** Both references must resolve to retained scan results from completed runs whose selected-rule and coverage data are complete. A missing, corrupt, failed, unpublished, or scan-incomplete input fails the enclosing workflow operation and produces no comparison outcome.
 2. **Resolve one comparison profile.** The operation must name exactly one of the three scenario profiles, its one selected axe rule, and its one known fixture target. A missing, conflicting, or unsupported profile fails validation rather than widening the rule scope.
 3. **Evaluate pair comparability.** Compare the frozen material invariants for that profile. A material mismatch between two otherwise valid scans produces the pair-level result `not comparable`. The intended revision and bounded evidence changes do not themselves make the pair not comparable.
-4. **Correlate the selected target.** Require the exact selected rule and stable fixture-element key across the state-appropriate records: finding evidence for each failing side and a positive target observation for each non-failing side. A missing, duplicate, conflicting, or ambiguous record produces child outcome `inconclusive`; it is not forced into a match.
+4. **Correlate the selected target.** Require the exact selected rule and stable fixture-target key across the state-appropriate records: finding evidence for each failing side and a positive target observation for each non-failing side. A missing, duplicate, conflicting, or ambiguous record produces child outcome `inconclusive`; it is not forced into a match.
 5. **Compare profile evidence.** Apply the binary rules for `image-alt` or `label`, or the contrast rules and ordered measure for `color-contrast`. Preserve native scanner categories; never turn `incomplete` or `inapplicable` into a pass or violation.
-6. **Publish one comparison record.** Record one pair-level comparison with its comparability assessment and, only when comparable, one identified child outcome. A `not comparable` pair has no child entry. Proposal, review, and manual-check records remain linked human context, never inputs to the automated outcome.
+6. **Complete one comparison result.** Record one pair-level comparison with its comparability assessment and, only when comparable, one identified child outcome. A `not comparable` pair has no child entry. The enclosing run may become `completed` only after this result and its references validate; failure leaves the run failed rather than partially successful. Proposal, review, and manual-check records remain linked human context, never inputs to the automated outcome.
 
 Comparison is a pure transformation of retained evidence. Repeating it with the same scan records and comparison-profile version must produce the same result.
 
@@ -49,14 +49,14 @@ Do not combine operational progress, source validity, pair comparability, findin
 
 | Dimension | MVP vocabulary and meaning |
 | --- | --- |
-| Comparison work operation | Reuse the first-slice lifecycle: `created`, `running`, `completed`, or `failed`. The sequential MVP exposes no interactive cancellation; a later cancellable stage may add `cancelled`. |
+| Workflow operation | Reuse the accepted first-slice lifecycle: `running`, `completed`, or `failed`. Retry creates a new immutable run with an optional link to the failed run; it never overwrites the earlier directory. The MVP has no created, queued, cancelled, paused, partial-success, checkpoint, worker, or resume state. |
 | Source-scan completeness | `complete` or `incomplete`. An incomplete source cannot enter substantive comparison. Do not introduce `partial` as a competing term. |
-| Native scanner result | Preserve `violations`, `incomplete`, `passes`, and `inapplicable` under a clearly labeled scanner-result field. Scanner-native `incomplete` is not a comparison-operation state. |
+| Native scanner result | Preserve `violations`, `incomplete`, `passes`, and `inapplicable` under a clearly labeled scanner-result field. Scanner-native `incomplete` is not a workflow-operation state. |
 | Pair comparability | `comparable` or `not comparable`. `Not comparable` is a valid completed assessment of two valid scans, not an operation failure. |
 | Child finding outcome | `resolved`, `persistent`, `regressed`, or `inconclusive` for each profile; `improved` is additionally available only to the `text-contrast` profile under its `color-contrast` ordered-measure rule. |
 | Manual-check execution | Reuse `pending`, `completed`, or `not applicable`, plus a separately recorded observed outcome and `supports`, `contradicts`, or `inconclusive` relationship to the proposal. |
 
-A `not comparable` pair contains no child outcome. An invalid source pair fails or blocks the operation before pair comparability is decided. Ambiguous target correlation can become `inconclusive` only after the source scans pass the comparability gate.
+A `not comparable` pair contains no child outcome. An invalid source pair fails the enclosing workflow operation before pair comparability is decided. Ambiguous target correlation can become `inconclusive` only after the source scans pass the comparability gate.
 
 ## Binary outcome definitions
 
@@ -95,11 +95,11 @@ The raw emitted measured value is numeric, while axe-core 4.13 emits `expectedCo
 | `regressed` | Either the comparable baseline has a determinate same-target native pass and the later scan reports a native violation, or both scans remain determinate violations and the later retained margin is strictly lower. The expected threshold and profile must be identical. |
 | `inconclusive` | Either measurement is missing or indeterminate; the native result is `incomplete` or `inapplicable`; the expected threshold, font classification, engine/profile, or target changed; or the retained values cannot support a deterministic calculation. |
 
-No third fixture revision is required merely to define `improved`. The selected failing-to-corrected portfolio pair demonstrates `resolved`; `improved` remains a conservative available classification for a later comparable pair that actually satisfies its evidence rule.
+No third fixture revision is required to demonstrate `improved`. The selected failing-to-corrected portfolio pair demonstrates `resolved`; one provider-independent deterministic record-level check demonstrates the conservative `improved` classification, and any later real comparison receives that outcome only when it independently satisfies the same evidence rule.
 
 ## Manual checks and review context
 
-An accepted or edited remediation plan may explain why the user requested a later scan, but it does not prove that the change was applied or caused the automated result. Approval, rejection, model text, citations, and evidence-sufficiency labels do not enter comparability, target correlation, or outcome calculation.
+An accepted or edited remediation plan may explain why the user requested a later scan, but it does not prove that the change was applied or caused the automated result. Approval, rejection, model text, citations, the immutable evidence-sufficiency gate, and model confidence do not enter comparability, target correlation, or outcome calculation.
 
 Reuse the proposal's scenario-specific post-change manual-check definition:
 
@@ -113,11 +113,11 @@ The later result begins `pending`; do not clone the definition, copy a baseline 
 
 ## Conceptual comparison record
 
-Use one canonical **Scan-pair comparison** record. It contains one identified child outcome rather than creating a second pair entity per finding. Exact serialization remains under OD-015.
+Use one canonical **Scan-pair comparison** record. It contains one identified child outcome rather than creating a second pair entity per finding. It is application-owned canonical JSON within the relevant local run directory. Exact filenames and TypeScript field shapes remain implementation details within OD-012 and OD-015; this assessment selects no schema framework.
 
 | Record part | Minimum conceptual information |
 | --- | --- |
-| Identity and operation | Comparison ID and profile version; comparison work-operation reference and separate operation status; start and completion times. |
+| Identity and operation | Comparison ID and profile version; enclosing run/operation reference and its `running`, `completed`, or `failed` status; start and completion or failure times. |
 | Selected profile | Exactly one scenario-profile ID, one selected rule, one known fixture-target key, and the profile's evidence-semantics version. |
 | Source pair | Baseline and later scan IDs; fixture-family and revision references; authorization references; exact scan, rule, browser, evidence, sanitizer, page-state, viewport, locale, and coverage-profile identities. |
 | Pair comparability | Each material invariant's baseline and later identity, pass or mismatch disposition, bounded reason code, and overall `comparable` or `not comparable` result. |
@@ -126,13 +126,13 @@ Use one canonical **Scan-pair comparison** record. It contains one identified ch
 | Human context | Optional accepted-proposal and review-action references; reused manual-check definition; and later manual-check result occurrence. These references do not enter deterministic calculation. |
 | Limitations and follow-up | Fixed no-certification and no-whole-page conclusion; scenario-specific manual-verification limitation; unresolved statement for `improved`; and separate manual-check state. |
 
-Prefer references over duplicate page content. If a referenced source record is deleted under an accepted policy, expose broken lineage; do not reconstruct or preserve a hidden copy.
+Prefer references over duplicate page content. If a referenced run directory is deleted, expose broken lineage; do not reconstruct or preserve a hidden copy.
 
 ## Privacy and public-demo boundary
 
 Comparison uses only project-owned synthetic fixture content. Retain only the scenario and fixture identities, bounded sanitized target evidence, exact configuration identities, and outcome rationale required above. Do not retain screenshots, full HTML, accessibility-tree or DOM snapshots, network traces, credentials, private URLs, or private review notes.
 
-Before-and-after evidence can reveal changes even when each scan looks harmless in isolation. Public views and exports therefore use a closed allowlist and synthetic reviewer information. Hashes and element fingerprints are integrity or correlation material, not anonymization.
+Before-and-after evidence can reveal changes even when each scan looks harmless in isolation. Keep each minimized comparison and its references only in the applicable local run directories; deleting a run directory deletes the application's MVP copy. Any separately prepared public demonstration material must use a closed allowlist and synthetic reviewer information. The MVP adds no export service, cloud storage, backup, telemetry, analytics, full-page capture, hash-based anonymization, or generalized element fingerprint.
 
 ## Meaningful alternatives
 
@@ -156,7 +156,7 @@ The exact axe release remains an evaluation pin rather than a release dependency
 - [WCAG 2.2 SC 1.4.3: Contrast (Minimum)](https://www.w3.org/TR/WCAG22/#contrast-minimum)
 - [Understanding SC 1.4.3: Contrast (Minimum)](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html)
 
-## Assumptions and open questions
+## Assumptions and remaining implementation questions
 
 ### Assumptions
 
@@ -166,11 +166,11 @@ The exact axe release remains an evaluation pin rather than a release dependency
 - The exact pinned tool and profile versions will be recorded when an evaluation authority is frozen; this assessment does not promote them to release support.
 - Page changes happen outside the product; the product neither edits code nor verifies deployment causality.
 
-### Open questions
+### Remaining implementation questions
 
-- What exact three fixture-family identifiers, target-key convention, profile digests, and scenario-specific sanitized evidence fields will OD-008 and OD-015 accept?
-- What retention and deletion behavior will OD-006 and OD-012 accept for source scans and linked comparisons?
-- What exact reviewer rubrics will OD-007 and OD-009 accept for the three post-change manual checks?
+- What exact three fixture-family identifiers, target-key convention, profile digests, and scenario-specific sanitized evidence field names best implement the accepted minimal identity?
+- What exact JSON filenames and TypeScript record fields best fit the accepted run-directory and boundary-validation decisions?
+- What exact wording and compact interaction best present each scenario's post-change manual check without implying that it changes the automated outcome?
 
 ## Risks
 
@@ -184,11 +184,11 @@ The exact axe release remains an evaluation pin rather than a release dependency
 ## Explicit non-goals
 
 - Comparing more than one baseline and one later scan, selected rule, known target, or child outcome in one operation; bulk comparison across the three profiles; multiple pages; crawling; live or authenticated pages; scheduled monitoring; CI integration; alerts; dashboards; trends; or long-term analytics.
-- A required third contrast fixture revision solely to demonstrate `improved`, or an `improved` result for the binary `image-alt` and `label` profiles.
+- A third contrast fixture revision or additional end-to-end fixture scenario solely to demonstrate `improved`, or an `improved` result for the binary `image-alt` and `label` profiles. The accepted provider-independent record-level `improved` check remains in scope.
 - General-purpose element matching, fuzzy or weighted correlation, AI matching, embeddings, DOM or accessibility-tree diffing, screenshots, visual comparison, or cross-version translation.
 - Page-level scores, aggregate finding counts, broad WCAG coverage, accessibility conclusions, certification, conformance, complete non-conformance, or causal proof.
 - Automatic source-code modification, remediation application, deployment verification, regeneration, retrieval, or re-review after the rescan.
-- Selecting a database, event store, workflow engine, comparison package, hosted service, or production infrastructure.
+- Adding a database, event store, workflow engine, comparison package, hosted service, backup, export service, or production infrastructure.
 
 ## Acceptance criteria for this planning definition
 
@@ -196,13 +196,14 @@ This workflow step is adequately defined for the three-scenario portfolio slice 
 
 1. Each operation selects exactly one of the three project-owned profiles, one baseline scan, one later scan, one rule, and one stable fixture target; a comparable pair contains exactly one child outcome and a `not comparable` pair contains none.
 2. Each scan retains its required state-specific target evidence; absence from a later violations list is never sufficient to claim resolution.
-3. Invalid or incomplete source scans fail or block the operation; a material invariant mismatch produces pair-level `not comparable`; and ambiguous target correlation produces child-level `inconclusive` only after comparability passes.
+3. Invalid or incomplete source scans fail the enclosing workflow operation; a material invariant mismatch produces pair-level `not comparable`; and ambiguous target correlation produces child-level `inconclusive` only after comparability passes.
 4. The binary evidence rules deterministically define `resolved`, `persistent`, and `regressed` for `image-alt` and `label`, with no `improved` inference and with their manual-quality limitations visible.
 5. Contrast evidence retains axe-emitted colors, reported and expected ratios, and font inputs; margin comparison is allowed only under the exact equality gates; the native bucket determines `resolved`; two violations with a higher, equal, or lower later margin produce `improved`, `persistent`, or `regressed` respectively; and `improved` remains explicitly unresolved.
 6. One pair-level record contains the comparability result and, when comparable, exactly one identified child outcome; a `not comparable` pair contains none.
 7. A later manual-check result reuses the proposal's scenario-specific definition and records its own execution and relationship without modifying the automated outcome.
 8. The visible result traces to both scan and evidence records and states that the finding transition does not establish label or alternative-text quality, whole-page accessibility, compliance, certification, complete non-conformance, or causal remediation success.
 9. The public demonstration uses only the bounded project-owned synthetic scenario, configuration, reviewer, and comparison material described here.
+10. The enclosing operation uses only `running`, `completed`, or `failed`; retry creates a new run; canonical comparison data is JSON in the local run boundary; and no partial-success, queue, cancellation, checkpoint, worker, resume, database, backup, or export mechanism is required.
 
 ## Documentation navigation
 

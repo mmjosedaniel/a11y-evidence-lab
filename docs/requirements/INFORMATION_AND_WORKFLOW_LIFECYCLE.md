@@ -2,88 +2,58 @@
 
 ## Authority and use
 
-This document is part of the authoritative requirements baseline indexed by [Project requirements](../PROJECT_REQUIREMENTS.md). The index defines status vocabulary, priority semantics, ID stability, and precedence. This file describes planned behavior, not implemented behavior; each identified row's recorded status controls.
+This document is part of the authoritative requirements baseline indexed by [Project requirements](../PROJECT_REQUIREMENTS.md). The index defines status vocabulary, priority semantics, ID stability, and precedence. This file describes planned behavior, not implemented behavior.
 
-## Core information and provenance model
+## Decision scope and history
 
-**Status:** Proposed until the data, retention, and persistence decisions are accepted. This is a conceptual information model, not a database design.
+**Status: Accepted for the MVP information and operation lifecycle.** OD-012 and OD-018 were resolved on 2026-08-25. They narrow the earlier Proposed model: the MVP uses one local filesystem run directory, canonical JSON records, and a three-state operation lifecycle. Database storage, backup, synchronization, resumable work, queues, cancellation, and formal release records remain Deferred. The record names below are conceptual responsibilities, not a database schema or authorization to create implementation files during planning.
+
+OD-011 also keeps MVP diagnostics local and content-safe. LangSmith, hosted tracing, telemetry, and analytics are outside the MVP.
+
+## Accepted minimal information model
+
+The conceptual storage root is `data/runs/<timestamp-or-run-id>/`. This notation describes a future application-data layout; it does not place user data in the source repository. A run directory and its contents must remain outside Git.
 
 | Record | Minimum required information |
 | --- | --- |
-| Target | Identifier, project-owned synthetic fixture and revision references, authorization attestation, declared scope, sensitivity classification, and owner-provided state description. The MVP record does not identify a live page or crawler-discovered target. |
-| Scan run | Scenario/profile identifier, target and fixture revision, timestamp, declared page state, viewport, locale, browser, scanner/exact rule/configuration, execution status, coverage, and evidence-package reference when capture succeeds |
-| Finding | Stable record identifier, scenario/profile, scan, exact rule, native result type, impact metadata as reported by the scanner, affected target, correlation fingerprint version, rule-specific measured-value references when applicable, and evidence references |
-| Evidence item | Type, exactly one source finding, scenario/profile, minimal sanitized content and allowlisted scanner-emitted rule facts, capture/sanitization policy and omissions, integrity metadata, sensitivity, access policy, and retention status |
-| Positive target observation | Stable identifier, scenario/profile, scan, rule, stable fixture-element key, narrow native non-failing observation, required scanner-emitted measured values, capture policy, and the finding or baseline target whose later comparison it supports |
-| Corpus source and snapshot | Publisher, title, canonical URL, authority type, version/date, license notes, checksum, snapshot ID, and ingestion configuration |
-| Corpus derivation profile | Versioned source allowlist, normalization, segmentation, chunk-identity, locator, and snapshot-publication rules. Continuation, concurrency, cancellation, and generalized resource-budget fields are added only when a later corpus build needs them. |
-| Guidance passage | Snapshot, source, exact locator, text checksum, chunk identifier, and derivation metadata |
-| Retrieval run | Scenario/profile, finding, source-evidence, normalized-projection, exact rule and approved guidance-mapping inputs; exact privacy-safe query or complete reconstruction inputs; query digest; filters; embedding/index/config versions; ranked passage IDs; support state; and operation status |
-| Provider profile | Identifier, local or external type, adapter and runtime versions, approved endpoint reference and class, model ID and revision or digest, capability-snapshot reference, non-secret configuration, privacy/cost disclosure version, consent status, secret-store reference only, and last validation state |
-| Readiness snapshot | Privacy-safe bounded observations for host capacity, runtime identity and availability, artifact installation and integrity, adapter capabilities and health, workload eligibility, observation freshness, unknown facts, and resulting eligibility |
-| Acquisition manifest | Approved artifact and profile IDs, sources and origins, revision and digests, license, transfer/installed/temporary/free-space sizes, dependencies, compatibility profile, staging and promotion rules, and install/removal ownership |
-| Model artifact | Purpose, source, exact tag and digest, format or quantization, size, location, license and integrity metadata, acquisition and verification times, lifecycle status, and dependent provider profiles |
-| Work operation | Operation ID, type, input identities, state, start/completion times, failure reason, result reference when completed, and a cancellation reason only if that later capability is supported. Revision, supersession, queue, cancellation, and stale-publication fields are added only when concurrency, replacement, or interactive cancellation is introduced. |
-| Generation run | Scenario/profile, retrieval and evidence inputs; prompt/schema/config versions; proposal-or-abstention result; and validation outcome. A model-invoking run also records the provider profile, capability snapshot, local/API mode, model identity, no-fallback state, safe provider request/response references, and available usage/cost metadata. A deterministic policy abstention records that no provider call occurred. |
-| Setup or model-lifecycle action | Actor, time, action, affected runtime/model/profile, disclosure and consent versions, source/destination, planned and actual transfer/storage, integrity result, outcome, and recovery state without credentials |
-| Proposal version | Scenario/profile, generation source, authorship type (`AI-generated` or `reviewer-edited`), predecessor when edited, complete submitted content, evidence-sufficiency state and authority, citations, manual-check definitions, and lifecycle state |
-| Review action | Proposal version, actor, timestamp, action, reason or note, edits, and resulting state |
-| Manual-check definition | Stable identifier, scenario/profile, proposal/finding source, instructions, purpose, timing, blocking classification, and author |
-| Manual-check result | Definition, proposal, actor, timestamp, execution status, evidence or note, and—only when completed—observed accessibility outcome and one proposal relationship. A post-change occurrence may also reference its later scan and comparison. |
-| Scan-pair comparison | Selected scenario/profile, baseline and later scans, operation status, comparability assessment, measurement-profile identity when applicable, limitations, and identified finding-comparison entries. A comparable first-slice operation contains exactly one entry for its one selected target; a `not comparable` pair contains none. |
-| Finding-comparison entry | Parent scan-pair comparison, scenario/profile, correlated finding or positive-observation references, native before/after result buckets, outcome, rationale, before/after evidence, ordered measure name and values when applicable, uncertainty, and follow-up checks |
-| Evaluation authority | Authority version and status, pilot/official classification, exact candidates, dataset and transforms, rubric and gates, runtime rules, software and hardware identities, result schema, privacy rules, interpretation policy, and authority digest |
-| Evaluation run and decision | Authority reference, exact profile and artifact identities, implementation revision and locks, measured results, validity state, decision state, reviewer or decision authority, failure evidence, and content-safe trace references |
-| Support qualification | Exact provider-profile, artifact/runtime configuration, hardware-profile, workload, and evaluation-authority identities; support state; applicable passed, failed, unavailable, or deferred gates; evidence digests; decision time and scope; and superseding qualification |
-| Release inventory and claim | Exact component inventory and tested artifact digests, validation classes, applicable profile qualifications, signing state, notices, audit blind spots, release-claim scope, outcome, and superseding evidence set |
+| Run identity | Immutable run ID; creation time; one of the three accepted scenario/profile IDs; project-owned fixture revision and declared failing or corrected state; stable fixture target key; exact rule and scan-profile identity; optional `retryOfRunId` |
+| Scan and finding | Scan time and execution identity; browser/scanner/rule versions; viewport and locale; native result bucket; affected stable target key; minimized deterministic evidence; rule-specific measured values when applicable; sanitization and omission notes |
+| Corpus and retrieval | Corpus snapshot ID; approved source and passage IDs; exact section locators and URLs; retrieval configuration identity; ordered retrieved passage references; evidence-sufficiency result; enough query metadata to reconstruct the bounded finding-to-guidance query without retaining excluded page content |
+| Generation | Application generation-stage branch (`proposal` or deterministic `abstention`), evidence-eligibility basis, and policy/output-contract versions. For a provider invocation: selected local or Groq mode; exact provider/model/configuration identity; prompt version; validated structured proposal; citations; confidence/uncertainty; assumptions; required manual checks; validation outcome; and safe usage metadata when available. For a deterministic abstention: reason, manual-review direction, and explicit confirmation that no adapter or model was invoked; provider-call provenance fields are absent. |
+| Review | Original proposal reference; one reviewer action (`approve`, `edit`, or `reject`); preserved reviewer-edited proposal or rejection feedback when applicable; decision timestamp; manual-check results and limitations |
+| Comparison | Baseline and later run references; scenario, rule, fixture revisions, stable target key and comparison-profile identity; before/after minimized evidence; ordered measure name and values for contrast when applicable; outcome; rationale; limitations; follow-up manual checks |
+| Operation | State; start and completion/failure time; complete workflow-result reference only when completed; bounded content-safe failure category when failed |
+| Local diagnostic | Timestamp, run/operation reference, stage, non-secret configuration identity, content-safe event or error category, and enough bounded context to diagnose the controlled workflow without page content, secrets, or provider payloads |
 
-## Workflow state and recovery model
+Canonical machine-readable records are JSON. An optional Markdown report may be generated for human reading, but it is derived output and must not be the only source of truth. TypeScript record definitions and the runtime checks required at external and persisted-JSON boundaries are governed by `REQ-QUAL-010` and `REQ-QUAL-011`; this conceptual model does not select a schema framework.
 
-**Status:** The high-level first-run provider choice is Accepted; detailed setup, persistence, review, and deletion transitions remain Proposed until their policies are accepted.
+## Accepted operation lifecycle
 
-The proposed installation and provider-readiness path is:
+One user-requested workflow operation exists at a time for one selected scenario, fixture revision, rule, and target:
 
-`installed -> first launch -> choose recommended local / choose external API / defer AI setup -> validate or provision selected provider -> application ready`
+`running -> completed`
 
-Deferring setup or losing provider readiness disables generation visibly but does not block authorized scanning, evidence inspection, or history. Switching provider creates or selects a versioned provider profile and affects only later generation runs.
+`running -> failed`
 
-The proposed readiness dimensions are evaluated separately rather than collapsed into one optimistic status:
+Only a completely validated workflow result may be referenced by `completed`. Timeout or application shutdown produces `failed` and must not publish the run as a partial success. Valid minimized records completed before the failure may remain available for diagnosis and a later explicit retry, but they do not make the failed run successful.
 
-`host compatible -> required runtime available -> exact artifact installed and verified -> adapter healthy and capable -> requested workload eligible`
+Retry starts a new run/operation with a new immutable ID and an optional link to the failed run; it never overwrites the earlier directory or result. The MVP has no `created`, `queued`, `cancelled`, `paused`, `resuming`, or partial-success state. It also has no worker lifecycle, concurrency, replacement-in-flight behavior, checkpointing, or workflow engine.
 
-The proposed application-owned optional-artifact lifecycle is:
+The proposal decision path remains deliberately small:
 
-`absent -> confirming -> acquiring by managed download / offline import / runtime-managed pull -> verifying -> installed -> activated`
+`pending review -> accepted / superseded by an accepted reviewer-edited version / rejected`
 
-Cancellation or failure can occur at every active phase. It must leave partial staging unavailable and preserve the last verified selection. Installation, activation, deactivation, selection, and removal are distinct explicit actions. An adapter for an independently installed runtime may observe and request its supported operations rather than duplicate that runtime's model store.
+The reviewer actions are `approve`, `edit` with explicit acceptance of the edited version, and `reject`. An abstention is not an approvable proposal. It remains visible with its reason and required manual review. Reviewer decisions and manual-check results remain distinct from deterministic evidence and model-generated interpretation.
 
-The proposed durable proposal path is:
+Pair comparability and child finding outcome are separate. A material mismatch in scenario, target, fixture relationship, browser/rule/measurement profile, or required coverage produces pair-level `not comparable` and no child outcome. For a comparable pair, the child outcome is one of `resolved`, `improved`, `persistent`, `regressed`, or `inconclusive`, subject to the scenario-owned comparison requirements; ambiguous correlation or insufficient/conflicting evidence after comparability produces `inconclusive`. `Improved` is available only for `text-contrast` and requires the defined ordered contrast measure to increase while the deterministic result still fails. A failing-to-non-failing transition is `resolved`. Neither manual review nor an earlier accepted proposal converts any outcome into automated proof.
 
-`target declared -> scan running -> evidence available -> retrieval complete -> proposal generated -> pending review -> accepted / edited and accepted -> rescan requested -> comparison operation complete`
+## Retention and deletion boundary
 
-`pending review -> rejected`
+The MVP retains only the synthetic minimized records needed to reopen a local run: deterministic evidence, retrieved passage references, proposal or abstention, review decision, comparison, and content-safe diagnostics. Deleting a run means deleting its one local run directory. No database migration, cascading-delete service, backup, cloud synchronization, telemetry store, analytics store, or multi-user retention policy is required.
 
-A completed comparable comparison operation contains exactly one first-slice finding outcome such as `resolved`, `improved`, `persistent`, `regressed`, or `inconclusive`. `Inconclusive` is not an operation state. `Improved` is available only to the `text-contrast` profile: it records a correlated finding that remains natively failing while the later contrast margin (retained numeric measured ratio minus the validated numeric component of the retained expected-ratio string) is strictly higher. A native failing-to-non-failing contrast transition is `resolved`. The two binary profiles cannot produce `improved`. A materially mismatched valid pair completes with pair-level `not comparable` and contains no finding outcomes; an invalid or incomplete source pair blocks or fails the operation.
+## Deferred lifecycle concepts
 
-The separate abstention path is:
-
-`retrieval complete -> abstained -> acknowledged / manual triage / explicit retry after inputs change`
-
-An abstention cannot become an accepted remediation plan. Any first-slice stage may enter a visible failure state. Timeout or application shutdown aborts the current work without publishing completed output; an explicit retry starts a linked operation from the last valid durable input. A visible `cancelled` state is added only if a later stage introduces interactive cancellation. A new generation after rejection or abstention creates a linked result version; it does not erase the earlier record. Optional tracing failure does not destroy deterministic evidence or an existing human decision.
-
-The minimal operation lifecycle is:
-
-`created -> running -> completed / failed`
-
-A later cancellable stage may add `running -> cancelled`; that transition is not part of the first portfolio slice.
-
-The controlled-fixture portfolio slice runs one user-requested operation per stage for one selected scenario, fixture revision, rule, and target. It needs no queue, child-worker lifecycle, replace-in-flight action, or generalized publication-eligibility protocol. It also has no live-target intake, link discovery, crawling, or crawler lifecycle. Explicit retry creates a linked operation and must not automatically resubmit an ambiguous billable provider request. If later concurrency introduces replacement or late results, OD-018 must define the additional identity and eligibility semantics before that behavior is implemented.
-
-The proposed evaluation lifecycle is:
-
-`non-promotable calibration -> authority frozen -> official execution -> validity determination -> accepted / deferred / rejected -> exact-profile support state`
-
-Historical authorities and results remain immutable. One current support matrix identifies the effective status without rewriting the evidence that produced earlier states.
+The following are not MVP records or transitions: generalized target intake; live-page or crawler state; provider registries; installation readiness matrices; automated model-acquisition workflows; cancellation and resume; background queues; multi-user history; long-term analytics; support qualification; release inventories; and public claim publication. They require a later explicit scope decision before their lifecycle is designed.
 
 ## Documentation navigation
 
