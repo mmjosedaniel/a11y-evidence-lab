@@ -50,7 +50,7 @@ The hardware snapshot in [Local MVP feasibility](../LOCAL_MVP_FEASIBILITY.md) is
 
 ## Deferred candidates requiring evidence
 
-The following ideas remain useful research candidates from the Voxleaf assessment, but YAGNI excludes them from the first slice. They may be evaluated only after the named trigger exists.
+The following ideas remain useful research candidates identified during architecture planning, including applicable patterns from the Voxleaf assessment. YAGNI excludes them from the first slice, and they may be evaluated only after the named trigger exists.
 
 | Candidate | Trigger before evaluation |
 | --- | --- |
@@ -62,6 +62,7 @@ The following ideas remain useful research candidates from the Voxleaf assessmen
 | Exact release inventory, signing, repair, and uninstall evidence | A distributable Windows release is authorized. |
 | Formal evaluation authority and support matrix | The project intends to promote results, compare providers publicly, or make support claims. |
 | Compatibility/readiness report | The project supports hardware beyond the documented reference PC. |
+| [One constrained configurable remote-generation profile](../requirements/generation-provider-and-model-lifecycle/GENERATION_PROVIDER_EXECUTION.md) | The completed MVP demonstrates its fixed local/Groq paths and a later product need justifies replacing the Groq remote slot with one approved HTTPS origin, model, authentication method, and protocol subset. Evaluation requires accepted provider-selection, threat-model, and data-flow decisions first. This is not a third MVP mode, a provider registry, or general OpenAI-compatible support. |
 
 ## Documentation navigation
 
