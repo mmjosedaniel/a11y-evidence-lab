@@ -1,15 +1,87 @@
 # Project documentation
 
-This directory contains the planning documentation for A11y Evidence Lab. Return to the [project overview](../README.md) for the public summary and development status.
+This index is the starting point for project work. Use the task router to load only the documents that govern the current task. Return to the [project overview](../README.md) for the public summary and repository status.
 
-## Documentation hierarchy
+## Authority and status map
 
-Read the planning documents in this order:
+| Document set | Responsibility | Authority and status |
+| --- | --- | --- |
+| [Agent instructions](../AGENTS.md) | Repository working rules and required context | Governs agent work in this repository. |
+| [Project requirements](PROJECT_REQUIREMENTS.md) | Main goal, status vocabulary, priority semantics, precedence, traceability, and routing for the modular requirements baseline | Canonical requirements index. The identified row in its owning module controls each requirement's status. |
+| [Requirements baseline](#requirements-baseline) | Canonical topic requirements, lifecycle models, and delivery gates organized into focused modules and family indexes | The identified row in its focused canonical module controls. A family index routes ownership but owns no requirement row or status. |
+| [Architecture Decision Records](architecture/decisions/README.md) | Significant accepted architecture decisions | Binding only at the scope and status recorded in each ADR. An evaluation baseline is not implementation or release qualification. |
+| Six [workflow-step technical assessments](#workflow-step-technical-assessments) | Smallest viable proposed technical approaches for authorized scanning, evidence capture, guidance retrieval, grounded generation, human review, and rescan comparison | Proposed architecture research only. The assessments own no requirement IDs or statuses, accept no technology beyond an ADR's recorded scope, and cannot authorize development or override a requirement or accepted ADR. |
+| [Voxleaf implementation pattern assessment](architecture/candidates/VOXLEAF_IMPLEMENTATION_PATTERN_ASSESSMENT.md) | External implementation patterns, adaptation limits, provenance, and explicit non-adoptions | Proposed research input only; it cannot select a dependency, authorize implementation, or override a requirement or ADR. |
+| [Local MVP feasibility](LOCAL_MVP_FEASIBILITY.md) | Dated reference-PC, local-stack, model, runtime, and benchmark evidence | Feasibility evidence, not proof of implementation, support, or release readiness. |
+| [Project context](PROJECT_CONTEXT.md) and [Project concept](PROJECT_CONCEPT.md) | Project rationale, direction, product proposal, workflow, boundaries, and unresolved product questions | Product intent and planning context; detailed identified requirements remain in the modular baseline. |
+| [Project overview](../README.md) | Public orientation and current repository status | Summary only; it does not override the planning or decision authorities above. |
 
-1. **Foundation — [Project context](PROJECT_CONTEXT.md):** explains the problem, rationale, technical direction, product boundaries, and current status.
-2. **Product definition — [Project concept](PROJECT_CONCEPT.md):** describes the proposed product, workflow, engineering objective, intended boundaries, and open questions.
-3. **Technical feasibility — [Local MVP feasibility](LOCAL_MVP_FEASIBILITY.md):** records the preliminary hardware assessment and candidate local tools and models.
+If two authoritative documents appear inconsistent, do not infer a new decision. Identify the conflict and update the applicable source documents together.
 
-## Repository guidance
+## Read by task
 
-- [AGENTS.md](../AGENTS.md) defines the repository-wide working rules for coding agents.
+| Task | Read first | Then read as applicable |
+| --- | --- | --- |
+| Product purpose, users, scope, scenarios, exclusions, or terminology | [Project requirements](PROJECT_REQUIREMENTS.md) and [Product scope and glossary](requirements/PRODUCT_SCOPE_AND_GLOSSARY.md) | [Project context](PROJECT_CONTEXT.md) and [Project concept](PROJECT_CONCEPT.md) |
+| Target authorization or deterministic browser scanning | [Project requirements](PROJECT_REQUIREMENTS.md) and [Evidence and review workflow — Target authorization and scanning](requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#target-authorization-and-scanning) | Start with the [authorized deterministic web scan assessment family](architecture/candidates/authorized-scan/README.md), then load its technology or execution assessment and applicable feasibility, quality, or ADR material only as needed |
+| Finding capture, page evidence, sanitization, or provenance | [Project requirements](PROJECT_REQUIREMENTS.md) and [Evidence and review workflow — Evidence and provenance](requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#evidence-and-provenance) | [Accessibility finding evidence-capture assessment](architecture/candidates/ACCESSIBILITY_FINDING_EVIDENCE_CAPTURE_ASSESSMENT.md), then the lifecycle or quality module when directly applicable |
+| Guidance sources, corpus scope, licensing, attribution, normalization, segmentation, or passage identity | [Project requirements](PROJECT_REQUIREMENTS.md), [Evidence and review workflow — Corpus and retrieval](requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#corpus-and-retrieval), and [Curated accessibility guidance corpus assessment](architecture/candidates/guidance-retrieval/CURATED_GUIDANCE_CORPUS_ASSESSMENT.md) | Lifecycle, privacy, open-decision, or source evidence only when directly applicable |
+| Embeddings, vector storage, finding-to-query projection, retrieval ranking, citations, or retrieval-quality evaluation | [Project requirements](PROJECT_REQUIREMENTS.md), [Evidence and review workflow — Corpus and retrieval](requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#corpus-and-retrieval), and [Local retrieval execution and evaluation assessment](architecture/candidates/guidance-retrieval/LOCAL_RETRIEVAL_EXECUTION_AND_EVALUATION_ASSESSMENT.md) | [ADR-0013](architecture/decisions/ADR-0013-langchain-as-initial-rag-integration.md), then applicable feasibility, lifecycle, and evaluation evidence |
+| Grounded explanations, remediation proposals, evidence sufficiency, or abstention | [Project requirements](PROJECT_REQUIREMENTS.md) and [Evidence and review workflow — Generated explanations and remediation proposals](requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#generated-explanations-and-remediation-proposals) | [Evidence-grounded remediation-generation assessment](architecture/candidates/EVIDENCE_GROUNDED_REMEDIATION_GENERATION_ASSESSMENT.md), [ADR-0013](architecture/decisions/ADR-0013-langchain-as-initial-rag-integration.md), then applicable provider, feasibility, or evaluation material |
+| Proposal review, reviewer edits or decisions, or manual checks | [Project requirements](PROJECT_REQUIREMENTS.md) and [Evidence and review workflow — Human review and manual checks](requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#human-review-and-manual-checks) | [Human remediation-review assessment](architecture/candidates/HUMAN_REMEDIATION_REVIEW_ASSESSMENT.md), then applicable lifecycle, quality, or interface decisions |
+| Rescan comparability, finding correlation, or evidence comparison | [Project requirements](PROJECT_REQUIREMENTS.md) and [Evidence and review workflow — Rescan and comparison](requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#rescan-and-comparison) | [Rescan evidence-comparison assessment](architecture/candidates/RESCAN_EVIDENCE_COMPARISON_ASSESSMENT.md), then the evidence-capture assessment and applicable lifecycle or scan decisions |
+| Cross-step workflow or evidence-oriented interface and export behavior | [Project requirements](PROJECT_REQUIREMENTS.md) and [Evidence and review workflow — Evidence-oriented interface and export](requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#evidence-oriented-interface-and-export) | The lifecycle and quality modules, plus only the assessment for the affected workflow step |
+| Local/API generation providers, capability, readiness, isolation, or provider support qualification | [Generation provider execution](requirements/generation-provider-and-model-lifecycle/GENERATION_PROVIDER_EXECUTION.md) | [Local MVP feasibility](LOCAL_MVP_FEASIBILITY.md), applicable provider and capacity ADRs, evaluation requirements, and privacy/security requirements |
+| Windows installer, first-run setup, runtime or model acquisition, activation, update, removal, or uninstall | [Installation and model lifecycle](requirements/generation-provider-and-model-lifecycle/INSTALLATION_AND_MODEL_LIFECYCLE.md) | [Local MVP feasibility](LOCAL_MVP_FEASIBILITY.md), applicable distribution ADRs, release requirements, and privacy/security requirements |
+| Accessibility of A11y Evidence Lab | [Application accessibility](requirements/quality-security-and-operations/APPLICATION_ACCESSIBILITY.md) | Applicable workflow, interface, evaluation, and UI decision records |
+| Privacy, security, credentials, egress, renderer isolation, or untrusted-content boundaries | [Privacy and security](requirements/quality-security-and-operations/PRIVACY_AND_SECURITY.md) | Applicable workflow, provider, installation, lifecycle, architecture, and decision records |
+| Reliability, reproducibility, runtime contracts, component-inventory contract, resource limits, service ownership, cancellation, or benchmark protocol | [Reliability, reproducibility, and operations](requirements/quality-security-and-operations/RELIABILITY_REPRODUCIBILITY_AND_OPERATIONS.md) | Applicable workflow, lifecycle, feasibility, architecture, and decision records |
+| Domain records, provenance, state transitions, recovery, or work lifecycle | [Information and workflow lifecycle model](requirements/INFORMATION_AND_WORKFLOW_LIFECYCLE.md) | Applicable behavioral requirements and architecture records |
+| Evaluation design, datasets, metrics, provider comparison, support qualification, or acceptance targets | [Evaluation and acceptance](requirements/evaluation-and-release/EVALUATION_AND_ACCEPTANCE.md) | [Delivery readiness and open decisions](requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md), feasibility evidence, and applicable ADRs |
+| Release-inventory derivation or verification, packaged validation, release evidence, signing evidence, or release claims | [Release inventory, evidence, and claims](requirements/evaluation-and-release/RELEASE_INVENTORY_EVIDENCE_AND_CLAIMS.md) | The canonical [component-inventory contract](requirements/quality-security-and-operations/RELIABILITY_REPRODUCIBILITY_AND_OPERATIONS.md), evaluation evidence, installation requirements, delivery decisions, feasibility evidence, and applicable ADRs |
+| Delivery sequence, assumptions, risks, open decisions, or authorization to begin development | [Delivery readiness and open decisions](requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md) | [Project requirements](PROJECT_REQUIREMENTS.md) and every module or ADR affected by the decision |
+| Architecture proposal or decision | [Architecture index](architecture/README.md), [Candidate architecture](architecture/CANDIDATE_ARCHITECTURE.md), and the [ADR index](architecture/decisions/README.md) | The applicable requirement modules, accepted ADRs, feasibility evidence, and candidate assessment |
+| Voxleaf-derived reuse, provenance, packaging precedent, or non-adoption | [Voxleaf implementation pattern assessment](architecture/candidates/VOXLEAF_IMPLEMENTATION_PATTERN_ASSESSMENT.md) | [Candidate architecture](architecture/CANDIDATE_ARCHITECTURE.md), the applicable open decision, and relevant requirements |
+| Tool, model, runtime, hardware, or local-capacity evaluation | [Local MVP feasibility](LOCAL_MVP_FEASIBILITY.md) | Applicable requirements modules and ADRs; verify time-sensitive claims against current primary sources |
+
+Do not load every requirements module automatically. Read the master index, the module that owns the affected requirement or decision, and any directly applicable authority linked from it.
+
+## Complete document index
+
+### Foundation and feasibility
+
+- [Project context](PROJECT_CONTEXT.md) — motivation, accepted direction, constraints, product guardrails, and current status.
+- [Project concept](PROJECT_CONCEPT.md) — proposed product experience, workflow, engineering objective, boundaries, and open product questions.
+- [Local MVP feasibility](LOCAL_MVP_FEASIBILITY.md) — dated reference-PC and local-stack feasibility evidence with the initial benchmark recommendation.
+
+### Requirements baseline
+
+- [Project requirements](PROJECT_REQUIREMENTS.md) — master index, main goal, shared status rules, traceability, and module routing.
+- [Product scope and glossary](requirements/PRODUCT_SCOPE_AND_GLOSSARY.md) — users, job to be done, principles, scope, scenario set, exclusions, and terminology.
+- [Evidence and review workflow](requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md) — canonical requirement IDs, statuses, shared corpus hierarchy, comparison outcome meanings, interface behavior, and routing to the six detailed workflow assessments.
+- [Generation provider and model lifecycle](requirements/generation-provider-and-model-lifecycle/README.md) — family index for [provider execution](requirements/generation-provider-and-model-lifecycle/GENERATION_PROVIDER_EXECUTION.md) and [installation and model lifecycle](requirements/generation-provider-and-model-lifecycle/INSTALLATION_AND_MODEL_LIFECYCLE.md).
+- [Quality, security, and operations](requirements/quality-security-and-operations/README.md) — family index for [application accessibility](requirements/quality-security-and-operations/APPLICATION_ACCESSIBILITY.md), [privacy and security](requirements/quality-security-and-operations/PRIVACY_AND_SECURITY.md), and [reliability, reproducibility, and operations](requirements/quality-security-and-operations/RELIABILITY_REPRODUCIBILITY_AND_OPERATIONS.md).
+- [Evaluation and release](requirements/evaluation-and-release/README.md) — family index for [evaluation and acceptance](requirements/evaluation-and-release/EVALUATION_AND_ACCEPTANCE.md) and [release inventory, evidence, and claims](requirements/evaluation-and-release/RELEASE_INVENTORY_EVIDENCE_AND_CLAIMS.md).
+- [Information and workflow lifecycle model](requirements/INFORMATION_AND_WORKFLOW_LIFECYCLE.md) — domain records, provenance, workflow states, recovery, readiness, acquisition, work, and evaluation lifecycles.
+- [Delivery readiness and open decisions](requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md) — delivery stages, assumptions, risks, open decisions, and the pre-development gate.
+
+### Architecture and decisions
+
+- [Architecture index](architecture/README.md) — entry point for accepted decisions and proposed architecture material.
+- [Candidate architecture](architecture/CANDIDATE_ARCHITECTURE.md) — Proposed system topology, technology constraints, and implementation patterns; it is not part of the authoritative requirements baseline.
+- [Architecture Decision Record index](architecture/decisions/README.md) — status, scope, and links for accepted ADRs.
+- [Voxleaf implementation pattern assessment](architecture/candidates/VOXLEAF_IMPLEMENTATION_PATTERN_ASSESSMENT.md) — explicitly unaccepted external-reference assessment and adaptation gates.
+
+#### Workflow-step technical assessments
+
+- [Authorized deterministic web scan assessments](architecture/candidates/authorized-scan/README.md) — step 1 family index for [technology selection](architecture/candidates/authorized-scan/TECHNOLOGY_SELECTION.md) and [controlled-fixture execution and security](architecture/candidates/authorized-scan/CONTROLLED_FIXTURE_EXECUTION_AND_SECURITY.md).
+- [Accessibility finding and evidence capture](architecture/candidates/ACCESSIBILITY_FINDING_EVIDENCE_CAPTURE_ASSESSMENT.md) — step 2 finding records, evidence minimization, provenance, coverage, and privacy.
+- [Accessibility guidance retrieval assessments](architecture/candidates/guidance-retrieval/README.md) — step 3 family index for the [curated guidance corpus](architecture/candidates/guidance-retrieval/CURATED_GUIDANCE_CORPUS_ASSESSMENT.md) and [local retrieval execution and evaluation](architecture/candidates/guidance-retrieval/LOCAL_RETRIEVAL_EXECUTION_AND_EVALUATION_ASSESSMENT.md).
+- [Evidence-grounded remediation generation](architecture/candidates/EVIDENCE_GROUNDED_REMEDIATION_GENERATION_ASSESSMENT.md) — step 4 structured generation, grounding, sufficiency, abstention, and evaluation.
+- [Human remediation review](architecture/candidates/HUMAN_REMEDIATION_REVIEW_ASSESSMENT.md) — step 5 reviewer information, decisions, manual checks, lifecycle, and privacy.
+- [Rescan evidence comparison](architecture/candidates/RESCAN_EVIDENCE_COMPARISON_ASSESSMENT.md) — step 6 comparability, finding correlation, outcome classification, and follow-up checks.
+
+### Repository guidance
+
+- [Project overview](../README.md) — public summary and repository status.
+- [Agent instructions](../AGENTS.md) — repository-wide rules and selective context-loading requirements.
