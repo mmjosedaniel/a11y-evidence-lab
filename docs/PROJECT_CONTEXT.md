@@ -19,7 +19,9 @@ The selected direction combines:
 
 This structure makes the AI workflow observable and testable. Retrieval quality, answer quality, review outcomes, and regressions can be evaluated independently instead of relying on the apparent quality of a chat response.
 
-The selected first portfolio slice applies that structure to one project-owned fixture containing one informative image without an `alt` attribute and one corrected state. The pinned axe-core `image-alt` result supplies the finding. A small WCAG 2.2 SC 1.1.1 corpus supplies the retrieval context. The visible user story demonstrates one proposal, one review decision, and the failing-to-corrected `resolved` comparison; the fixed pilot reuses the same two states in separate operations for `persistent` and inverse `regressed`. Broader rules and live-page support are not prerequisites.
+The selected first portfolio slice applies that structure independently to three project-owned synthetic controlled profiles: `informative-image-alt` (`image-alt` / WCAG 2.2 SC 1.1.1), `form-input-label` (`label` / SC 4.1.2), and `text-contrast` (`color-contrast` / SC 1.4.3). Each has a failing and corrected revision and retains one stable intended target. One operation selects one profile and finding workflow, so the expansion adds useful evidence variety without bulk scanning or workflow orchestration. The bounded curated corpus covers only those mappings. Binary image and label comparisons demonstrate `resolved`, `persistent`, and inverse `regressed`; contrast also defines a possible still-failing `improved` result through a retained ordered margin. The exact scenario contract and OD-002/OD-019 history are in [Product scope — First vertical slice](requirements/PRODUCT_SCOPE_AND_GLOSSARY.md#first-vertical-slice).
+
+Live-site input, arbitrary URLs, crawling, and crawler implementation are deliberately excluded from this portfolio MVP. The purpose is to demonstrate the end-to-end integration of deterministic scanning, evidence capture, RAG/LangChain, structured generation, human review, and comparison—not to build production target discovery. Live pages, crawling, and broader rule coverage remain possible later capabilities if a demonstrated product need justifies their additional controls.
 
 ## Technical intent
 
@@ -43,12 +45,13 @@ The distributable MVP will use a Windows installer. A Start menu shortcut will l
 - Deterministic evidence and cited guidance would remain distinguishable from model-generated interpretation.
 - Every generated proposal would require human review, and findings that require contextual or subjective judgment would also require explicit manual checks.
 - The system would operate only on authorized pages or controlled fixtures.
+- The portfolio MVP would accept only the three selected synthetic controlled profiles; it would not accept live-site input, arbitrary URLs, or implement crawling.
 - Private pages, source code, and sensitive traces would not be exposed in a public demonstration.
 - Automated source-code modification is outside the current concept.
 
 ## Current status
 
-The project remains in idea exploration. No implementation has started. The generation-provider boundary, Windows distribution direction, first `image-alt` portfolio scenario, and initial technology evaluation baselines—including TypeScript, React, and the bounded LangChain role—in the [architecture decisions](architecture/decisions/README.md) are accepted. LangGraph is deferred pending a demonstrated orchestration need, and LangSmith remains optional. Release technologies, JavaScript runtime, desktop container, packaging technology, local runtime ownership, external API provider, persistence, evaluation details, release model, and success thresholds remain open decisions.
+The project remains in idea exploration. No implementation has started. OD-019 accepts the three-scenario portfolio boundary and supersedes OD-002's earlier one-scenario scope in the [product decision register](requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#resolved-decisions-for-the-first-portfolio-slice). Separately, the generation-provider boundary, Windows distribution direction, and initial technology evaluation baselines—including TypeScript, React, and the bounded LangChain role—are accepted at their recorded scopes in the [architecture decisions](architecture/decisions/README.md). The scenario decision does not promote any evaluation candidate to a release dependency. LangGraph is deferred pending a demonstrated orchestration need, and LangSmith remains optional. Release technologies, JavaScript runtime, desktop container, packaging technology, local runtime ownership, external API provider, persistence, evaluation details, release model, and success thresholds remain open decisions.
 
 ## Documentation navigation
 

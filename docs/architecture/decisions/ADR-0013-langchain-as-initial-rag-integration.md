@@ -9,6 +9,10 @@ The portfolio objective is to demonstrate a small, inspectable retrieval-augment
 
 The project needs enough framework use to demonstrate practical RAG integration without allowing a framework to own scanner evidence, canonical corpus identity, review decisions, or comparison semantics. LangChain's JavaScript documentation describes a predictable two-step RAG shape in which retrieval always precedes generation, plus modular interfaces for embeddings, vector stores, retrievers, models, and structured output. That shape matches the selected portfolio slice and avoids agentic retrieval or workflow infrastructure that the MVP does not need.
 
+### Scope amendment recorded 2026-08-24
+
+The context above preserves the one-`image-alt` scope in effect when this ADR was accepted. The later product decision OD-019 supersedes OD-002's one-scenario scope with exactly three independent, project-owned synthetic controlled profiles: `informative-image-alt` (`image-alt`/SC 1.1.1), `form-input-label` (`label`/SC 4.1.2), and `text-contrast` (`color-contrast`/SC 1.4.3). This ADR is not superseded: its Accepted-for-evaluation status and bounded LangChain role are unchanged. For any operation, LangChain remains limited to retrieval for one selected finding and one structured generation call. The amendment does not select multi-rule orchestration, LangGraph, LangSmith, an agent, a service, a queue, a workflow engine, or a release dependency.
+
 ## Considered options
 
 1. Implement retrieval and model integration directly with provider and vector-store SDKs.
@@ -58,3 +62,4 @@ This decision does not select exact LangChain packages or versions, a JavaScript
 - [Evidence and review workflow requirements](../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md): `REQ-CORP-*`, `REQ-RETR-*`, and `REQ-GEN-*`
 - [Generation provider execution requirements](../../requirements/generation-provider-and-model-lifecycle/GENERATION_PROVIDER_EXECUTION.md): `REQ-LLM-*`
 - [Evaluation and acceptance requirements](../../requirements/evaluation-and-release/EVALUATION_AND_ACCEPTANCE.md): `REQ-EVAL-*`
+- [Delivery readiness and open decisions](../../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md): OD-002 and OD-019

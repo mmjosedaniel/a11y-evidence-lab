@@ -2,7 +2,11 @@
 
 ## Overview
 
-A11y Evidence Lab is a planned accessibility analysis application whose goal is to help engineering teams turn automated findings into traceable, guidance-backed remediation decisions that can be reviewed and verified. It would analyze authorized web pages with deterministic browser checks, preserve the evidence behind each finding, retrieve relevant guidance from a curated corpus, and use a user-selected local or external-API LLM to generate cited explanations, remediation proposals, evidence-sufficiency indicators, and required manual checks through one provider-neutral contract. The first portfolio slice is intentionally narrower: one project-owned controlled fixture, one axe-core `image-alt` rule, and one corrected fixture state. User-selected live pages remain a later gated extension.
+A11y Evidence Lab is a planned accessibility analysis application whose goal is to help engineering teams turn automated findings into traceable, guidance-backed remediation decisions that can be reviewed and verified. It would analyze authorized web pages with deterministic browser checks, preserve the evidence behind each finding, retrieve relevant guidance from a curated corpus, and use a user-selected local or external-API LLM to generate cited explanations, remediation proposals, evidence-sufficiency indicators, and required manual checks through one provider-neutral contract.
+
+The portfolio MVP is deliberately limited to three project-owned, synthetic, controlled scenarios: a missing text alternative for an informative image (`image-alt`), a form input without an accessible label (`label`), and normal text with insufficient color contrast (`color-contrast`). Each scenario has a failing and corrected state, and the product processes one selected scenario and one finding workflow at a time. The MVP accepts no live-site input, performs no crawling, and contains no crawler implementation.
+
+This is a deliberate portfolio-scope decision. The project exists to demonstrate the complete implementation and integration of deterministic scanning, minimized evidence capture, curated RAG through a bounded LangChain role, structured AI generation, human review, and deterministic rescan comparison—not to build a production website crawler. Crawling and broader accessibility coverage are important possible product capabilities, but they are deferred until a demonstrated product need justifies their security, product, and engineering cost. This limitation applies to the MVP only.
 
 Users would review each proposal and could approve, edit, or reject it before it becomes an accepted remediation plan. Subsequent scans would compare finding evidence to show whether the observed condition improved, persisted, or regressed. The application would support accessibility investigation and engineering decisions; it would not provide accessibility certification or legal-compliance determinations, and it would not modify source code automatically.
 
@@ -28,14 +32,14 @@ The distributable MVP would use a Windows installer. The user would start it fro
 
 ## Planned workflow
 
-1. [Scan the authorized controlled fixture with deterministic browser checks](docs/architecture/candidates/authorized-scan/README.md).
+1. [Scan the selected authorized controlled scenario with deterministic browser checks](docs/architecture/candidates/authorized-scan/README.md).
 2. [Capture findings and the evidence behind them](docs/architecture/candidates/ACCESSIBILITY_FINDING_EVIDENCE_CAPTURE_ASSESSMENT.md).
 3. [Retrieve relevant accessibility guidance from the curated corpus](docs/architecture/candidates/guidance-retrieval/README.md).
 4. [Generate cited explanations, remediation proposals, evidence-sufficiency indicators, and required manual checks](docs/architecture/candidates/EVIDENCE_GROUNDED_REMEDIATION_GENERATION_ASSESSMENT.md).
 5. [Present each AI-generated remediation proposal for approval, editing, or rejection](docs/architecture/candidates/HUMAN_REMEDIATION_REVIEW_ASSESSMENT.md).
-6. [Rescan the page and compare the evidence to identify improvement, persistence, or regression](docs/architecture/candidates/RESCAN_EVIDENCE_COMPARISON_ASSESSMENT.md).
+6. [Rescan the selected controlled scenario and compare the evidence to identify improvement, persistence, or regression](docs/architecture/candidates/RESCAN_EVIDENCE_COMPARISON_ASSESSMENT.md).
 
-For the binary `image-alt` slice, the exact demonstrations are `resolved` (failing → corrected), `persistent` (failing → failing), and `regressed` (corrected → failing). An `improved` outcome is deferred until a later scenario defines an ordered evidence measure.
+For `image-alt` and `label`, the comparison is binary: a same-target failing-to-corrected transition may be `resolved`, failing-to-failing is `persistent`, and corrected-to-failing is `regressed`, subject to comparability and evidence gates. For `color-contrast`, the retained contrast margin supplies an ordered measure: a later native pass may be `resolved`; among two remaining violations, a higher margin is `improved`, an equal margin is `persistent`, and a lower margin is `regressed`. An `improved` result remains unresolved, and none of these outcomes establishes whole-page accessibility or conformance.
 
 ## Project status
 

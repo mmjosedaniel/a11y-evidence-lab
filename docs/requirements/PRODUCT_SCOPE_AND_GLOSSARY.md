@@ -39,9 +39,9 @@ When an authorized page produces an automated accessibility finding, the user ne
 
 ### MVP scope
 
-**Status:** The first portfolio slice below is Accepted. Distribution and broader product scope remain Proposed until their applicable decisions are accepted.
+**Status:** The three-scenario first portfolio slice below is Accepted through OD-019. Distribution and broader product scope remain Proposed until their applicable decisions are accepted.
 
-The portfolio MVP is a local-first, single-user web application that completes one full evidence lifecycle for one controlled fixture using one capacity-qualified local generation configuration. The provider-neutral generation boundary, later user choice between local and external-API generation, Windows installer, and post-install model acquisition are Accepted directions recorded in [ADR-0001](../architecture/decisions/ADR-0001-interchangeable-generation-providers.md) and [ADR-0002](../architecture/decisions/ADR-0002-windows-installation-and-model-acquisition.md). The closed-loop portfolio demonstration comes first; dual-provider support and release packaging remain later delivery stages rather than prerequisites for proving the RAG workflow.
+The portfolio MVP is a local-first, single-user web application that completes one full evidence lifecycle for one selected controlled scenario at a time using one capacity-qualified local generation configuration. The provider-neutral generation boundary, later user choice between local and external-API generation, Windows installer, and post-install model acquisition are Accepted directions recorded in [ADR-0001](../architecture/decisions/ADR-0001-interchangeable-generation-providers.md) and [ADR-0002](../architecture/decisions/ADR-0002-windows-installation-and-model-acquisition.md). The closed-loop portfolio demonstration comes first; dual-provider support and release packaging remain later delivery stages rather than prerequisites for proving the RAG workflow.
 
 1. Declare and authorize a target and its relevant page state.
 2. Run deterministic browser accessibility checks.
@@ -52,34 +52,62 @@ The portfolio MVP is a local-first, single-user web application that completes o
 7. Rescan a comparable target state.
 8. Show an evidence-backed scan comparison outcome.
 
-Live public-page support is a later gated extension, not a portfolio-MVP completion criterion. It may be added only after target-isolation and network-safety requirements are verified. Authenticated private pages, arbitrary crawling, and multi-user hosting are outside the initial MVP.
+The MVP accepts only the three named project-owned synthetic scenarios below. It has no live-site input, arbitrary-URL input, crawling, or crawler implementation. Those capabilities are deferred until a demonstrated product need justifies their target-authorization, isolation, network-safety, privacy, and product-design cost. This is an MVP portfolio boundary, not a claim that live-page analysis, crawling, or broader accessibility coverage is unimportant. Authenticated private pages and multi-user hosting also remain outside the MVP.
 
 ### First vertical slice
 
-**Status:** Accepted on 2026-08-24 as the smallest portfolio scenario.
+**Status:** The three scenario identities, rule/WCAG pairings, project-owned synthetic boundary, requirement for failing and corrected states, one-profile-at-a-time scope, contrast-measurement retention, and high-level `resolved` versus possible still-failing `improved` distinction are Accepted on 2026-08-24 through OD-019.
 
-The first slice uses one project-owned synthetic page with one informative image that lacks an `alt` attribute and one corrected revision of the same fixture. The exact scanner rule is axe-core `image-alt`, mapped to WCAG 2.2 SC 1.1.1. The two fixture revisions are sufficient to demonstrate the complete pipeline and can be paired as follows without creating more page scenarios:
+The first slice supports exactly three logical fixture profiles. Each profile is project-owned, synthetic, controlled, and has one failing and one corrected revision with one stable intended target. One scan operation selects one profile, one revision, and its one axe-core rule; downstream retrieval, generation, review, and comparison also process one finding at a time. Supporting three profiles therefore does not introduce crawling, bulk review, multi-finding orchestration, or a generalized workflow engine. The physical fixture-file arrangement remains a later implementation detail.
 
-“Informative” records the fixture author's intended evaluation-gold answer. It is not included in the scanner evidence, retrieval query, or model prompt. The reviewer must independently inspect the rendered image, surrounding content, and behavior to confirm its purpose; this keeps the blocking image-purpose check meaningful and lets evaluation detect an unsupported model assumption.
+The current axe-core 4.13 rule metadata maps `image-alt` to `wcag111`, `label` to `wcag412`, and `color-contrast` to `wcag143` in the official [versioned rule descriptions](https://github.com/dequelabs/axe-core/blob/v4.13.0/doc/rule-descriptions.md). For this slice, those tags are recorded as the primary mappings to [WCAG 2.2 SC 1.1.1](https://www.w3.org/TR/2024/REC-WCAG22-20241212/#non-text-content), [SC 4.1.2](https://www.w3.org/TR/2024/REC-WCAG22-20241212/#name-role-value), and [SC 1.4.3](https://www.w3.org/TR/2024/REC-WCAG22-20241212/#contrast-minimum), respectively. A scanner-to-criterion mapping supplies scope and retrieval vocabulary; one automated result never proves complete success-criterion or page-level non-conformance.
 
-| Scan pair | Applicable automated outcome |
-| --- | --- |
-| Missing alternative → corrected alternative | `resolved`, subject to the same-target positive observation and the stated automated-coverage limitation |
-| Missing alternative → the same missing-alternative state | `persistent` |
-| Corrected alternative → missing alternative | `regressed` |
+The exact fixture literals, evidence field allowlists and normalization, guidance-pack composition, model wording, manual-check definitions, finding-correlation rules, and contrast-margin algorithm below are **Proposed planning detail**. They make the three scenarios coherent enough to evaluate but remain subject to OD-003, OD-004, OD-007, and OD-008; they are not Accepted implementation or release decisions.
 
-The `image-alt` rule does not provide an ordered measure for an `improved` outcome, so the first slice must not manufacture one. A later contrast scenario is the leading candidate if the portfolio needs to demonstrate a quantitative improved-but-not-resolved comparison. Accessible names, contrast, keyboard, focus, and semantic-structure scenarios remain later candidates rather than MVP obligations.
+#### Scenario 1: missing text alternative for an informative image (`informative-image-alt`)
+
+- **Controlled states:** the failing revision contains one intended informative `img` without an `alt` attribute. The corrected revision retains the target and context and adds the fixture author's context-appropriate text alternative. “Informative” and “appropriate” are evaluation-gold facts, not scanner facts or model inputs.
+- **Deterministic evidence:** retain the native `image-alt` result bucket, rule and check identity, pinned engine and scan profile, stable fixture-target key, minimized locator and sanitized element facts, `img` element type, and the missing or present text-alternative state. The corrected scan retains one narrow native positive target observation instead of a page-wide pass set.
+- **Minimum guidance:** the selected sections of WCAG 2.2 SC 1.1.1, [Understanding SC 1.1.1](https://www.w3.org/WAI/WCAG22/Understanding/non-text-content), [Technique H37](https://www.w3.org/WAI/WCAG22/Techniques/html/H37), and [Technique H67](https://www.w3.org/WAI/WCAG22/Techniques/html/H67).
+- **Permitted model contribution:** explain the observed missing alternative, describe possible user impact with qualified language, and propose conditional informative, functional, or decorative treatment grounded in retrieved guidance. It may not assert the image's purpose, create an applied patch, or claim that the page fails or satisfies SC 1.1.1 as a whole.
+- **Required human judgment:** before plan acceptance, determine the image's actual purpose and context and choose the applicable conditional branch. After a change, verify that the alternative communicates equivalent purpose, exposes an intended action, or removes genuinely decorative content without information loss.
+- **Conservative comparison:** `resolved` requires a comparable baseline violation and corrected same-target positive observation; `persistent` requires the same violation on both sides; `regressed` requires a positive baseline and later violation; ambiguous or insufficient evidence is `inconclusive`. This binary rule has no `improved` outcome.
+
+#### Scenario 2: form input without an accessible label (`form-input-label`)
+
+- **Controlled states:** the failing revision contains one visible “Email address” text beside a stable email input but no `label` association or other accessible-name source. The corrected revision replaces that text with an explicit visible `label` whose `for` value matches the unchanged input `id`.
+- **Deterministic evidence:** retain the native `label` result bucket, rule and check identity, pinned engine and profile, stable target key, minimized locator and sanitized element/association facts, input type, and the absence or presence of an accessible-name source. Never retain the input value. The corrected scan retains one narrow native positive observation for the same input.
+- **Minimum guidance:** WCAG 2.2 SC 4.1.2, [Understanding SC 4.1.2](https://www.w3.org/WAI/WCAG22/Understanding/name-role-value), and [Technique H44](https://www.w3.org/WAI/WCAG22/Techniques/html/H44). The official W3C [ACT rule e086e5](https://www.w3.org/WAI/standards-guidelines/act/rules/e086e5/) is mapping and test-boundary input rather than embedded remediation guidance.
+- **Permitted model contribution:** explain that the retained evidence shows no non-empty programmatically determinable name and propose the explicit visible `label` association used by this controlled profile. It may not claim that the label wording is adequate, that all form instructions are sufficient, or that the automated result proves complete SC 4.1.2 or page non-conformance.
+- **Required human judgment:** confirm that the visible label accurately and clearly identifies the intended input, remains available to users, and is associated with the correct control; separately determine whether format, required-field, or other instructions are needed. H44 can support other criteria, but this axe rule is mapped here only to SC 4.1.2—not to SC 1.3.1 or SC 3.3.2.
+- **Conservative comparison:** use the same binary `resolved`, `persistent`, `regressed`, and `inconclusive` definitions as the image scenario. A partial change that still fails is `persistent`, not `improved`.
+
+#### Scenario 3: text with insufficient color contrast (`text-contrast`)
+
+- **Controlled states:** the failing revision uses meaningful normal text at 16 CSS pixels and weight 400, with `#888888` foreground on `#FFFFFF` background, for a formula-derived ratio of approximately `3.5449:1`. The corrected revision retains the same target, content, background, font classification, and scan profile but uses `#767676` foreground, approximately `4.5422:1`. The exact native axe result remains authoritative; these planning calculations do not replace it.
+- **Deterministic evidence:** retain the native `color-contrast` result bucket, rule and check identity, stable target and profile, and axe-emitted foreground color, background color, contrast ratio, expected ratio, font size, font weight, and incomplete reason when present. Retain the same fields in the corrected positive target observation. Do not independently turn a rounded or displayed number into a pass.
+- **Minimum guidance:** WCAG 2.2 SC 1.4.3 and its contrast definitions, [Understanding SC 1.4.3](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum), and [Technique G18](https://www.w3.org/WAI/WCAG22/Techniques/general/G18). G145 is unnecessary for this deliberately normal-text profile.
+- **Permitted model contribution:** explain the retained measurement and applicable threshold, describe possible readability impact, and propose changing the foreground, background, or both subject to reviewer constraints. Any candidate color is a proposal that requires a rescan; the model may not state that an unmeasured pair passes.
+- **Required human judgment:** confirm that the target is meaningful ordinary text rather than incidental content or a logotype; confirm its rendered size/weight classification and the controlled opaque-background assumptions; review design meaning and other visual states that this one profile does not exercise.
+- **Conservative comparison:** define the comparison-only ordered measure as `contrast margin = retained numeric measured ratio - validated numeric component of the retained expected-ratio string`; higher is better only when target, engine, browser/profile, evidence-normalization version, font classification, threshold, and retained precision are identical. `resolved` requires a baseline violation and later native pass. Among two determinate violations, a strictly higher later margin is `improved` but remains unresolved, an equal retained margin is `persistent`, and a strictly lower margin is `regressed`; a native pass followed by a violation is also `regressed`. Incomplete or non-comparable measurements are `inconclusive`. No third fixture revision is required merely to define the possible `improved` outcome.
+
+The version-pinned axe [contrast evaluation source](https://github.com/dequelabs/axe-core/blob/v4.13.0/lib/checks/color/color-contrast-evaluate.js) exposes the retained measurement fields and reports a truncated ratio, which is why the scanner bucket—not comparison arithmetic—controls pass or resolution.
+
+#### Scope-decision history
+
+- **OD-002 (superseded):** earlier on 2026-08-24, the portfolio slice accepted only the `image-alt` scenario and deferred the other families. Its original resolution remains preserved in the [decision register](DELIVERY_READINESS_AND_OPEN_DECISIONS.md#resolved-decisions-for-the-first-portfolio-slice).
+- **OD-019 (current, Accepted):** later on 2026-08-24, explicit product direction replaced that one-scenario boundary with exactly the three profiles above. This replacement does not authorize implementation, select release dependencies, expand scanning to live pages, or alter the evaluation-only scope of the applicable ADRs.
 
 ### Out of scope for the MVP
 
-**Status:** The non-certification, no-automatic-modification, authorization, and public-data boundaries are Accepted. The remaining deferrals are Proposed MVP scope decisions.
+**Status:** The non-certification, no-automatic-modification, authorization, public-data, exactly-three-scenario coverage, and no-live-site/arbitrary-URL/authenticated-target/crawler boundaries are Accepted. Other deferrals in this list remain Proposed MVP scope decisions.
 
 - Accessibility certification, compliance badges, legal advice, or whole-page/whole-site conformance claims.
 - Claims that the absence of automated findings means a page is accessible.
 - Automatic source-code edits, pull requests, or deployments.
-- Arbitrary site crawling or discovery of targets the user did not authorize.
+- Live-site scanning, arbitrary-URL input, site crawling, target discovery, or any crawler specification or implementation.
 - Authenticated production pages or persistence of browser credentials.
-- Broad WCAG coverage, cross-browser equivalence, mobile-device coverage, or production-scale concurrency.
+- Any accessibility-rule coverage beyond the three selected profiles, cross-browser equivalence, mobile-device coverage, or production-scale concurrency.
 - A generic chatbot as the primary interface. Chat, if later included, remains secondary.
 - Automatic learning from rejected proposals or unreviewed page content.
 - Public exposure of private page content, source code, evidence, prompts, or traces.
@@ -93,11 +121,12 @@ Terms prefixed with **Candidate** below are proposed vocabulary from the archite
 | --- | --- |
 | Authorized target | A single page or controlled fixture the user is permitted to analyze, with the declared scope recorded. |
 | Controlled fixture | A deliberately constructed local page state with known expected accessibility evidence. |
+| Controlled scenario profile | One of the three accepted MVP scenario identities and rule/WCAG pairings, with project-owned synthetic failing and corrected states and one stable intended target. One operation selects one profile. Its exact fixture literals, evidence allowlist, guidance mapping, manual-check wording, and comparison algorithm remain Proposed until their owning open decisions are resolved. |
 | Transient scan observation | The in-memory native scanner result and execution metadata produced by Step 1 for immediate consumption by Step 2; it is not a durable finding or evidence record. |
 | Scan run | One execution of a versioned scanner configuration against a recorded target state. |
 | Finding | A scanner observation. A finding is not automatically a confirmed accessibility issue. |
-| Page evidence | The minimal captured data needed to inspect and reproduce one finding, such as rule output, locator, allowlisted DOM attributes or excerpt, and computed values. The first slice retains one source-evidence item per finding. |
-| Positive target observation | A narrow, non-failing observation retained only when the selected comparison profile needs to prove that the same target and rule scope were exercised in a corrected scan. |
+| Page evidence | The minimal captured data needed to inspect and reproduce one finding, such as rule output, locator, allowlisted DOM facts, check data, or measured values. The first slice retains one rule-specific source-evidence item per selected finding. |
+| Positive target observation | A narrow, non-failing observation retained only when the selected comparison profile needs to prove that the same target and rule scope were exercised in a corrected scan. It retains the profile's required association or measurement facts, not a page-wide pass set. |
 | Corpus snapshot | An immutable, identified collection of approved and versioned guidance sources and derived chunks. |
 | Guidance passage | A traceable excerpt retrieved from a corpus source. |
 | Model interpretation | Generated explanation, impact analysis, or remediation text; it is never deterministic evidence. |
@@ -130,6 +159,7 @@ Terms prefixed with **Candidate** below are proposed vocabulary from the archite
 | Scan-pair comparison | One operation record for a baseline scan and later scan, containing comparability, operation status, limitations, and identified finding-comparison entries. |
 | Finding-comparison entry | One addressable child of a scan-pair comparison containing a correlation rationale, before-and-after evidence references, and one applicable finding outcome. |
 | Finding fingerprint | Versioned correlation data used to suggest that findings from separate scans refer to the same observed condition; it is distinct from each finding record's immutable ID. |
+| Contrast margin | A comparison-only value equal to the retained numeric axe-reported measured ratio minus the validated numeric component of the retained axe-reported expected-ratio string. It is ordered only under an identical contrast and evidence-normalization profile, is not a WCAG or confidence score, and never overrides the scanner's native pass/fail bucket. |
 | Audit record | The append-only history of versions, actions, decisions, and relevant configuration metadata while that history remains within its approved retention period. |
 
 ## Documentation navigation

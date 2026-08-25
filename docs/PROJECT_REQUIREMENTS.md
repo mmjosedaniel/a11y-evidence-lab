@@ -5,6 +5,7 @@
 - **Repository stage:** Idea exploration
 - **Document status:** Planning baseline
 - **Main goal status:** Accepted on 2026-08-23
+- **Current portfolio-scenario scope:** Accepted on 2026-08-24 through OD-019, replacing OD-002
 - **Implementation status:** Not started
 - **Last reviewed:** 2026-08-24
 
@@ -39,6 +40,8 @@ Outside identified requirement rows, those words are ordinary explanatory langua
 The application must preserve the evidence behind each finding, retrieve relevant guidance from a curated and versioned corpus, generate cited remediation proposals with explicit evidence-sufficiency indicators and required manual checks, require human review before a proposal is accepted, and compare later scans without overstating what the comparison proves.
 
 The application supports accessibility investigation and engineering decisions. It is not an accessibility certification tool, does not determine legal compliance or whole-site conformance, and does not modify source code automatically.
+
+For the portfolio MVP, this goal is demonstrated through exactly three project-owned synthetic controlled profiles—`informative-image-alt` (axe-core `image-alt`), `form-input-label` (`label`), and `text-contrast` (`color-contrast`)—processed one selected scenario and finding at a time. Live-site input, arbitrary URLs, crawling, and crawler implementation are excluded from this stage. The current accepted scope and the superseded one-scenario decision history are owned by [Product scope and glossary](requirements/PRODUCT_SCOPE_AND_GLOSSARY.md#first-vertical-slice) and OD-019 in [Delivery readiness and open decisions](requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#resolved-decisions-for-the-first-portfolio-slice).
 
 ## Supporting engineering objective
 
@@ -88,10 +91,11 @@ The following inputs explain Proposed requirements or candidate architecture det
 
 ### Accepted requirement decisions
 
-The requirements-definition request and the subsequent user directions on provider choice, Windows delivery, existing-PC capacity, and technology evaluation baselines are the acceptance authority for the main goal and accepted decisions recorded here on 2026-08-23. Earlier accepted requirement rows restate directions or boundaries repeated in the existing documentation; ADR-mapped rows record provider, distribution, model-capacity, application-stack, and evaluation-baseline decisions. Detailed mechanisms not accepted by those records remain Proposed.
+The requirements-definition request and the subsequent user directions on provider choice, Windows delivery, existing-PC capacity, and technology evaluation baselines are the acceptance authority for the main goal and accepted decisions recorded here on 2026-08-23. The explicit three-scenario portfolio direction is the acceptance authority for OD-019 on 2026-08-24; OD-019 supersedes the earlier accepted OD-002 scope without rewriting its history. Earlier accepted requirement rows restate directions or boundaries repeated in the existing documentation; ADR-mapped rows record provider, distribution, model-capacity, application-stack, and evaluation-baseline decisions. Detailed mechanisms not accepted by those records remain Proposed.
 
-| Accepted requirement IDs | Basis |
+| Accepted requirement IDs or product decision | Basis |
 | --- | --- |
+| `OD-019` | [Product scope — First vertical slice and decision history](requirements/PRODUCT_SCOPE_AND_GLOSSARY.md#first-vertical-slice) and the [resolved-decision register](requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#resolved-decisions-for-the-first-portfolio-slice). It accepts exactly the three project-owned synthetic controlled profiles, their rule/WCAG pairings and failing/corrected-state obligation, one-profile-at-a-time processing, deterministic contrast-measurement retention, the high-level `resolved` versus possible still-failing `improved` distinction, and the stated target/coverage/crawler exclusions. It explicitly supersedes OD-002 but does not accept exact fixture literals, evidence allowlists, corpus composition, manual-check wording, comparison algorithms, implementation, or a candidate technology. |
 | `REQ-AUTH-001`, `REQ-AUTH-002`, `REQ-SCAN-001` | [Project overview — Planned workflow and boundaries](../README.md), [Product scope — First vertical slice](requirements/PRODUCT_SCOPE_AND_GLOSSARY.md#first-vertical-slice), and [Project concept — Possible user flow and intended boundaries](PROJECT_CONCEPT.md) |
 | `REQ-EVID-004`, `REQ-GEN-005` | [Project context — Direction and product boundaries](PROJECT_CONTEXT.md) |
 | `REQ-RETR-002`, `REQ-RETR-004`, `REQ-GEN-002` | [Project concept — Engineering objective and possible user flow](PROJECT_CONCEPT.md) |
@@ -111,6 +115,7 @@ The requirements-definition request and the subsequent user directions on provid
 | Source | Contribution to this baseline |
 | --- | --- |
 | [Project overview](../README.md) | Product purpose, planned workflow, engineering objective, current status, and public boundaries. |
+| [Product scope and glossary](requirements/PRODUCT_SCOPE_AND_GLOSSARY.md) | Current three-scenario MVP decision, its per-scenario planning boundaries, and the preserved OD-002/OD-019 decision history. |
 | [Project context](PROJECT_CONTEXT.md) | Evidence-centered direction, separation of deterministic and generated information, human judgment, local-first feasibility, and product limits. |
 | [Project concept](PROJECT_CONCEPT.md) | Workflow stages, user review, rescanning, intended framework roles, and original open questions. |
 | [Local MVP feasibility](LOCAL_MVP_FEASIBILITY.md) | Reference hardware, published feasibility evidence, initial technology evaluation baselines, and their validation needs; all feasibility conclusions remain subject to representative benchmarks. |
@@ -128,7 +133,7 @@ The requirements-definition request and the subsequent user directions on provid
 | [ADR-0012](architecture/decisions/ADR-0012-react-as-initial-user-interface-library.md) | Accepted React only as the initial client-interface evaluation baseline, with durable and privileged behavior kept behind the application-owned local API. |
 | [ADR-0013](architecture/decisions/ADR-0013-langchain-as-initial-rag-integration.md) | Accepted LangChain only as the initial two-step RAG integration baseline; deterministic stages, human decisions, domain records, LangGraph, and LangSmith remain outside that acceptance scope. |
 
-The requirements also reflect the W3C distinction between normative WCAG success criteria and informative supporting guidance, and the documented limitation that accessibility evaluation requires both automated and human evaluation. The official sources linked in the [curated accessibility guidance corpus assessment](architecture/candidates/guidance-retrieval/CURATED_GUIDANCE_CORPUS_ASSESSMENT.md#initial-w3c-micro-corpus) retain their recorded verification dates.
+The requirements also reflect the W3C distinction between normative WCAG success criteria and informative supporting guidance, and the documented limitation that accessibility evaluation requires both automated and human evaluation. The official sources linked in the [curated accessibility guidance corpus assessment](architecture/candidates/guidance-retrieval/CURATED_GUIDANCE_CORPUS_ASSESSMENT.md#closed-eight-artifact-w3c-pack) retain their recorded verification dates.
 
 ## Documentation navigation
 

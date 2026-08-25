@@ -4,7 +4,7 @@
 
 **Document status: Proposed architecture assessment.** ADR-0008, ADR-0009, and ADR-0011 retain their accepted evaluation-baseline scope; no part of this assessment family becomes accepted by association.
 
-Assessment date: 2026-08-23. Simplified for the portfolio vertical slice on 2026-08-24.
+Assessment date: 2026-08-23. Expanded to the three-scenario portfolio slice on 2026-08-24.
 
 This family describes the smallest proposed approach for the first workflow step: **scan an authorized controlled fixture with deterministic browser checks**. It does not authorize implementation, dependency installation, live-page scanning, or release adoption.
 
@@ -12,22 +12,24 @@ The authoritative behavior remains in [Evidence and review workflow requirements
 
 ## Initial portfolio slice
 
-The accepted first portfolio scenario is deliberately narrow; this assessment proposes only how Step 1 executes it:
+The accepted first portfolio slice is deliberately limited to three synthetic, project-owned controlled scenario families. This assessment proposes only how Step 1 executes them:
 
-- One synthetic, project-owned product-image scenario represented by a baseline fixture and one corrected revision.
-- The baseline contains one informative image without an alternative-text attribute.
-- The corrected revision contains an appropriate alternative for the same image.
-- One pinned axe-core rule, **image-alt**, runs in one pinned Playwright-managed Chromium profile.
-- No arbitrary URL, uploaded HTML, credential, crawling, or live-page access.
+| Scenario profile | Failing and corrected revisions | Direct rule mapping |
+| --- | --- | --- |
+| `informative-image-alt` — missing text alternative | One informative image without an `alt` attribute, then the same image with a reviewed alternative | axe-core **image-alt**; WCAG 2.2 SC 1.1.1 |
+| `form-input-label` — missing accessible form-input name | One email input with nearby visible text but no programmatic association, then the same input with an explicit visible `label` | axe-core **label**; WCAG 2.2 SC 4.1.2. The rule does not by itself test SC 3.3.2 or the whole success criterion/page. |
+| `text-contrast` — insufficient text contrast | One 16 CSS px, weight-400 normal-text target rendered as `#888888` on `#ffffff`, then the same target as `#767676` on `#ffffff` | axe-core **color-contrast**; WCAG 2.2 SC 1.4.3 |
 
-This is enough to supply deterministic evidence to the later retrieval and generation stages while keeping the portfolio focus on RAG, LangChain, grounded generation, tracing, evaluation, and human review.
+Each scan operation selects exactly one scenario, one failing or corrected revision, one rule, and one intended target. The three families use the same pinned Playwright-managed Chromium profile but do not form a broad rule suite. No operation accepts an arbitrary URL, uploaded HTML, credential, authentication state, crawler input, or live page.
+
+This is enough to supply three different kinds of deterministic evidence to the later retrieval and generation stages while keeping the portfolio focus on RAG, bounded LangChain integration, grounded generation, evaluation, human review, and rescan comparison. Broader rule or fixture coverage and any crawler remain deferred until demonstrated product need.
 
 ## Assessment map
 
 | Assessment | Responsibility |
 | --- | --- |
 | [Technology selection](TECHNOLOGY_SELECTION.md) | Minimal TypeScript, Playwright, Chromium, and axe-core proposal, with alternatives and primary-source evidence. |
-| [Controlled-fixture execution and security](CONTROLLED_FIXTURE_EXECUTION_AND_SECURITY.md) | Exact fixture slice, minimal authorization attestation, page-state profile, execution sequence, scan outcome, Step 1 handoff, security limits, and live-page prerequisites. |
+| [Controlled-fixture execution and security](CONTROLLED_FIXTURE_EXECUTION_AND_SECURITY.md) | Exact three-family fixture slice, minimal authorization attestation, page-state profile, execution sequence, scan outcome, Step 1 handoff, and security limits. |
 
 ## Step boundary
 

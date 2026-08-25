@@ -13,16 +13,20 @@ This directory is the entry point for the architecture documentation of A11y Evi
 
 The requirement IDs, wording, and statuses remain authoritative in [Evidence and review workflow requirements](../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md). These assessments are supporting Proposed architecture research. They cannot override a requirement or accepted ADR, promote an evaluation baseline, or authorize development.
 
-All six assessments now describe the same first portfolio slice: one project-owned `image-alt` fixture in failing and corrected states. Step 1 owns browser execution and ends with a transient native axe observation; Step 2 exclusively creates minimized durable evidence. Steps 3 and 4 use the bounded LangChain evaluation role accepted by [ADR-0013](decisions/ADR-0013-langchain-as-initial-rag-integration.md), while review and comparison remain plain application-owned TypeScript behavior.
+All six assessments now describe the same first portfolio slice: exactly three independent, project-owned synthetic controlled profiles in failing and corrected states—`informative-image-alt` (axe `image-alt`, WCAG 2.2 SC 1.1.1), `form-input-label` (axe `label`, SC 4.1.2), and `text-contrast` (axe `color-contrast`, SC 1.4.3). One operation selects one profile, executes only its named rule, and carries one finding and one proposal through the sequential workflow. Step 1 owns browser execution and ends with a transient native axe observation; Step 2 exclusively creates minimized durable evidence. Steps 3 and 4 use the bounded LangChain evaluation role accepted by [ADR-0013](decisions/ADR-0013-langchain-as-initial-rag-integration.md), while review and comparison remain plain application-owned TypeScript behavior. LangGraph remains deferred and LangSmith remains optional for eligible synthetic-data evaluation only.
+
+The mapping basis is the official versioned [axe-core 4.13 rule descriptions](https://github.com/dequelabs/axe-core/blob/v4.13.0/doc/rule-descriptions.md) and normative WCAG 2.2 [SC 1.1.1](https://www.w3.org/TR/2024/REC-WCAG22-20241212/#non-text-content), [SC 4.1.2](https://www.w3.org/TR/2024/REC-WCAG22-20241212/#name-role-value), and [SC 1.4.3](https://www.w3.org/TR/2024/REC-WCAG22-20241212/#contrast-minimum). A rule tag scopes evidence and retrieval; it does not make one automated result proof of complete success-criterion or page-level non-conformance.
+
+OD-019 records this accepted portfolio-scope replacement for OD-002's earlier one-scenario resolution; it does not promote any Proposed assessment or evaluation baseline to an implementation or release dependency. The MVP includes no live-page or arbitrary-URL scanning, authenticated target scanning, crawling, crawler implementation, multi-rule orchestration, service expansion, agent, queue, or workflow engine.
 
 | Step | Assessment | Focus |
 | --- | --- | --- |
-| 1 | [Authorized deterministic web scan assessments](candidates/authorized-scan/README.md) | Family index for technology selection and controlled-fixture execution, determinism, and security. |
-| 2 | [Accessibility finding and evidence capture](candidates/ACCESSIBILITY_FINDING_EVIDENCE_CAPTURE_ASSESSMENT.md) | Scanner findings, minimized evidence, provenance, coverage, and sanitization. |
-| 3 | [Accessibility guidance retrieval assessments](candidates/guidance-retrieval/README.md) | Family index for curated-corpus preparation and local retrieval execution and evaluation. |
-| 4 | [Evidence-grounded remediation generation](candidates/EVIDENCE_GROUNDED_REMEDIATION_GENERATION_ASSESSMENT.md) | Structured generation, grounding, citation attachment, sufficiency, abstention, and model evaluation. |
-| 5 | [Human remediation review](candidates/HUMAN_REMEDIATION_REVIEW_ASSESSMENT.md) | Evidence-first proposal review, decisions, manual checks, lifecycle, and review history. |
-| 6 | [Rescan evidence comparison](candidates/RESCAN_EVIDENCE_COMPARISON_ASSESSMENT.md) | Scan comparability, finding correlation, evidence deltas, outcomes, and follow-up checks. |
+| 1 | [Authorized deterministic web scan assessments](candidates/authorized-scan/README.md) | Select one controlled profile and execute only its pinned axe rule in the deterministic browser boundary. |
+| 2 | [Accessibility finding and evidence capture](candidates/ACCESSIBILITY_FINDING_EVIDENCE_CAPTURE_ASSESSMENT.md) | Convert the selected rule's transient native result into minimized, rule-appropriate durable evidence and provenance. |
+| 3 | [Accessibility guidance retrieval assessments](candidates/guidance-retrieval/README.md) | Prepare the bounded three-scenario guidance corpus and retrieve cited passages for one finding. |
+| 4 | [Evidence-grounded remediation generation](candidates/EVIDENCE_GROUNDED_REMEDIATION_GENERATION_ASSESSMENT.md) | Generate one structured proposal from the selected finding and eligible passages, with sufficiency, citations, abstention, and manual checks. |
+| 5 | [Human remediation review](candidates/HUMAN_REMEDIATION_REVIEW_ASSESSMENT.md) | Present the four information layers for one proposal and record one approve, edit, or reject decision without automatic modification. |
+| 6 | [Rescan evidence comparison](candidates/RESCAN_EVIDENCE_COMPARISON_ASSESSMENT.md) | Compare one baseline/later pair under the same profile, including ordered contrast evidence where applicable, and report conservative outcomes. |
 
 ## Planned documentation areas
 
