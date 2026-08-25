@@ -6,11 +6,13 @@
 
 **Assessment date:** 2026-08-24.
 
-**Decision alignment:** 2026-08-25.
+**Decision alignment:** 2026-08-25, including the authorized-public-page scope recorded by OD-020.
 
 This focused assessment belongs to the [Accessibility guidance retrieval assessment family](README.md). It owns no requirement ID or status and does not authorize corpus acquisition or implementation. OD-004 accepts the bounded source pack and its W3C/WAI use-condition boundary in the canonical [Evidence and review workflow requirements — Corpus and retrieval](../../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#corpus-and-retrieval); the exact future acquisition and passage-construction mechanics assessed here remain Proposed.
 
-The [accepted first vertical slice](../../../requirements/PRODUCT_SCOPE_AND_GLOSSARY.md#first-vertical-slice) contains exactly three project-owned synthetic controlled profiles: `informative-image-alt` (`image-alt` / SC 1.1.1), `form-input-label` (`label` / SC 4.1.2), and `text-contrast` (`color-contrast` / SC 1.4.3). This candidate assesses how to prepare the accepted bounded pack for those scenarios without selecting a release technology or creating any corpus material during planning.
+The [accepted first vertical slice](../../../requirements/PRODUCT_SCOPE_AND_GLOSSARY.md#first-vertical-slice) scans one user-attested authorized public page with exactly three rule mappings: `image-alt` / SC 1.1.1, `label` / SC 4.1.2, and `color-contrast` / SC 1.4.3. The project-owned `informative-image-alt`, `form-input-label`, and `text-contrast` failing/corrected profiles remain the reproducible evaluation baseline for those mappings. This candidate assesses how to prepare the same bounded pack for independently selected findings from either source without selecting a release technology or creating corpus material during planning.
+
+The live page is evidence, never guidance-corpus input. No page text, page link, scanner help text, or model output is admitted to the corpus. The eight-artifact pack is intentionally not guaranteed to support every real-world variant of an allowed rule: when a selected finding cannot be grounded in its allowlisted passages, retrieval records the applicable canonical state—`incomplete`, `missing`, or `conflicting`—and generation abstains. Only `supported` is generation-eligible. Observed abstentions may justify a later reviewed corpus decision; they do not expand this manifest automatically.
 
 ## Accepted closed eight-artifact W3C pack
 
@@ -29,21 +31,21 @@ OD-004 accepts one manually curated English pack containing exactly eight W3C ar
 
 The dated WCAG artifact counts once even though three selected success-criterion sections become separately addressable passages. No other WCAG section, linked technique, example page, or definition is admitted unless this closed manifest is explicitly revised through the applicable decision process.
 
-### Scenario source filters and guidance roles
+### Rule source filters and guidance roles
 
-Each retrieval run uses exactly one profile and may retrieve only its selected passages:
+Each retrieval run starts from one selected finding, resolves exactly one accepted rule mapping, and may retrieve only its selected passages:
 
-| Scenario profile | Embedded source filter | Guidance roles needed for a supported result |
+| Supported rule and evaluation profile | Embedded source filter | Guidance roles needed for a supported result |
 | --- | --- | --- |
 | `informative-image-alt` / SC 1.1.1 | Artifact 1 SC 1.1.1 and needed definitions; artifacts 2, 5, and 6 | Normative criterion; contextual purpose/exceptions; meaningful-image technique; decorative-image technique. |
 | `form-input-label` / SC 4.1.2 | Artifact 1 SC 4.1.2 and needed definitions; artifacts 3 and 7 | Normative criterion; programmatic-name context; applicable native-label association technique. |
 | `text-contrast` / SC 1.4.3 | Artifact 1 SC 1.4.3 and needed definitions; artifacts 4 and 8 | Normative criterion and thresholds/exceptions; interpretive context; contrast technique/calculation context. |
 
-These filters prevent a single query from searching the other profiles. Technique inclusion never implies that it is the only sufficient method or that its preconditions have been established automatically.
+These filters prevent a single finding query from searching the other rule mappings. Multiple findings from the same page are never combined into one query. Technique inclusion never implies that it is the only sufficient method or that its preconditions have been established automatically.
 
 ## Mapping and boundary inputs outside the corpus
 
-The Step 2 **rule manifest** and **approved scenario/rule-to-guidance mapping** must pin the scanner release and source evidence used for each mapping. Candidate primary references are the axe-core 4.13 [`image-alt` rule metadata](https://github.com/dequelabs/axe-core/blob/v4.13.0/lib/rules/image-alt.json), Deque's axe-core 4.13 [`label` rule page](https://dequeuniversity.com/rules/axe/4.13/label), and Deque's axe-core 4.13 [`color-contrast` rule page](https://dequeuniversity.com/rules/axe/4.13/color-contrast). These records are mapping and provenance input, not embedded guidance and not proof that a complete success criterion failed.
+The Step 2 **rule manifest** and **approved rule-to-guidance mapping** must pin the scanner release and source evidence used for each mapping. Candidate primary references are the axe-core 4.13 [`image-alt` rule metadata](https://github.com/dequelabs/axe-core/blob/v4.13.0/lib/rules/image-alt.json), Deque's axe-core 4.13 [`label` rule page](https://dequeuniversity.com/rules/axe/4.13/label), and Deque's axe-core 4.13 [`color-contrast` rule page](https://dequeuniversity.com/rules/axe/4.13/color-contrast). These records are mapping and provenance input, not embedded guidance and not proof that a complete success criterion failed.
 
 The W3C ACT rule [Form field has non-empty accessible name (e086e5)](https://www.w3.org/WAI/standards-guidelines/act/rules/e086e5/) is also retained outside the embedded corpus as an official mapping/boundary reference. It maps that atomic check to SC 4.1.2 and explicitly does not map it to SC 3.3.2. The proposed `label` profile likewise does not infer SC 1.3.1. ACT e086e5 may validate the mapping boundary and record its own version, locator, acquisition time, and checksum, but its text is not chunked, embedded, ranked, or cited as retrieved guidance in this evaluation.
 
@@ -82,7 +84,8 @@ The external mapping manifest separately retains the pinned axe and ACT identiti
 
 ## Assumptions
 
-- The three accepted project-owned synthetic scenario profiles and their selected scanner results can be expressed without private page content.
+- Each allowed live finding can be projected to its rule mapping without placing the page URL, locator, page text, or other target content in the retrieval query.
+- The three project-owned synthetic profiles remain sufficient to freeze and evaluate the canonical supported retrieval cases.
 - The pinned axe mappings remain `image-alt` to SC 1.1.1, `label` to SC 4.1.2 only, and `color-contrast` to SC 1.4.3 during the evaluation.
 - A curator can approve exact mappings and guidance roles without treating them as conformance determinations.
 - The accepted OD-004 boundary is sufficient to begin artifact-specific use-condition verification after development is authorized; it is not a conclusion that every future packaging or public-display choice is permitted.
@@ -92,6 +95,7 @@ The external mapping manifest separately retains the pinned axe and ACT identiti
 - What exact excerpt and attribution presentation will be used in the local interface and any later public demo after artifact-specific use-condition review?
 - What exact paragraph/list boundaries and continuation representation will the implementation select if an approved heading exceeds the evaluated embedding input limit?
 - What exact immutable identifiers and review cadence should the external axe and ACT mapping manifest use when their published pages change?
+- Which observed, safely minimized live-finding abstentions would demonstrate a product need to review the closed corpus after the MVP?
 
 ## Risks
 
@@ -102,6 +106,7 @@ The external mapping manifest separately retains the pinned axe and ACT identiti
 - Contrast thresholds and exceptions require contextual facts; retrieval of SC 1.4.3 and G18 cannot prove that the scanner classified every condition correctly.
 - Manual selection or passage boundaries may omit an exception, definition, or qualification and change the apparent meaning.
 - Three narrow hard-filtered profiles can make a small evaluation look stronger than broader retrieval would be.
+- A supported axe rule can produce a live variant whose context or remediation path is not covered by the closed pack; treating rule identity alone as sufficient support would overstate retrieval quality.
 
 ## Explicit non-goals
 
@@ -109,6 +114,7 @@ The external mapping manifest separately retains the pinned axe and ACT identiti
 - Embedding axe help text, ACT e086e5, scanner metadata, or product-authored summaries as guidance.
 - Web search, automatic crawling, link following, automatic corpus refresh, or automatic acceptance of upstream changes.
 - Embedding or indexing raw page evidence, private target content, credentials, proprietary documents, or generated text as guidance.
+- Expanding the corpus automatically from a scanned page, its links, a model suggestion, or an unsupported finding.
 - Accessibility certification, full-success-criterion determination, or legal-compliance interpretation.
 
 ## Planning acceptance criteria
@@ -116,12 +122,13 @@ The external mapping manifest separately retains the pinned axe and ACT identiti
 This corpus portion is adequately defined for the Proposed retrieval evaluation when:
 
 1. The closed manifest contains exactly the eight W3C artifacts listed above and only the selected sections; artifact-specific use, status, copyright, attribution, modification, and public-display checks are completed before any authorized acquisition.
-2. Each of the three scenario profiles has one exact source allowlist and required guidance-role mapping; the `label` profile is restricted to SC 4.1.2.
+2. Each of the three accepted rule mappings has one exact source allowlist and required guidance-role mapping; the `label` mapping is restricted to SC 4.1.2, and each selected finding is queried independently.
 3. Pinned axe metadata and ACT e086e5 remain versioned mapping/boundary inputs outside the embedded corpus and cannot appear as ranked guidance passages.
 4. Every passage has a visible authority label, exact locator, immutable snapshot identity, checksum, scenario eligibility, guidance role, and deterministic derivation path.
 5. Manual heading-aware selection and paragraph/list segmentation occur before embedding; no crawler, generic splitter, sliding-window overlap, or embedding-owned segmentation is introduced.
 6. Rebuilding an unchanged manifest produces the same passage identities and normalized text, while a source, selected boundary, or mapping change creates a new version rather than rewriting history.
 7. No retrieved source or mapping record is presented as proof of complete WCAG failure, accessibility, conformance, or certification.
+8. Live page content cannot enter the corpus or retrieval query, and an allowed-rule finding outside the pack's supported context causes a recorded `incomplete`, `missing`, or `conflicting` result and deterministic abstention rather than corpus expansion.
 
 ## Documentation navigation
 

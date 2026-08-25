@@ -1,18 +1,18 @@
-# Authorized deterministic web scan controlled-fixture execution and security assessment
+# Controlled-fixture execution and security evaluation assessment
 
 ## Authority, status, and scope
 
-**Document status: Proposed architecture assessment.** ADR-0008, ADR-0009, and ADR-0011 retain their accepted evaluation-baseline scope; no part of this assessment becomes accepted by association.
+**Document status: Proposed evaluation architecture assessment.** [ADR-0017](../../decisions/ADR-0017-authorized-public-page-scan-boundary.md) replaces controlled fixtures as the runtime target boundary but retains them as the deterministic evaluation baseline. ADR-0008, ADR-0009, and ADR-0011 retain their evaluation-baseline scope; no exact fixture or technical detail becomes accepted by association.
 
 Assessment date: 2026-08-23. Expanded to the three-scenario portfolio slice on 2026-08-24.
 
-This assessment owns the proposed controlled-fixture execution, authorization, Step 1 handoff, failure, and minimum security boundary for the [authorized deterministic web scan assessment family](README.md). It owns no requirement ID or status, changes no ADR scope, and does not authorize implementation or live-page scanning.
+This assessment owns the proposed project-owned controlled-fixture execution, expected observations, Step 1 handoff, failure, and zero-egress security profile used to evaluate the [authorized deterministic web scan assessment family](README.md). It owns no requirement ID or status, changes no ADR scope, and does not define the product's runtime target intake. Runtime public-page behavior is assessed separately in [Authorized public-page execution and security](AUTHORIZED_PUBLIC_PAGE_EXECUTION_AND_SECURITY.md).
 
 Canonical behavior remains in [Evidence and review workflow requirements — Target authorization and scanning](../../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#target-authorization-and-scanning), [Privacy and security requirements](../../../requirements/quality-security-and-operations/PRIVACY_AND_SECURITY.md), and [Reliability, reproducibility, and operations requirements](../../../requirements/quality-security-and-operations/RELIABILITY_REPRODUCIBILITY_AND_OPERATIONS.md).
 
-## Smallest portfolio scenario set
+## Smallest deterministic evaluation set
 
-The first vertical slice should demonstrate exactly three accessibility scenarios through the complete product pipeline, not broad scanner coverage. Each row is one logical scenario with a failing and corrected state. These six states do not imply six projects, pages, or files; physical layout remains an implementation detail.
+The fixed portfolio evaluation should demonstrate exactly three accessibility rule families through the complete product pipeline, not broad scanner coverage. Each row is one logical controlled case with a failing and corrected state. These six states do not imply six projects, pages, or files; physical layout remains an implementation detail.
 
 | Scenario profile | Failing revision | Corrected revision | Expected automated observations |
 | --- | --- | --- | --- |
@@ -20,7 +20,7 @@ The first vertical slice should demonstrate exactly three accessibility scenario
 | `form-input-label` | Visible text `Email address` is adjacent to one visible `<input type="email">` but is not programmatically associated, and no other accessible-name mechanism is present. | The same input has the visible label `Email address` explicitly associated through matching `for` and `id` values. | Exactly one **label** violation, then a same-target native pass. Direct mapping: WCAG 2.2 SC 4.1.2; the axe rule does not itself test SC 3.3.2 or the whole success criterion/page. |
 | `text-contrast` | One 16 CSS px, weight-400 normal-text target is rendered as foreground `#888888` on background `#ffffff`. | The same target retains its typography and is rendered as foreground `#767676` on background `#ffffff`. | Exactly one **color-contrast** violation, then a same-target native pass under the fixed profile. Direct mapping: WCAG 2.2 SC 1.4.3. |
 
-All three scenarios and both states are project-owned, synthetic, publicly shareable, and static. They contain no script, frame, form submission, external resource, credential, or personal data; image bytes are embedded. Before evaluation, each scenario's state content, expected rule result, stable fixture-target key, and browser/rule profile are frozen. One scan execution within the single enclosing workflow operation selects exactly one scenario and one state, runs only the rule named by that profile, and expects one intended target. The application does not combine the scenarios or rules into one scan.
+All three cases and both states are project-owned, synthetic, publicly shareable, and static. They contain no script, frame, form submission, external resource, credential, or personal data; image bytes are embedded. Before evaluation, each case's state content, expected rule result, stable fixture-target key, and browser/rule profile are frozen. The deterministic manifest may exercise each logical case independently so a failure is attributable to one rule family. This is an evaluation arrangement, not the runtime public-page scan shape, which performs one exact three-rule page scan and may return multiple findings.
 
 The corrected results prove only the selected axe rule outcomes under the recorded profile. They do not prove alternative-text appropriateness, label accuracy or instruction sufficiency, text readability in every condition, whole-success-criterion satisfaction, page accessibility, or WCAG conformance. Later generation and review must preserve those distinctions and require the scenario-specific manual checks.
 
@@ -30,11 +30,11 @@ The corrected results prove only the selected axe rule outcomes under the record
 | `form-input-label` | Confirm that `Email address` accurately and clearly identifies the intended input, remains visibly available, activates the associated input as expected, and is accompanied by any necessary instructions. |
 | `text-contrast` | Confirm that the target is ordinary text in the intended visual context and remains understandable under relevant visual conditions not established by the one automated measurement. |
 
-Ambiguous variants, any fourth scenario, broader rule sets, arbitrary URLs, live or authenticated target pages, and crawling remain deferred until demonstrated product need.
+Ambiguous variants, any fourth rule family, broader rule sets, and extra fixture permutations remain outside the compact evaluation manifest. Public-page admission and hostile-network behavior are evaluated under the separate runtime assessment; authenticated pages and crawling remain out of scope.
 
 ## Minimal component boundary
 
-The proposed flow is:
+The controlled evaluation flow is:
 
 **Chrome or Edge → loopback React presentation → local TypeScript service → authorization module → scan module → Playwright-managed Chromium → transient native scanner observation → evidence-capture module**
 
@@ -65,7 +65,7 @@ The scan admission record needs only:
 
 A missing confirmation or unknown fixture ID rejects the request before Chromium launches. The interface accepts no arbitrary URL, filesystem path, uploaded HTML, browser option, header, cookie, or credential.
 
-This attestation is intentionally small for a single-user portfolio fixture. Live targets need a different, accepted authorization and threat model.
+This attestation is intentionally small because the project owns the fixture. It must not be reused as the runtime public-page admission policy; ADR-0017 and the public-page assessment own that boundary.
 
 ## Proposed deterministic browser profile
 
@@ -182,13 +182,13 @@ The synthetic fixture remains untrusted browser content even though the project 
 
 This is a controlled-fixture boundary, not a general hostile-web isolation design.
 
-## Deferred live-page boundary
+## Relationship to the runtime public-page path
 
-Live or user-selected pages, arbitrary URLs, authenticated target states, crawling, and a crawler implementation are outside the MVP and this assessment. They require demonstrated product need and a separate accepted scope, authorization, privacy, and threat-model decision before architecture work begins. This document intentionally specifies none of those mechanisms.
+ADR-0017 accepts one attested authorized public HTTPS page as the runtime MVP target. This controlled assessment remains intentionally stricter: it blocks all external egress, freezes the content, and supplies known gold observations. Passing these fixture checks does not prove that the public-page destination, redirect, subresource, hostile-content, resource-bound, or privacy controls work. Those need separate evaluation under [Authorized public-page execution and security](AUTHORIZED_PUBLIC_PAGE_EXECUTION_AND_SECURITY.md).
 
-## Acceptance criteria for the planned step
+## Acceptance criteria for the controlled evaluation baseline
 
-The first workflow step is adequately defined for the portfolio slice when a future evaluation can demonstrate that:
+The controlled evaluation baseline is adequately defined when a future evaluation can demonstrate that:
 
 - Only the failing or corrected logical state of the three project-owned scenarios can be selected, and each scan requires the recorded attestation.
 - One pinned Playwright/Chromium/axe configuration executes exactly one rule resolved from **image-alt**, **label**, or **color-contrast**.
@@ -204,9 +204,9 @@ The first workflow step is adequately defined for the portfolio slice when a fut
 
 ## Open decisions and explicit non-goals
 
-The former single `image-alt` scenario scope is superseded by the accepted three-scenario product decision. OD-003, OD-014, and OD-015 now establish the fixed-input principle, browser-local service boundary, and minimal runtime-validation boundary; this assessment still does not accept the exact proposed Playwright values or fixture organization. Evidence retention and canonical filesystem persistence remain owned by Step 2. Installer and distribution packaging remain deferred until demonstrated product need.
+The former single `image-alt` evaluation scope is superseded by the three-family evaluation manifest. The fixed-input principle, browser-local service boundary, and minimal runtime-validation boundary still do not accept the exact proposed Playwright values or fixture organization. Evidence retention and canonical filesystem persistence remain owned by Step 2. Installer and distribution packaging remain deferred.
 
-Explicit non-goals are arbitrary, live, or authenticated target pages; crawler behavior or implementation; cross-browser equivalence; any fourth rule or fixture family; broad WCAG coverage; production concurrency; browser-worker isolation; process supervision; automatic remediation; and any claim of accessibility conformance.
+Explicit non-goals are using fixtures as the runtime target selector; authenticated targets; crawler behavior or implementation; cross-browser equivalence; any fourth rule or fixture family; broad WCAG coverage; production concurrency; automatic remediation; and any claim of accessibility conformance. Public-page security controls belong to the adjacent runtime assessment, not this zero-egress fixture profile.
 
 ## Primary sources
 
@@ -223,7 +223,7 @@ The shared browser and scanner sources are listed in [Technology selection — P
 
 ## Documentation navigation
 
-- Previous within this workflow step: [Technology selection](TECHNOLOGY_SELECTION.md)
+- Previous within this workflow step: [Authorized public-page execution and security](AUTHORIZED_PUBLIC_PAGE_EXECUTION_AND_SECURITY.md)
 - Up: [Authorized deterministic web scan candidate assessments](README.md)
 - Next workflow step: [Accessibility finding and evidence capture assessment](../ACCESSIBILITY_FINDING_EVIDENCE_CAPTURE_ASSESSMENT.md)
 - [Architecture index](../../README.md)

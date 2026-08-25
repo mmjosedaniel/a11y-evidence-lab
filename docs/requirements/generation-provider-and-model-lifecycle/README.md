@@ -8,7 +8,7 @@ This family index routes the canonical provider-execution and installed-product 
 
 | Module | Canonical IDs | Responsibility |
 | --- | --- | --- |
-| [Generation provider execution](GENERATION_PROVIDER_EXECUTION.md) | `REQ-LLM-001` through `REQ-LLM-017` | Provider-neutral generation, explicit per-run local/Groq selection, no-fallback behavior, bounded readiness, structured-output configuration, deferred support qualification, and the recommended post-MVP constrained remote-profile candidate. |
+| [Generation provider execution](GENERATION_PROVIDER_EXECUTION.md) | `REQ-LLM-001` through `REQ-LLM-018` | Provider-neutral generation, one explicit global Local/Groq mode per PageAnalysisRun, finding-specific invocation and disclosure, no-fallback behavior, bounded readiness, structured-output configuration, deferred support qualification, and the recommended post-MVP constrained remote-profile candidate. |
 | [Installation and model lifecycle](INSTALLATION_AND_MODEL_LIFECYCLE.md) | `REQ-INST-001` through `REQ-INST-016` | Local-service startup in Chrome or Edge, explicit runtime-managed model acquisition, and deferred installer, packaging, and expanded artifact lifecycle. |
 
 Read only the focused module that owns the task. Provider execution and artifact installation remain distinct authorities even when a workflow change affects both.

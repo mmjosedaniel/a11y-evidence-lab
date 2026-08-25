@@ -7,6 +7,10 @@
 
 A reranker could improve the ordering of passages returned by dense retrieval, but it would add another model artifact, capacity load, latency stage, provenance surface, and evaluation variable. The initial corpus is intentionally small, and no retrieval baseline has yet demonstrated a ranking problem that requires a reranker.
 
+### Public-page terminology amendment recorded 2026-08-25
+
+[ADR-0017](ADR-0017-authorized-public-page-scan-boundary.md) adds bounded target-page networking without changing this reranker deferral. The original **local-only operation/path** wording referred to reranking without a hosted API, not to an offline page scan. The clarified wording below preserves the original evidence gate and deferral.
+
 ## Considered options
 
 1. Include a local reranker in the initial retrieval baseline.
@@ -22,9 +26,9 @@ Reconsider a reranker only when all of the following are true:
 - the embedding and vector-store baseline has been tuned and evaluated on the approved fixed dataset;
 - error analysis shows that candidate passages are retrieved but materially misordered;
 - the accepted retrieval gate cannot be met through corpus, chunking, metadata, query, or base-ranking corrections alone; and
-- a proposed local reranker passes the reference-PC capacity gate and can preserve passage-level provenance, deterministic configuration, and local-only operation.
+- a proposed local reranker passes the reference-PC capacity gate and can preserve passage-level provenance, deterministic configuration, and reranking without a hosted API.
 
-A hosted reranker must not become an automatic substitute for the local-only path. Adding any reranker requires a new ADR identifying the exact model, runtime, insertion point, evaluation gain, resource cost, and failure behavior.
+A hosted reranker must not become an automatic substitute for the local no-hosted-reranking path. Adding any reranker requires a new ADR identifying the exact model, runtime, insertion point, evaluation gain, resource cost, and failure behavior.
 
 ## Consequences
 
@@ -38,6 +42,7 @@ A hosted reranker must not become an automatic substitute for the local-only pat
 - [ADR-0004: Reference-PC capacity gate](ADR-0004-reference-pc-capacity-gate-for-local-models.md)
 - [ADR-0006: EmbeddingGemma as the initial embedding model](ADR-0006-embeddinggemma-as-initial-embedding-model.md)
 - [ADR-0007: Chroma as the initial local vector store](ADR-0007-chroma-as-initial-local-vector-store.md)
+- [ADR-0017: Authorized public-page scan boundary](ADR-0017-authorized-public-page-scan-boundary.md)
 - [Evidence and review workflow requirements](../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md): `REQ-RETR-*`
 - [Evaluation and acceptance requirements](../../requirements/evaluation-and-release/EVALUATION_AND_ACCEPTANCE.md): `REQ-EVAL-003`
 - [Reliability, reproducibility, and operations requirements](../../requirements/quality-security-and-operations/RELIABILITY_REPRODUCIBILITY_AND_OPERATIONS.md): `REQ-QUAL-009`

@@ -5,9 +5,13 @@
 
 ## Context
 
-The local retrieval pipeline needs an embedding model that can index and query the initial accessibility-guidance corpus within the reference PC's capacity. The choice must preserve local-only operation and exact index reproducibility while providing adequate retrieval quality for cited remediation guidance.
+The local retrieval pipeline needs an embedding model that can index and query the initial accessibility-guidance corpus within the reference PC's capacity. The choice must preserve embedding without a hosted API and exact index reproducibility while providing adequate retrieval quality for cited remediation guidance.
 
 The currently published Ollama `embeddinggemma` artifact is a compact, local text-embedding option. Published size and general-purpose retrieval claims do not establish fitness for WCAG, ACT, APG, scanner metadata, or the project's chunking strategy.
+
+### Public-page terminology amendment recorded 2026-08-25
+
+[ADR-0017](ADR-0017-authorized-public-page-scan-boundary.md) adds bounded target-page networking but does not move embedding to a hosted API. The original **local-only operation** wording referred to local embedding, not to an offline page scan. The clarified wording below preserves the original embedding decision and applies it to both global generation modes.
 
 ### MVP acquisition and qualification amendment recorded 2026-08-25
 
@@ -28,7 +32,7 @@ Use `embeddinggemma` as the initial embedding model for evaluation only.
 - Evaluate it only on the compact frozen three-scenario retrieval subset and its one representative provider-independent insufficiency control, with descriptive per-case results rather than a statistical or promotion claim.
 - Verify that chunk lengths and query construction fit the model's effective input limit without silent truncation.
 - Rebuild indexes when the model, digest, preprocessing, chunking, or normalization changes; never reuse an index across incompatible embedding configurations.
-- Keep embedding local in the local-only mode. A hosted generation selection does not silently move embeddings to an external API.
+- Keep embedding local for both global generation modes. Selecting hosted generation does not silently move embeddings to an external API.
 
 Promoting `embeddinggemma` to a release configuration is Deferred. For the MVP it must pass the bounded retrieval checks and practical reference-PC screen; if it fails, replace it with one smaller capacity-screened local candidate while retaining the same retrieval provenance contract.
 
@@ -47,6 +51,7 @@ Promoting `embeddinggemma` to a release configuration is Deferred. For the MVP i
 
 - [ADR-0004: Reference-PC capacity gate](ADR-0004-reference-pc-capacity-gate-for-local-models.md)
 - [ADR-0005: Ollama as the initial local model runtime](ADR-0005-ollama-as-initial-local-model-runtime.md)
+- [ADR-0017: Authorized public-page scan boundary](ADR-0017-authorized-public-page-scan-boundary.md)
 - [Evidence and review workflow requirements](../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md): `REQ-RETR-003`
 - [Reliability, reproducibility, and operations requirements](../../requirements/quality-security-and-operations/RELIABILITY_REPRODUCIBILITY_AND_OPERATIONS.md): `REQ-QUAL-003`, `REQ-QUAL-004`, and `REQ-QUAL-009`
 - [Evaluation and acceptance requirements](../../requirements/evaluation-and-release/EVALUATION_AND_ACCEPTANCE.md): `REQ-EVAL-003`

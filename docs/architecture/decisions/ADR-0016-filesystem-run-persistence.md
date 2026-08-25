@@ -9,6 +9,10 @@ The MVP needs only enough local persistence to reopen one synthetic run, inspect
 
 The retrieval index is a replaceable derived artifact and is not the authority for run evidence. Browser storage and a rendered Markdown report are also insufficient as the canonical record because privileged workflow state must remain owned by the local application service and machine-readable.
 
+### Authorized public-page amendment recorded 2026-08-25
+
+[ADR-0017](ADR-0017-authorized-public-page-scan-boundary.md) replaces the one-synthetic-finding-per-directory assumption with a small filesystem aggregate. One `PageAnalysisRun` is the parent scan record and deletion unit. It contains the complete variable Finding and `ScannerReviewObservation` collections. Selecting a Finding may add its independently identified and versioned `FindingWorkflow` child; no child record is required while the Finding remains `unprocessed`, and only one child may be active. A `ProviderInvocation` record exists only when a provider call is actually attempted; deterministic abstention and unprocessed findings create none. `ScannerReviewObservation` records have no finding workflow. This preserves filesystem simplicity without introducing a database, queue, batch controller, or schema platform.
+
 ## Considered options
 
 1. Use a relational or document database for all MVP records.
@@ -19,19 +23,22 @@ The retrieval index is a replaceable derived artifact and is not the authority f
 
 Use application-owned filesystem persistence for MVP run data.
 
-- Use the conceptual layout `data/runs/<timestamp-or-run-id>/`, where each directory belongs to one immutable run. The exact safe ID format and filenames remain implementation details.
-- Store the canonical machine-readable run graph as JSON. It contains only the minimized synthetic finding evidence, guidance passage references and source metadata needed to interpret them, generation proposal or abstention, review decision or edit, comparison reference/result when present, timestamps, record versions, and non-secret execution provenance required to reopen the run.
+- Use the conceptual layout `data/runs/<timestamp-or-run-id>/`, where one directory belongs to one canonical `PageAnalysisRun` parent and contains its child records. The exact safe ID format, filenames, subdirectories, write protocol, and serialization split remain implementation details.
+- Store the parent and child graph as canonical machine-readable JSON. The parent contains only the authorization and minimized target identity required by the privacy authority, immutable scan configuration and provenance, navigation/policy outcome, exact per-rule and full-result coverage, complete Finding and `ScannerReviewObservation` collections or their contained indexes, timestamps, and record version needed to reopen the page analysis.
+- Store the complete Finding collection and minimized-evidence references in the parent scan graph. An unselected Finding is visibly `unprocessed` without requiring a child record. When the user selects it, add one independently identified `FindingWorkflow` child, which may acquire retrieval, proposal or abstention, optional invocation, review or edit, comparison, timing, version, and non-secret execution-provenance fields as those validated stages occur. Updating one versioned child must not rewrite the immutable completed scan evidence or a sibling child.
+- Create a `ProviderInvocation` child or subrecord only when a local or Groq call is attempted. It records the non-secret provider/model/configuration, disclosed data categories, request time, outcome, and available usage or limit metadata; it never stores a credential or duplicate raw request/response payload. No-call abstention records why no invocation exists.
 - A human-readable Markdown report may be generated for portfolio inspection, but it is optional and must never be the only source of truth.
 - Keep user/run data outside Git. The future implementation must ignore the local data root and must not commit generated runs, model artifacts, credentials, downloaded source copies, or private material.
-- A retry creates a new run directory and never overwrites the earlier run. A failed operation remains failed and must not be presented as partial success.
-- Deleting a run means deleting that run's local directory. The MVP does not add a recycle-bin workflow, cross-run cascading deletion, retention scheduler, backup, restore, sync, export service, audit store, or multi-user ownership model.
+- Retrying a failed scan or any failed finding workflow creates a new linked `PageAnalysisRun` and parent directory with a new authorization attestation, scan, global provider-mode choice, and optional retry reference. It never overwrites or resumes the earlier parent or child. A coverage-incomplete or failed operation is never presented as partial success or a complete zero-finding scan.
+- Deleting a `PageAnalysisRun` means deleting its exact local parent directory and all contained child records. The MVP does not add independent child deletion, a recycle-bin workflow, cross-run cascading deletion, retention scheduler, backup, restore, sync, export service, audit store, or multi-user ownership model.
 - Do not retain full HTML, DOM snapshots, screenshots, browser traces, cookies, credentials, arbitrary input values, private URLs, or unrelated page content. The application still minimizes and validates data before persistence.
 - Chroma, if it passes its separate evaluation, stores a rebuildable corpus index only. It is not the canonical run store, and this ADR does not promote Chroma to a release dependency.
 
 ## Consequences
 
-- One local directory is enough to reopen, inspect, compare, and delete a controlled run.
+- One local parent directory is enough to reopen, inspect, extend with independently versioned selected-finding work, compare, and delete a page analysis.
 - Canonical JSON keeps the record inspectable and testable without introducing a database or schema-migration platform; minimal record-version fields remain necessary.
+- The variable number of deterministic findings and selected child workflows does not require batch processing or concurrent writers; one user action can append one validated child at a time.
 - There is intentionally no automatic backup or synchronization. Deleting the directory removes the application's only MVP copy unless the developer independently copied it.
 - A future need for private projects, high-volume history, concurrent writers, migrations, backup, or cross-device access requires a new persistence decision.
 
@@ -40,6 +47,7 @@ Use application-owned filesystem persistence for MVP run data.
 - [ADR-0011: TypeScript as the initial application language](ADR-0011-typescript-as-initial-application-language.md)
 - [ADR-0012: React as the initial user-interface library](ADR-0012-react-as-initial-user-interface-library.md)
 - [ADR-0015: Localhost browser MVP execution](ADR-0015-localhost-browser-mvp-execution.md)
+- [ADR-0017: Authorized public-page scan boundary](ADR-0017-authorized-public-page-scan-boundary.md)
 - [Information and workflow lifecycle requirements](../../requirements/INFORMATION_AND_WORKFLOW_LIFECYCLE.md)
 - [Privacy and security requirements](../../requirements/quality-security-and-operations/PRIVACY_AND_SECURITY.md): `REQ-SEC-*`
 - [Reliability, reproducibility, and operations requirements](../../requirements/quality-security-and-operations/RELIABILITY_REPRODUCIBILITY_AND_OPERATIONS.md): `REQ-QUAL-*`
