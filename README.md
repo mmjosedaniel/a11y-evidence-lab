@@ -53,7 +53,7 @@ This repository currently contains product planning and feasibility analysis onl
 
 ## Documentation
 
-Start with the [project documentation index](docs/README.md) for the recommended reading order, current concept, context, [project requirements](docs/PROJECT_REQUIREMENTS.md), and local MVP feasibility assessment.
+Start with the [project documentation index](docs/README.md) for the recommended reading order, current concept, context, [project requirements](docs/PROJECT_REQUIREMENTS.md), local MVP feasibility assessment, and the derived [documentation-only Gherkin specifications](docs/specs/README.md).
 
 ## License
 
