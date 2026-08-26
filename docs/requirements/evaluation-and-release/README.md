@@ -13,7 +13,7 @@ This family index routes the canonical evaluation and release-evidence requireme
 
 Read only the focused module that owns the task. The compact MVP evaluation is portfolio evidence and cannot qualify a release. A later release decision may define separate evidence, but one module never implies that the other passed.
 
-The [documentation-only Gherkin specifications](../../specs/README.md) are a derived view of the behavioral examples. They own no requirement ID or status and provide no executable or acceptance evidence.
+The [documentation-only Gherkin specifications](../../specs/README.md) are derived views of the behavioral examples and the applicable constraints in their linked authorities. They own no requirement ID or status and provide no executable or acceptance evidence.
 
 ## Documentation navigation
 
