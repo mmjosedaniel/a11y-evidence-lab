@@ -17,20 +17,24 @@ The original decision anticipated provisional latency and thermal limits followe
 
 For the fixed MVP, apply this gate to `qwen3.5:4b` as the single first local configuration. Only if that configuration fails may the project replace it with one smaller configuration that must pass the same gate. The plural candidate-set language in the original decision describes the reusable gate and possible future evaluation, not an active multi-model list, parallel screens, or a local-model comparison in this MVP. This clarification follows ADR-0003 and OD-009 while leaving the capacity gate itself Accepted.
 
+### Portfolio YAGNI amendment recorded 2026-08-27
+
+[OD-022](../../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-022--portfolio-mvp-yagni-simplification) makes the on-device step one manual representative capacity smoke performed by the developer after the developer-managed Ollama setup in ADR-0020. It is evaluation work, not an in-application preflight, benchmark screen, hardware monitor, or readiness subsystem. The metadata exclusion rule and reference-PC boundary remain Accepted.
+
 ## Considered options
 
 1. Compare current models broadly and reject oversized configurations after full evaluation.
 2. Treat published artifact size as the only eligibility check.
-3. Use a published-metadata prefilter followed by a short on-device capacity preflight before full evaluation.
+3. Use a published-metadata prefilter followed by one manual on-device capacity smoke before full evaluation.
 
 ## Decision
 
 Use a two-stage capacity gate before a local model configuration becomes an evaluation candidate.
 
 1. **Metadata prefilter:** exclude a configuration without downloading or benchmarking it when published artifact size, estimated runtime/context working set, storage needs, or supported runtime requirements clearly exceed the existing reference PC with a documented safety margin.
-2. **On-device capacity preflight:** a configuration that is plausibly within the envelope may run a bounded preflight using its exact model digest, quantization, configured context, and runtime while the representative browser, embedding, retrieval, and application services are active.
+2. **Manual on-device capacity smoke:** after the developer installs the one plausible configuration, run the representative browser, embedding, retrieval, and application workload once using its exact model digest, quantization, configured context, and runtime.
 
-A configuration passes only if it completes the bounded preflight on the existing PC without out-of-memory failure, storage exhaustion, or an unusable application interface. Record material paging or fallback, observed duration, memory behavior, UI responsiveness, and thermal limitations as evaluation context without converting them into formal MVP budgets.
+A configuration passes only if the manual smoke completes on the existing PC without out-of-memory failure, storage exhaustion, or an unusable application interface. Record readily observable paging or fallback, duration, and UI responsiveness as evaluation context. No in-app hardware monitoring, repeated benchmark protocol, formal budget, or thermal qualification is required.
 
 Only configurations that pass both stages may enter the compact MVP evaluation or become the documented local evaluation configuration. Passing does not place a model in a supported-model catalog or justify a release, hardware-compatibility, latency, or thermal claim. A failed configuration is removed from the active candidate set; the project records the exclusion reason but performs no further quality evaluation on it. Additional hardware, remote compute, or API inference must not be used to make a local configuration appear eligible.
 
@@ -39,7 +43,7 @@ The capacity gate applies to every local model, including the initial bootstrap.
 ## Consequences
 
 - Obviously oversized models do not appear in current candidate lists or consume download and evaluation effort.
-- Borderline configurations receive only enough testing to establish whether they fit before quality work begins.
+- The one plausible configuration receives one manual representative smoke before quality work begins.
 - The candidate set may contain smaller models, different quantizations, or different context profiles, provided each configuration independently passes the gate.
 - A future hardware change requires a new recorded reference-machine decision before it broadens local-model eligibility.
 - Formal performance and broad compatibility qualification remain deferred; this gate supports only the controlled portfolio workflow on the documented PC.

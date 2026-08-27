@@ -12,6 +12,10 @@ Those controls would be appropriate if A11y Evidence Lab claimed safe general-pu
 
 Treating the URL as trusted does not make arbitrary page content safe. It is an explicit supported-use assumption and limitation, not a security guarantee. A later product that accepts untrusted targets, is distributed to non-developers, or claims general Internet scanning would require a new threat model and architecture decision.
 
+### Portfolio YAGNI downstream amendment recorded 2026-08-27
+
+[OD-022](../../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-022--portfolio-mvp-yagni-simplification) narrows downstream mechanics without changing this trusted-URL boundary. [ADR-0019](ADR-0019-in-process-exact-vector-search.md) replaces Chroma with in-process exact vector search. [ADR-0020](ADR-0020-manual-developer-managed-local-model-setup.md) makes local setup a developer prerequisite and replaces separate provider probes and repeated per-invocation disclosure with one mode-selection disclosure, an explicit Generate action, the actual provider call, and returned-output validation. [ADR-0021](ADR-0021-single-file-run-aggregate.md) replaces independently versioned child records with one `run.json` aggregate. Public-page comparison now requires aligned page and scan profiles plus one exact unique same-rule locator match; ambiguous, missing, or changed matches are `inconclusive`, and no fuzzy or AI correlation framework belongs to the MVP.
+
 ## Considered options
 
 1. Keep ADR-0017's production-oriented hostile-network containment and qualification as a pre-development requirement.
@@ -89,8 +93,11 @@ A demonstrated need for any of those capabilities requires a later threat model 
 - [ADR-0013: LangChain as the initial RAG integration baseline](ADR-0013-langchain-as-initial-rag-integration.md)
 - [ADR-0014: Groq as the MVP external generation provider](ADR-0014-groq-as-mvp-external-generation-provider.md)
 - [ADR-0015: Localhost browser MVP execution](ADR-0015-localhost-browser-mvp-execution.md)
-- [ADR-0016: Filesystem run persistence](ADR-0016-filesystem-run-persistence.md)
+- [ADR-0016: Filesystem run persistence](ADR-0016-filesystem-run-persistence.md) — superseded for the MVP by ADR-0021
 - [ADR-0017: Authorized public-page scan boundary](ADR-0017-authorized-public-page-scan-boundary.md) — superseded for the MVP
+- [ADR-0019: In-process exact vector search for the MVP](ADR-0019-in-process-exact-vector-search.md)
+- [ADR-0020: Manual developer-managed local model setup](ADR-0020-manual-developer-managed-local-model-setup.md)
+- [ADR-0021: Single-file run aggregate](ADR-0021-single-file-run-aggregate.md)
 - [Evidence and review workflow requirements](../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md): `REQ-AUTH-*`, `REQ-SCAN-*`, `REQ-EVID-*`, `REQ-RETR-*`, and `REQ-GEN-*`
 - [Generation provider execution requirements](../../requirements/generation-provider-and-model-lifecycle/GENERATION_PROVIDER_EXECUTION.md): `REQ-LLM-*`
 - [Privacy and security requirements](../../requirements/quality-security-and-operations/PRIVACY_AND_SECURITY.md): `REQ-SEC-*`

@@ -27,8 +27,9 @@ Use TypeScript as the primary application language for the initial evaluation im
 - Apply it to application-owned UI code, the local application service, shared domain contracts, provider and embedding adapters, retrieval integration, and the Playwright/axe-core module where the selected execution runtime supports the pinned dependencies.
 - Require strict, independently executed type checking. A transpiler, build tool, test runner, or editor that accepts TypeScript syntax does not replace a successful compiler type check.
 - Define the minimum application-owned record types needed by the six-step workflow. Runtime-validate and normalize native axe results, Groq responses, local-runtime responses, and canonical persisted JSON before they enter domain logic.
+- Under [ADR-0021](ADR-0021-single-file-run-aggregate.md), persisted domain state is one top-level `run.json` type with nested finding data, not a family of independently versioned child contracts.
 - Do not introduce JSON Schema or another schema language as a second canonical contract merely for the MVP. Provider-required JSON Schema may describe the Groq request boundary, but the application-owned TypeScript record meaning remains authoritative and the returned value is still validated.
-- Keep React, Playwright, axe-core, Ollama, Chroma, model-provider SDK, and workflow-framework types outside canonical domain records. Integration-specific types terminate at their adapters.
+- Keep React, Playwright, axe-core, Ollama, LangChain `MemoryVectorStore`, model-provider SDK, and workflow-framework types outside canonical domain records. Integration-specific types terminate at their adapters.
 - Keep credentials, filesystem access, process control, model management, persistence, and privileged networking in the local application service, never in browser-delivered UI code. A later isolated helper requires its own demonstrated need and topology decision.
 - Pin and record the TypeScript compiler, JavaScript runtime, package manager, lockfile, and material dependency versions used by the MVP evaluation.
 - Evaluate strict type checking, the four runtime-validation boundaries, normalized failures, loopback isolation, startup, recovery, and practical reference-PC capacity. Cancellation frameworks, packaging, migrations, and broader compatibility qualification remain deferred.
@@ -42,7 +43,7 @@ This evaluation decision does not qualify TypeScript or its toolchain as a relea
 - UI, service, browser-analysis, and contract code can share one language and compatible tooling while preserving explicit module boundaries.
 - Static checking can catch incompatible contract changes before execution, but the four untrusted MVP boundaries still require runtime validation because erased types are not a security or data-integrity boundary.
 - Some operating-system integrations may require a native module, helper process, or separately owned service whose security and lifecycle must be evaluated.
-- Chroma's TypeScript client uses a running Chroma service for the documented local setup, so TypeScript does not resolve Chroma's evaluation topology or lifecycle. ADR-0016 also keeps the rebuildable vector index distinct from canonical JSON run records.
+- ADR-0019 keeps the fixed corpus vectors as disposable in-process LangChain values, while ADR-0021 keeps the single canonical run aggregate application-owned. Neither framework type enters `run.json`.
 - Replacing TypeScript later would affect application-owned implementation code but must not change record-version meaning, stored evidence meaning, or provider-neutral behavior.
 
 ## Primary references
@@ -50,18 +51,18 @@ This evaluation decision does not qualify TypeScript or its toolchain as a relea
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/intro)
 - [TypeScript runtime behavior and erased types](https://www.typescriptlang.org/docs/handbook/typescript-from-scratch)
 - [Playwright TypeScript support](https://playwright.dev/docs/test-typescript)
-- [Chroma TypeScript getting started](https://docs.trychroma.com/docs/overview/getting-started)
+- [LangChain JavaScript MemoryVectorStore](https://docs.langchain.com/oss/javascript/integrations/vectorstores/memory)
 
 ## Related decisions and requirements
 
 - [ADR-0001: Interchangeable generation providers](ADR-0001-interchangeable-generation-providers.md)
-- [ADR-0007: Chroma as the initial local vector store](ADR-0007-chroma-as-initial-local-vector-store.md)
+- [ADR-0019: In-process exact vector search](ADR-0019-in-process-exact-vector-search.md)
 - [ADR-0008: Playwright as the initial browser automation technology](ADR-0008-playwright-as-initial-browser-automation.md)
 - [ADR-0012: React as the initial user-interface library](ADR-0012-react-as-initial-user-interface-library.md)
 - [ADR-0013: LangChain as the initial RAG integration baseline](ADR-0013-langchain-as-initial-rag-integration.md)
 - [ADR-0014: Groq as the MVP external generation provider](ADR-0014-groq-as-mvp-external-generation-provider.md)
 - [ADR-0015: Localhost browser MVP execution](ADR-0015-localhost-browser-mvp-execution.md)
-- [ADR-0016: Filesystem run persistence](ADR-0016-filesystem-run-persistence.md)
+- [ADR-0021: Single-file run aggregate](ADR-0021-single-file-run-aggregate.md)
 - [Evidence and review workflow requirements](../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md): `REQ-SCAN-*`
 - [Generation provider execution requirements](../../requirements/generation-provider-and-model-lifecycle/GENERATION_PROVIDER_EXECUTION.md): `REQ-LLM-*`
 - [Installation and model lifecycle requirements](../../requirements/generation-provider-and-model-lifecycle/INSTALLATION_AND_MODEL_LIFECYCLE.md): `REQ-INST-*`

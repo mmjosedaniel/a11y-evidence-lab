@@ -5,13 +5,13 @@
 
 ## Context
 
-The product needs an evidence-oriented interface with target setup, progress and failure states, finding navigation, inspectable evidence and citations, proposal review, manual checks, history, and before-and-after comparison. It must keep deterministic evidence, guidance, generated interpretation, and human decisions visually and semantically distinct while satisfying the application's own accessibility requirements.
+The product needs an evidence-oriented interface with target setup, truthful operation status and failure, finding navigation, inspectable evidence and citations, proposal review, manual checks, the current decision, and before-and-after comparison. It must keep deterministic evidence, guidance, generated interpretation, and human decisions visually and semantically distinct while satisfying the application's own accessibility requirements.
 
 React supports TypeScript and component-based client interfaces. It can support this interaction model, but it does not by itself provide durable workflow state, runtime validation, security isolation, accessible semantics, routing, data fetching, or a Windows application container.
 
 ### MVP topology amendment recorded 2026-08-25
 
-[ADR-0015](ADR-0015-localhost-browser-mvp-execution.md) accepts the MVP topology: the developer starts the local application service and opens its React UI from an enumerated localhost or loopback URL in Chrome or Edge. [ADR-0016](ADR-0016-filesystem-run-persistence.md) makes service-owned JSON records, not React state or browser storage, the durable authority. Installer, desktop-container, and broader packaging work are deferred.
+[ADR-0015](ADR-0015-localhost-browser-mvp-execution.md) accepts the MVP topology: the developer starts the local application service and opens its React UI from an enumerated localhost or loopback URL in Chrome or Edge. [ADR-0021](ADR-0021-single-file-run-aggregate.md) makes the service-owned `run.json`, not React state or browser storage, the durable authority. Installer, desktop-container, and broader packaging work are deferred.
 
 ### Trusted operator URL amendment recorded 2026-08-27
 
@@ -29,9 +29,9 @@ React supports TypeScript and component-based client interfaces. It can support 
 Use React with TypeScript as the initial user-interface library for evaluation, implemented as a client-rendered single-page application served by the local application.
 
 - Limit React to presentation, interaction, navigation, and transient UI state. Durable workflow, evidence, review, comparison, and provider-choice state remains owned by the local application service and must survive UI reload or replacement.
-- Communicate only through the application-owned loopback interface. Browser-delivered React code must not directly access Groq or another provider API, Ollama, Chroma, Playwright, credentials, the filesystem, process control, or unrestricted networking. Under the 2026-08-27 amendment, no production loopback request-protection system is required for the trusted single-developer MVP, and no user accounts, roles, or permissions are introduced.
+- Communicate only through the application-owned loopback interface. Browser-delivered React code must not directly access Groq or another provider API, Ollama, the in-process retrieval store, Playwright, credentials, the filesystem, process control, or unrestricted networking. Under the 2026-08-27 amendment, no production loopback request-protection system is required for the trusted single-developer MVP, and no user accounts, roles, or permissions are introduced.
 - Reconstruct the visible state from durable service records after reload, interruption, or local-service restart; React component state must never be the source of truth for accepted decisions.
-- Prefer native semantic HTML and explicit accessible names, relationships, keyboard behavior, focus management, validation, error handling, progress, and status announcements. Visual differences and state must not rely only on color.
+- Prefer native semantic HTML and explicit accessible names, relationships, keyboard behavior, focus management, validation, error handling, and status announcements. Visual differences and state must not rely only on color. No separate progress subsystem follows from this decision.
 - Render target content, scanner output, corpus passages, and model output as untrusted data. Display markup as text by default; any future rendered preview requires a separately accepted sandboxing and sanitization design.
 - Serve pinned local assets from the local service and verify that local-mode operations produce no unapproved non-loopback egress. A Groq-mode generation request is the one explicit external operation accepted by ADR-0014.
 - Evaluate the three controlled review paths against `REQ-A11Y-*` with automated checks plus focused keyboard and manual review. A formal assistive-technology support matrix is deferred, and React component tests alone are insufficient.
@@ -62,7 +62,7 @@ This evaluation decision does not qualify React or a browser version as a releas
 - [ADR-0011: TypeScript as the initial application language](ADR-0011-typescript-as-initial-application-language.md)
 - [ADR-0014: Groq as the MVP external generation provider](ADR-0014-groq-as-mvp-external-generation-provider.md)
 - [ADR-0015: Localhost browser MVP execution](ADR-0015-localhost-browser-mvp-execution.md)
-- [ADR-0016: Filesystem run persistence](ADR-0016-filesystem-run-persistence.md)
+- [ADR-0021: Single-file run aggregate](ADR-0021-single-file-run-aggregate.md)
 - [Evidence and review workflow requirements](../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md): `REQ-EVID-004` and `REQ-UX-*`
 - [Installation and model lifecycle requirements](../../requirements/generation-provider-and-model-lifecycle/INSTALLATION_AND_MODEL_LIFECYCLE.md): `REQ-INST-002`
 - [Application accessibility requirements](../../requirements/quality-security-and-operations/APPLICATION_ACCESSIBILITY.md): `REQ-A11Y-*`

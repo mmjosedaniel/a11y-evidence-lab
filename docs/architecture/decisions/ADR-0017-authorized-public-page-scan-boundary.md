@@ -10,6 +10,8 @@
 
 ADR-0018 restates the current one-page, exact-three-rule, finding-level workflow and its retained limitations. The context, options, decision, and consequences below remain as decision history and possible input to a future product-hardening decision; they do not reactivate automatically.
 
+[OD-022](../../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-022--portfolio-mvp-yagni-simplification), [ADR-0020](ADR-0020-manual-developer-managed-local-model-setup.md), and [ADR-0021](ADR-0021-single-file-run-aggregate.md) further supersede this historical body's independently versioned `FindingWorkflow`, repeated per-invocation provider disclosure, and child-record language. The current MVP uses one `run.json` aggregate, one mode-selection disclosure, an explicit Generate action followed by the actual provider call, and no separate connection probe or repeated confirmation gate. These later changes do not alter the historical text below.
+
 ## Context
 
 The original portfolio boundary accepted only three project-owned synthetic fixtures. That boundary made the first deterministic scan easy to reproduce, but it did not demonstrate the product's intended evidence workflow against a page selected by its user. The MVP may now accept one user-entered public page while retaining the three controlled fixtures as its fixed evaluation baseline.

@@ -45,7 +45,7 @@ An automated result remains evidence about one rule under the recorded scan prof
 
 ## Step boundary
 
-Step 1 ends with a runtime-validated, **transient native page-scan observation held in memory**. Step 2 exclusively owns rule-specific evidence allowlisting, privacy sanitization, per-node finding identity, normalized evidence, redaction information, and durable publication.
+Step 1 ends with a runtime-validated, **transient native page-scan observation held in memory**. Step 2 exclusively owns rule-specific evidence allowlisting, privacy sanitization, per-node finding identity, minimized evidence, and durable publication.
 
 All application-owned scan logic remains ordinary modules in one local TypeScript service. The loopback React UI is unprivileged; it does not receive raw page/scanner payloads, filesystem authority, provider credentials, local-model-runtime access, or Playwright authority. The service owns the fresh managed scan context and cleanup. It does not need an egress proxy, worker, supervisor, or hostile-page sandbox for the trusted-input portfolio path.
 

@@ -13,6 +13,10 @@ This decision selects the first model configuration to put through the capacity 
 
 The original decision below preserved Qwen3.5 9B as a possible later capacity screen and quality-comparison participant and discussed a future release-qualified recommendation. OD-009, OD-010, OD-013, and OD-017 narrow the current portfolio MVP to one practical local configuration plus the fixed Groq evaluation path, with no local-model comparison, formal qualification, or release recommendation. Therefore `qwen3.5:9b` and any second local-model screen are Deferred for this MVP. The `qwen3.5:4b` configuration remains only the first model to put through the practical reference-PC screen; if it fails, select one smaller replacement rather than adding a comparison candidate. This amendment controls the original 9B and release-profile statements while preserving them as decision history.
 
+### Portfolio YAGNI amendment recorded 2026-08-27
+
+[OD-022](../../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-022--portfolio-mvp-yagni-simplification), the current form of [ADR-0004](ADR-0004-reference-pc-capacity-gate-for-local-models.md), and [ADR-0020](ADR-0020-manual-developer-managed-local-model-setup.md) make the capacity screen developer-run evaluation work. The developer installs Ollama, pulls `qwen3.5:4b`, and performs one manual representative smoke on the reference PC. A11y Evidence Lab does not implement a capacity-preflight feature, model downloader, hardware monitor, connection probe, or readiness subsystem. This amendment controls any earlier wording below that could imply application-managed provisioning or preflight while retaining `qwen3.5:4b` as the one initial configuration.
+
 ## Considered options
 
 1. Begin capacity screening with Qwen3.5 9B as the larger quality-oriented option.
@@ -27,7 +31,7 @@ Apply [ADR-0004](ADR-0004-reference-pc-capacity-gate-for-local-models.md) before
 
 [`qwen3.5:9b`](https://ollama.com/library/qwen3.5%3A9b), listed at 6.6 GB and 9.65B parameters in Q4_K_M, was originally retained as a later capacity-screen option that could enter quality comparison after passing the gate. The 2026-08-25 amendment Defers that option and any local-model comparison outside the MVP.
 
-Floating tags and displayed digest prefixes are insufficient for release integrity. Provisioning and evaluation must record the exact full digest, quantization, context, runtime version, generation parameters, and license.
+Floating tags and displayed digest prefixes are insufficient for reproducible evaluation. The developer's manual evaluation note records the exact full digest, quantization, context, runtime version, material generation parameters, and license; the application does not need a provisioning or model-lifecycle record.
 
 ## Consequences
 
@@ -42,4 +46,5 @@ Floating tags and displayed digest prefixes are insufficient for release integri
 - [Reliability, reproducibility, and operations requirements](../../requirements/quality-security-and-operations/RELIABILITY_REPRODUCIBILITY_AND_OPERATIONS.md): `REQ-QUAL-006` and `REQ-QUAL-009`
 - [ADR-0004: Reference-PC capacity gate for local models](ADR-0004-reference-pc-capacity-gate-for-local-models.md)
 - [ADR-0005: Ollama as the initial local model runtime](ADR-0005-ollama-as-initial-local-model-runtime.md)
+- [ADR-0020: Manual developer-managed local model setup](ADR-0020-manual-developer-managed-local-model-setup.md)
 - [Local MVP feasibility](../../LOCAL_MVP_FEASIBILITY.md)

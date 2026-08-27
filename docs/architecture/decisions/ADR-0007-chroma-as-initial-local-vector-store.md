@@ -1,7 +1,13 @@
 # ADR-0007: Chroma as the initial local vector store
 
-- **Status:** Accepted for evaluation
+- **Status:** Superseded for the MVP by [ADR-0019](ADR-0019-in-process-exact-vector-search.md); Chroma is Deferred
 - **Decision date:** 2026-08-23
+
+## MVP supersession recorded 2026-08-27
+
+[ADR-0019](ADR-0019-in-process-exact-vector-search.md) replaces Chroma with an in-process exact vector search for the portfolio MVP. The fixed corpus is too small to justify a persistent vector service, its startup and lifecycle, or approximate-index behavior. Chroma remains documented below as decision history and may be reconsidered only if corpus scale, index persistence, or measured search cost creates a demonstrated need.
+
+This supersession does not remove local embeddings, semantic retrieval, cosine ranking, LangChain's bounded integration role, passage-level citations, or retrieval-quality evaluation. Those concerns continue under ADR-0006, ADR-0013, and ADR-0019.
 
 ## Context
 
@@ -52,6 +58,7 @@ Promoting Chroma to the release architecture requires passing those gates. A fai
 ## Related decisions and requirements
 
 - [ADR-0006: EmbeddingGemma as the initial embedding model](ADR-0006-embeddinggemma-as-initial-embedding-model.md)
+- [ADR-0019: In-process exact vector search for the MVP](ADR-0019-in-process-exact-vector-search.md) — current MVP replacement
 - [ADR-0011: TypeScript as the initial application language](ADR-0011-typescript-as-initial-application-language.md)
 - [Evidence and review workflow requirements](../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md): `REQ-CORP-*` and `REQ-RETR-*`
 - [Reliability, reproducibility, and operations requirements](../../requirements/quality-security-and-operations/RELIABILITY_REPRODUCIBILITY_AND_OPERATIONS.md): `REQ-QUAL-003`, `REQ-QUAL-004`, and `REQ-QUAL-010`

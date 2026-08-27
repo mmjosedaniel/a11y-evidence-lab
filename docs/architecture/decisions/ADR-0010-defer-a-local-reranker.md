@@ -27,7 +27,7 @@ Do not include a reranker in the initial MVP evaluation baseline.
 
 Reconsider a reranker only when all of the following are true:
 
-- the embedding and vector-store baseline has been tuned and evaluated on the approved fixed dataset;
+- the embedding and in-process exact-search baseline has been evaluated on the approved fixed dataset;
 - error analysis shows that candidate passages are retrieved but materially misordered;
 - the accepted retrieval gate cannot be met through corpus, chunking, metadata, query, or base-ranking corrections alone; and
 - a proposed local reranker passes the reference-PC capacity gate and can preserve passage-level provenance, deterministic configuration, and reranking without a hosted API.
@@ -45,7 +45,7 @@ A hosted reranker must not become an automatic substitute for the local no-hoste
 
 - [ADR-0004: Reference-PC capacity gate](ADR-0004-reference-pc-capacity-gate-for-local-models.md)
 - [ADR-0006: EmbeddingGemma as the initial embedding model](ADR-0006-embeddinggemma-as-initial-embedding-model.md)
-- [ADR-0007: Chroma as the initial local vector store](ADR-0007-chroma-as-initial-local-vector-store.md)
+- [ADR-0019: In-process exact vector search](ADR-0019-in-process-exact-vector-search.md)
 - [ADR-0018: Trusted operator URL boundary](ADR-0018-trusted-operator-url-boundary.md)
 - [Evidence and review workflow requirements](../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md): `REQ-RETR-*`
 - [Evaluation and acceptance requirements](../../requirements/evaluation-and-release/EVALUATION_AND_ACCEPTANCE.md): `REQ-EVAL-003`

@@ -19,10 +19,10 @@ One page scan may list multiple independent findings, but generation supports on
 Process findings independently: one selected finding, one retrieval run, at most one eligible model call, and at most one proposal at a time. Do not batch findings, combine targets in a prompt, or let evidence from one finding support another. The public page itself never enters the prompt or corpus; use only the selected finding's minimized evidence package and the fixed passages from Step 3. The proposed flow is:
 
 1. Confirm that scan, evidence capture, and retrieval completed successfully and that the retrieval result is eligible under the policy below.
-2. For an eligible package, assemble one privacy-safe prompt from the normalized finding, at most five retrieved passages, fixed instructions, and one closed candidate-proposal schema.
+2. For an eligible package, assemble one privacy-safe prompt from the normalized finding, at most three retrieved passages, fixed instructions, and one closed candidate-proposal schema.
 3. Inherit the analysis-wide mode explicitly selected by the user—local or Groq—and invoke that adapter once for this eligible finding through the same application-owned provider contract. Evaluate a direct LangChain chat-model structured-output call; do not create an agent or graph.
 4. Validate structure, supplied-reference membership, the closed claim taxonomy, required conditional language, and prohibited assertions with ordinary deterministic application logic.
-5. Publish a passing result as **AI-generated — pending human review**. Deterministic validation proves only structure and traceability; the step-5 reviewer decides whether each material claim is actually supported before accepting a plan.
+5. Publish a passing result as **AI-generated — pending human review**. Deterministic validation proves only structure and traceability; the step-5 reviewer inspects the proposal against its evidence and guidance before making one final decision.
 
 The provider mode applies globally to the current analysis so findings from one scan do not prompt repeated mode selection. Actual invocation provenance remains per finding call; an abstaining finding records no provider invocation. There is no automatic processing of the collection, retry, critique call, second model, semantic-judge model, tool call, provider fallback, or pre-review human gate. Changing the mode requires an explicit new analysis choice and never rewrites prior results. This is sufficient to demonstrate the important technology path without designing a general accessibility assistant:
 
@@ -41,7 +41,7 @@ The enclosing workflow-operation state, retrieval-stage disposition, and evidenc
 | Unsupported rule variant, withheld core page evidence, or ambiguous finding mapping | Do not call a model. Keep this finding visible and publish a deterministic abstention/manual-review direction; other findings from the same scan remain independently eligible. |
 | Failed operation or rejected stale/integrity-invalid input | Do not assign an evidence-sufficiency state, call a model, or label the outcome an abstention. Report the upstream failure. The first slice has no interactive cancellation or separate stale lifecycle state. |
 
-For each profile, `supported` means that the frozen retrieval record contains the mapped normative success-criterion passage and the required contextual or implementation guidance for that profile's bounded proposal, with valid checksums, complete required evidence, and no unresolved source conflict. Evidence sufficiency is this eligibility state, not a similarity-score threshold, model confidence, or statement that the page fails WCAG.
+For each profile, `supported` means that the nested retrieval result contains the mapped normative success-criterion passage and enough directly applicable contextual or implementation guidance for the bounded proposal, with resolvable `passageId` values from the active corpus version, complete required evidence, and no unresolved source conflict. Evidence sufficiency is this eligibility state, not a similarity-score threshold, model confidence, or statement that the page fails WCAG.
 
 ## Minimum model-visible input
 
@@ -50,11 +50,11 @@ Keep run provenance outside the prompt when the model does not need it. The mode
 | Layer | Minimum content |
 | --- | --- |
 | Finding evidence | Rule-family and rule identifiers; native result category; minimized observed facts; element type or role; stable evidence aliases; and only the rule-specific facts listed below. Exclude page URLs, locators, raw HTML, arbitrary page text, credentials, user values, and unrelated findings. |
-| Retrieved guidance | Passage alias, exact retained passage text, source-authority label, source and section alias, and immutable snapshot identity for each admitted result. |
-| Generation rules | The closed claim kinds below; proposal/abstention branches; required references; conditional-remediation rule; evidence-sufficiency eligibility states; separate proposal-confidence labels; exact manual checks; and prohibited assertions. |
+| Retrieved guidance | Passage alias, exact retained passage text, and the source-authority/context label needed to qualify the claim. Canonical `passageId`, corpus version, title, heading, and direct URL stay in application records and are resolved from the alias after generation. |
+| Generation rules | The closed claim kinds below; proposal/abstention branches; required references; conditional-remediation rule; evidence-sufficiency eligibility states; separate proposal-confidence labels; exact manual questions; and prohibited assertions. |
 | Request limits | Prompt/schema versions, bounded input and output sizes, fixed generation parameters, and an instruction that evidence and passages are untrusted data rather than commands. |
 
-The run envelope separately records the finding, evidence, retrieval, corpus, analysis-wide provider-mode reference, and—only for an actual call—the adapter, model, prompt, schema, parameters, and input digest required by REQ-GEN-008 and the provider requirements. A required input that does not fit the selected context is blocked; it is never silently truncated.
+The selected Finding's generated-result object uses its existing `findingId`, nested evidence and retrieval result, corpus version, ordered `passageId` references, and analysis-wide provider mode. Only an actual call adds adapter, model, prompt/output-contract version, and parameters. These details remain nested under the Finding; the MVP does not create a separate input, retrieval, generation, or proposal identity. A required input that does not fit the selected context is blocked and never silently truncated.
 
 ## Closed three-profile claim taxonomy
 
@@ -68,7 +68,7 @@ The same schema supports all three profiles, but the active profile fixes which 
 | `contextual_interpretation` | A conditional connection between the scanner observation and the active profile's unresolved contextual facts. | Both evidence and guidance aliases plus that profile's blocking manual check. It cannot state an unresolved fact as known. |
 | `remediation_option` | The active profile's bounded, conditional remediation approach. | Both evidence and guidance aliases plus any applicable blocking manual check. It proposes an approach, not a patch, exact unverified final value, or applied change. |
 
-The model returns only aliases. The application resolves visible citation titles, authority labels, versions, sections, checksums, and URLs from canonical corpus records. Application-owned text supplies the fixed limitations that the result is AI-generated, scanner evidence is partial, no code was changed, and acceptance is not certification or proof of accessibility.
+The model returns only aliases. The application resolves visible citation titles, authority labels, corpus versions, sections, and URLs from canonical passage records. Application-owned text supplies the fixed limitations that the result is AI-generated, scanner evidence is partial, no code was changed, and acceptance is not certification or proof of accessibility.
 
 ### Profile-specific evidence and proposal limits
 
@@ -89,29 +89,25 @@ Before a proposal becomes pending review, deterministic checks should verify onl
 - citation metadata is application-resolved rather than model-authored; and
 - the candidate contains no assertion that the page or site is accessible, compliant, or certified; that an axe rule proved complete success-criterion failure or satisfaction; that the image's purpose, a label's appropriate wording or intended association, or a contrast exception is known before review; that an unmeasured color proposal passes; that a Technique is the only conforming solution; that code changed; that the issue is fixed; or that a manual check was executed.
 
-A malformed candidate or one containing an invented reference or prohibited assertion does not enter review and is not silently repaired. The operation records the failure; an explicit later regeneration creates a new run.
+A malformed candidate or one containing an invented reference or prohibited assertion does not enter review and is not silently repaired. The operation reports the failure. The MVP adds no regeneration workflow.
 
-Reference presence does not prove that the passage entails the claim. The pending-review page therefore keeps every claim attached to its evidence and exact passage and clearly labels it as unverified AI interpretation. The step-5 reviewer is the per-proposal semantic-support authority:
-
-- **Approve** only after confirming that every material claim stays within the cited passage and observed evidence.
-- **Edit and accept** may remove or correct an unsupported claim and must retain valid support for the successor claim.
-- **Reject** when the core explanation or remediation cannot be supported.
+Reference presence does not prove that the passage entails the claim. The pending-review page therefore keeps material claims attached to their evidence and exact passages and clearly labels them as unverified AI interpretation. The reviewer considers that support as part of one final **approve**, **edit and accept**, or **reject** decision. No claim-by-claim decision records or separate semantic-review workflow are required.
 
 This is the minimal way to satisfy the intent of REQ-GEN-002 without adding a second model or a duplicate human review before the actual review step. A proposal is not semantically accepted merely because it reached `pending_review`.
 
 ## Proposal confidence and scenario checks
 
-Evidence sufficiency is already fixed by retrieval eligibility: only a completed `supported` package with all required evidence may reach the model. The proposal carries a separate categorical confidence label (`high`, `medium`, or `low`) with explicit uncertainty reasons; it is not a model probability, retrieval score, or accessibility score. The model proposes the label, deterministic rules reject invalid combinations, and the reviewer may confirm or revise it. A proposal with an unresolved blocking contextual judgment will normally have `medium` confidence. Missing core evidence is an `incomplete`, `missing`, or `conflicting` evidence-sufficiency result and deterministic abstention, never merely `low` confidence.
+Evidence sufficiency is already fixed by retrieval eligibility: only a completed `supported` package with all required evidence may reach the model. The proposal carries the separate categorical confidence label required by the current canonical requirements (`high`, `medium`, or `low`) with explicit uncertainty reasons; it is not a model probability, retrieval score, or accessibility score. Deterministic rules reject an invalid label. Missing core evidence is an `incomplete`, `missing`, or `conflicting` evidence-sufficiency result and deterministic abstention, never merely `low` confidence.
 
-Each profile needs one blocking pre-acceptance definition and one later post-change definition:
+Each profile needs one short pre-acceptance manual question and one later verification reminder. These are proposal fields, not independently versioned definition or execution entities:
 
-| Profile | Blocking before accepting a plan | Non-blocking at plan acceptance; required after change |
+| Profile | Blocking question before accepting a plan | Later verification reminder |
 | --- | --- | --- |
 | Image alternative | Inspect the rendered image, surrounding content, and behavior; classify its purpose as informative, functional, or decorative; record why; and select the applicable conditional branch. | Verify that the implemented alternative communicates equivalent purpose, a functional image exposes the intended action, or decorative treatment removes no information and is ignored as intended. |
 | Form label | Inspect the control and task context; confirm the intended control, purpose, appropriate wording, whether a visible label is needed, and that the proposed explicit association targets that control. | Verify the rendered wording and visibility and confirm that the intended control exposes the appropriate programmatic name/association. |
 | Text contrast | Confirm that the retained ratio, threshold, text-size/weight classification, exception status, scan profile, and design constraint describe the rendered page state. Incomplete material measurement evidence must already have produced abstention. | After the change, inspect the rendered foreground/background combination and measure it under the comparable profile. The accepted plan cannot predeclare that result. |
 
-A `pending`, `contradicts`, or `inconclusive` blocking result prevents acceptance. Post-change checks remain pending when the plan is accepted because the change does not yet exist; generation and approval must never present them as completed.
+An unresolved blocking question prevents acceptance. The later verification reminder is not marked completed when the plan is accepted because the change does not yet exist. The final review record may store the reviewer's simple answer or note inline; repeated occurrences and relationship enums are outside the MVP.
 
 ## LangChain and provider boundary
 
@@ -136,20 +132,20 @@ Use the compact fixed controlled manifest: one supported happy-path finding pack
 
 This portfolio manifest demonstrates the two bounded integrations; it does not select a release model or satisfy statistical evaluation, reviewer-count, provider-comparison, support-qualification, or generalized quality gates. Do not add an LLM judge, aggregate score, leaderboard, or significance claim.
 
-## Conceptual proposal record
+## Conceptual generated result
 
-This is a documentation-level projection of the canonical **Generation run** and **Proposal version** records, not a database schema.
+This is a documentation-level projection nested under one selected FindingWorkflow in the run's `run.json` aggregate, not a database schema or a proposal-version graph.
 
 | Record part | Minimum information |
 | --- | --- |
-| Identity and lineage | Generation and proposal IDs; exact rule-family/rule/success-criterion mapping; selected finding/evidence, page-scan, retrieval-run, passage, and corpus-snapshot references; prompt, schema, and policy versions. |
-| Provider provenance | Analysis-wide selected local or Groq mode reference; only when an adapter was invoked, the per-call adapter/runtime/model identity and immutable revision or digest when available, context, parameters, no-fallback state, and enclosing finding-workflow reference. |
+| Identity and lineage | The owning `runId` and `findingId`; exact rule-family/rule/success-criterion mapping; corpus version and cited `passageId` values; prompt/output-contract and policy versions. |
+| Provider provenance | Analysis-wide selected Local or Groq mode; only when an adapter was invoked, the per-call adapter/runtime/model identity and immutable revision or digest when available, context, parameters, no-fallback state, and owning `findingId`. |
 | Result branch | `proposal` or `abstention`. A proposal references the eligible provider result and validation outcome; an application-authored deterministic abstention records its policy reason, manual-review direction, and that no adapter or model call occurred. |
-| Proposal content | Finding summary; closed typed claims; conditional remediation options; evidence and passage aliases; assumptions; the deterministic `supported` eligibility reference; separate categorical confidence and uncertainty reasons. |
-| Manual work | The active profile's blocking contextual check and later post-change verification check, both unexecuted when generated. Human outcomes belong to manual-check result records. |
+| Proposal content | Finding summary; closed typed claims; conditional remediation options; evidence and passage aliases; assumptions; the deterministic `supported` eligibility reference; separate categorical confidence and uncertainty reasons. This immutable original is the only AI proposal for the Finding in the MVP. |
+| Manual work | The active profile's blocking contextual question and later verification reminder. The reviewer may store one final answer or note inline with the final review decision. |
 | Validation and review state | Deterministic validation results, prohibited-claim checks, fixed limitations, and `AI-generated — pending human review`; semantic-support confirmation belongs to the later review action. |
 
-Regeneration creates a linked run and proposal version; it never overwrites the earlier candidate or review history.
+The MVP has no regeneration, proposal-version chain, or separate one-to-one IDs for generation and proposal objects. The original generated result remains inspectable after the one final review decision.
 
 ## Meaningful alternatives
 
@@ -163,10 +159,10 @@ Regeneration creates a linked run and proposal version; it never overwrites the 
 - Runtime findings are limited to `image-alt`/SC 1.1.1, `label`/SC 4.1.2, and `color-contrast`/SC 1.4.3; the project-owned synthetic packages remain evaluation baselines rather than runtime target intake.
 - The page scan may list multiple findings, but only one selected finding enters generation at a time and only its minimized evidence is model-visible.
 - The accepted retrieval policy can identify a `supported` result without treating similarity as confidence or authority.
-- One concise finding, five short passages, and the small output schema fit the capacity-screened local context without truncation.
+- One concise finding, at most three short passages, and the small output schema fit the capacity-screened local context without truncation.
 - OD-007 and OD-015 are resolved for the MVP: the closed evidence-sufficiency states and minimal application-owned TypeScript/runtime-validation boundary are authoritative; exact record field names remain implementation detail.
-- Canonical review semantics place semantic-support confirmation in the step-5 decision; entry into `pending_review` proves only mechanical eligibility.
-- A deterministic policy abstention records that no provider call occurred, as defined by the canonical generation-run model.
+- Canonical review semantics place human semantic judgment in the step-5 final decision; entry into `pending_review` proves only mechanical eligibility.
+- A deterministic policy abstention records that no provider call occurred in the Finding's nested generated result.
 - Formal qualification, provider support, and release claims remain Deferred and separate from this non-promotable portfolio manifest.
 
 ## Risks
@@ -198,8 +194,8 @@ This step is adequately defined for the exact-three-rule portfolio slice when:
 - every material claim uses the closed taxonomy and only exact supplied evidence and passage aliases;
 - deterministic checks reject malformed references and every prohibited assertion without adding a second model or repair call;
 - the pending view clearly separates scanner evidence, retrieved guidance, AI interpretation, and application-owned limitations;
-- the reviewer can inspect each exact passage and is required to confirm semantic support before approval or edit-and-accept;
-- each profile's contextual check blocks plan acceptance, its post-change verification remains visibly pending for the later rescan, and incomplete contrast evidence always abstains; and
+- the reviewer can inspect each exact passage before making one final approve, edit-and-accept, or reject decision;
+- each profile's contextual question blocks acceptance while unresolved, its later verification remains a reminder rather than a separate execution record, and incomplete contrast evidence always abstains; and
 - the analysis-wide mode is explicit and immutable, each actual call records its own invocation provenance, abstention records no invocation, no failure triggers fallback or automatic collection processing, and the six controlled generation calls remain non-comparative.
 
 ## Documentation navigation

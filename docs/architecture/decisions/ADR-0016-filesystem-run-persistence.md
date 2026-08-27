@@ -1,7 +1,11 @@
 # ADR-0016: Filesystem run persistence
 
-- **Status:** Accepted
+- **Status:** Superseded for the MVP by [ADR-0021](ADR-0021-single-file-run-aggregate.md) on 2026-08-27
 - **Decision date:** 2026-08-25
+
+## Supersession
+
+[ADR-0021](ADR-0021-single-file-run-aggregate.md) preserves this record's local-filesystem, canonical-JSON, exact-directory deletion, and no-database decisions while replacing its later parent/child record graph for the portfolio MVP. The current MVP uses one versioned `run.json` aggregate, no independently versioned child files, and no Markdown report. The remainder of this document is preserved as decision history.
 
 ## Context
 
@@ -52,6 +56,7 @@ Use application-owned filesystem persistence for MVP run data.
 - [ADR-0012: React as the initial user-interface library](ADR-0012-react-as-initial-user-interface-library.md)
 - [ADR-0015: Localhost browser MVP execution](ADR-0015-localhost-browser-mvp-execution.md)
 - [ADR-0018: Trusted operator URL boundary](ADR-0018-trusted-operator-url-boundary.md)
+- [ADR-0021: Single-file run aggregate](ADR-0021-single-file-run-aggregate.md) — current MVP persistence decision
 - [Information and workflow lifecycle requirements](../../requirements/INFORMATION_AND_WORKFLOW_LIFECYCLE.md)
 - [Privacy and security requirements](../../requirements/quality-security-and-operations/PRIVACY_AND_SECURITY.md): `REQ-SEC-*`
 - [Reliability, reproducibility, and operations requirements](../../requirements/quality-security-and-operations/RELIABILITY_REPRODUCIBILITY_AND_OPERATIONS.md): `REQ-QUAL-*`
