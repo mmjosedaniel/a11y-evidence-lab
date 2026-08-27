@@ -68,7 +68,7 @@ Do not load every requirements module automatically. Read the master index, the 
 
 ### Derived planning specifications
 
-- [Gherkin specifications](specs/README.md) — routing, status, tag convention, and compact coverage for the non-executable [SPEC.feature](specs/SPEC.feature) and [HARD_SPEC.feature](specs/HARD_SPEC.feature). No executable binding is included.
+- [Gherkin specifications](specs/README.md) — routing, status, tag convention, maintenance guidance, and links to the compact non-executable [SPEC.feature](specs/SPEC.feature) and [HARD_SPEC.feature](specs/HARD_SPEC.feature). No executable binding is included.
 
 ### Architecture and decisions
 

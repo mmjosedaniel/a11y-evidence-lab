@@ -98,7 +98,7 @@ No generated, displayed, or reported text may claim certification, legal complia
 | BHV-05 | Require an individual approve, edit-and-accept, or reject decision before one proposal becomes an accepted plan. | `REQ-REV-001`, `REQ-REV-008`, `REQ-REV-009` |
 | BHV-06 | Rescan in a distinct run and compare exact-locator evidence conservatively without making a conformance claim. | `REQ-EVID-010`, `REQ-COMP-004`, `REQ-COMP-005`, `REQ-COMP-007`, `REQ-COMP-008` |
 | BHV-07 | Preserve complete local evidence across downstream failure, reopen its one validated aggregate, and use a separate run for another Analyze action or an intentional rescan. | `REQ-EVID-011`, ADR-0021, and the accepted information lifecycle |
-| BHV-08 | Keep deterministic evidence, retrieved guidance, AI interpretation, human work, and limitations visibly distinct; never modify code automatically. | `REQ-EVID-004`, `REQ-GEN-005`, `REQ-GEN-006` |
+| BHV-08 | Keep deterministic evidence, retrieved guidance, AI interpretation, human work, and limitations visibly distinct; never modify code automatically. | `REQ-EVID-004`, `REQ-GEN-003`–`REQ-GEN-006` |
 
 ## Explicit non-goals
 

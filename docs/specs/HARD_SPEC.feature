@@ -29,23 +29,24 @@ Feature: Non-negotiable boundaries for the portfolio MVP
       Given navigation reaches the configured readiness condition
       When axe executes exactly "image-alt", "label", and "color-contrast"
       Then every returned violation node becomes an independent Finding
-      And every relevant native incomplete node remains a separate ScannerReviewObservation
+      And every returned native incomplete node remains a separate ScannerReviewObservation
       And a complete zero result requires validated coverage for all three rules
       And missing coverage, malformed output, timeout, scanner failure, or evidence-capture failure publishes no complete or valid-zero result
       And provider selection neither changes the scan nor invokes a model
 
   @HS-006 @REQ-EVID-004 @REQ-EVID-008 @REQ-SEC-003 @REQ-SEC-015
-  Rule: Only minimized evidence crosses durable and provider boundaries
+  Rule: Durable data and provider input remain minimized
 
-    Scenario: Exclude raw page and provider material
+    Scenario: Keep only the information required at each boundary
       Given transient scanner and page material exists for one Finding
       When evidence is persisted or one eligible provider request is assembled
-      Then only the rule-specific minimized facts and required curated passages cross that boundary
-      And raw HTML, arbitrary page text, DOM or accessibility snapshots, screenshots, traces, cookies, credentials, form values, sibling Findings, and raw provider payloads remain excluded
-      And page identity remains limited to permitted run provenance
+      Then the durable aggregate contains only permitted application-owned provenance, minimized evidence, and workflow data
+      And provider input contains only that Finding's permitted minimized facts, required guidance passages, application-owned instructions and output contract, and non-secret request parameters and metadata
+      And provider input excludes page identity, locator, sibling Findings, credentials, raw page material, and raw native scanner payloads
+      And the durable aggregate retains no credentials, raw page or scanner material, or raw provider request or response payloads
       And scanner evidence, guidance, AI interpretation, and human work remain distinguishable
 
-  @HS-008 @REQ-RETR-004 @REQ-GEN-002 @REQ-GEN-003 @REQ-GEN-004 @REQ-GEN-010
+  @HS-008 @REQ-RETR-004 @REQ-RETR-005 @REQ-GEN-002 @REQ-GEN-003 @REQ-GEN-004 @REQ-GEN-010
   Rule: Evidence sufficiency gates every model call
 
     Scenario: Invoke a model only for one eligible Finding
@@ -53,10 +54,10 @@ Feature: Non-negotiable boundaries for the portfolio MVP
       When the deterministic generation gate is evaluated
       Then a provider call is permitted only when required evidence is complete and completed retrieval is "supported"
       And incomplete, missing, or conflicting support creates abstention and a manual-review direction
-      And an abstention creates no ProviderInvocation or remediation conclusion
+      And an abstention creates no ProviderInvocation
       And no sibling Finding is included or changed
 
-  @HS-009 @REQ-LLM-002 @REQ-LLM-003 @REQ-LLM-004 @REQ-LLM-005 @REQ-LLM-009 @REQ-LLM-019 @REQ-LLM-020 @ADR-0014 @ADR-0020
+  @HS-009 @REQ-LLM-002 @REQ-LLM-003 @REQ-LLM-004 @REQ-LLM-005 @REQ-LLM-019 @REQ-LLM-020 @ADR-0014 @ADR-0020
   Rule: Provider mode never mixes, batches, or falls back
 
     Scenario Outline: Keep one immutable provider mode
@@ -65,7 +66,7 @@ Feature: Non-negotiable boundaries for the portfolio MVP
       When the user explicitly invokes one eligible selected Finding
       Then only the "<adapter>" adapter receives that one Finding
       And the run's provider and model remain unchanged
-      And no separate provider probe or repeated disclosure is required
+      And there is no separate provider preflight or repeated per-finding disclosure gate
       And provider failure remains visible without automatic retry or fallback
       And selecting the other provider requires a new PageAnalysisRun
 
@@ -91,7 +92,7 @@ Feature: Non-negotiable boundaries for the portfolio MVP
         | edit and accept | the reviewer edit is accepted      |
         | reject          | no remediation plan is accepted    |
 
-  @HS-015 @REQ-EVAL-001 @REQ-EVAL-009 @REQ-GEN-006 @REQ-COMP-005
+  @HS-015 @REQ-EVAL-001 @REQ-EVAL-006 @REQ-EVAL-009 @REQ-GEN-006 @REQ-COMP-005
   Rule: Portfolio evidence never becomes an automatic remediation or broad claim
 
     Scenario: Keep outputs inside the bounded portfolio purpose
@@ -100,4 +101,4 @@ Feature: Non-negotiable boundaries for the portfolio MVP
       Then it does not claim certification, legal compliance, whole-page or whole-site accessibility, or complete success-criterion conformance or non-conformance
       And it does not modify or claim to have modified source code automatically
       And the fixed Local and Groq observations are not ranked or presented as a provider comparison
-      And six generation executions do not qualify a release dependency, provider, model, hardware class, or security boundary
+      And the six generation executions neither qualify a dependency nor establish general provider, model, or hardware support

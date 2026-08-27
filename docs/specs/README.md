@@ -21,11 +21,7 @@ Executable acceptance work requires explicit development authorization. A future
 
 ## Evaluation freeze boundary
 
-- Before implementation, record the accepted product scope and expected native failing/corrected scanner outcome for each of the three controlled profiles.
-- Exact fixture literals, timeout values, record fields, filenames, browser configuration, and implementation choices may be selected during the applicable implementation slice.
-- Before inspecting Local or Groq model output, freeze the exact evaluation inputs, gold passages, output contract, rubric, prohibited claims, and failure interpretation.
-
-The specifications therefore avoid inventing implementation literals. Their existence does not make an unresolved implementation value a development-authorization gate.
+The [evaluation authority](../requirements/evaluation-and-release/EVALUATION_AND_ACCEPTANCE.md#freeze-boundary) owns the accepted scope, expected native outcomes, and timing for freezing exact evaluation inputs. These feature files create no additional freeze artifact, implementation value, or development-authorization gate.
 
 ## Tag convention
 
@@ -36,37 +32,8 @@ The specifications therefore avoid inventing implementation literals. Their exis
 | `@SPEC-*` / `@HS-*` | Stable identifier within the derived view. |
 | `@BHV-*` | Link to the compact behavioral scope in the evaluation authority. |
 | `@REQ-*`, `@OD-*`, `@ADR-*` | Navigation to a controlling requirement or decision; source status still controls. |
-| `@controlled_evaluation` | The scenario uses project-owned synthetic evaluation input rather than runtime page input. |
 
 Previously used `SPEC-*` or `HS-*` identifiers omitted from the compact views are retired and are not reused. They were derived navigation labels, not requirement IDs.
-
-## Observable-specification coverage
-
-| Rule | Essential behavior |
-| --- | --- |
-| `SPEC-001` | Start the local application, scan one trusted page once, and show the complete supported result. |
-| `SPEC-002` | Select one Finding and inspect its minimized evidence and exact retrieved guidance. |
-| `SPEC-003` | Produce one validated proposal or abstain before provider invocation. |
-| `SPEC-004` | Keep one explicit Local-or-Groq mode, one Finding per invocation, visible failure, and no fallback. |
-| `SPEC-005` | Apply one individual human review decision. |
-| `SPEC-006` | Rescan in a new run and compare evidence conservatively. |
-| `SPEC-007` | Preserve and reopen local run evidence without overwriting earlier work. |
-| `SPEC-008` | Keep evidence layers and limitations distinct and prohibit automatic remediation claims. |
-| `SPEC-009` | Execute exactly the fixed six generation evaluations without comparing providers. |
-
-## Hard-boundary coverage
-
-| Rule | Non-negotiable invariant |
-| --- | --- |
-| `HS-001` | One trusted public HTTPS page, one fresh context, and no crawling or deliberate page interaction. |
-| `HS-004` | Exactly three rules, every returned violation node, separate native `incomplete` observations, and no false zero or partial success. |
-| `HS-006` | Minimized evidence and provider input; excluded raw content never crosses the durable or provider boundary. |
-| `HS-008` | Complete evidence plus `supported` guidance is required before a model call; otherwise abstain with no invocation. |
-| `HS-009` | One immutable global provider mode, one Finding per call, no mixing, batching, automatic retry, or fallback. |
-| `HS-010` | No proposal becomes an accepted plan without one finding-specific human decision. |
-| `HS-015` | No automatic source-code modification, certification, conformance, provider-ranking, or release claim. |
-
-Production hostile-target protection, authenticated pages, crawling, broader rules, combined proposals, queues, agents, provider comparison, packaging, and release qualification remain outside this derived view. Their governing authorities, not their repetition in Gherkin, preserve those exclusions.
 
 ## Maintenance
 

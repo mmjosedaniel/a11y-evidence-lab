@@ -6,11 +6,11 @@
 @SPEC @planned
 Feature: Evidence-first accessibility analysis for one trusted public page
   A frontend developer scans one deliberately supplied public HTTPS page with
-  three deterministic rules and processes one selected Finding at a time
-  through evidence, retrieval, generation or abstention, human review, and
-  later comparison.
+  three deterministic rules. The application captures minimized evidence for
+  every Finding, then processes one selected Finding at a time through
+  retrieval, generation or abstention, human review, and later comparison.
 
-  @SPEC-001 @BHV-01 @REQ-AUTH-007 @REQ-AUTH-008 @REQ-SCAN-006 @REQ-SCAN-007 @OD-021 @ADR-0018
+  @SPEC-001 @BHV-01 @REQ-AUTH-007 @REQ-AUTH-008 @REQ-SCAN-006 @REQ-SCAN-007 @REQ-UX-012 @OD-021 @ADR-0018
   Rule: Analyze one trusted page and show the complete supported result
 
     Scenario: Complete one provider-independent page analysis
@@ -18,12 +18,12 @@ Feature: Evidence-first accessibility analysis for one trusted public page
       And the developer chose one public HTTPS page they are permitted and willing to trust
       And the user selected one global Local-or-Groq generation mode
       When the user activates Analyze once
-      Then one fresh non-persistent browser context loads only that main document
+      Then one fresh non-persistent browser context inspects only that page as the main-document scan target
       And the scan executes exactly "image-alt", "label", and "color-contrast"
       And every returned violation node appears as an independent Finding
       And native incomplete observations remain separate from Findings
       And a complete zero result is shown only after all three rules complete
-      And loading, timeout, scanner, validation, or collection failure never appears as a complete zero or partial result
+      And loading, timeout, scanner, validation, or collection failure remains visible and never appears as a completed zero or partial success
       And the temporary page, context, and managed browser are closed
       And no provider is invoked by scanning
       And the interface states that crawling, authenticated targets, hostile targets, and whole-page conformance claims are unsupported
@@ -36,7 +36,7 @@ Feature: Evidence-first accessibility analysis for one trusted public page
       When the user selects one Finding
       And the application retrieves guidance from the curated corpus
       Then the view keeps its minimized scanner evidence separate from guidance
-      And the retrieval identifies its corpus snapshot and support state
+      And the retrieval identifies its corpus version and support state
       And every material citation resolves to an exact versioned source passage, section, and URL
       And no sibling Finding or arbitrary page-level content enters the query
 
@@ -47,45 +47,31 @@ Feature: Evidence-first accessibility analysis for one trusted public page
       Given the selected Finding has complete required evidence
       And its completed retrieval is "supported"
       When the user explicitly starts generation
-      Then one provider invocation contains only that Finding's minimized evidence and supporting guidance
-      And the returned candidate must pass structure, evidence-reference, citation, grounding, and prohibited-claim validation
-      And a valid proposal states its explanation, remediation approach, citations, uncertainty, assumptions, and required manual checks
+      Then the provider request contains only that Finding's permitted minimized evidence, supporting guidance, application-owned instructions and output contract, and non-secret request parameters and metadata
+      And the returned candidate must pass structure, evidence-reference, citation-resolution, and prohibited-claim validation
+      And a valid proposal states its explanation, remediation approach, citations, confidence, uncertainty, assumptions, and required manual checks
       And the proposal enters pending review only for that Finding
 
-    Scenario Outline: Abstain when evidence or guidance is insufficient
+    Scenario: Abstain when evidence or guidance is insufficient
       Given the selected Finding remains visible
-      And generation eligibility is "<condition>"
+      And its required evidence is incomplete or its retrieval is not "supported"
       When the application applies the deterministic evidence-sufficiency gate
       Then the Finding records abstention and its manual-review direction
-      And no provider invocation or remediation conclusion is created
+      And no provider invocation is created
       And sibling Finding states remain unchanged
 
-      Examples:
-        | condition                    |
-        | required evidence incomplete |
-        | guidance incomplete          |
-        | guidance missing             |
-        | guidance conflicting         |
-
-  @SPEC-004 @BHV-04 @REQ-LLM-002 @REQ-LLM-003 @REQ-LLM-004 @REQ-LLM-005 @REQ-LLM-009 @REQ-LLM-019 @REQ-LLM-020 @ADR-0014 @ADR-0020
+  @SPEC-004 @BHV-04 @REQ-LLM-002 @REQ-LLM-003 @REQ-LLM-004 @REQ-LLM-005 @REQ-LLM-019 @REQ-LLM-020 @ADR-0014 @ADR-0020
   Rule: One explicit provider mode applies to the whole analysis
 
-    Scenario Outline: Use one mode without mixing or fallback
-      Given the PageAnalysisRun began in "<mode>" mode after its one run-level disclosure
+    Scenario: Use one mode without mixing or fallback
+      Given the PageAnalysisRun began in an explicitly selected Local or Groq mode after its one run-level disclosure
       And the selected provider and exact model remain visibly labeled
       And one selected Finding is eligible for generation
       When the user explicitly starts that Finding's invocation
-      Then only the "<adapter>" adapter is used
-      And the invocation contains no sibling Finding
+      Then only the selected provider receives that one Finding
       And the run's provider and model remain unchanged
-      And no separate provider probe or repeated disclosure is required
       And any provider or response failure remains visible without automatic retry or fallback
       And selecting the other provider requires a new PageAnalysisRun
-
-      Examples:
-        | mode  | adapter                        |
-        | Local | configured local-model adapter |
-        | Groq  | approved Groq adapter          |
 
   @SPEC-005 @BHV-05 @REQ-REV-001 @REQ-REV-008 @REQ-REV-009
   Rule: A person decides each proposal independently
@@ -108,36 +94,36 @@ Feature: Evidence-first accessibility analysis for one trusted public page
   @SPEC-006 @BHV-06 @REQ-EVID-010 @REQ-COMP-004 @REQ-COMP-005 @REQ-COMP-007 @REQ-COMP-008
   Rule: Compare two complete runs conservatively
 
-    Scenario Outline: Classify only adequately correlated evidence
+    Scenario Outline: Classify evidence conservatively
       Given a complete baseline run and a complete later run
-      When the comparison observes "<transition>"
+      When the comparison observes "<condition>"
       Then the comparison result is "<outcome>"
       And it shows the matching rationale and before-and-after evidence
       And it states limitations and required follow-up checks
       And it makes no accessibility, conformance, certification, or remediation-causality claim
 
       Examples:
-        | transition                                                   | outcome        |
-        | a violation followed by a unique same-target non-failing observation | resolved |
-        | a contrast failure followed by a higher comparable failing margin | improved |
-        | the same correlated failure in both runs                     | persistent     |
-        | a retained non-failing observation followed by a violation   | regressed      |
-        | missing or ambiguous target evidence                         | inconclusive   |
-        | a material page or scan-profile mismatch                     | not comparable |
+        | condition                                                                  | outcome        |
+        | one exact rule-and-locator match changes from violation to non-failing    | resolved       |
+        | one exact color-contrast match has a higher comparable failing margin     | improved       |
+        | one exact image-alt or label match remains failing, or one exact contrast match has an equal failing margin | persistent |
+        | one exact match changes from non-failing to violation, or one exact contrast match has a lower failing margin | regressed |
+        | target evidence is missing or the rule-and-locator match is not unique    | inconclusive   |
+        | the page or scan profiles differ materially                              | not comparable |
 
-  @SPEC-007 @BHV-07 @REQ-EVID-011 @REQ-QUAL-002 @REQ-QUAL-010 @REQ-QUAL-012 @ADR-0021
+  @SPEC-007 @BHV-07 @REQ-EVID-011 @REQ-QUAL-002 @REQ-QUAL-010 @ADR-0021
   Rule: Preserve earlier local evidence
 
-    Scenario: Reopen one aggregate without overwriting an earlier run
-      Given a completed PageAnalysisRun is stored in one versioned local "run.json"
-      When a downstream stage fails or the user starts another analysis or an intentional rescan
+    Scenario: Reopen completed evidence after a downstream failure
+      Given a completed PageAnalysisRun is stored in one local "run.json" with a top-level format version
+      And a later Finding workflow fails
+      When the user reopens that PageAnalysisRun
       Then the completed scan, minimized evidence, and sibling states remain available
+      And reading "run.json" validates it before presenting the stored work
       And another analysis uses an independent run identifier
       And an intentional rescan may reference the baseline run identifier
-      And reopening validates "run.json" before presenting it
-      And no child file, Markdown report, retry graph, or audit history is required
 
-  @SPEC-008 @BHV-08 @REQ-EVID-004 @REQ-GEN-005 @REQ-GEN-006 @REQ-COMP-005
+  @SPEC-008 @BHV-08 @REQ-EVID-004 @REQ-GEN-003 @REQ-GEN-004 @REQ-GEN-005 @REQ-GEN-006 @REQ-COMP-005
   Rule: Keep evidence layers and limitations understandable
 
     Scenario: Present bounded evidence without automatic remediation claims
@@ -148,22 +134,3 @@ Feature: Evidence-first accessibility analysis for one trusted public page
       And required manual checks and limitations remain visible
       And the product does not claim certification, legal compliance, whole-page conformance, or complete success-criterion conformance or non-conformance
       And it does not modify or claim to have modified source code automatically
-
-  @SPEC-009 @controlled_evaluation @REQ-EVAL-001 @REQ-EVAL-006 @REQ-EVAL-008 @REQ-EVAL-009
-  Rule: The fixed evaluation contains exactly six generation executions
-
-    Scenario Outline: Exercise each controlled profile in each accepted mode
-      Given the frozen controlled "<profile>" package is eligible for generation
-      When it is evaluated once in "<mode>" mode
-      Then the shared application-owned proposal contract is used
-      And the result is attributed only to that exact configuration
-      And the result is not used to rank providers or claim release qualification
-
-      Examples:
-        | profile               | mode  |
-        | informative-image-alt | Local |
-        | form-input-label      | Local |
-        | text-contrast         | Local |
-        | informative-image-alt | Groq  |
-        | form-input-label      | Groq  |
-        | text-contrast         | Groq  |
