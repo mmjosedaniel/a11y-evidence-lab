@@ -12,7 +12,7 @@ OD-017 defers the formal qualification and release requirements that were previo
 
 [OD-021](../DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-021--trusted-operator-url-boundary-for-the-portfolio-mvp) retains one developer-supplied public HTTPS page as the runtime target while replacing the earlier production-style URL-security gate with an explicit trusted-input portfolio boundary. [ADR-0018](../../architecture/decisions/ADR-0018-trusted-operator-url-boundary.md) supersedes ADR-0017 for the MVP. Hostile, private, authenticated, and otherwise untrusted targets, plus production SSRF, DNS/IP, redirect, and connection-level egress guarantees, are unsupported and deferred. The three project-owned profiles remain the canonical evaluation baseline, live pages do not become evaluation-gold inputs, and the fixed six generation executions do not change.
 
-[OD-022](../DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-022--portfolio-mvp-yagni-simplification) replaces duplicated behavioral narratives and exhaustive hard-specification matrices with the compact derived views below and in `docs/specs/`. It also narrows provider disclosure, persistence, review, and public-page correlation through their owning requirements and ADRs. It does not change the fixed six generation executions or turn them into a provider comparison.
+[OD-022](../DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-022--portfolio-mvp-yagni-simplification) replaces duplicated behavioral narratives and exhaustive hard-specification matrices with the compact derived views below and in `docs/specs/`. It also narrows provider disclosure, persistence, review, and public-page correlation through their owning requirements and ADRs. It does not change the fixed six generation executions or turn them into a provider comparison. The comparison clarification below preserves OD-019's controlled outcome set and positive-to-violation binary regression case while making explicit that public runtime comparison always begins with a baseline Finding.
 
 ## Evaluation requirements
 
@@ -55,6 +55,20 @@ This section constrains later evaluation but does not authorize implementation.
 
 The detailed controlled states, minimized evidence, guidance, manual judgments, and comparison meanings remain governed by [Product scope and glossary](../PRODUCT_SCOPE_AND_GLOSSARY.md) and [Evidence and review workflow](../EVIDENCE_AND_REVIEW_WORKFLOW.md).
 
+### Comparison-only contrast policy vector
+
+The manifest freezes this minimal `text-contrast` policy-test vector solely to exercise the deterministic `improved` branch without adding a third fixture or browser execution:
+
+| Field | Baseline record | Later record |
+| --- | --- | --- |
+| Shared identity and profile | `text-contrast`; the same stable target key and minimized locator; axe `color-contrast` and retained check identity; the same viewport, browser, scanner, evidence, and measurement profile | Identical to baseline |
+| Retained visual facts | `#888888` foreground on `#FFFFFF`; normal text at `16px` and weight `400` | `#7F7F7F` foreground on the same `#FFFFFF`; the same font classification |
+| Comparison input bucket and threshold | `violation`; expected ratio `4.5:1` | `violation`; expected ratio `4.5:1` |
+| Comparison input measured ratio | `3.54:1` | `4.00:1` |
+| Comparison-only margin | `3.54 - 4.50 = -0.96` | `4.00 - 4.50 = -0.50` |
+
+The later margin is strictly higher while both input buckets remain failing, so the expected deterministic result is `improved`, not `resolved`. This is not a retained scanner-evidence record and does not satisfy `REQ-EVID-002`; it contains only the field shapes consumed by the comparison policy and makes no claim that axe emitted these values. The vector creates no third fixture revision, product scenario, browser scan, provider invocation, generation execution, or canonical run-comparison record.
+
 ### Fixed executions and shared checks
 
 | Manifest part | Minimum content |
@@ -64,8 +78,8 @@ The detailed controlled states, minimized evidence, guidance, manual judgments, 
 | Shared deterministic path | Verify each controlled failing/corrected scanner outcome, complete all-node collection, minimized evidence, gold-passage retrieval, and valid-zero versus failed/incomplete scan behavior once at provider-independent frequency. |
 | Shared abstention | Use one incomplete, missing, or conflicting evidence/guidance package; keep the Finding visible and create no provider invocation. |
 | Shared review | Exercise `approve`, `edit and accept`, and `reject` while preserving the original proposal, required manual judgments, and decision timestamp. |
-| Shared comparison | Exercise the accepted controlled outcomes, including contrast-only `improved`, without inferring accessibility, conformance, or remediation causality. |
-| Trusted-URL boundary | Demonstrate one trusted public HTTPS page, basic input rejection, a fresh single-page scan, no crawling or deliberate page interaction, a finite timeout, cleanup, and visible failure. This is not hostile-target qualification. |
+| Shared comparison | Exercise the accepted controlled outcomes. Use the comparison-only same-target/profile still-failing contrast policy vector for `improved`; retain reversed controlled positive/failing evidence for binary `regressed`. Neither case adds a fixture revision or generation execution, and neither supports accessibility, conformance, scanner-fidelity, or remediation-causality inference. |
+| Trusted-URL boundary | Demonstrate one trusted public HTTPS page, basic input rejection, a fresh top-level-main-document scan with iframe documents excluded, no crawling or deliberate page interaction, a finite timeout, cleanup, and visible failure. This is not hostile-target qualification. |
 
 The generation count is exactly six. Shared checks do not add generation executions and are not duplicated per provider.
 
@@ -77,10 +91,10 @@ Each case records completion or failure and the applicable observations below. T
 | --- | --- |
 | Scanner and evidence | Exact three-rule coverage is complete; every expected violation node is retained independently; native `incomplete` observations remain distinct; a failed or coverage-incomplete scan never appears as a valid zero result. |
 | Retrieval and citations | The selected Finding retrieves the frozen directly supporting passage; source, version, section, URL, and passage identity resolve; support is not overstated. |
-| Structured generation | An eligible call returns the application-owned validated structure with references to the selected Finding's nested evidence, supported citations, qualified explanation, remediation proposal, uncertainty, assumptions, and required manual checks. |
+| Structured generation | An eligible call returns the application-owned validated structure with a finding summary, references to the selected Finding's nested evidence, user-impact explanation, remediation proposal, supported citations, evidence sufficiency, a separate categorical confidence label with uncertainty, assumptions, and required manual checks. |
 | Abstention and provider behavior | Insufficient evidence or guidance abstains before invocation; provider failure is visible; neither path triggers automatic retry, batching, mode mixing, or fallback. |
 | Human review | One reviewer can approve, edit and accept, or reject one proposal while the original proposal, action, feedback or edit, and timestamp remain distinguishable. |
-| Comparison | The controlled before/after evidence produces the applicable conservative outcome and rationale; missing or mismatched evidence remains inconclusive or not comparable. |
+| Comparison | The controlled before/after evidence produces the applicable conservative outcome and rationale; missing or mismatched evidence remains inconclusive or not comparable. Public runtime comparison begins with a baseline Finding, so binary positive-to-violation regression remains controlled-evaluation-only, while exact matched lower-margin `color-contrast` failures may be public `regressed`. |
 | Capacity and reporting | The three local cases run sequentially on the reference PC without out-of-memory failure or an unusable interface. Local and Groq observations are reported separately with limitations and without ranking or generalized claims. |
 
 No generated, displayed, or reported text may claim certification, legal compliance, whole-page or whole-site accessibility, or complete success-criterion conformance or non-conformance.
@@ -91,14 +105,14 @@ No generated, displayed, or reported text may claim certification, legal complia
 
 | Example | Essential behavior | Primary authorities |
 | --- | --- | --- |
-| BHV-01 | Start the local application, analyze one trusted page, and publish one complete list containing every supported-rule Finding while keeping scanner-review observations and failures distinct. | `REQ-AUTH-007`, `REQ-AUTH-008`, `REQ-SCAN-006`, OD-021, ADR-0018 |
-| BHV-02 | Select one Finding, inspect its minimized evidence, and retrieve exact versioned guidance without sibling content. | `REQ-EVID-004`, `REQ-EVID-007`, `REQ-RETR-001`, `REQ-RETR-002`, `REQ-RETR-005` |
-| BHV-03 | Generate one validated proposal only from complete evidence and supported guidance, otherwise abstain before any provider call. | `REQ-RETR-004`, `REQ-GEN-002`–`REQ-GEN-005`, `REQ-GEN-010` |
-| BHV-04 | Apply one explicit immutable Local-or-Groq mode to the run; invoke one selected Finding at a time; expose failure without provider mixing, batching, or fallback. | `REQ-LLM-002`–`REQ-LLM-005`, `REQ-LLM-008`, `REQ-LLM-009`, `REQ-LLM-019`, `REQ-LLM-020`, ADR-0014, ADR-0020 |
+| BHV-01 | Start the local application, analyze one trusted page, and publish one complete list containing every supported-rule Finding while keeping scanner-review observations and failures distinct. | `REQ-AUTH-007`, `REQ-AUTH-008`, `REQ-SCAN-006`, `REQ-UX-004`, `REQ-UX-005`, `REQ-UX-010`, OD-021, ADR-0018 |
+| BHV-02 | Select one Finding, inspect its minimized evidence, and retrieve exact versioned guidance without sibling content. | `REQ-EVID-004`, `REQ-EVID-007`, `REQ-RETR-001`, `REQ-RETR-002`, `REQ-RETR-005`, ADR-0022 |
+| BHV-03 | Generate one validated proposal only from complete evidence and supported guidance, otherwise abstain before any provider call; fail safely before invocation when required input cannot fit without truncation. | `REQ-RETR-004`, `REQ-GEN-001`–`REQ-GEN-005`, `REQ-GEN-009`, `REQ-GEN-010`, `REQ-LLM-008` |
+| BHV-04 | Apply one explicit immutable Local-or-Groq mode to the run; invoke one selected Finding at a time; record minimum actual-call provenance; keep all non-generation configuration unchanged by mode; enforce the selected data boundary; expose failure without provider mixing, batching, or fallback. | `REQ-GEN-008`, `REQ-LLM-002`–`REQ-LLM-005`, `REQ-LLM-009`, `REQ-LLM-019`, `REQ-LLM-020`, ADR-0014, ADR-0020, ADR-0023 |
 | BHV-05 | Require an individual approve, edit-and-accept, or reject decision before one proposal becomes an accepted plan. | `REQ-REV-001`, `REQ-REV-008`, `REQ-REV-009` |
 | BHV-06 | Rescan in a distinct run and compare exact-locator evidence conservatively without making a conformance claim. | `REQ-EVID-010`, `REQ-COMP-004`, `REQ-COMP-005`, `REQ-COMP-007`, `REQ-COMP-008` |
 | BHV-07 | Preserve complete local evidence across downstream failure, reopen its one validated aggregate, and use a separate run for another Analyze action or an intentional rescan. | `REQ-EVID-011`, ADR-0021, and the accepted information lifecycle |
-| BHV-08 | Keep deterministic evidence, retrieved guidance, AI interpretation, human work, and limitations visibly distinct; never modify code automatically. | `REQ-EVID-004`, `REQ-GEN-003`–`REQ-GEN-006` |
+| BHV-08 | Keep deterministic evidence, retrieved guidance, AI interpretation, human work, and limitations visibly distinct without relying only on color; never modify code automatically. | `REQ-EVID-004`, `REQ-GEN-003`–`REQ-GEN-006`, `REQ-UX-002` |
 
 ## Explicit non-goals
 

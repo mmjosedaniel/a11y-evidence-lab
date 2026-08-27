@@ -40,8 +40,8 @@ An automated result remains evidence about one rule under the recorded scan prof
 | Assessment | Responsibility |
 | --- | --- |
 | [Technology selection](TECHNOLOGY_SELECTION.md) | Minimal TypeScript, Playwright, Chromium, and axe-core proposal, with alternatives and primary-source evidence. |
-| [Deferred public-page hardening](AUTHORIZED_PUBLIC_PAGE_EXECUTION_AND_SECURITY.md) | Preserved post-MVP research for hostile-URL containment; it is not the current execution design or a development prerequisite. |
-| [Controlled-fixture execution and security](CONTROLLED_FIXTURE_EXECUTION_AND_SECURITY.md) | Project-owned deterministic evaluation baseline and its stricter zero-egress fixture profile. |
+| [Deferred hostile-URL and public-page hardening assessment](AUTHORIZED_PUBLIC_PAGE_EXECUTION_AND_SECURITY.md) | Preserved post-MVP research for hostile-URL containment; it is not the current execution design or a development prerequisite. |
+| [Controlled-fixture evaluation assessment](CONTROLLED_FIXTURE_EXECUTION_AND_SECURITY.md) | Project-owned deterministic evaluation baseline and its network-independent, no-external-resource fixture profile. |
 
 ## Step boundary
 

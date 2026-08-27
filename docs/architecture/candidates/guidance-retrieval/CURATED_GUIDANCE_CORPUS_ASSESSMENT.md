@@ -2,13 +2,13 @@
 
 ## Authority, status, and scope
 
-**Status:** Proposed architecture detail for the corpus portion of the third workflow step.
+**Status:** Proposed supporting assessment. It documents candidate implementation detail within the closed source, versioning, identity, and deterministic passage boundaries accepted by [ADR-0022](../../decisions/ADR-0022-closed-versioned-guidance-corpus.md). Exact acquisition, physical layout, and paragraph/list selections remain Proposed implementation-stage detail.
 
 **Assessment date:** 2026-08-24.
 
-**Decision alignment:** 2026-08-27, including the trusted operator-input portfolio scope recorded by [OD-021](../../../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-021--trusted-operator-url-boundary-for-the-portfolio-mvp) and [ADR-0018](../../decisions/ADR-0018-trusted-operator-url-boundary.md), plus the corpus and record simplifications accepted by [OD-022](../../../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-022--portfolio-mvp-yagni-simplification), [ADR-0019](../../decisions/ADR-0019-in-process-exact-vector-search.md), and [ADR-0021](../../decisions/ADR-0021-single-file-run-aggregate.md).
+**Decision alignment:** 2026-08-27, including the trusted operator-input portfolio scope recorded by [OD-021](../../../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-021--trusted-operator-url-boundary-for-the-portfolio-mvp) and [ADR-0018](../../decisions/ADR-0018-trusted-operator-url-boundary.md), plus the corpus, retrieval, and record simplifications accepted by [OD-022](../../../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-022--portfolio-mvp-yagni-simplification), [ADR-0019](../../decisions/ADR-0019-in-process-exact-vector-search.md), [ADR-0021](../../decisions/ADR-0021-single-file-run-aggregate.md), and [ADR-0022](../../decisions/ADR-0022-closed-versioned-guidance-corpus.md).
 
-This focused assessment belongs to the [Accessibility guidance retrieval assessment family](README.md). It owns no requirement ID or status and does not authorize corpus acquisition or implementation. OD-004 accepts the bounded source pack and its W3C/WAI use-condition boundary in the canonical [Evidence and review workflow requirements — Corpus and retrieval](../../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#corpus-and-retrieval); the exact future acquisition and passage-construction mechanics assessed here remain Proposed.
+This focused assessment belongs to the [Accessibility guidance retrieval assessment family](README.md). It owns no requirement ID or status and does not authorize corpus acquisition or implementation. OD-004 and ADR-0022 accept the bounded source pack and its W3C/WAI use-condition boundary in the canonical [Evidence and review workflow requirements — Corpus and retrieval](../../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#corpus-and-retrieval). ADR-0022 also accepts manual deterministic heading-aware passage construction; exact copied text, paragraph/list boundaries, serialization, and physical layout remain Proposed until the implementation slice is authorized.
 
 The [accepted first vertical slice](../../../requirements/PRODUCT_SCOPE_AND_GLOSSARY.md#first-vertical-slice) scans one trusted operator-supplied, explicitly authorized public HTTPS page with exactly three rule mappings: `image-alt` / SC 1.1.1, `label` / SC 4.1.2, and `color-contrast` / SC 1.4.3. Choosing a suitable public target is the operator's responsibility; the application does not independently prove authorization or public reachability. The project-owned `informative-image-alt`, `form-input-label`, and `text-contrast` failing/corrected profiles remain the reproducible evaluation baseline for those mappings. This candidate assesses how to prepare the same bounded pack for independently selected findings from either source without selecting a release technology or creating corpus material during planning.
 
@@ -16,7 +16,7 @@ The live page is evidence, never guidance-corpus input. No page text, page link,
 
 ## Accepted closed eight-artifact W3C pack
 
-OD-004 accepts one manually curated English pack containing exactly eight W3C artifacts, subject to the recorded W3C/WAI use conditions. It is only large enough to retrieve the normative basis, essential contextual distinctions, and one or two directly applicable technique paths for the three profiles. Acceptance of the manifest is not a corpus download, copied-source authorization, or dependency selection.
+OD-004 and ADR-0022 accept one manually curated English pack containing exactly eight W3C artifacts, subject to the recorded W3C/WAI use conditions. It is only large enough to retrieve the normative basis, essential contextual distinctions, and one or two directly applicable technique paths for the three profiles. Acceptance of the manifest is not a corpus download, copied-source authorization, or dependency selection.
 
 | # | Accepted guidance artifact | Selected content boundary | Authority, version, and update treatment |
 | --- | --- | --- | --- |
@@ -57,15 +57,15 @@ OD-004 accepts this bounded pack only under WAI's [Using WAI Material](https://w
 
 The future source manifest must have one corpus version and, for each artifact, its source title and type, direct URL, publisher, applicable publication/version status, selected headings, copyright and attribution notice, and license or use-condition URI. Before source text is acquired, an implementation review must confirm that its planned local use, segmentation, excerpt display, and any public-demo distribution follow those recorded conditions. Product-authored summaries remain separate from exact W3C text. No corpus directory, download, copied source, or derived passage is created in this planning phase; after development is explicitly authorized, the implementation may download only the eight approved artifacts. This is a planning constraint, not legal advice.
 
-## Proposed deterministic source preparation
+## Accepted source-preparation boundary and Proposed exact selections
 
-When implementation is later authorized, the canonical corpus should remain independent of the embedding, retrieval, and generation runtimes:
+ADR-0022 requires the canonical corpus to remain independent of the embedding, retrieval, and generation runtimes. When implementation is later authorized, exact passage selections must stay inside this accepted boundary:
 
 1. **Acquire only from the closed manifest.** One versioned source manifest records the eight approved entries, their selected headings, direct URLs, source types, and attribution/use-condition information. There is no recursive traversal, link following, or automatic refresh.
 2. **Select sections manually.** The manifest names each accepted success criterion, required definition, Understanding heading, or Technique heading. This manual selection occurs before embedding.
 3. **Segment by document structure.** Preserve the selected heading and complete paragraph/list units. If one selected section must be divided to meet the evaluated embedding input limit, split only at a paragraph or list boundary and assign each selected unit a stable passage ID. Do not use sliding-window overlap, a generic splitter, or query-dependent chunks.
 4. **Attach only the needed identity and citation fields.** Each passage records its stable `passageId`, corpus version, source title and type, exact heading, direct URL, rule and success-criterion tags, and selected text. A source or selected-text change creates a new corpus version.
-5. **Embed only after segmentation.** The embedding adapter vectorizes the already selected canonical text. It may apply model-required query/document prefixes inside the adapter, but it does not decide passage boundaries, rewrite source ranges, or change canonical identity.
+5. **Make segmentation a prerequisite for embedding.** The embedding adapter may vectorize only already selected canonical text. Actual vectorization and in-process store construction wait for the first explicit retrieval request and repeat only for a required rebuild under ADR-0019 and ADR-0020; corpus preparation itself does not trigger them. The adapter may apply model-required query/document prefixes, but it does not decide passage boundaries, rewrite source ranges, or change canonical identity.
 
 This is deliberately a small manual content-preparation path. It needs no crawler, framework loader, generic chunker, overlap strategy, concurrency control, refresh service, or automated ingestion pipeline.
 
@@ -126,5 +126,6 @@ This corpus portion is adequately defined for the Proposed retrieval evaluation 
 - Up: [Accessibility guidance retrieval assessments](README.md)
 - Next within this workflow step: [Local retrieval execution and evaluation](LOCAL_RETRIEVAL_EXECUTION_AND_EVALUATION_ASSESSMENT.md)
 - [Evidence and review workflow requirements](../../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md)
+- [ADR-0022: Closed, versioned guidance corpus](../../decisions/ADR-0022-closed-versioned-guidance-corpus.md)
 - [Architecture index](../../README.md)
 - [Project documentation index](../../../README.md)

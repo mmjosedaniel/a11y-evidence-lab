@@ -23,10 +23,16 @@ The following current decisions have been accepted at the scope stated in each r
 15. [ADR-0019: In-process exact vector search for the MVP](ADR-0019-in-process-exact-vector-search.md)
 16. [ADR-0020: Manual developer-managed local model setup](ADR-0020-manual-developer-managed-local-model-setup.md)
 17. [ADR-0021: Single-file run aggregate](ADR-0021-single-file-run-aggregate.md)
+18. [ADR-0022: Closed, versioned guidance corpus](ADR-0022-closed-versioned-guidance-corpus.md)
+19. [ADR-0023: Local-mode data boundary](ADR-0023-local-mode-data-boundary.md)
 
-`Accepted for evaluation` selects a bounded configuration to measure after development is authorized; it does not mean implemented, bundled, generally supported, or release-qualified. `Accepted` records a binding project direction or, for ADR-0010, an explicit deferral. ADR-0014 deliberately splits these scopes: Groq and the explicit dual-mode/no-fallback boundary are binding MVP decisions, while its exact model is only a fixed evaluation configuration. ADR-0018 accepts the trusted single-page scan boundary. ADR-0019, ADR-0020, and ADR-0021 apply the portfolio YAGNI boundary to retrieval, model setup, and persistence. Release adoption remains subject to a later decision.
+`Accepted for evaluation` selects a bounded configuration to measure after development is authorized; it does not mean implemented, bundled, generally supported, or release-qualified. `Accepted` records a binding project direction or, for ADR-0010, an explicit deferral. ADR-0014 deliberately splits these scopes: Groq and the explicit dual-mode/no-fallback boundary are binding MVP decisions, while its exact model is only a fixed evaluation configuration. ADR-0018 accepts the trusted single-page scan boundary. ADR-0019, ADR-0020, and ADR-0021 apply the portfolio YAGNI boundary to retrieval, model setup, and persistence. ADR-0022 accepts the closed, manually segmented corpus boundary, and ADR-0023 accepts a local-inference data boundary without a system-wide zero-egress claim. Release adoption remains subject to a later decision.
 
 Candidate technologies and architecture options not covered by these records remain proposals until an ADR or another authoritative project document explicitly records a decision.
+
+## Partial amendments to current decisions
+
+ADR-0023 supersedes only ADR-0005's requirement to disable or isolate unrelated runtime networking and its system-wide zero-egress release gate, plus ADR-0012's requirement that all Local-mode operations show no unapproved non-loopback egress and its description of Groq as the only external operation. ADR-0005 and ADR-0012 otherwise remain current. Groq remains the only external generation path; trusted-page navigation and developer-managed model acquisition are separate network operations.
 
 ## Superseded decision history
 

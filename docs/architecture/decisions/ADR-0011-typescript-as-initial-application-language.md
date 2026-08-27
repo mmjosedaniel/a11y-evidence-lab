@@ -11,7 +11,7 @@ TypeScript is a static type checker for JavaScript and has first-class support i
 
 ### MVP scope amendment recorded 2026-08-25
 
-OD-015 narrows the runtime-contract work anticipated by the original decision. The MVP uses small TypeScript record definitions plus minimal runtime validation only where untrusted data enters from axe-core, Groq, the selected local model runtime, or persisted JSON. It does not require JSON Schema as a cross-system authority, code generation, a schema framework, migrations, multiple schema dialects, or a compatibility framework. TypeScript's erased compile-time types still do not validate those runtime values.
+OD-015 narrows the runtime-contract work anticipated by the original decision. The MVP uses small TypeScript record definitions plus minimal runtime validation only where unknown data enters from axe-core, Groq, the selected local model runtime, or persisted JSON. ADR-0018 separately requires basic URL-syntax validation before target admission. The MVP does not require JSON Schema as a cross-system authority, code generation, a schema framework, migrations, multiple schema dialects, or a compatibility framework. TypeScript's erased compile-time types still do not validate those runtime values.
 
 ## Considered options
 
@@ -26,13 +26,13 @@ Use TypeScript as the primary application language for the initial evaluation im
 
 - Apply it to application-owned UI code, the local application service, shared domain contracts, provider and embedding adapters, retrieval integration, and the Playwright/axe-core module where the selected execution runtime supports the pinned dependencies.
 - Require strict, independently executed type checking. A transpiler, build tool, test runner, or editor that accepts TypeScript syntax does not replace a successful compiler type check.
-- Define the minimum application-owned record types needed by the six-step workflow. Runtime-validate and normalize native axe results, Groq responses, local-runtime responses, and canonical persisted JSON before they enter domain logic.
+- Define the minimum application-owned record types needed by the six-step workflow. Validate basic URL syntax before target admission, and runtime-validate and normalize native axe results, Groq responses, local-runtime responses, and canonical persisted JSON before they enter domain logic.
 - Under [ADR-0021](ADR-0021-single-file-run-aggregate.md), persisted domain state is one top-level `run.json` type with nested finding data, not a family of independently versioned child contracts.
 - Do not introduce JSON Schema or another schema language as a second canonical contract merely for the MVP. Provider-required JSON Schema may describe the Groq request boundary, but the application-owned TypeScript record meaning remains authoritative and the returned value is still validated.
 - Keep React, Playwright, axe-core, Ollama, LangChain `MemoryVectorStore`, model-provider SDK, and workflow-framework types outside canonical domain records. Integration-specific types terminate at their adapters.
 - Keep credentials, filesystem access, process control, model management, persistence, and privileged networking in the local application service, never in browser-delivered UI code. A later isolated helper requires its own demonstrated need and topology decision.
 - Pin and record the TypeScript compiler, JavaScript runtime, package manager, lockfile, and material dependency versions used by the MVP evaluation.
-- Evaluate strict type checking, the four runtime-validation boundaries, normalized failures, loopback isolation, startup, recovery, and practical reference-PC capacity. Cancellation frameworks, packaging, migrations, and broader compatibility qualification remain deferred.
+- Evaluate strict type checking, URL admission plus the four external/persisted-data validation boundaries, normalized failures, loopback isolation, startup, recovery, and practical reference-PC capacity. Cancellation frameworks, packaging, migrations, and broader compatibility qualification remain deferred.
 
 This decision does not select Node.js or another JavaScript runtime, a package manager, build tool, desktop container, installer technology, runtime-schema library, web-service framework, or database driver. [ADR-0013](ADR-0013-langchain-as-initial-rag-integration.md) separately accepts LangChain's bounded evaluation role; this language decision does not accept LangGraph or LangSmith.
 
@@ -41,7 +41,7 @@ This evaluation decision does not qualify TypeScript or its toolchain as a relea
 ## Consequences
 
 - UI, service, browser-analysis, and contract code can share one language and compatible tooling while preserving explicit module boundaries.
-- Static checking can catch incompatible contract changes before execution, but the four untrusted MVP boundaries still require runtime validation because erased types are not a security or data-integrity boundary.
+- Static checking can catch incompatible contract changes before execution, but URL input and the four external/persisted-data boundaries still require runtime validation because erased types are not a security or data-integrity boundary.
 - Some operating-system integrations may require a native module, helper process, or separately owned service whose security and lifecycle must be evaluated.
 - ADR-0019 keeps the fixed corpus vectors as disposable in-process LangChain values, while ADR-0021 keeps the single canonical run aggregate application-owned. Neither framework type enters `run.json`.
 - Replacing TypeScript later would affect application-owned implementation code but must not change record-version meaning, stored evidence meaning, or provider-neutral behavior.

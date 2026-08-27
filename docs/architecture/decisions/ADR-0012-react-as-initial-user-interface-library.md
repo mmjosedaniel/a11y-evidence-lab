@@ -17,6 +17,14 @@ React supports TypeScript and component-based client interfaces. It can support 
 
 [ADR-0018](ADR-0018-trusted-operator-url-boundary.md) retains the loopback service and unprivileged browser UI but defers production session-authentication, request-forgery, DNS-rebinding, and exhaustive renderer-projection qualification for the trusted single-user portfolio MVP. The proportional UI boundary is the one recorded by `REQ-SEC-027`.
 
+### Local-mode data-boundary amendment recorded 2026-08-27
+
+[ADR-0023](ADR-0023-local-mode-data-boundary.md) supersedes this record's earlier requirement to prove that every Local-mode operation produces no unapproved non-loopback egress. The current boundary is narrower: browser-delivered code has no direct provider authority; the local service exchanges Local-generation prompts and responses only with the approved Ollama loopback endpoint and performs embedding only through the locally present embedding model over loopback, without a hosted embedding or vector service. This does not alter the separately authorized minimized Groq generation payload and does not claim or enforce zero system-wide or unrelated egress. The trusted public-page scan still uses ordinary external HTTPS traffic, and Groq remains the only external generation provider.
+
+### MVP accessibility-verification clarification recorded 2026-08-27
+
+[OD-022](../../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-022--portfolio-mvp-yagni-simplification) and [OD-024](../../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-024--minimum-complete-mvp-behavior-contracts) replace this record's earlier “three controlled review paths” wording with the compact verification boundary in `REQ-A11Y-006`: one automated check, one keyboard smoke path, and one screen-reader smoke path across the core trusted-public-URL workflow. This preserves accessible implementation as a requirement without creating a browser, assistive-technology, scenario, or workflow-state matrix.
+
 ## Considered options
 
 1. Use a server-rendered or full-stack React framework as the application boundary.
@@ -33,8 +41,8 @@ Use React with TypeScript as the initial user-interface library for evaluation, 
 - Reconstruct the visible state from durable service records after reload, interruption, or local-service restart; React component state must never be the source of truth for accepted decisions.
 - Prefer native semantic HTML and explicit accessible names, relationships, keyboard behavior, focus management, validation, error handling, and status announcements. Visual differences and state must not rely only on color. No separate progress subsystem follows from this decision.
 - Render target content, scanner output, corpus passages, and model output as untrusted data. Display markup as text by default; any future rendered preview requires a separately accepted sandboxing and sanitization design.
-- Serve pinned local assets from the local service and verify that local-mode operations produce no unapproved non-loopback egress. A Groq-mode generation request is the one explicit external operation accepted by ADR-0014.
-- Evaluate the three controlled review paths against `REQ-A11Y-*` with automated checks plus focused keyboard and manual review. A formal assistive-technology support matrix is deferred, and React component tests alone are insufficient.
+- Serve pinned application UI assets from the local service. Browser-delivered code has no direct generation or embedding authority; the local service exchanges Local-generation prompts and responses only with the approved Ollama loopback endpoint and performs embedding only through the locally present embedding model over loopback, without a hosted embedding or vector service. This boundary does not alter the separately authorized minimized Groq generation payload or require system-wide egress control: trusted public-page navigation remains external under ADR-0018, and an explicit Groq-mode generation request remains the only external generation path accepted by ADR-0014.
+- Evaluate the application's core path against `REQ-A11Y-*` using the one automated check, keyboard smoke path, and screen-reader smoke path governed by `REQ-A11Y-006`. This supersedes the earlier three-controlled-review-path wording; a formal assistive-technology support matrix is deferred, and React component tests alone are insufficient.
 - Keep React-specific component, state, router, and query types outside canonical domain records and the service API.
 
 This decision does not select a router, state or data-fetching library, CSS system, component kit, form library, build tool, full-stack React framework, local-service framework, desktop container, or installer technology. In particular, it does not select Vite, Next.js, Electron, Tauri, or WebView2. A desktop container and installer are outside the MVP.
@@ -63,7 +71,9 @@ This evaluation decision does not qualify React or a browser version as a releas
 - [ADR-0014: Groq as the MVP external generation provider](ADR-0014-groq-as-mvp-external-generation-provider.md)
 - [ADR-0015: Localhost browser MVP execution](ADR-0015-localhost-browser-mvp-execution.md)
 - [ADR-0021: Single-file run aggregate](ADR-0021-single-file-run-aggregate.md)
+- [ADR-0023: Local-mode data boundary](ADR-0023-local-mode-data-boundary.md)
+- [Minimum complete MVP behavior contracts](../../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-024--minimum-complete-mvp-behavior-contracts)
 - [Evidence and review workflow requirements](../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md): `REQ-EVID-004` and `REQ-UX-*`
 - [Installation and model lifecycle requirements](../../requirements/generation-provider-and-model-lifecycle/INSTALLATION_AND_MODEL_LIFECYCLE.md): `REQ-INST-002`
 - [Application accessibility requirements](../../requirements/quality-security-and-operations/APPLICATION_ACCESSIBILITY.md): `REQ-A11Y-*`
-- [Privacy and security requirements](../../requirements/quality-security-and-operations/PRIVACY_AND_SECURITY.md): `REQ-SEC-013` and `REQ-SEC-027`
+- [Privacy and security requirements](../../requirements/quality-security-and-operations/PRIVACY_AND_SECURITY.md): `REQ-SEC-004`, `REQ-SEC-013`, and `REQ-SEC-027`

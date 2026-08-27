@@ -15,7 +15,7 @@ Read only the focused module that owns the task. The compact MVP evaluation is p
 
 The [documentation-only Gherkin specifications](../../specs/README.md) are derived views of the behavioral examples and the applicable constraints in their linked authorities. They own no requirement ID or status and provide no executable or acceptance evidence.
 
-[OD-022](../DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-022--portfolio-mvp-yagni-simplification) owns the compact evaluation/specification boundary. The related accepted MVP boundaries are [ADR-0019](../../architecture/decisions/ADR-0019-in-process-exact-vector-search.md), [ADR-0020](../../architecture/decisions/ADR-0020-manual-developer-managed-local-model-setup.md), and [ADR-0021](../../architecture/decisions/ADR-0021-single-file-run-aggregate.md).
+[OD-022](../DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-022--portfolio-mvp-yagni-simplification) owns the compact evaluation/specification boundary. The related accepted MVP boundaries are [ADR-0019](../../architecture/decisions/ADR-0019-in-process-exact-vector-search.md), [ADR-0020](../../architecture/decisions/ADR-0020-manual-developer-managed-local-model-setup.md), [ADR-0021](../../architecture/decisions/ADR-0021-single-file-run-aggregate.md), [ADR-0022](../../architecture/decisions/ADR-0022-closed-versioned-guidance-corpus.md), and [ADR-0023](../../architecture/decisions/ADR-0023-local-mode-data-boundary.md).
 
 ## Documentation navigation
 

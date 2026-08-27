@@ -8,6 +8,8 @@ The authoritative requirements remain in [Evidence and review workflow requireme
 
 Controlled fixtures remain the deterministic evaluation baseline. They exercise the same scan and comparison modules as the runtime path, while their gold scenario metadata stays in the evaluation manifest rather than becoming a second product workflow.
 
+This refinement preserves OD-019's controlled positive-to-violation binary regression case as decision history. It does not add that case to the public runtime path, which always starts from a selected baseline Finding, and it adds no fixture revision, product scenario, or generation execution.
+
 ## Recommended minimal approach
 
 Use ordinary deterministic application logic to compare one selected baseline Finding with evidence from one later complete scan. Do not use an LLM, LangChain, embeddings, DOM diffing, fuzzy matching, or a generalized element-identity framework.
@@ -36,7 +38,7 @@ Both source runs must have completed their exact three-rule scans. The pair-leve
 
 If any row differs, report `not comparable` with the differing values. Do not create a materiality policy, configurable tolerance matrix, URL-equivalence engine, page-readiness taxonomy, or cross-version translation framework for the MVP.
 
-The operator remains responsible for choosing the trusted page. Authorization notices, provider mode, proposal state, reviewer decision, and manual judgments do not affect deterministic scan comparability.
+Choosing the trusted page is an operator responsibility outside this comparison model. Provider mode, proposal state, reviewer decision, and manual judgments do not affect deterministic scan comparability.
 
 ## Exact selected-target matching
 
@@ -68,7 +70,7 @@ Do not persist the scanner's complete pass or inapplicable collections. Controll
 | `resolved` | The selected baseline violation has one exact later same-rule/same-locator native non-failing observation under a comparable scan. This means only that the automated Finding was not reproduced under those conditions. |
 | `persistent` | Both scans contain one exact same-rule/same-locator violation. For `image-alt` and `label`, any still-failing change remains persistent. |
 | `improved` | `color-contrast` only: both exact matched observations remain violations and the later retained contrast margin is higher under identical measurement semantics. The Finding remains unresolved. |
-| `regressed` | A retained positive baseline becomes a same-target violation, or two exact matched `color-contrast` violations have a lower later margin. This does not prove causation. |
+| `regressed` | Public runtime: two exact matched `color-contrast` violations have a lower later margin. Controlled evaluation only: a retained positive baseline becomes a same-target violation under the stable fixture key. Public binary `image-alt` and `label` comparison cannot produce this outcome because it starts from a baseline Finding. This does not prove causation. |
 | `inconclusive` | The pair passed the URL/profile gate, but the selected target has no exact unique match or lacks required evidence. |
 | `not comparable` | The URL or exact scan/evidence profile differs, or either scan is incomplete. No Finding outcome is assigned. |
 
@@ -100,11 +102,11 @@ The three project-owned profiles supply the deterministic comparison demonstrati
 
 | Profile | Frozen evaluation evidence |
 | --- | --- |
-| `informative-image-alt` | Failing and corrected observations support `resolved`; reusing the failing observation on both sides supports `persistent`, and reversing the pair supports the controlled `regressed` case. |
-| `form-input-label` | The same failing/corrected pairings support the binary outcomes. A deliberately missing or duplicate match can be an evaluation-record case for `inconclusive` without another page revision. |
-| `text-contrast` | Failing/corrected observations retain the comparison measurements. A small record-level still-failing ratio case may verify `improved` arithmetic without adding a third runtime fixture revision. |
+| `informative-image-alt` | Failing and corrected observations support `resolved`; reusing the failing observation on both sides supports `persistent`, and reversing the pair supports the controlled-evaluation-only `regressed` case. Public runtime cannot start from that positive observation because it selects a baseline Finding. |
+| `form-input-label` | The same failing/corrected pairings support the controlled binary outcomes. A deliberately missing or duplicate match can be an evaluation-record case for `inconclusive` without another page revision. Binary `regressed` remains controlled-evaluation-only. |
+| `text-contrast` | Failing/corrected observations retain the comparison measurements. The manifest also supplies one [comparison-only still-failing policy vector](../../requirements/evaluation-and-release/EVALUATION_AND_ACCEPTANCE.md#comparison-only-contrast-policy-vector): both inputs declare the same stable target key, rule, browser/measurement profile, expected ratio, and failing bucket; the later input ratio and margin are strictly higher but remain below the expected ratio. The vector contains only the fields consumed by deterministic comparison. It is not retained scanner evidence under `REQ-EVID-002`, is not scanner-fidelity evidence, and adds no third fixture revision, product scenario, browser scan, provider invocation, or generation execution. |
 
-The evaluation harness supplies scenario identity, revision role, expected result, and stable fixture key. The product scan and comparison modules receive ordinary scan records and do not expose a fixture-selector UI or a second fixture-specific product model.
+The evaluation harness supplies scenario identity, revision role, expected result, and stable fixture key. Normal controlled cases pass ordinary scan records to the same comparison logic. The two comparison-only record pairs—reversed binary evidence for controlled `regressed` and still-failing contrast evidence for `improved`—exercise only deterministic classification and are not persisted as public runtime comparisons. The product exposes no fixture-selector UI or second fixture-specific model.
 
 ## Manual judgment
 
@@ -118,7 +120,7 @@ The comparison may show the accepted plan and the reviewer's earlier notes as co
 
 ## Conceptual comparison record
 
-Store one small comparison object in the later run, addressed by its `baselineRunId` and the selected baseline `findingId`:
+For public runtime use, store one small comparison object in the later run, addressed by its `baselineRunId` and the selected baseline `findingId`:
 
 | Part | Minimum information |
 | --- | --- |
@@ -128,7 +130,7 @@ Store one small comparison object in the later run, addressed by its `baselineRu
 | Evidence | Baseline and later Finding or narrow positive-observation references and the relevant rule-specific values. |
 | Result | One outcome, limitations, and optional manual-follow-up note. |
 
-No separate correlation-policy registry, child-comparison graph, event history, or copied page payload is required. If a referenced run is deleted, expose broken lineage instead of retaining a hidden duplicate.
+No separate correlation-policy registry, child-comparison graph, event history, or copied page payload is required. If a referenced run is deleted, expose broken lineage instead of retaining a hidden duplicate. Controlled comparison-only evaluation pairs do not create this public runtime object, a baseline `findingId`, or another canonical artifact.
 
 ## Privacy and public-demo boundary
 
@@ -171,14 +173,15 @@ Public demonstrations should use the project-owned controlled cases. A non-sensi
 This step is adequately defined when:
 
 1. comparison accepts only two complete scans with identical normalized requested/final URLs and exact scan/evidence profiles;
-2. only one selected baseline Finding is compared;
+2. public runtime comparison starts from only one selected baseline Finding;
 3. one exact unique same-rule/minimized-locator match is required;
 4. missing, changed, or duplicate matches are `inconclusive`;
 5. `resolved` requires a narrow same-target native non-failing observation and never follows from absence alone;
-6. contrast outcomes use only exact matched scanner-emitted measurements;
-7. controlled fixtures exercise the full deterministic outcome set through the same modules without a fixture-selector product workflow;
-8. reviewer context cannot alter the deterministic outcome; and
-9. no result claims whole-page accessibility, conformance, certification, legal compliance, causation, or code modification.
+6. exact matched public binary failures remain `persistent`, while public `regressed` is limited to a lower margin between exact matched failing `color-contrast` observations;
+7. runtime and normal fixture contrast outcomes use exact matched scanner-emitted measurements, while the comparison-only still-failing policy vector exercises `improved` arithmetic without being treated as retained scanner evidence or adding another fixture revision or generation execution;
+8. controlled fixtures preserve positive-to-violation binary `regressed` as an evaluation-only case through the same modules without a fixture-selector product workflow;
+9. reviewer context cannot alter the deterministic outcome; and
+10. no result claims whole-page accessibility, conformance, certification, legal compliance, causation, or code modification.
 
 ## Primary sources
 

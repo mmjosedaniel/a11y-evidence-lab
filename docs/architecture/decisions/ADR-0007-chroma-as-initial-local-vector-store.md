@@ -9,6 +9,8 @@
 
 This supersession does not remove local embeddings, semantic retrieval, cosine ranking, LangChain's bounded integration role, passage-level citations, or retrieval-quality evaluation. Those concerns continue under ADR-0006, ADR-0013, and ADR-0019.
 
+Because this record is fully superseded, every Chroma-specific “MVP” check below—including its zero-egress wording—is historical and is not a current development gate. [ADR-0023](ADR-0023-local-mode-data-boundary.md) separately defines the current application-owned local-embedding boundary without requiring machine-wide zero-egress proof.
+
 ## Context
 
 The MVP needs local vector storage for a small, immutable accessibility-guidance corpus. The store must preserve passage identifiers and source metadata, support reproducible filtered retrieval, survive restarts, and participate in atomic rebuild, deletion, backup, and migration behavior without requiring cloud access.
@@ -59,6 +61,7 @@ Promoting Chroma to the release architecture requires passing those gates. A fai
 
 - [ADR-0006: EmbeddingGemma as the initial embedding model](ADR-0006-embeddinggemma-as-initial-embedding-model.md)
 - [ADR-0019: In-process exact vector search for the MVP](ADR-0019-in-process-exact-vector-search.md) — current MVP replacement
+- [ADR-0023: Local-mode data boundary](ADR-0023-local-mode-data-boundary.md)
 - [ADR-0011: TypeScript as the initial application language](ADR-0011-typescript-as-initial-application-language.md)
 - [Evidence and review workflow requirements](../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md): `REQ-CORP-*` and `REQ-RETR-*`
 - [Reliability, reproducibility, and operations requirements](../../requirements/quality-security-and-operations/RELIABILITY_REPRODUCIBILITY_AND_OPERATIONS.md): `REQ-QUAL-003`, `REQ-QUAL-004`, and `REQ-QUAL-010`

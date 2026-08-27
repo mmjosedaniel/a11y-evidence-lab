@@ -169,7 +169,7 @@ The shared browser and scanner sources are listed in [Technology selection — P
 
 ## Documentation navigation
 
-- Deferred post-MVP research: [Authorized public-page execution and security](AUTHORIZED_PUBLIC_PAGE_EXECUTION_AND_SECURITY.md)
+- Deferred post-MVP research: [Deferred hostile-URL and public-page hardening assessment](AUTHORIZED_PUBLIC_PAGE_EXECUTION_AND_SECURITY.md)
 - Up: [Authorized deterministic web scan candidate assessments](README.md)
 - Next workflow step: [Accessibility finding and evidence capture assessment](../ACCESSIBILITY_FINDING_EVIDENCE_CAPTURE_ASSESSMENT.md)
 - [Architecture index](../../README.md)

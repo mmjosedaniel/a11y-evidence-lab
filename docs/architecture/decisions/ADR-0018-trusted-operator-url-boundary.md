@@ -38,7 +38,7 @@ Accept option 3 for the portfolio MVP. This record supersedes ADR-0017 as the cu
 - Parse the entered value as one valid HTTPS URL and reject malformed input or embedded credentials. No application-owned DNS, IP-address, redirect, or subresource security classification is part of the MVP.
 - Launch the page in a fresh, non-persistent Playwright-managed Chromium context without imported cookies, storage state, credentials, extensions, permissions, or a personal browser profile.
 - Apply one finite navigation timeout, run the scan, and close the page, context, and managed browser after success, timeout, or failure. Exact timeout and cleanup mechanics are implementation details rather than architecture qualification gates.
-- Perform one passive top-level page analysis. The product does not intentionally click controls, submit forms, upload or download files, discover or follow links as scan targets, execute user journeys, crawl, or scan multiple pages.
+- Perform one passive top-level page analysis. Scan only the admitted top-level main document; iframe documents are excluded from the MVP scan. The product does not intentionally click controls, submit forms, upload or download files, discover or follow links as scan targets, execute user journeys, crawl, or scan multiple pages.
 - Browser redirects and subresources needed for an ordinary page load follow the managed browser's normal behavior. The application does not re-attest redirects or mediate every connection, and it makes no hostile-page containment claim.
 
 ### Deterministic three-rule result

@@ -91,7 +91,7 @@ Public-page variability, redirects, experiments, consent views, localization, an
 
 - Current scan technology proposal: [Technology selection](TECHNOLOGY_SELECTION.md)
 - Up: [Authorized deterministic web scan candidate assessments](README.md)
-- Evaluation baseline: [Controlled-fixture execution and security](CONTROLLED_FIXTURE_EXECUTION_AND_SECURITY.md)
+- Evaluation baseline: [Controlled-fixture evaluation assessment](CONTROLLED_FIXTURE_EXECUTION_AND_SECURITY.md)
 - Current decision: [ADR-0018: Trusted operator URL boundary for the portfolio MVP](../../decisions/ADR-0018-trusted-operator-url-boundary.md)
 - Superseded decision history: [ADR-0017: Authorized public-page scan boundary](../../decisions/ADR-0017-authorized-public-page-scan-boundary.md)
 - Next workflow step: [Accessibility finding and evidence capture assessment](../ACCESSIBILITY_FINDING_EVIDENCE_CAPTURE_ASSESSMENT.md)

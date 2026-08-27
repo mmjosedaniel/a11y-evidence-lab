@@ -27,7 +27,11 @@ ADR-0015 and the accepted installation requirements replace the original general
 
 ### In-process vector amendment recorded 2026-08-27
 
-[ADR-0019](ADR-0019-in-process-exact-vector-search.md) supersedes this record's reusable-index and immutable-index-identity assumptions for the MVP. The fixed corpus vectors are disposable in-process values rebuilt from the canonical passages and current embedding configuration. No persisted index, index identifier, index migration, or index lifecycle is required.
+[ADR-0019](ADR-0019-in-process-exact-vector-search.md) supersedes this record's reusable-index and immutable-index-identity assumptions for the MVP. The fixed corpus vectors are disposable in-process values built only after retrieval is first explicitly requested and rebuilt after a process restart or material corpus/embedding change. No application-start embedding, persisted index, index identifier, index migration, or index lifecycle is required.
+
+### Local-mode data-boundary amendment recorded 2026-08-27
+
+[ADR-0023](ADR-0023-local-mode-data-boundary.md) makes the local-embedding boundary explicit for both generation modes. Selected corpus text and privacy-safe finding-query text cross only the approved Ollama loopback endpoint to the locally present embedding model, and returned vectors remain in the local application process. The MVP uses no hosted embedding or vector service, but it does not claim that trusted-page navigation, the separately selected Groq generation path, the independently installed runtime, or the whole machine has zero external network activity.
 
 ## Considered options
 
@@ -39,12 +43,12 @@ ADR-0015 and the accepted installation requirements replace the original general
 
 Use `embeddinggemma` as the initial embedding model for evaluation only.
 
-- The developer acquires it outside A11y Evidence Lab with `ollama pull embeddinggemma` after installing Ollama through its official developer-managed setup. The application neither invokes nor manages acquisition, update, removal, progress, storage selection, or download state. Record the exact tag, full digest, dimensions, context limit, runtime version, license, and available integrity metadata for evaluation provenance.
+- The developer acquires it outside A11y Evidence Lab with the canonical MVP setup command `ollama pull embeddinggemma` after installing Ollama through its official developer-managed setup. `EmbeddingGemma 300M` identifies the selected model family; it is not a second evaluation configuration or a competing setup tag. The application neither invokes nor manages acquisition, update, removal, progress, storage selection, or download state. At evaluation time, record the configured `embeddinggemma` tag, its resolved full artifact digest, dimensions, context limit, runtime version, license, and available integrity metadata for reproducibility.
 - Check the approved Ollama loopback endpoint and presence of `embeddinggemma` only when retrieval is actually requested. Use the actual corpus/query embedding operation and boundary validation to establish success or visible failure; do not add a synthetic connection test, capability probe, or readiness report.
 - Apply the reference-PC capacity gate before full retrieval evaluation.
 - Evaluate it only on the compact frozen three-scenario retrieval subset and its one representative provider-independent insufficiency control, with descriptive per-case results rather than a statistical or promotion claim.
 - Verify that chunk lengths and query construction fit the model's effective input limit without silent truncation.
-- Rebuild the disposable in-process vectors when the model, digest, preprocessing, passage segmentation, or normalization changes; never reuse vectors across incompatible embedding configurations.
+- Build the disposable in-process vectors once per required in-process rebuild, beginning with the first explicit retrieval request after process start. Rebuild when the model digest, preprocessing, passage segmentation, or normalization changes; never reuse vectors across incompatible embedding configurations.
 - Keep embedding local for both global generation modes. Selecting hosted generation does not silently move embeddings to an external API.
 
 Promoting `embeddinggemma` to a release configuration is Deferred. For the MVP it must pass the bounded retrieval checks and practical reference-PC screen; if it fails, replace it with one smaller capacity-screened local candidate while retaining the same retrieval provenance contract.
@@ -57,9 +61,10 @@ Promoting `embeddinggemma` to a release configuration is Deferred. For the MVP i
 - The corpus and evaluation set determine suitability, not the model's general benchmark claims.
 - A replacement embedding model requires rebuilding the in-process vectors and rerunning the compact retrieval evaluation but does not change corpus-source lineage.
 
-## Primary reference
+## Primary references
 
 - [EmbeddingGemma on Ollama](https://ollama.com/library/embeddinggemma)
+- [Google EmbeddingGemma model card](https://huggingface.co/google/embeddinggemma-300m/blob/main/README.md)
 
 ## Related decisions and requirements
 
@@ -69,6 +74,8 @@ Promoting `embeddinggemma` to a release configuration is Deferred. For the MVP i
 - [ADR-0018: Trusted operator URL boundary](ADR-0018-trusted-operator-url-boundary.md)
 - [ADR-0019: In-process exact vector search](ADR-0019-in-process-exact-vector-search.md)
 - [ADR-0020: Manual developer-managed local model setup](ADR-0020-manual-developer-managed-local-model-setup.md)
+- [ADR-0022: Closed, versioned guidance corpus](ADR-0022-closed-versioned-guidance-corpus.md)
+- [ADR-0023: Local-mode data boundary](ADR-0023-local-mode-data-boundary.md)
 - [Installation and model lifecycle requirements](../../requirements/generation-provider-and-model-lifecycle/INSTALLATION_AND_MODEL_LIFECYCLE.md): `REQ-INST-003`–`REQ-INST-006` and `REQ-INST-017`
 - [Evidence and review workflow requirements](../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md): `REQ-RETR-006`
 - [Reliability, reproducibility, and operations requirements](../../requirements/quality-security-and-operations/RELIABILITY_REPRODUCIBILITY_AND_OPERATIONS.md): `REQ-QUAL-003`, `REQ-QUAL-004`, and `REQ-QUAL-009`
