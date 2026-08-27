@@ -15,6 +15,10 @@ Groq documents an API that is mostly compatible with OpenAI client libraries, bu
 
 ADR-0017 also moves mode selection to one immutable global `Local` or `Groq` context on the parent `PageAnalysisRun`. Selecting Groq does not send data or automatically process its findings. Each child finding workflow is user-selected, gated independently, disclosed before remote invocation, and limited to at most one Groq call. There is no all-findings batch, automatic retry, or fallback.
 
+### Trusted operator URL amendment recorded 2026-08-27
+
+[ADR-0018](ADR-0018-trusted-operator-url-boundary.md) supersedes ADR-0017's hostile-network controls for the portfolio MVP while preserving the run-level provider mode and per-Finding invocation semantics above. Treating the entered page as trusted input does not authorize sending its URL or raw content to Groq; evidence minimization, disclosure, explicit invocation, and no-fallback behavior remain unchanged.
+
 ## Considered options
 
 1. Keep external generation outside the MVP.
@@ -30,7 +34,7 @@ Use Groq as the first and only external generation provider in the MVP. This pro
 - Target Groq's documented `https://api.groq.com/openai/v1` API base through the fixed Groq adapter. Do not expose an arbitrary compatible-base-URL setting in the MVP.
 - Use Groq model ID `openai/gpt-oss-20b` with strict Structured Outputs (`strict: true`) for the fixed MVP API evaluation. The schema must satisfy Groq's documented strict-mode constraints and the application must still validate the returned value at runtime.
 - This exact model is an evaluation configuration, not a release-qualified dependency or a permanent availability promise. Check Groq's current model catalog, structured-output support, deprecation notices, and account limits before an evaluation run; changing the model requires a recorded decision.
-- Before each public-page Groq invocation, identify Groq, the exact model and destination, the minimized data categories to be sent, provider-controlled retention and service conditions, and bounded failure behavior. Global Groq mode is context, not standing permission for an automatic call.
+- Before each trusted-page Groq invocation, identify Groq, the exact model and destination, the minimized data categories to be sent, provider-controlled retention and service conditions, and failure behavior. Global Groq mode is context, not standing permission for an automatic call.
 - Send only one selected finding's minimized application-owned facts and the required curated guidance passages, instructions, and schema. Do not send the target URL or origin, locator or selector, raw or full HTML, element or arbitrary page text, image source, form or input values, arbitrary attributes, screenshots, DOM or accessibility-tree snapshots, credentials, cookies, headers, hidden page data, redirect or network data, unrelated findings, repository contents, or prior review history. If those exclusions leave material support insufficient, abstain rather than widen the payload.
 - Keep the Groq API key in the local application service, loaded from an ignored local `.env` file or an equivalent local secret source. Never place it in browser-delivered code, tracked documentation, Git, logs, exports, or persisted run records.
 - Record non-secret provenance: Groq as provider, adapter version, exact model ID, endpoint identity without credentials, generation parameters, request time, and usage or limit metadata returned by the service. Do not record the key or a reconstructable secret.
@@ -62,7 +66,7 @@ Groq's published free-plan row for `openai/gpt-oss-20b` showed 30 requests per m
 - [ADR-0001: Interchangeable generation providers](ADR-0001-interchangeable-generation-providers.md)
 - [ADR-0013: LangChain as the initial RAG integration baseline](ADR-0013-langchain-as-initial-rag-integration.md)
 - [ADR-0015: Localhost browser MVP execution](ADR-0015-localhost-browser-mvp-execution.md)
-- [ADR-0017: Authorized public-page scan boundary](ADR-0017-authorized-public-page-scan-boundary.md)
+- [ADR-0018: Trusted operator URL boundary](ADR-0018-trusted-operator-url-boundary.md)
 - [Generation provider execution requirements](../../requirements/generation-provider-and-model-lifecycle/GENERATION_PROVIDER_EXECUTION.md): `REQ-LLM-*`
 - [Privacy and security requirements](../../requirements/quality-security-and-operations/PRIVACY_AND_SECURITY.md): `REQ-SEC-*`
 - [Evaluation and acceptance requirements](../../requirements/evaluation-and-release/EVALUATION_AND_ACCEPTANCE.md): `REQ-EVAL-*`

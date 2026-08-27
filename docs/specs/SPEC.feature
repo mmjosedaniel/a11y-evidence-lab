@@ -5,11 +5,13 @@
 # an executable test, acceptance evidence, or proof that a scenario passes.
 
 @SPEC @planned
-Feature: Evidence-first accessibility analysis for one authorized public page
-  A frontend developer analyzes one authorized public HTTPS page with three
+Feature: Evidence-first accessibility analysis for one trusted public page
+  A frontend developer analyzes one deliberately supplied public HTTPS page with three
   deterministic accessibility rules, can inspect any resulting finding, and
   processes one selected finding at a time through evidence, retrieval,
   generation or abstention, human review, and later comparison.
+  The portfolio MVP treats that URL as trusted developer input; it does not
+  promise safe handling of hostile, private, authenticated, or untrusted targets.
   Open implementation values remain governed by their owning authorities.
 
   @SPEC-001 @BHV-01 @REQ-INST-002 @REQ-INST-005 @ADR-0015
@@ -30,14 +32,13 @@ Feature: Evidence-first accessibility analysis for one authorized public page
       Then the service reports a visible startup failure
       And it does not report a ready application address
 
-  @SPEC-002 @BHV-01 @REQ-AUTH-005 @REQ-AUTH-006 @REQ-SCAN-001 @REQ-SCAN-006 @REQ-SCAN-007 @REQ-UX-010 @OD-020 @ADR-0017
-  Rule: The user can analyze one authorized page and see every supported finding
+  @SPEC-002 @BHV-01 @REQ-AUTH-007 @REQ-AUTH-008 @REQ-SEC-026 @REQ-SEC-027 @REQ-SCAN-001 @REQ-SCAN-006 @REQ-SCAN-007 @REQ-UX-010 @OD-021 @ADR-0018
+  Rule: The user can analyze one trusted page and see every supported finding
 
     Scenario Outline: Start one provider-independent page analysis
       Given the local application is ready
-      And the user is authorized to analyze one non-authenticated public HTTPS page
-      When the user enters that page URL
-      And the user attests that the page is authorized for this analysis
+      And the developer has chosen one public HTTPS page that they are permitted and willing to trust
+      When the developer enters that page URL
       And the user selects the global "<mode>" generation mode
       And the user activates Analyze once
       Then the application creates one PageAnalysisRun for that page
@@ -48,6 +49,13 @@ Feature: Evidence-first accessibility analysis for one authorized public page
         | mode  |
         | Local |
         | Groq  |
+
+    Scenario: State the trusted-input limitation
+      Given the application accepts one developer-supplied public HTTPS URL
+      When the user reviews target entry or interprets scan results
+      Then the application states that the developer is responsible for choosing a page they may analyze and trust
+      And it identifies hostile, private, authenticated, and untrusted targets as unsupported
+      And it does not claim production-grade URL isolation, SSRF protection, or safe hostile-page processing
 
     Scenario: List every finding reported by the three supported rules
       Given a complete scan reports violation nodes for one or more supported rules
@@ -61,7 +69,7 @@ Feature: Evidence-first accessibility analysis for one authorized public page
       And native scanner incomplete observations appear separately from findings
 
     Scenario: Present a complete scan with no findings
-      Given the scanner completed the exact three-rule collection within the accepted boundary
+      Given page navigation and the exact three-rule collection completed successfully
       And none of the three supported rules reported a violation node
       When the application presents the scan results
       Then it shows a complete result with zero findings
@@ -69,7 +77,7 @@ Feature: Evidence-first accessibility analysis for one authorized public page
       And it does not present the zero count as proof of accessibility or conformance
 
     Scenario: Keep an incomplete scan distinct from a complete result
-      Given the accepted scan boundary cannot establish complete three-rule collection
+      Given page navigation times out, page loading fails, or exact three-rule collection cannot complete
       When the scan operation ends
       Then the application shows a failed or coverage-incomplete scan state
       And it does not publish a complete zero-finding or partial finding list
@@ -180,7 +188,7 @@ Feature: Evidence-first accessibility analysis for one authorized public page
       And no automatic retry or cross-provider fallback occurs
       And retry, regeneration, or provider change requires a new linked PageAnalysisRun
 
-  @SPEC-006 @BHV-05 @REQ-REV-001 @REQ-REV-008 @OD-020
+  @SPEC-006 @BHV-05 @REQ-REV-001 @REQ-REV-008 @OD-021
   Rule: A person decides each generated proposal independently
 
     Scenario: Approve the original proposal
@@ -207,12 +215,12 @@ Feature: Evidence-first accessibility analysis for one authorized public page
       And the rejection remains evaluation feedback rather than automatic ground truth
       And the rejection applies only to that finding
 
-  @SPEC-007 @BHV-06 @REQ-COMP-004 @REQ-COMP-005 @REQ-COMP-007 @REQ-COMP-008 @OD-019 @OD-020
+  @SPEC-007 @BHV-06 @REQ-COMP-004 @REQ-COMP-005 @REQ-COMP-007 @REQ-COMP-008 @OD-019 @OD-021
   Rule: The user can rescan and compare evidence conservatively
 
     Scenario: Create a distinct later scan for comparison
       Given a baseline PageAnalysisRun contains a complete scan
-      And the authorized page may have changed since that scan
+      And the submitted page may have changed since that scan
       When the user starts another analysis of the page
       Then the application creates a distinct immutable PageAnalysisRun
       And comparison first determines whether the two complete scans are comparable
@@ -289,7 +297,7 @@ Feature: Evidence-first accessibility analysis for one authorized public page
       And it does not claim accessibility certification, legal compliance, or whole-page conformance
       And it does not represent a proposal as an automatic source-code change
 
-  @SPEC-010 @controlled_evaluation @REQ-SCAN-002 @REQ-SCAN-004 @REQ-EVAL-001 @REQ-EVAL-003 @REQ-EVAL-006 @REQ-EVAL-009 @OD-019 @OD-020
+  @SPEC-010 @controlled_evaluation @REQ-SCAN-002 @REQ-SCAN-004 @REQ-EVAL-001 @REQ-EVAL-003 @REQ-EVAL-006 @REQ-EVAL-009 @OD-019 @OD-021
   Rule: The portfolio uses three controlled profiles as its fixed evaluation baseline
 
     Scenario Outline: Preserve each supported profile and its primary guidance mapping

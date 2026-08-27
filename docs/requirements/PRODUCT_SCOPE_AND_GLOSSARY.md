@@ -10,16 +10,16 @@ This document is part of the authoritative requirements baseline indexed by [Pro
 
 **Status:** Accepted on 2026-08-25 through OD-001.
 
-- **Primary MVP user:** a frontend developer investigating one selected accessibility finding from an authorized page analysis and preparing a remediation decision.
+- **Primary MVP user:** a frontend developer investigating one selected accessibility finding from a trusted developer-input page analysis and preparing a remediation decision.
 - **Secondary MVP user:** a QA engineer reproducing the same selected finding and verifying the later result.
 
-The MVP serves one local human user and one proposal at a time. The labels above describe intended users, not application roles: the product has no user accounts, login or reviewer-identity authentication, permissions, assignments, teams, or collaboration workflow. This does not remove the accepted local-session and request-authentication boundary for the loopback API. Approving the bounded corpus is a project-maintainer responsibility during development, not an in-product curator role.
+The MVP serves one local human user and one proposal at a time. The labels above describe intended users, not application roles: the product has no user accounts, login or reviewer-identity authentication, permissions, assignments, teams, or collaboration workflow. The local service still owns privileged operations under `REQ-SEC-027`; the trusted single-user MVP does not add a production session-authentication or request-forgery-protection system. Approving the bounded corpus is a project-maintainer responsibility during development, not an in-product curator role.
 
 OD-020 changes the runtime scan cardinality, not the intended-user decision: the same person sees a complete supported-rule result list and may work on one selected FindingWorkflow at a time.
 
 ### Core job to be done
 
-When an authorized public page produces automated accessibility findings, the user needs to inspect the complete supported-rule result, understand one selected finding at a time, find applicable authoritative guidance, decide what remediation is appropriate, record where human judgment is still needed, and verify how the evidence changes after the page is updated.
+When a developer-selected page produces automated accessibility findings, the user needs to inspect the complete supported-rule result, understand one selected finding at a time, find applicable authoritative guidance, decide what remediation is appropriate, record where human judgment is still needed, and verify how the evidence changes after the page is updated.
 
 ### Product principles
 
@@ -30,21 +30,21 @@ When an authorized public page produces automated accessibility findings, the us
 3. **Human authority.** Every generated proposal requires review; contextual judgments require explicit manual checks.
 4. **Conservative AI behavior.** Unsupported or conflicting evidence must lead to abstention or an inconclusive result, not a plausible invention.
 5. **Visible limitations.** The interface, and any export that is provided, states the target, supported-rule coverage, automation boundary, and comparison limits.
-6. **Privacy and authorization.** Only authorized targets may be analyzed, and local/private data must not silently leave the local environment.
+6. **Responsible target and data use.** The developer is responsible for choosing a page they are permitted to analyze, and local/private data must not silently leave the local environment.
 7. **Measurable quality.** Retrieval, generation, workflow, comparison, and resource use must be evaluated independently.
 8. **Accessible by design.** The application itself must be usable by people with disabilities.
 9. **Replaceable generation.** The evidence and review workflow must not be bound to one model vendor or runtime. For every PageAnalysisRun, the user explicitly chooses either the downloaded local model through the selected runtime or Groq as the first and only external provider. Local mode is the recommended initial choice but is never implicit; failure never triggers automatic fallback to the other mode.
 10. **Existing-hardware boundary.** Local model candidates must fit the documented reference PC under the representative workload; models that exceed that capacity are excluded rather than accommodated with additional hardware or remote compute.
 
-OD-020 applies these principles to one public-page analysis: exact three-rule scanner coverage and every retained Finding stay visible; the run has one immutable Local-or-Groq context; and only one selected FindingWorkflow may reach retrieval, generation, and individual review at a time.
+OD-021 applies these principles to one trusted developer-input analysis: exact three-rule scanner coverage and every retained Finding stay visible; the run has one immutable Local-or-Groq context; and only one selected FindingWorkflow may reach retrieval, generation, and individual review at a time.
 
 ## Scope
 
 ### MVP scope
 
-**Status:** The authorized-public-page portfolio scope is Accepted through [OD-020](DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-020--authorized-public-page-analysis-scope), which supersedes OD-019's synthetic-only, one-profile-at-a-time runtime boundary. [ADR-0017](../architecture/decisions/ADR-0017-authorized-public-page-scan-boundary.md) accepts the corresponding public-page scan boundary. The single-user localhost application, one global local-or-Groq mode per run, no-fallback behavior, local filesystem persistence, and absence of an MVP installer remain Accepted through their recorded decisions.
+**Status:** The one-public-page portfolio interaction remains Accepted through [OD-020](DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-020--authorized-public-page-analysis-scope), which supersedes OD-019's synthetic-only, one-profile-at-a-time runtime boundary. [OD-021](DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-021--trusted-operator-url-boundary-for-the-portfolio-mvp) and [ADR-0018](../architecture/decisions/ADR-0018-trusted-operator-url-boundary.md) replace OD-020 and ADR-0017 only where they required a production hostile-target boundary. The single-user localhost application, one global local-or-Groq mode per run, no-fallback behavior, local filesystem persistence, and absence of an MVP installer remain Accepted through their recorded decisions.
 
-The portfolio MVP is a single-user web application served by one local application service and opened at a loopback address in Chrome or Edge. One **PageAnalysisRun** accepts one user-attested public HTTPS page URL, selects one immutable global generation mode, and performs one provider-independent deterministic scan using exactly these axe-core rules:
+The portfolio MVP is a single-user web application served by one local application service and opened at a loopback address in Chrome or Edge. One **PageAnalysisRun** accepts one developer-entered non-authenticated public HTTPS page URL as trusted input, selects one immutable global generation mode, and performs one provider-independent deterministic scan using exactly these axe-core rules. Target authorization and suitability are supported-use assumptions owned by the developer; the application collects no separate attestation, confirmation, or acknowledgement record:
 
 - `image-alt`, mapped narrowly to WCAG 2.2 SC 1.1.1;
 - `label`, mapped narrowly to WCAG 2.2 SC 4.1.2; and
@@ -60,16 +60,16 @@ Durable records remain local in one application-owned filesystem run directory p
 
 The smallest runtime workflow is:
 
-1. Enter one public HTTPS page URL and attest authorization for that single page.
+1. Enter one non-authenticated public HTTPS page URL that the developer is responsible for choosing and is permitted to analyze.
 2. Select one global local or Groq generation mode for the new PageAnalysisRun.
-3. Activate **Analyze** once; the local service validates the public-page boundary and runs one provider-independent scan with exactly the three supported rules.
+3. Activate **Analyze** once; the local service performs basic URL parsing, opens a fresh non-persistent browser context without imported state, and runs one provider-independent scan with exactly the three supported rules under a simple timeout and cleanup path.
 4. Preserve and show every finding plus each distinct ScannerReviewObservation; show a valid zero only after complete coverage.
 5. Select one finding and process only its minimized evidence through retrieval and the evidence-sufficiency gate.
 6. Produce either one structured cited proposal through the run's selected provider or one deterministic abstention with no provider call.
 7. Record manual checks and one individual approve, edit-and-accept, or reject decision.
 8. Start a new run to retry or rescan; compare only evidence that satisfies the conservative same-page, same-rule, and same-target prerequisites.
 
-The public-page input does not authorize crawling or general website analysis. The MVP accepts no authenticated page, cookie, credential, custom authorization header, uploaded HTML, filesystem path, link-discovery request, multi-page target set, or broader rule set. Target authorization, URL/network validation, redirect and resource containment, bounded execution, and minimized evidence are mandatory parts of the public-page boundary recorded in ADR-0017 and the owning security requirements.
+The page input does not authorize crawling or general website analysis. The MVP accepts no authenticated page, cookie, credential, custom authorization header, uploaded HTML, filesystem path, link-discovery request, multi-page target set, or broader rule set. The developer owns target authorization. The application performs only basic URL-shape validation and deliberately does not claim to prove that a URL is public, safe, or non-hostile. The fresh browser context, no-imported-state boundary, no-crawl/no-interaction behavior, simple timeout and cleanup, and minimized evidence are the proportional safeguards recorded in ADR-0018 and the owning requirements.
 
 ### First vertical slice
 
@@ -130,16 +130,17 @@ The version-pinned axe [contrast evaluation source](https://github.com/dequelabs
 
 - **OD-002 (Superseded by OD-019):** accepted only the `image-alt` controlled scenario.
 - **OD-019 (Superseded for runtime scope by OD-020):** expanded the portfolio to three project-owned synthetic controlled profiles processed one at a time. Its three rule/WCAG mappings, controlled evaluation profiles, and comparison evidence remain evaluation history where current requirements still reference them.
-- **OD-020 (current, Accepted):** replaces the runtime boundary with one user-attested public HTTPS page per PageAnalysisRun, exactly the three supported rules in one provider-independent scan, a complete variable finding list, one global local-or-Groq mode context, and one selected finding workflow at a time. It does not authorize crawling, authentication, broader rule coverage, bulk generation/review, provider mixing, or implementation. See the [decision register](DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-020--authorized-public-page-analysis-scope) and [ADR-0017](../architecture/decisions/ADR-0017-authorized-public-page-scan-boundary.md).
+- **OD-020 (Accepted on 2026-08-25; attestation and hostile-target controls superseded by OD-021):** replaced the runtime boundary with one user-attested public HTTPS page per PageAnalysisRun, exactly the three supported rules in one provider-independent scan, a complete variable finding list, one global local-or-Groq mode context, and one selected finding workflow at a time. Its one-page, scan-cardinality, provider, and no-crawl decisions remain current; its separate attestation and production public-target enforcement clauses are preserved only as history. See the [decision register](DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-020--authorized-public-page-analysis-scope) and superseded [ADR-0017](../architecture/decisions/ADR-0017-authorized-public-page-scan-boundary.md).
+- **OD-021 (current, Accepted):** retains OD-020's one-page, exact-three-rule, complete-finding-list, global-provider, and selected-finding workflow while replacing its attestation and hostile-target enforcement model with a trusted developer-input portfolio boundary. The application provides no production isolation claim for hostile, private, redirecting, or resource-abusive targets. See the [decision register](DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-021--trusted-operator-url-boundary-for-the-portfolio-mvp) and [ADR-0018](../architecture/decisions/ADR-0018-trusted-operator-url-boundary.md).
 
 ### Out of scope for the MVP
 
-**Status:** The non-certification, no-automatic-modification, public-HTTPS-only single-page input, exactly-three-rule coverage, no-authentication/no-crawler, single-user, global-provider-mode, and one-selected-finding-workflow boundaries are Accepted through their recorded decisions. Other deferrals remain governed by their owning requirements.
+**Status:** The non-certification, no-automatic-modification, trusted public-HTTPS-only single-page input, exactly-three-rule coverage, no-authentication/no-crawler, single-user, global-provider-mode, and one-selected-finding-workflow boundaries are Accepted through their recorded decisions. Production hostile-target protection is Deferred through OD-021. Other deferrals remain governed by their owning requirements.
 
 - Accessibility certification, compliance badges, legal advice, or whole-page/whole-site conformance claims.
 - Claims that zero supported-rule findings means a page is accessible.
 - Automatic source-code edits, pull requests, deployments, or unsupervised remediation.
-- Authenticated, private-network, non-public, or credentialed pages; cookies, custom authorization headers, stored browser sessions, or user-entered form state.
+- Authenticated, intentionally hostile, private-network, non-public, or credentialed pages; cookies, custom authorization headers, stored browser sessions, or user-entered form state. The MVP documents these as unsupported and does not claim to detect them reliably.
 - Multiple input URLs, link following, target discovery, site crawling, crawler specifications, or crawler implementation.
 - Any accessibility rule beyond `image-alt`, `label`, and `color-contrast`; cross-browser equivalence or mobile-device coverage.
 - Automatic processing, combined retrieval, combined prompts, combined proposals, approve-all/reject-all actions, background queues, parallel finding workflows, or production-scale batch processing.
@@ -155,12 +156,12 @@ Terms prefixed with **Candidate** below are proposed or Deferred vocabulary. The
 
 | Term | Definition |
 | --- | --- |
-| Authorized target | A page or controlled fixture the user is permitted to analyze, with declared scope recorded. At runtime the MVP accepts only the Authorized public page defined below; controlled fixtures are evaluation inputs. |
-| Authorized public page | One public HTTPS page the user explicitly attests they are authorized to analyze for one PageAnalysisRun. The scope does not include links, authenticated state, another URL, or a site. |
+| Authorized target | A page or controlled fixture the user is permitted to analyze. The developer owns that determination; the MVP performs no ownership-verification workflow. Controlled fixtures are evaluation inputs. |
+| Trusted developer-input page | One developer-entered non-authenticated public HTTPS page treated as benign input for one PageAnalysisRun. The application performs basic URL parsing but does not prove public reachability, authorization, or hostile-page safety. The scope does not include links as targets, authenticated state, another URL, or a site. |
 | Controlled fixture | A project-owned synthetic page state with frozen expected evidence, retained only for deterministic evaluation rather than runtime target intake. |
 | Controlled scenario profile | One of the three accepted evaluation scenario identities and rule/WCAG pairings, with project-owned synthetic failing and corrected states and one stable intended target. Its content, expected native result, stable target key, fixture revision, browser profile, and rule profile are frozen before evaluation; physical fixture-file layout is an implementation detail. |
 | Supported rule profile | One of the three accepted axe rule/WCAG mappings plus its rule-specific minimized evidence, retrieval vocabulary, manual judgment, and comparison constraints. All three profiles run in every public-page scan. |
-| PageAnalysisRun | The parent record and local persistence unit for one attested URL, one immutable global generation-mode context, one complete three-rule scan, a variable finding collection, distinct scanner-review observations, and any finding-specific downstream records created through explicit selection. |
+| PageAnalysisRun | The parent record and local persistence unit for one trusted developer-supplied URL, one immutable global generation-mode context, one complete three-rule scan, a variable finding collection, distinct scanner-review observations, and any finding-specific downstream records created through explicit selection. |
 | Transient scan observation | The in-memory native scanner result and execution metadata produced for immediate evidence capture; it is not durable evidence. |
 | Scan run | One execution of a versioned scanner configuration against a recorded target state. For the public-page MVP, its durable Scan record belongs to one PageAnalysisRun. |
 | Scan record | The provider-independent record of one complete or failed three-rule scanner execution against the PageAnalysisRun target. |

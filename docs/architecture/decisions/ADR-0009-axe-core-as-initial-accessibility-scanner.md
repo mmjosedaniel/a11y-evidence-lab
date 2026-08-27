@@ -19,6 +19,10 @@ The fixed physical evidence surface is exactly the three accepted scenario profi
 
 [ADR-0017](ADR-0017-authorized-public-page-scan-boundary.md) accepts an additional public-page input and replaces the one-selected-rule/one-retained-violation assumption for that path. One public `PageAnalysisRun` executes exactly `image-alt`, `label`, and `color-contrast` against the same stabilized page state as one atomic scan, validates coverage for all three, and lists every in-bounds violation node. The user selects one normalized finding only after that deterministic enumeration. The three controlled profiles and six revisions remain fixed inputs for the separate controlled evaluation path; they do not enter the user-submitted runtime URL path.
 
+### Trusted operator URL amendment recorded 2026-08-27
+
+[ADR-0018](ADR-0018-trusted-operator-url-boundary.md) supersedes ADR-0017's hostile-network and numeric-bound requirements without changing scanner cardinality. One trusted-page scan still validates the exact three-rule result and lists every returned violation node as an independent Finding. A timeout, browser or scanner failure, malformed or truncated result, or missing rule coverage remains visible and cannot be presented as a complete scan or a valid zero-finding result.
+
 ## Considered options
 
 1. Use axe-core.
@@ -33,9 +37,9 @@ Use a pinned axe-core version, initially through `@axe-core/playwright`, as the 
 - Pin and record the axe-core and integration versions, exact rule set, tags, options, page-state inputs, coverage contract, and browser configuration. The public-page rule set is closed to `image-alt`, `label`, and `color-contrast`.
 - Keep the native axe result transient and distinguish it from normalized findings and model-generated interpretation. Step 2 persists only minimized, allowlisted rule-specific source evidence plus exact scanner provenance.
 - Runtime-validate the axe result payload before Step 1 hands it to Step 2; TypeScript or integration-package types are not evidence validation. Step 2 alone applies evidence policy and creates canonical domain records.
-- For a complete public-page scan, create one minimized `Finding` record for every in-bounds violation node returned by the three rules. Do not sample, silently deduplicate distinct nodes, collapse them into a page-level issue, or automatically start downstream work. Retain every allowed native axe `incomplete` node separately as a minimized `ScannerReviewObservation`; it is not a violation, scan failure, evidence-sufficiency state, or proposal-eligible finding. Exclude unrelated passes and inapplicable results from general durable collections while retaining the narrow positive and coverage facts needed for comparison and proof that all three rules completed.
+- For a complete trusted-page scan, create one minimized `Finding` record for every validated violation node returned by the three rules. Do not sample, silently deduplicate distinct nodes, collapse them into a page-level issue, or automatically start downstream work. Retain every allowed native axe `incomplete` node separately as a minimized `ScannerReviewObservation`; it is not a violation, scan failure, evidence-sufficiency state, or proposal-eligible finding. Exclude unrelated passes and inapplicable results from general durable collections while retaining the narrow positive and coverage facts needed for comparison and proof that all three rules completed.
 - Keep the synthetic fixture expectations narrow: validate each profile's mapped rule and rule-specific evidence against its frozen failing and corrected revisions, and use those fixtures to exercise the same normalization, coverage, abstention, provider, review, and comparison boundaries without claiming broad page coverage.
-- Record exact per-rule coverage and a full collection disposition independently of the violation and `ScannerReviewObservation` counts. A network-policy rejection, timeout, browser/scanner failure, exceeded bound, malformed or truncated result, or missing rule coverage cannot become a complete result. Zero Findings is valid only after all three public-page rules and both collections validate.
+- Record exact per-rule coverage and a full collection disposition independently of the violation and `ScannerReviewObservation` counts. A navigation timeout, browser/scanner failure, malformed or truncated result, or missing rule coverage cannot become a complete result. Zero Findings is valid only after all three trusted-page rules and both collections validate.
 - Treat rule-description, impact, target, node, and failure-summary fields as scanner output with recorded version provenance, not immutable project semantics.
 - Never translate an empty result set, complete scan, or incomplete scan into an accessibility or conformance claim; manual and assistive-technology checks remain separate evidence.
 
@@ -63,7 +67,7 @@ Promoting axe-core to the release stack remains Deferred. The MVP records only t
 - [ADR-0008: Playwright as the initial browser automation technology](ADR-0008-playwright-as-initial-browser-automation.md)
 - [ADR-0011: TypeScript as the initial application language](ADR-0011-typescript-as-initial-application-language.md)
 - [ADR-0012: React as the initial user-interface library](ADR-0012-react-as-initial-user-interface-library.md)
-- [ADR-0017: Authorized public-page scan boundary](ADR-0017-authorized-public-page-scan-boundary.md)
+- [ADR-0018: Trusted operator URL boundary](ADR-0018-trusted-operator-url-boundary.md)
 - [Evidence and review workflow requirements](../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md): `REQ-SCAN-*` and `REQ-EVID-*`
 - [Evaluation and acceptance requirements](../../requirements/evaluation-and-release/EVALUATION_AND_ACCEPTANCE.md): `REQ-EVAL-*`
 - [Reliability, reproducibility, and operations requirements](../../requirements/quality-security-and-operations/RELIABILITY_REPRODUCIBILITY_AND_OPERATIONS.md): `REQ-QUAL-*`

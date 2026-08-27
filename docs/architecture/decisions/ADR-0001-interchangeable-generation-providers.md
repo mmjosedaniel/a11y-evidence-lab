@@ -5,7 +5,7 @@
 
 ## Context
 
-A11y Evidence Lab needs generated explanations and remediation proposals, but its evidence, review, and comparison workflow must not depend on one model vendor or runtime. The product must also preserve a complete local-generation path with no hosted inference while allowing a user to deliberately choose an external LLM API when its privacy, cost, and operational tradeoffs are acceptable. Runtime public-page network access remains separately governed by ADR-0017, so local generation does not mean an offline scan.
+A11y Evidence Lab needs generated explanations and remediation proposals, but its evidence, review, and comparison workflow must not depend on one model vendor or runtime. The product must also preserve a complete local-generation path with no hosted inference while allowing a user to deliberately choose an external LLM API when its privacy, cost, and operational tradeoffs are acceptable. Runtime public-page network access remains separate from generation-provider choice, so local generation does not mean an offline scan.
 
 The provider decision applies to structured text generation. Embedding and reranking providers remain separate architecture decisions.
 
@@ -16,6 +16,10 @@ The 2026-08-23 decision put the external adapter in a later distributable-produc
 ### Public-page mode-context amendment recorded 2026-08-25
 
 [ADR-0017](ADR-0017-authorized-public-page-scan-boundary.md) adds one authorized public-page workflow that may enumerate a variable number of findings. For that workflow, one explicit `Local` or `Groq` generation-mode context belongs to the parent `PageAnalysisRun` and is inherited by its finding-workflow records. This replaces the narrower assumption that provider mode is chosen independently for every finding, but it does not make mode selection a provider call or authorize automatic work across all findings. The user still selects one finding at a time, evidence sufficiency still runs before invocation, and each eligible generation action makes at most one call. Changing the global mode requires a new page-analysis context; no child silently switches provider.
+
+### Trusted operator URL amendment recorded 2026-08-27
+
+[ADR-0018](ADR-0018-trusted-operator-url-boundary.md) supersedes ADR-0017's production-style hostile-network boundary for the portfolio MVP. The run-level `Local` or `Groq` choice and all provider controls in this record remain Accepted. A trusted operator-entered public HTTPS page still requires ordinary network access for the deterministic scan, but that traffic is separate from hosted model inference and does not add a provider fallback or another adapter.
 
 ## Considered options
 
@@ -29,7 +33,7 @@ Use an application-owned structured-generation contract with replaceable provide
 
 - The MVP has exactly two generation adapters: the selected local provider and the Groq provider accepted in ADR-0014. This is a fixed pair, not a provider registry or a promise of arbitrary OpenAI-compatible endpoints.
 - One explicit `Local` or `Groq` mode is immutable within a `PageAnalysisRun`; the fixed synthetic evaluation records the equivalent selected mode for each evaluated path. The mode and non-secret provider/model provenance never rewrite completed output.
-- The complete local-generation/no-hosted-inference workflow remains available. Public-page fetching still uses ADR-0017's bounded target network path, so this is not an offline workflow. Groq mode is an explicit generation-data egress choice, not an automatic fallback.
+- The complete local-generation/no-hosted-inference workflow remains available. Fetching the trusted operator-entered page still uses ordinary HTTPS network access under ADR-0018, so this is not an offline workflow. Groq mode is an explicit generation-data egress choice, not an automatic fallback.
 - Any transition that changes data egress requires an informed user action. A failed local request must not be silently retried through an external API, and a failed API request must not silently switch providers.
 - Every adapter must accept the same eligible application-level generation request for one selected finding and return the same normalized candidate-proposal result. The application-owned generation stage, not the adapters, exposes the `proposal` or deterministic `abstention` result branches. An evidence-sufficiency abstention bypasses every provider adapter. Provider-specific objects must not leak into the page-analysis, evidence, review, or comparison domains.
 - Every adapter must preserve citation validation, manual-check, provenance, privacy, error, and evaluation behavior. Application-owned evidence-sufficiency and abstention policy runs before adapter invocation. Unsupported required capabilities must be detected before a provider call and reported clearly.
@@ -51,4 +55,4 @@ Use an application-owned structured-generation contract with replaceable provide
 - [Evaluation and acceptance requirements](../../requirements/evaluation-and-release/EVALUATION_AND_ACCEPTANCE.md): `REQ-EVAL-*`
 - [ADR-0003: Initial local generation capacity-screen configuration](ADR-0003-initial-local-generation-evaluation-preset.md)
 - [ADR-0014: Groq as the MVP external generation provider](ADR-0014-groq-as-mvp-external-generation-provider.md)
-- [ADR-0017: Authorized public-page scan boundary](ADR-0017-authorized-public-page-scan-boundary.md)
+- [ADR-0018: Trusted operator URL boundary](ADR-0018-trusted-operator-url-boundary.md)

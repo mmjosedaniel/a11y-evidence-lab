@@ -13,6 +13,10 @@ React supports TypeScript and component-based client interfaces. It can support 
 
 [ADR-0015](ADR-0015-localhost-browser-mvp-execution.md) accepts the MVP topology: the developer starts the local application service and opens its React UI from an enumerated localhost or loopback URL in Chrome or Edge. [ADR-0016](ADR-0016-filesystem-run-persistence.md) makes service-owned JSON records, not React state or browser storage, the durable authority. Installer, desktop-container, and broader packaging work are deferred.
 
+### Trusted operator URL amendment recorded 2026-08-27
+
+[ADR-0018](ADR-0018-trusted-operator-url-boundary.md) retains the loopback service and unprivileged browser UI but defers production session-authentication, request-forgery, DNS-rebinding, and exhaustive renderer-projection qualification for the trusted single-user portfolio MVP. The proportional UI boundary is the one recorded by `REQ-SEC-027`.
+
 ## Considered options
 
 1. Use a server-rendered or full-stack React framework as the application boundary.
@@ -25,7 +29,7 @@ React supports TypeScript and component-based client interfaces. It can support 
 Use React with TypeScript as the initial user-interface library for evaluation, implemented as a client-rendered single-page application served by the local application.
 
 - Limit React to presentation, interaction, navigation, and transient UI state. Durable workflow, evidence, review, comparison, and provider-choice state remains owned by the local application service and must survive UI reload or replacement.
-- Communicate only through the application-owned loopback interface. Browser-delivered React code must not directly access Groq or another provider API, Ollama, Chroma, Playwright, credentials, the filesystem, process control, or unrestricted networking. The exact loopback request-protection mechanism remains an implementation detail; it must not introduce user accounts, roles, or permissions into the single-developer MVP.
+- Communicate only through the application-owned loopback interface. Browser-delivered React code must not directly access Groq or another provider API, Ollama, Chroma, Playwright, credentials, the filesystem, process control, or unrestricted networking. Under the 2026-08-27 amendment, no production loopback request-protection system is required for the trusted single-developer MVP, and no user accounts, roles, or permissions are introduced.
 - Reconstruct the visible state from durable service records after reload, interruption, or local-service restart; React component state must never be the source of truth for accepted decisions.
 - Prefer native semantic HTML and explicit accessible names, relationships, keyboard behavior, focus management, validation, error handling, progress, and status announcements. Visual differences and state must not rely only on color.
 - Render target content, scanner output, corpus passages, and model output as untrusted data. Display markup as text by default; any future rendered preview requires a separately accepted sandboxing and sanitization design.
@@ -62,4 +66,4 @@ This evaluation decision does not qualify React or a browser version as a releas
 - [Evidence and review workflow requirements](../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md): `REQ-EVID-004` and `REQ-UX-*`
 - [Installation and model lifecycle requirements](../../requirements/generation-provider-and-model-lifecycle/INSTALLATION_AND_MODEL_LIFECYCLE.md): `REQ-INST-002`
 - [Application accessibility requirements](../../requirements/quality-security-and-operations/APPLICATION_ACCESSIBILITY.md): `REQ-A11Y-*`
-- [Privacy and security requirements](../../requirements/quality-security-and-operations/PRIVACY_AND_SECURITY.md): `REQ-SEC-011`, `REQ-SEC-013`, `REQ-SEC-018`, and `REQ-SEC-019`
+- [Privacy and security requirements](../../requirements/quality-security-and-operations/PRIVACY_AND_SECURITY.md): `REQ-SEC-013` and `REQ-SEC-027`

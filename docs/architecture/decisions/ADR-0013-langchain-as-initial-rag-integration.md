@@ -21,6 +21,10 @@ The context above preserves the one-`image-alt` scope in effect when this ADR wa
 
 [ADR-0017](ADR-0017-authorized-public-page-scan-boundary.md) allows one page analysis to enumerate a variable number of deterministic findings. This does not expand LangChain's role. The user selects one finding, and LangChain composes retrieval and at most one eligible structured-generation call for that finding under the parent run's immutable `Local` or `Groq` mode. Other findings remain deterministic records until separately selected. Page-wide retrieval, multi-finding prompts, automatic queues, batch generation, synthesis across findings, and agentic iteration remain outside the MVP.
 
+### Trusted operator URL amendment recorded 2026-08-27
+
+[ADR-0018](ADR-0018-trusted-operator-url-boundary.md) supersedes ADR-0017's production-style URL security boundary for the portfolio MVP without expanding LangChain's role. The trusted-page scan may still enumerate many Findings, but retrieval and structured generation remain a bounded, sequential workflow for one explicitly selected Finding at a time.
+
 ## Considered options
 
 1. Implement retrieval and model integration directly with provider and vector-store SDKs.
@@ -69,7 +73,7 @@ This decision does not select exact LangChain packages or versions, a JavaScript
 - [ADR-0010: Defer a local reranker](ADR-0010-defer-a-local-reranker.md)
 - [ADR-0011: TypeScript as the initial application language](ADR-0011-typescript-as-initial-application-language.md)
 - [ADR-0014: Groq as the MVP external generation provider](ADR-0014-groq-as-mvp-external-generation-provider.md)
-- [ADR-0017: Authorized public-page scan boundary](ADR-0017-authorized-public-page-scan-boundary.md)
+- [ADR-0018: Trusted operator URL boundary](ADR-0018-trusted-operator-url-boundary.md)
 - [Evidence and review workflow requirements](../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md): `REQ-CORP-*`, `REQ-RETR-*`, and `REQ-GEN-*`
 - [Generation provider execution requirements](../../requirements/generation-provider-and-model-lifecycle/GENERATION_PROVIDER_EXECUTION.md): `REQ-LLM-*`
 - [Evaluation and acceptance requirements](../../requirements/evaluation-and-release/EVALUATION_AND_ACCEPTANCE.md): `REQ-EVAL-*`

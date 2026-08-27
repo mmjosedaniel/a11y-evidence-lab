@@ -2,13 +2,13 @@
 
 ## Authority, status, and scope
 
-**Status:** Proposed architecture assessment as of 2026-08-24, reframed on 2026-08-25 for the authorized-public-page boundary accepted in [ADR-0017](../decisions/ADR-0017-authorized-public-page-scan-boundary.md) and OD-020. It owns no requirement IDs or statuses, accepts no public-page correlation algorithm, promotes no evaluation technology to release adoption, and does not authorize development.
+**Status:** Proposed architecture assessment as of 2026-08-24, aligned on 2026-08-27 with the trusted operator-input portfolio boundary accepted in [ADR-0018](../decisions/ADR-0018-trusted-operator-url-boundary.md) and [OD-021](../../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-021--trusted-operator-url-boundary-for-the-portfolio-mvp). It owns no requirement IDs or statuses, accepts no public-page correlation algorithm, promotes no evaluation technology to release adoption, and does not authorize development.
 
 The authoritative requirements remain in [Evidence and review workflow requirements — Rescan and comparison](../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#rescan-and-comparison). `REQ-COMP-007`, `REQ-COMP-008`, and the exact public-page correlation descriptor remain Proposed. Controlled fixtures remain the accepted deterministic evaluation baseline and do not enter the user-submitted runtime URL path.
 
 ## Recommended minimal approach
 
-Use ordinary deterministic application logic to compare one complete baseline `PageAnalysisRun` with one complete later `PageAnalysisRun` for the same admitted public page. Do not use an LLM, LangChain, embeddings, a DOM-diff library, or a second scanner. The later run repeats the accepted atomic scan of the main document with exactly `image-alt`, `label`, and `color-contrast`, lists every retained violation-node `Finding`, and keeps native axe `incomplete` `ScannerReviewObservation` records separate.
+Use ordinary deterministic application logic to compare one complete baseline `PageAnalysisRun` with one complete later `PageAnalysisRun` for the same trusted operator-supplied public page. Do not use an LLM, LangChain, embeddings, a DOM-diff library, or a second scanner. The later run repeats the accepted atomic scan of the main document with exactly `image-alt`, `label`, and `color-contrast`, lists every retained violation-node `Finding`, and keeps native axe `incomplete` `ScannerReviewObservation` records separate.
 
 Runtime comparison remains one selected `FindingWorkflow` at a time. The user selects one baseline `Finding`; the service then evaluates only that finding's target lineage against the later scan. It does not automatically compare, retrieve for, generate for, or review the complete findings collection, and it produces no page-level score or combined remediation result. Sibling and later-only findings remain visible in the later run without changing the selected comparison. A predeclared positive-baseline lineage may still be exercised by the controlled evaluation manifest to verify `regressed` record semantics; it is not a second runtime selection path.
 
@@ -16,18 +16,18 @@ This is sufficient for the MVP because it demonstrates the final evidence-first 
 
 ## Minimum comparable scan pair
 
-Both scans must be completed, bounded scans under ADR-0017. A material mismatch makes the pair `not comparable` and produces no finding outcome. The proposed minimum equality gate is:
+Both scans must be complete scans under ADR-0018. A material mismatch makes the pair `not comparable` and produces no finding outcome. The proposed minimum equality gate is:
 
 | Dimension | Minimum comparison rule |
 | --- | --- |
-| Page identity | The normalized requested page identity and validated final page identity match under the same versioned normalization policy. A materially different redirect destination is not the same page. |
-| Authorization and scope | Both runs carry their own authorization attestations for the same single public-page scope. Neither run uses authentication, private targets, imported browser state, crawling, interaction scripts, or another page. |
-| Document and page state | Both analyze the admitted top-level main document under the same versioned readiness definition. Iframe-document scanning remains Deferred. A material readiness or document-scope change is not comparable. |
+| Page identity | The normalized requested page identity and observed final page identity match under the same versioned normalization policy. A materially different final destination is not the same page for comparison. |
+| Target scope | Both runs concern the same operator-authorized public HTTPS page under the trusted-input limitation. The operator, rather than an application network-security boundary or required notice confirmation, is responsible for choosing a suitable target. Neither run uses authentication, imported browser state, crawling, interaction scripts, or another page. |
+| Document and page state | Both analyze the top-level main document under the same versioned readiness definition. Iframe-document scanning remains Deferred. A material readiness or document-scope change is not comparable. |
 | Scan profile | The exact three-rule profile, per-rule coverage, scanner and wrapper versions, browser engine/version, viewport, locale, and material browser settings match. |
 | Evidence semantics | Evidence allowlist, sanitizer, correlation-descriptor, and positive-observation profile versions match. |
 | Measurement profile | For contrast, font classification, expected-threshold semantics, emitted-value normalization, and other measurement inputs match. |
 
-Exact URL normalization, materiality rules, page-readiness checks, correlation fields, and numeric execution bounds must be frozen and evaluated before implementation. They remain Proposed implementation detail; this assessment does not silently elevate them to Accepted policy.
+Exact URL normalization, materiality rules, page-readiness checks, and correlation fields remain Proposed implementation detail to define during implementation planning; this assessment does not silently elevate them to Accepted policy or require a production hostile-network qualification matrix.
 
 ## Selected-target correlation
 
@@ -75,7 +75,7 @@ Two violations with a higher, equal, or lower later margin are `improved`, `pers
 ## Deterministic sequence
 
 1. Resolve the complete baseline and later page-scan records and validate their exact source references.
-2. Apply the pair-level page, authorization-scope, main-document, scan-profile, coverage, evidence, and measurement gates.
+2. Apply the pair-level page, target-scope, main-document, scan-profile, coverage, evidence, and measurement gates.
 3. If a material gate differs, complete the assessment as `not comparable` with bounded reasons and no finding outcome.
 4. Resolve the one selected baseline `FindingWorkflow` and seek one exact same-rule, same-descriptor match in the later evidence. A controlled record-level regression check may instead use its frozen positive-baseline lineage.
 5. Apply the rule-specific outcome table. Preserve native `incomplete` and missing evidence as uncertainty rather than treating them as non-failing.
@@ -104,7 +104,7 @@ One selected-finding **Comparison** record contains:
 | Part | Minimum conceptual information |
 | --- | --- |
 | Identity | Comparison ID, selected `FindingWorkflow` and baseline `Finding`, comparison-profile version, start/completion time, and operation status. A controlled regression check may reference its frozen positive-baseline lineage instead. |
-| Scan pair | Baseline and later run/scan IDs; normalized requested and validated final page identities; authorization-scope references; main-document/readiness, exact rule-profile, coverage, browser, viewport, locale, scanner, evidence, sanitizer, correlation, and measurement identities. |
+| Scan pair | Baseline and later run/scan IDs; normalized requested and observed final page identities; trusted-input limitation-notice version when retained; main-document/readiness, exact rule-profile, coverage, browser, viewport, locale, scanner, evidence, sanitizer, correlation, and measurement identities. Notice display or confirmation is not a comparability gate. |
 | Comparability | Each material gate's baseline/later identity, disposition and bounded reason; overall `comparable` or `not comparable`. |
 | Correlation | Exact rule, baseline and later minimized descriptor references, unique-match result, and explicit ambiguity or missing-evidence reasons. |
 | Evidence comparison | Baseline/later finding or positive-observation references, rule-specific before/after values, minimized delta, and native categories. |
@@ -131,17 +131,17 @@ Public demonstrations should default to the project-owned controlled evaluation 
 
 ### Assumptions
 
-- Both scans independently satisfy ADR-0017, use default HTTPS port 443, analyze only the main document, and retain complete three-rule coverage.
+- Both scans independently satisfy ADR-0018, analyze the same trusted operator-supplied public HTTPS page's main document, and retain complete three-rule coverage.
 - Page changes occur outside the product; no comparison claims that the product applied or caused them.
 - Controlled fixture target keys remain the deterministic evaluation baseline and do not become runtime public-page identity.
-- The later scan may contain any bounded number of in-envelope findings; only the selected baseline `FindingWorkflow` is compared at runtime.
+- The later scan may contain any number of validated findings from the exact three supported rules; only the selected baseline `FindingWorkflow` is compared at runtime.
 
 ### Open questions
 
 - Which privacy-safe locator and rule-specific semantic fields form the exact versioned public-page correlation descriptor?
 - Which page-readiness, normalized/final-identity, and configuration changes are material enough to make a pair `not comparable`?
 - How should the UI request the targeted positive observation without retaining unrelated native passes?
-- Which adversarial public-page pairs qualify descriptor ambiguity, target removal, dynamic restructuring, and bounds failure before implementation is authorized?
+- Which controlled and trusted public-page pairs are sufficient to exercise descriptor ambiguity, target removal, and dynamic restructuring before implementation is authorized?
 
 ## Risks
 
@@ -165,7 +165,7 @@ Public demonstrations should default to the project-owned controlled evaluation 
 
 This step is adequately defined when:
 
-1. comparison accepts only two complete scans of the same normalized requested and validated final public page under materially identical scope, main-document, readiness, three-rule, coverage, browser, scanner, evidence, and measurement profiles;
+1. comparison accepts only two complete scans of the same normalized requested and observed final public page under materially identical target scope, main-document, readiness, three-rule, coverage, browser, scanner, evidence, and measurement profiles;
 2. one selected baseline `FindingWorkflow` is compared independently at runtime, while all sibling and later-only findings remain visible and unchanged; any positive-baseline regression check stays confined to the controlled evaluation manifest;
 3. exact same-rule, unique privacy-safe descriptor matching is required, with missing, changed, duplicate, or ambiguous correlation classified `inconclusive`;
 4. `resolved` requires complete later coverage plus a unique same-target positive observation and never follows from absence alone;
@@ -194,7 +194,7 @@ The exact axe release remains an evaluation pin rather than a release dependency
 
 - Previous workflow step: [Human remediation review assessment](HUMAN_REMEDIATION_REVIEW_ASSESSMENT.md)
 - [Accessibility finding and evidence-capture assessment](ACCESSIBILITY_FINDING_EVIDENCE_CAPTURE_ASSESSMENT.md)
-- [ADR-0017: Authorized public-page scan boundary](../decisions/ADR-0017-authorized-public-page-scan-boundary.md)
+- [ADR-0018: Trusted operator URL boundary](../decisions/ADR-0018-trusted-operator-url-boundary.md)
 - [Evidence and review workflow requirements](../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md)
 - [Information and workflow lifecycle](../../requirements/INFORMATION_AND_WORKFLOW_LIFECYCLE.md)
 - [Architecture index](../README.md)

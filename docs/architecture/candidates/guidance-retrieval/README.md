@@ -4,13 +4,13 @@
 
 **Status:** Proposed architecture detail for the third workflow step. Accepted product decisions bound the three-rule scope, closed source pack, support gate, fixed evaluation manifest, minimal record validation, and manual segmentation. This family does not promote ADR-0006, ADR-0007, or ADR-0013 beyond evaluation; change ADR-0010's reranker deferral; authorize implementation or corpus acquisition; or treat retrieval as accessibility or conformance proof.
 
-Assessment date: 2026-08-24. Reframed for the public-page finding model on 2026-08-25.
+Assessment date: 2026-08-24. Aligned with the trusted operator-input portfolio boundary on 2026-08-27.
 
 Canonical behavior remains in [Evidence and review workflow requirements — Corpus and retrieval](../../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#corpus-and-retrieval). These assessments own no requirement IDs or statuses.
 
 ## Runtime relationship
 
-One admitted page scan may produce many independent findings from exactly three axe rules:
+One scan of the trusted operator-supplied page may produce many independent findings from exactly three axe rules:
 
 | Finding rule | Retrieval scope |
 | --- | --- |

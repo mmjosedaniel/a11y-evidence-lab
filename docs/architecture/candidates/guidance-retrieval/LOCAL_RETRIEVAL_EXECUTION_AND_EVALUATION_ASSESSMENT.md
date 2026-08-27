@@ -6,7 +6,7 @@
 
 **Assessment date:** 2026-08-24.
 
-**Decision alignment:** 2026-08-25, including the authorized-public-page boundary in [ADR-0017](../../decisions/ADR-0017-authorized-public-page-scan-boundary.md).
+**Decision alignment:** 2026-08-27, including the trusted operator-input portfolio boundary in [ADR-0018](../../decisions/ADR-0018-trusted-operator-url-boundary.md).
 
 This focused assessment belongs to the [Accessibility guidance retrieval assessment family](README.md). It owns no requirement ID or status, selects no release dependency or framework, cannot change the accepted support gate, and does not authorize implementation. Canonical behavior remains in [Evidence and review workflow requirements — Corpus and retrieval](../../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#corpus-and-retrieval).
 
@@ -18,7 +18,7 @@ The runtime scan may list multiple findings, but retrieval processes one user-se
 | `form-input-label` | `label` | WCAG 2.2 SC 4.1.2 only |
 | `text-contrast` | `color-contrast` | WCAG 2.2 SC 1.4.3 |
 
-ADR-0017 accepts the page-level exact-three-rule scan while preserving per-finding downstream isolation. The closed W3C pack, evidence-sufficiency gate, compact evaluation boundary, minimal record-validation boundary, and manual segmentation rule are Accepted through their recorded decisions; the exact retrieval mechanism and technology candidates remain Proposed. The controlled synthetic cases remain the fixed evaluation inputs. The `label` rule itself is not mapped to SC 3.3.2 or SC 1.3.1, and no scanner result establishes complete success-criterion non-conformance.
+ADR-0018 accepts one trusted operator-supplied page-level exact-three-rule scan while preserving per-finding downstream isolation. The closed W3C pack, evidence-sufficiency gate, compact evaluation boundary, minimal record-validation boundary, and manual segmentation rule are Accepted through their recorded decisions; the exact retrieval mechanism and technology candidates remain Proposed. The controlled synthetic cases remain the fixed evaluation inputs. The `label` rule itself is not mapped to SC 3.3.2 or SC 1.3.1, and no scanner result establishes complete success-criterion non-conformance.
 
 The scanned public page is never corpus content. Page URLs, safe locators, arbitrary text, HTML, form values, and unrelated findings are excluded from embedding and retrieval. An unsupported rule variant or missing/withheld core fact preserves the finding but makes it ineligible for a supported generation handoff.
 

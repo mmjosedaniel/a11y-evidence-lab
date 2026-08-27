@@ -1,7 +1,14 @@
 # ADR-0017: Authorized public-page scan boundary
 
-- **Status:** Accepted
+- **Status:** Superseded for the MVP by [ADR-0018](ADR-0018-trusted-operator-url-boundary.md)
 - **Decision date:** 2026-08-25
+- **Superseded date:** 2026-08-27
+
+## Supersession notice
+
+[ADR-0018](ADR-0018-trusted-operator-url-boundary.md) replaces this production-oriented hostile-network boundary for the portfolio MVP with a trusted-operator input assumption and inexpensive browser hygiene. The egress gate, DNS and IP classification, redirect and subresource revalidation, resource-limit manifest, and adversarial qualification below are no longer MVP requirements or development prerequisites.
+
+ADR-0018 restates the current one-page, exact-three-rule, finding-level workflow and its retained limitations. The context, options, decision, and consequences below remain as decision history and possible input to a future product-hardening decision; they do not reactivate automatically.
 
 ## Context
 

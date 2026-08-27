@@ -2,16 +2,16 @@
 
 ## Authority, status, and scope
 
-**Status:** Proposed architecture detail for the second workflow step, reframed on 2026-08-25 for the public-page boundary accepted by [ADR-0017](../decisions/ADR-0017-authorized-public-page-scan-boundary.md). This assessment owns no requirement IDs or statuses, authorizes no implementation, and selects no persistence or schema library.
+**Status:** Proposed architecture detail for the second workflow step, aligned on 2026-08-27 with the trusted operator-input portfolio boundary accepted by [ADR-0018](../decisions/ADR-0018-trusted-operator-url-boundary.md) and [OD-021](../../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-021--trusted-operator-url-boundary-for-the-portfolio-mvp). This assessment owns no requirement IDs or statuses, authorizes no implementation, and selects no persistence or schema library.
 
 Canonical behavior remains in [Evidence and review workflow requirements — Evidence and provenance](../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#evidence-and-provenance). Accepted policy controls if it conflicts with this assessment.
 
 ## Recommendation: one page publication with independent findings
 
-Step 1 supplies one complete, runtime-validated, transient observation for one attested authorized public HTTPS page and the exact rules `image-alt`, `label`, and `color-contrast`. Step 2 should publish:
+Step 1 supplies one complete, runtime-validated, transient observation for one trusted operator-supplied, explicitly authorized public HTTPS page and the exact rules `image-alt`, `label`, and `color-contrast`. The authorization and public-target conditions are supported-use assertions made by the operator, not facts independently proved by the application. Step 2 should publish:
 
 - one immutable page-scan record;
-- one independent finding record and one minimized source-evidence item for every in-envelope native violation node;
+- one independent finding record and one minimized source-evidence item for every validated native violation node returned for the exact three-rule scope;
 - one normalized projection for each finding;
 - separate minimized records for native `incomplete` observations;
 - the narrow same-target positive observations later requested for comparison; and
@@ -27,13 +27,13 @@ If allowlisted evidence is missing, withheld, internally inconsistent, or repres
 
 | Step 1 owns | Step 2 owns |
 | --- | --- |
-| Authorization, URL admission, browser/network execution, exact rule configuration, readiness, coverage, bounds, and cleanup | Durable page-scan publication and privacy-safe target identity |
+| Basic HTTPS URL validation, a visible trusted-input limitation notice, fresh browser-context execution, exact rule configuration, readiness, coverage, one navigation timeout, and cleanup | Durable page-scan publication and privacy-safe target identity |
 | One transient native axe page result | Rule-specific allowlisting and sanitization |
 | Runtime validation of the complete result envelope | One finding/evidence/projection set per violation node |
 | Native violations, incomplete, passes, and inapplicable categories without reinterpretation | Separate minimized incomplete-observation records and requested positive observations |
 | Tool and execution provenance | Omission/withholding facts, digests, and retrieval eligibility inputs |
 
-Step 2 must reject a failed, truncated, stale, malformed, limit-exceeding, or materially coverage-incomplete Step 1 handoff. It must not turn it into a successful scan with fewer findings. The unredacted native result remains in memory only until Step 2 finishes or fails.
+Step 2 must reject a failed, truncated, stale, malformed, or materially coverage-incomplete Step 1 handoff. It must not turn it into a successful scan with fewer findings. The unredacted native result remains in memory only until Step 2 finishes or fails.
 
 ## Finding granularity and identity
 
@@ -105,7 +105,7 @@ This is documentation, not a database or TypeScript schema.
 
 | Component | Minimum retained information | Purpose |
 | --- | --- | --- |
-| Page-scan publication | Scan and authorization IDs; normalized-requested and validated-final page references; attestation time/scope; redirect, browser, viewport, locale, scanner, exact three-rule, readiness, main-document/frame-exclusion and resource coverage, bounds, sanitizer, and configuration identities; execution/publication eligibility | Establishes one page-level source shared by the independent findings. |
+| Page-scan publication | Scan ID; normalized requested and observed final page references; trusted-input limitation-notice version when retained; browser, viewport, locale, scanner, exact three-rule, readiness, main-document/frame-exclusion and coverage, navigation-timeout, sanitizer, and configuration identities; execution/publication eligibility | Establishes one page-level source shared by the independent findings without making notice display a scan gate or claiming that the application proved public reachability or authorization. |
 | Finding | Finding and scan references; rule/category; safe locator/descriptor; source-evidence and projection references; insufficiency markers | Makes one violation node independently selectable and traceable. |
 | Per-finding source evidence | Common and rule-specific allowlisted native facts; sanitizer/omission metadata; retained-content digest | Preserves what the scanner reported without the full native payload. |
 | Normalized projection | Rule family, element kind, bounded observed-fact codes, rule-specific measurements, source reference, projection version/digest | Supplies privacy-safe display and retrieval input without becoming source truth. |
@@ -115,7 +115,7 @@ This is documentation, not a database or TypeScript schema.
 
 The minimum lineage is:
 
-`finding -> source evidence -> page scan -> authorization and normalized/final target -> exact scanner/profile`
+`finding -> source evidence -> page scan -> normalized/observed-final target -> exact scanner/profile`
 
 and:
 
@@ -133,7 +133,7 @@ Generation and review reference one finding package without mutating it. Compari
 
 ## Privacy and public-demo boundary
 
-Only the minimized local records needed to reopen the run should persist. The public-page URL, query string, target descriptors, text, accessible names, attributes, and before/after evidence may reveal sensitive or proprietary information even when reachable without authentication. Apply the accepted URL-retention policy, use content-safe diagnostics, and never treat digests as anonymization.
+Only the minimized local records needed to reopen the run should persist. The public-page URL, query string, target descriptors, text, accessible names, attributes, and before/after evidence may reveal sensitive or proprietary information even when reachable without authentication. Apply the documented evidence-minimization and URL-retention rules, use content-safe diagnostics, and never treat digests as anonymization.
 
 Groq may receive only the selected finding's explicitly disclosed minimized evidence after the global analysis provider mode is set and that finding passes evidence sufficiency. The scan collection, raw page, URL, unrelated findings, reviewer history, and native axe payload are not sent. Local generation remains available without hosted inference.
 
@@ -151,11 +151,11 @@ A public portfolio demonstration must use a separately approved non-sensitive pu
 
 Assumptions:
 
-- Runtime scans one authorized public HTTPS page with exactly the three accepted rules.
+- Runtime scans one trusted operator-supplied, explicitly authorized public HTTPS page with exactly the three accepted rules; the operator is responsible for using a suitable target.
 - Controlled synthetic cases remain the fixed evaluation baseline.
 - One local user selects and processes one retained finding at a time.
 
-Open implementation details include the exact safe-locator grammar, descriptor fields, numeric envelopes, URL-retention representation, sanitizer rules, digest algorithm, atomic file layout, and targeted-positive-observation procedure. These remain Proposed.
+Open implementation details include the exact safe-locator grammar, descriptor fields, URL-retention representation, sanitizer rules, digest algorithm, atomic file layout, and targeted-positive-observation procedure. These remain Proposed.
 
 Risks include sensitive page content leaking through descriptors, different nodes collapsing to one locator, unsupported rule variants being over-generalized, a truncated list being presented as complete, and public findings being mistaken for broad WCAG or compliance conclusions.
 
@@ -171,7 +171,7 @@ Risks include sensitive page content leaking through descriptors, different node
 
 This step is adequately defined when:
 
-1. one complete Step 1 page observation publishes one page-scan record and every in-envelope violation node as an independent finding;
+1. one complete Step 1 page observation publishes one page-scan record and every validated violation node returned for the exact three-rule scope as an independent finding;
 2. incomplete observations remain distinct and visible;
 3. common and rule-specific allowlists exclude raw page/browser payloads and entered values;
 4. evidence insufficiency keeps a finding visible and blocks only its generation path;
@@ -193,7 +193,7 @@ This step is adequately defined when:
 
 - Previous workflow step: [Authorized deterministic web scan assessments](authorized-scan/README.md)
 - Next workflow step: [Accessibility guidance retrieval assessments](guidance-retrieval/README.md)
-- [ADR-0017: Authorized public-page scan boundary](../decisions/ADR-0017-authorized-public-page-scan-boundary.md)
+- [ADR-0018: Trusted operator URL boundary](../decisions/ADR-0018-trusted-operator-url-boundary.md)
 - [Evidence and review workflow requirements](../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md)
 - [Architecture index](../README.md)
 - [Project documentation index](../../README.md)

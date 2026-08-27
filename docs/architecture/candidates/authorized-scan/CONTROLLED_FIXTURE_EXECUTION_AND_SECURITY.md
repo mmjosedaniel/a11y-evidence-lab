@@ -2,7 +2,7 @@
 
 ## Authority, status, and scope
 
-**Document status: Proposed evaluation architecture assessment.** [ADR-0017](../../decisions/ADR-0017-authorized-public-page-scan-boundary.md) replaces controlled fixtures as the runtime target boundary but retains them as the deterministic evaluation baseline. ADR-0008, ADR-0009, and ADR-0011 retain their evaluation-baseline scope; no exact fixture or technical detail becomes accepted by association.
+**Document status: Proposed evaluation architecture assessment.** [ADR-0018](../../decisions/ADR-0018-trusted-operator-url-boundary.md) retains controlled fixtures as the deterministic evaluation baseline while accepting a trusted operator URL as the runtime target. [ADR-0017](../../decisions/ADR-0017-authorized-public-page-scan-boundary.md) is superseded decision history. ADR-0008, ADR-0009, and ADR-0011 retain their evaluation-baseline scope; no exact fixture or technical detail becomes accepted by association.
 
 Assessment date: 2026-08-23. Expanded to the three-scenario portfolio slice on 2026-08-24.
 
@@ -30,7 +30,7 @@ The corrected results prove only the selected axe rule outcomes under the record
 | `form-input-label` | Confirm that `Email address` accurately and clearly identifies the intended input, remains visibly available, activates the associated input as expected, and is accompanied by any necessary instructions. |
 | `text-contrast` | Confirm that the target is ordinary text in the intended visual context and remains understandable under relevant visual conditions not established by the one automated measurement. |
 
-Ambiguous variants, any fourth rule family, broader rule sets, and extra fixture permutations remain outside the compact evaluation manifest. Public-page admission and hostile-network behavior are evaluated under the separate runtime assessment; authenticated pages and crawling remain out of scope.
+Ambiguous variants, any fourth rule family, broader rule sets, and extra fixture permutations remain outside the compact evaluation manifest. Production hostile-URL behavior is Deferred under the separate hardening assessment; authenticated pages and crawling remain out of scope.
 
 ## Minimal component boundary
 
@@ -49,23 +49,16 @@ The initial slice does not introduce:
 
 These mechanisms can be reconsidered only if a measured security, reliability, or scale requirement cannot be met by the single-process design.
 
-## Minimal authorization attestation
+## Minimal fixture selection
 
-The interface should present only the three scenario families and their failing or corrected revisions from a closed project-owned list. Before each scan, the user confirms:
-
-> I confirm that this project-owned controlled fixture is authorized for this scan.
-
-The scan admission record needs only:
+The interface should present only the three scenario families and their failing or corrected revisions from a closed project-owned list. Because the project owns these synthetic fixtures, the evaluation path needs no authorization attestation or confirmation control. Its scan-selection record needs only:
 
 - The selected scenario profile, fixture ID, and revision.
-- The authorization-statement version.
-- An affirmative confirmation.
-- The confirmation time.
-- The enclosing workflow-run ID and internal scan-execution ID created after successful admission.
+- The enclosing workflow-run ID and internal scan-execution ID created after successful selection validation.
 
-A missing confirmation or unknown fixture ID rejects the request before Chromium launches. The interface accepts no arbitrary URL, filesystem path, uploaded HTML, browser option, header, cookie, or credential.
+An unknown fixture ID or unsupported scenario/revision rejects the request before Chromium launches. The interface accepts no arbitrary URL, filesystem path, uploaded HTML, browser option, header, cookie, or credential.
 
-This attestation is intentionally small because the project owns the fixture. It must not be reused as the runtime public-page admission policy; ADR-0017 and the public-page assessment own that boundary.
+This closed fixture selection is evaluation-only. It must not be reused as the runtime public-page intake; ADR-0018 and the scan technology assessment own that boundary.
 
 ## Proposed deterministic browser profile
 
@@ -96,7 +89,7 @@ Step 1 should return one small in-memory observation. This is a conceptual bound
 
 It contains:
 
-- Enclosing workflow-run ID, scan-execution ID, and authorization-attestation facts.
+- Enclosing workflow-run ID and scan-execution ID.
 - Scenario profile, fixture ID, revision, content digest, and declared failing or corrected state.
 - Scan time and fixed page-state profile.
 - Exact Playwright, Chromium, axe adapter, and axe-core identities.
@@ -113,7 +106,7 @@ The observation is not a finding record, evidence record, normalized result, fin
 
 | Step 1: authorized scan | Step 2: evidence capture |
 | --- | --- |
-| Validate the minimal fixture authorization attestation | Apply the evidence allowlist |
+| Validate the closed fixture selection | Apply the evidence allowlist |
 | Resolve the allowed fixture revision | Sanitize and minimize page/scanner content |
 | Launch Playwright-managed Chromium and apply the fixed page-state profile | Create redaction information |
 | Execute the one pinned axe-core rule selected by the scenario profile | Create finding and evidence records |
@@ -129,8 +122,8 @@ Physical co-location does not change this logical ownership. Both modules may ru
 
 If evaluation is authorized, one scan runs as follows:
 
-1. The user selects one scenario profile and its failing or corrected fixture revision and confirms the authorization statement.
-2. The application rejects a missing attestation or unknown fixture before starting work. An admitted request starts one workflow run in `running`, assigns one internal scan-execution ID, and binds both to the already frozen scan profile.
+1. The user selects one scenario profile and its failing or corrected fixture revision.
+2. The application rejects an unknown or unsupported fixture selection before starting work. A valid request starts one workflow run in `running`, assigns one internal scan-execution ID, and binds both to the already frozen scan profile.
 3. The scan module resolves the selected bundled fixture and verifies its recorded content digest.
 4. Playwright launches its matching managed Chromium build and creates one fresh context with network requests blocked.
 5. The module loads the bundled static HTML, confirms the scenario/revision marker, and runs only the pinned rule resolved by the selected profile.
@@ -160,7 +153,7 @@ Admission, the enclosing workflow-operation state, scan-execution disposition, c
 
 | Dimension | Meaning |
 | --- | --- |
-| Admission `rejected` | The attestation or closed scenario/state selection was invalid, so no workflow operation or browser execution was started. |
+| Admission `rejected` | The closed scenario/state selection was invalid, so no workflow operation or browser execution was started. |
 | Workflow `running` | One admitted workflow owns the current scenario and its bounded scan execution. A successful scan handoff does not complete the workflow. The sequential MVP has no cancellation, queue, or concurrent replacement. |
 | Scan observation available | The fixture reached readiness, the configured rule executed over the declared scope, the runtime boundary passed, and the transient observation is available for Step 2. This is an internal stage result, not another operation state. |
 | Workflow `failed` | Launch, readiness, coverage, axe execution, validation, timeout, cleanup, or shutdown prevented a complete scan observation. No partial-success workflow result is published. |
@@ -184,13 +177,13 @@ This is a controlled-fixture boundary, not a general hostile-web isolation desig
 
 ## Relationship to the runtime public-page path
 
-ADR-0017 accepts one attested authorized public HTTPS page as the runtime MVP target. This controlled assessment remains intentionally stricter: it blocks all external egress, freezes the content, and supplies known gold observations. Passing these fixture checks does not prove that the public-page destination, redirect, subresource, hostile-content, resource-bound, or privacy controls work. Those need separate evaluation under [Authorized public-page execution and security](AUTHORIZED_PUBLIC_PAGE_EXECUTION_AND_SECURITY.md).
+ADR-0018 accepts one trusted operator-entered public HTTPS page as the runtime MVP target and states its supported-use limitation without a separate attestation control. This controlled assessment remains intentionally stricter for reproducibility: it blocks external egress, freezes the content, and supplies known gold observations. Passing these fixture checks does not prove hostile-page containment or general Internet safety; those claims are outside the MVP and are discussed only as [Deferred hardening research](AUTHORIZED_PUBLIC_PAGE_EXECUTION_AND_SECURITY.md).
 
 ## Acceptance criteria for the controlled evaluation baseline
 
 The controlled evaluation baseline is adequately defined when a future evaluation can demonstrate that:
 
-- Only the failing or corrected logical state of the three project-owned scenarios can be selected, and each scan requires the recorded attestation.
+- Only the failing or corrected logical state of the three project-owned scenarios can be selected; no separate authorization attestation is required for project-owned fixtures.
 - One pinned Playwright/Chromium/axe configuration executes exactly one rule resolved from **image-alt**, **label**, or **color-contrast**.
 - For every family, the failing revision produces the expected single violation and the corrected revision produces the corresponding same-target passing observation.
 - Contrast observations retain the six specified native measurement fields without treating a locally recomputed ratio as the result authority.
@@ -206,7 +199,7 @@ The controlled evaluation baseline is adequately defined when a future evaluatio
 
 The former single `image-alt` evaluation scope is superseded by the three-family evaluation manifest. The fixed-input principle, browser-local service boundary, and minimal runtime-validation boundary still do not accept the exact proposed Playwright values or fixture organization. Evidence retention and canonical filesystem persistence remain owned by Step 2. Installer and distribution packaging remain deferred.
 
-Explicit non-goals are using fixtures as the runtime target selector; authenticated targets; crawler behavior or implementation; cross-browser equivalence; any fourth rule or fixture family; broad WCAG coverage; production concurrency; automatic remediation; and any claim of accessibility conformance. Public-page security controls belong to the adjacent runtime assessment, not this zero-egress fixture profile.
+Explicit non-goals are using fixtures as the runtime target selector; authenticated targets; crawler behavior or implementation; cross-browser equivalence; any fourth rule or fixture family; broad WCAG coverage; production concurrency; automatic remediation; and any claim of accessibility conformance. Production public-page security hardening is Deferred and belongs only to the adjacent post-MVP assessment, not this zero-egress fixture profile.
 
 ## Primary sources
 
@@ -223,7 +216,7 @@ The shared browser and scanner sources are listed in [Technology selection — P
 
 ## Documentation navigation
 
-- Previous within this workflow step: [Authorized public-page execution and security](AUTHORIZED_PUBLIC_PAGE_EXECUTION_AND_SECURITY.md)
+- Deferred post-MVP research: [Authorized public-page execution and security](AUTHORIZED_PUBLIC_PAGE_EXECUTION_AND_SECURITY.md)
 - Up: [Authorized deterministic web scan candidate assessments](README.md)
 - Next workflow step: [Accessibility finding and evidence capture assessment](../ACCESSIBILITY_FINDING_EVIDENCE_CAPTURE_ASSESSMENT.md)
 - [Architecture index](../../README.md)

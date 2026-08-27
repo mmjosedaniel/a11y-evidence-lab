@@ -13,6 +13,10 @@ The currently published Ollama `embeddinggemma` artifact is a compact, local tex
 
 [ADR-0017](ADR-0017-authorized-public-page-scan-boundary.md) adds bounded target-page networking but does not move embedding to a hosted API. The original **local-only operation** wording referred to local embedding, not to an offline page scan. The clarified wording below preserves the original embedding decision and applies it to both global generation modes.
 
+### Trusted operator URL amendment recorded 2026-08-27
+
+[ADR-0018](ADR-0018-trusted-operator-url-boundary.md) supersedes ADR-0017's hostile-network controls for the portfolio MVP. This does not change the local embedding decision: ordinary HTTPS traffic used for the trusted operator-entered page remains separate from corpus embedding and retrieval.
+
 ### MVP acquisition and qualification amendment recorded 2026-08-25
 
 ADR-0015 and the accepted installation requirements replace the original general “model-provisioning workflow” assumption. For the MVP, acquisition is an explicit user-consented action delegated to the selected local runtime after source, identity, license, transfer/storage information, destination, and network use are disclosed; model files remain outside the repository and any installer. OD-009, OD-010, and OD-017 also replace formal release promotion and broad performance gates with the compact retrieval checks and one practical reference-PC screen. The original release direction remains history but is Deferred.
@@ -51,7 +55,7 @@ Promoting `embeddinggemma` to a release configuration is Deferred. For the MVP i
 
 - [ADR-0004: Reference-PC capacity gate](ADR-0004-reference-pc-capacity-gate-for-local-models.md)
 - [ADR-0005: Ollama as the initial local model runtime](ADR-0005-ollama-as-initial-local-model-runtime.md)
-- [ADR-0017: Authorized public-page scan boundary](ADR-0017-authorized-public-page-scan-boundary.md)
+- [ADR-0018: Trusted operator URL boundary](ADR-0018-trusted-operator-url-boundary.md)
 - [Evidence and review workflow requirements](../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md): `REQ-RETR-003`
 - [Reliability, reproducibility, and operations requirements](../../requirements/quality-security-and-operations/RELIABILITY_REPRODUCIBILITY_AND_OPERATIONS.md): `REQ-QUAL-003`, `REQ-QUAL-004`, and `REQ-QUAL-009`
 - [Evaluation and acceptance requirements](../../requirements/evaluation-and-release/EVALUATION_AND_ACCEPTANCE.md): `REQ-EVAL-003`

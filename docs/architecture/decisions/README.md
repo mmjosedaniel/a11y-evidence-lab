@@ -21,9 +21,9 @@ The following current decisions have been accepted at the scope stated in each r
 13. [ADR-0014: Groq as the MVP external generation provider](ADR-0014-groq-as-mvp-external-generation-provider.md)
 14. [ADR-0015: Localhost browser MVP execution](ADR-0015-localhost-browser-mvp-execution.md)
 15. [ADR-0016: Filesystem run persistence](ADR-0016-filesystem-run-persistence.md)
-16. [ADR-0017: Authorized public-page scan boundary](ADR-0017-authorized-public-page-scan-boundary.md)
+16. [ADR-0018: Trusted operator URL boundary for the portfolio MVP](ADR-0018-trusted-operator-url-boundary.md)
 
-`Accepted for evaluation` selects a bounded configuration to measure after development is authorized; it does not mean implemented, bundled, generally supported, or release-qualified. `Accepted` records a binding project direction or, for ADR-0010, an explicit deferral. ADR-0014 deliberately splits these scopes: Groq and the explicit dual-mode/no-fallback boundary are binding MVP decisions, while its exact model is only a fixed evaluation configuration. ADR-0017 accepts the one-page authorization, network-containment, exact three-rule coverage, selected-finding, and fail-closed safety properties; it does not qualify their unselected numeric limits or implementation mechanism. Release adoption remains subject to a later decision.
+`Accepted for evaluation` selects a bounded configuration to measure after development is authorized; it does not mean implemented, bundled, generally supported, or release-qualified. `Accepted` records a binding project direction or, for ADR-0010, an explicit deferral. ADR-0014 deliberately splits these scopes: Groq and the explicit dual-mode/no-fallback boundary are binding MVP decisions, while its exact model is only a fixed evaluation configuration. ADR-0018 accepts one trusted operator-entered public HTTPS page, inexpensive browser hygiene, exact three-rule coverage, and the selected-finding workflow while explicitly deferring production hostile-URL containment. Release adoption remains subject to a later decision.
 
 Candidate technologies and architecture options not covered by these records remain proposals until an ADR or another authoritative project document explicitly records a decision.
 
@@ -31,11 +31,13 @@ Candidate technologies and architecture options not covered by these records rem
 
 [ADR-0002: Windows installation and model acquisition](ADR-0002-windows-installation-and-model-acquisition.md) was Accepted on 2026-08-23 and superseded for the MVP by ADR-0015 on 2026-08-25. It is preserved as history; an installer, launcher, Start menu entry, desktop container, signing, repair, update, and uninstall remain deferred and require a future decision.
 
-ADR-0017 amends or clarifies, rather than supersedes, ADR-0001, ADR-0005, ADR-0006, ADR-0008, ADR-0009, ADR-0010, and ADRs 0013 through 0016. Their earlier local-only or synthetic-only wording remains visible through dated amendment notes as decision history. The current runtime boundary is one attested public HTTPS page; the three synthetic profiles remain the separate fixed evaluation baseline.
+[ADR-0017: Authorized public-page scan boundary](ADR-0017-authorized-public-page-scan-boundary.md) was Accepted on 2026-08-25 and superseded for the portfolio MVP by ADR-0018 on 2026-08-27. It is preserved as history and as possible input to later production hardening; its egress gate, address classification, redirect and subresource revalidation, resource-limit manifest, and adversarial qualification are not current MVP requirements.
 
-## Public-page pre-development qualification
+ADR-0018 replaces ADR-0017's amendments to ADR-0001, ADR-0005, ADR-0006, ADR-0008, ADR-0009, ADR-0010, and ADRs 0013 through 0016 wherever those amendments imposed the former hostile-network boundary. The current runtime boundary is one trusted, operator-entered and authorized public HTTPS page; the three synthetic profiles remain the separate fixed evaluation baseline.
 
-ADR-0017 intentionally leaves the exact numeric network, browser, page, scanner, storage, and duration ceilings and the concrete non-bypassable loopback egress-gate mechanism open. Before public-page development is authorized, the project must freeze those values and the redirect, bounded-subresource, DNS-pinning, cleanup, and adversarial qualification cases for the already accepted main-document-only scan. This is unresolved qualification work under an accepted safety boundary, not permission to weaken or omit the boundary and not a general-support commitment.
+## Trusted-input portfolio boundary
+
+ADR-0018 deliberately treats the local developer's authorized page URL as trusted input. A fresh non-persistent managed browser context, no imported state, one finite navigation timeout, cleanup, exact three-rule scanning, and visible scan failure are sufficient for this portfolio scope. SSRF defenses, DNS and IP classification, connection-level egress mediation, redirect re-attestation, quantitative resource-limit qualification, and adversarial URL testing are deferred until a demonstrated product need justifies a new threat model and decision. The MVP therefore must not claim safe handling of arbitrary or untrusted URLs.
 
 ## Deferred decision topics
 

@@ -13,6 +13,10 @@ Ollama documents native Windows operation, NVIDIA GPU support, a loopback API, c
 
 [ADR-0017](ADR-0017-authorized-public-page-scan-boundary.md) adds bounded public-page target networking without changing this runtime selection. The original phrase **controlled local-only workflow** referred to Ollama generation/embedding and its unrelated egress, not to an offline page scan. The decision wording below is clarified accordingly; its loopback-adapter, privacy, and evaluation-only scope remain unchanged.
 
+### Trusted operator URL amendment recorded 2026-08-27
+
+[ADR-0018](ADR-0018-trusted-operator-url-boundary.md) supersedes ADR-0017's hostile-network controls for the portfolio MVP without changing the Ollama decision. Ordinary HTTPS traffic used to load the trusted operator-entered page remains separate from Ollama's local generation and embedding traffic. The MVP does not require Ollama to implement a page-network security boundary.
+
 ## Considered options
 
 1. Load model implementations directly inside the application process.
@@ -26,7 +30,7 @@ Use Ollama as the initial local model runtime for evaluation only.
 - Access it only through application-owned integrations: the provider-neutral local generation adapter and a separately versioned embedding adapter, over enumerated loopback endpoints.
 - Pin and record the runtime version, model tag and full digest, quantization, context, generation parameters, GPU offload, and storage location for every evaluated configuration.
 - Validate local structured output against the application-owned proposal contract; runtime-level structured-output support does not replace application validation.
-- Disable or isolate update checks, analytics, cloud features, and unrelated networking during the controlled local generation and embedding workflow. The separately permitted public-page target traffic remains governed by ADR-0017 and does not make Ollama a hosted-inference path.
+- Disable or isolate update checks, analytics, cloud features, and unrelated networking during the controlled local generation and embedding workflow. The separately permitted trusted-page traffic remains governed by ADR-0018 and does not make Ollama a hosted-inference path.
 - Apply the reference-PC capacity gate to every model/runtime configuration.
 - For the MVP, treat Ollama as a separately installed evaluation runtime. Any selected model download is explicit, occurs outside the repository, and follows the disclosure and consent rules in the installation and model-lifecycle requirements. Installer ownership, repair, update, and uninstall integration remain deferred under ADR-0015.
 
@@ -51,8 +55,8 @@ Adopting Ollama as a release dependency requires passing provider conformance, c
 - [ADR-0003: Initial local generation capacity-screen configuration](ADR-0003-initial-local-generation-evaluation-preset.md)
 - [ADR-0004: Reference-PC capacity gate](ADR-0004-reference-pc-capacity-gate-for-local-models.md)
 - [ADR-0015: Localhost browser MVP execution](ADR-0015-localhost-browser-mvp-execution.md)
-- [ADR-0017: Authorized public-page scan boundary](ADR-0017-authorized-public-page-scan-boundary.md)
+- [ADR-0018: Trusted operator URL boundary](ADR-0018-trusted-operator-url-boundary.md)
 - [Generation provider execution requirements](../../requirements/generation-provider-and-model-lifecycle/GENERATION_PROVIDER_EXECUTION.md): `REQ-LLM-*`
 - [Installation and model lifecycle requirements](../../requirements/generation-provider-and-model-lifecycle/INSTALLATION_AND_MODEL_LIFECYCLE.md): `REQ-INST-*`
-- [Privacy and security requirements](../../requirements/quality-security-and-operations/PRIVACY_AND_SECURITY.md): `REQ-SEC-011`
+- [Privacy and security requirements](../../requirements/quality-security-and-operations/PRIVACY_AND_SECURITY.md): `REQ-SEC-004`, `REQ-SEC-014`, and `REQ-SEC-027`
 - [Reliability, reproducibility, and operations requirements](../../requirements/quality-security-and-operations/RELIABILITY_REPRODUCIBILITY_AND_OPERATIONS.md): `REQ-QUAL-009`
