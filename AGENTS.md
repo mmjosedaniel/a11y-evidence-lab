@@ -29,6 +29,8 @@ Do not load every requirements module by default. Follow the task router, then f
 
 Before implementation, confirm that the user selected a concrete roadmap task or milestone, its dependencies are complete, its directly applicable Must requirements and open-decision portions are Accepted or explicitly Deferred, and its stated evaluation-freeze condition is satisfied. Do not mark a roadmap task Complete until its verification evidence exists.
 
+When the selected task materially changes rendered UI, CSS, layout, visual hierarchy, responsive presentation, or visible interaction states, use the repository-local [frontend-quality skill](.agents/skills/frontend-quality/SKILL.md) as a bounded visual-quality overlay. It does not authorize development, change roadmap dependencies, add product behavior, or apply to nonvisual frontend or backend work.
+
 ## Documentation rules
 
 - Keep the repository minimal. Update the existing document or module whose declared responsibility owns the information; create another document only for a distinct responsibility that cannot remain coherent in an existing authority.

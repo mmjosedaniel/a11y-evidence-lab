@@ -1,0 +1,4 @@
+interface:
+  display_name: "Frontend Quality"
+  short_description: "Restrained, accessible, reuse-first UI delivery"
+  default_prompt: "Use $frontend-quality to plan, implement, or review a visible A11y Evidence Lab UI task with proportional browser evidence."
