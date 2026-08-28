@@ -38,7 +38,7 @@ WCAG success-criterion text is normative. Understanding documents and Techniques
 
 - Use one immutable corpus snapshot identified by one corpus version and one versioned source manifest. The manifest records the eight source identities, direct URLs, document type and status, selected headings, and W3C attribution and use-condition information.
 - Select passages manually before embedding. Segmentation must be deterministic and heading-aware, preserve complete paragraph or list units, and retain the success-criterion, Understanding-section, or Technique identity.
-- Each canonical passage needs only a stable `passageId`, corpus version, source title and type, exact heading, direct URL, accepted rule and success-criterion tags, and selected text.
+- Each canonical passage needs only a stable `passageId`, corpus version, source title and type, exact heading, direct URL, accepted rule and success-criterion tags, one application-owned guidance role, and selected text. The guidance role describes the passage's retrieval function and remains distinct from its normative or informative source authority; the manifest declares the required roles for each supported profile.
 - An unchanged rebuild must preserve passage IDs and selected text. A change to selected source text, headings, passage boundaries, or canonical passage text creates a new corpus version rather than silently mutating the existing snapshot.
 - The embedding adapter may apply model-required input formatting and vectorize an already selected passage. It must not select, split, overlap, merge, summarize, or rewrite canonical passages.
 - Use no crawler, recursive loader, generic splitter, sliding-window overlap, automatic refresh, web search, or query-dependent corpus construction in the MVP.

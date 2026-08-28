@@ -16,7 +16,7 @@ Feature: Evidence-first accessibility analysis for one trusted public page
   alone enters human review. Any retained baseline Finding may later be
   compared without first completing either downstream branch.
 
-  @SPEC-001 @BHV-01 @REQ-AUTH-007 @REQ-AUTH-008 @REQ-SCAN-006 @REQ-SCAN-007 @REQ-UX-004 @REQ-UX-005 @REQ-UX-010 @REQ-UX-012 @OD-021 @ADR-0018
+  @SPEC-001 @BHV-01 @REQ-AUTH-007 @REQ-AUTH-008 @REQ-SCAN-005 @REQ-SCAN-006 @REQ-SCAN-007 @REQ-QUAL-001 @REQ-QUAL-012 @REQ-UX-004 @REQ-UX-005 @REQ-UX-010 @REQ-UX-012 @OD-021 @ADR-0018
   Rule: Analyze one trusted page and show the complete supported result
 
     Scenario: Complete one provider-independent page analysis
@@ -32,7 +32,8 @@ Feature: Evidence-first accessibility analysis for one trusted public page
       And every Finding shows a stable label, rule, target summary, workflow status, and detail action
       And native incomplete observations appear in a clearly distinct group rather than as Findings
       And a complete zero result is shown only after all three rules complete
-      And loading, timeout, scanner, validation, or collection failure remains visible and never appears as a completed zero or partial success
+      And the parent scan fails visibly, without a completed zero or partial success, when page loading fails, a timeout occurs, a fatal top-level failure in scanner execution, coverage validation, result validation, or evidence capture prevents the complete bounded collection, or the initial complete aggregate cannot be durably written
+      And a missing, invalid, or withheld individual allowlisted fact preserves its Finding or ScannerReviewObservation with the concise category or sufficiency reason required by REQ-SCAN-005 instead of failing the parent scan or dropping the item
       And the temporary page, context, and managed browser are closed
       And no provider is invoked by scanning
       And the interface states that crawling, authenticated targets, hostile targets, and whole-page conformance claims are unsupported
@@ -132,7 +133,7 @@ Feature: Evidence-first accessibility analysis for one trusted public page
       And there is no automatic retry, provider change, or fallback
       And any later attempt, or use of the other provider, requires the ordinary Analyze flow and a new independent PageAnalysisRun with a new explicit global mode choice
 
-  @SPEC-005 @BHV-05 @REQ-REV-001 @REQ-REV-008 @REQ-REV-009
+  @SPEC-005 @BHV-05 @REQ-GEN-002 @REQ-REV-001 @REQ-REV-008 @REQ-REV-009
   Rule: A person decides each proposal independently
 
     Scenario Outline: Record one permitted review decision
@@ -140,6 +141,8 @@ Feature: Evidence-first accessibility analysis for one trusted public page
       When the reviewer chooses "<decision>"
       Then the review result is "<result>"
       And the original proposal remains distinguishable from reviewer-authored content
+      And approval or edit-and-accept is permitted only after the reviewer confirms that every material claim in the resulting proposal has the required support from cited guidance, recorded scanner evidence, or both
+      And any unsupported material claim must be resolved through the submitted edit or the proposal is rejected
       And the blocking pre-acceptance manual judgment is recorded
       And approval or edit-and-accept is permitted only when that judgment supports the resulting proposal or is explicitly not applicable with a reason
       And an unresolved or contradictory judgment must be resolved through the submitted edit or the proposal is rejected

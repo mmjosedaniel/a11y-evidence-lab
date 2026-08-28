@@ -20,7 +20,7 @@ Each PageAnalysisRun uses exactly one canonical machine-readable artifact outsid
 
 `data/runs/<run-id>/run.json`
 
-The file has one top-level format version. It contains the complete run aggregate and may be updated as the user processes selected Findings, but a downstream update must not alter completed scan evidence or a sibling Finding's data. The MVP has no canonical child files, independent nested-record versions, Markdown report, event log, or migration system.
+The file has one top-level format version. It contains the complete run aggregate and may be updated as the user processes selected Findings, but a downstream update must not alter completed scan evidence or a sibling Finding's data. If a later nested retrieval, generation, review, or comparison update cannot be durably written, the already completed parent and last valid aggregate remain unchanged, the application reports that selected action as failed, and no unsaved state is presented as durable. The MVP has no canonical child files, independent nested-record versions, Markdown report, event log, recovery journal, transaction service, or migration system.
 
 | Aggregate section | Minimum required information |
 | --- | --- |
@@ -49,7 +49,9 @@ At most one user-requested PageAnalysisRun is active at a time:
 
 `completed` means only that target parsing and navigation succeeded, the provider-independent scan executed all three supported rules, the complete untruncated Finding and ScannerReviewObservation collections were runtime-validated, and the canonical aggregate became durable. It does **not** mean every Finding was processed or reviewed, that every ScannerReviewObservation was resolved, that the selected provider was called, that the application proved the target safe, or that the page is accessible or conformant.
 
-A malformed-target, navigation, readiness, scanner, result-validation, persistence, timeout, or shutdown failure produces `failed`. A failed operation, including one with coverage-incomplete scanning, never publishes a valid zero or complete findings list. Bounded failure information may remain in `run.json`; it does not turn the run into a completed scan.
+Malformed target input is rejected before a PageAnalysisRun is created. Once a run exists, the parent becomes `failed` after a navigation, readiness, or scanner failure; malformed top-level output; a fatal failure in result validation or evidence capture that prevents the complete bounded scan collection; a timeout; shutdown; or failure to durably write the initial complete scan aggregate. A failed parent operation, including one with coverage-incomplete scanning, never publishes a valid zero or complete findings list. An individual missing, invalid, or withheld allowlisted fact instead preserves its Finding or ScannerReviewObservation with the concise category or sufficiency reason required by `REQ-SCAN-005`; it does not by itself fail the parent. Bounded failure information may remain in `run.json`; it does not turn the run into a completed scan.
+
+After parent completion, a failed write for a nested retrieval, generation, review, or comparison update does not move the parent to `failed` and does not publish a partial update. The last valid aggregate remains authoritative, the selected action is reported as failed, and the application must not claim that its unsaved result or state transition is durable.
 
 The immutable global generation mode, selected provider, and exact model identifier are recorded when the PageAnalysisRun begins, but scanner execution does not depend on them. This run configuration creates no provider invocation, performs no automatic Finding processing, and cannot change the rule set or Findings collection.
 

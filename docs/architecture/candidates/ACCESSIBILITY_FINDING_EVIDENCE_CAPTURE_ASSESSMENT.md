@@ -45,7 +45,7 @@ The locator is minimized evidence, not a universal element identity. It must not
 
 ## Rule-specific evidence
 
-Common retained facts are limited to the rule/category, native check identities, scanner-reported impact, a safe locator when valid and available or its concise unavailability reason, rule-specific facts, and explicit missing or invalid categories. Locator unavailability makes comparison unavailable or `inconclusive`; it does not by itself make generation evidence insufficient because the locator never enters retrieval or provider input. Exact scanner and adapter versions, page identity, viewport, locale, scan time, rule set, and coverage belong once at run level.
+Common retained facts are limited to the rule/category, native check identities, scanner-reported impact, a safe locator when valid and available or its concise unavailability reason, rule-specific facts, and explicit missing or invalid categories. Locator unavailability makes exact correlation unavailable and, if the scan pair otherwise passes the comparability gate, makes a requested comparison `inconclusive`; it does not by itself make generation evidence insufficient because the locator never enters retrieval or provider input. Exact scanner and adapter versions, page identity, viewport, locale, scan time, rule set, and coverage belong once at run level.
 
 Exclude native `node.html`, full HTML, arbitrary page or element text, page source, DOM or accessibility-tree snapshots, screenshots, browser traces, network bodies or logs, cookies, storage, credentials, headers, input values, image URLs, and unrelated attributes.
 

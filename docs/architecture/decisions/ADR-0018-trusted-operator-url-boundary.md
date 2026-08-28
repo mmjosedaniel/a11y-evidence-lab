@@ -46,7 +46,7 @@ Accept option 3 for the portfolio MVP. This record supersedes ADR-0017 as the cu
 - Run one provider-independent axe-core scan against the entire developer-selected top-level document in its current rendered state at the configured readiness condition, restricted to exactly `image-alt`, `label`, and `color-contrast`, with iframe documents excluded.
 - Normalize every violation node returned for those rules as an independent `Finding`; do not sample one result or combine unrelated nodes.
 - Keep native axe `incomplete` observations separate from violations and from scan failure.
-- A zero-finding result is valid only when navigation and the complete three-rule axe operation finish and the returned result validates. A navigation timeout, browser failure, scanner failure, malformed response, or interrupted collection is shown as failure, not as a complete zero-finding result.
+- A zero-finding result is valid only when navigation and the complete three-rule axe operation finish and the complete bounded collection validates. A navigation timeout, browser failure, scanner failure, interrupted collection, malformed top-level output, or a fatal failure in result validation or evidence capture that prevents that collection is shown as failure, not as a complete zero-finding result. A missing, invalid, or withheld individual allowlisted fact instead preserves its Finding or ScannerReviewObservation with the concise category or sufficiency reason required by `REQ-SCAN-005`; it does not by itself fail the parent or permit the item to be dropped.
 - A complete result describes only this one automated three-rule scan. It is not proof of whole-page accessibility, WCAG conformance, certification, or legal compliance.
 
 ### Downstream workflow retained

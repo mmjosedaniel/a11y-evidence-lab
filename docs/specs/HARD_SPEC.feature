@@ -31,7 +31,7 @@ Feature: Non-negotiable boundaries for the portfolio MVP
       And no scan or provider call begins
       And the rejection makes no hostile-target or private-network safety claim
 
-  @HS-004 @REQ-SCAN-006 @REQ-SCAN-007 @REQ-EVID-009 @REQ-QUAL-019
+  @HS-004 @REQ-SCAN-005 @REQ-SCAN-006 @REQ-SCAN-007 @REQ-EVID-009 @REQ-QUAL-001 @REQ-QUAL-012 @REQ-QUAL-019
   Rule: Only a complete exact-three-rule result may be published
 
     Scenario: Preserve every returned node without false zero or partial success
@@ -41,7 +41,8 @@ Feature: Non-negotiable boundaries for the portfolio MVP
       And every returned native incomplete node remains a separate ScannerReviewObservation
       And no ScannerReviewObservation enters retrieval, generation, proposal review, or an accepted plan
       And a complete zero result requires validated coverage for all three rules
-      And missing coverage, malformed output, timeout, scanner failure, or evidence-capture failure publishes no complete or valid-zero result
+      And no complete or valid-zero result is published when coverage is missing, top-level output is malformed, a timeout occurs, a fatal top-level failure in scanner execution, result validation, or evidence capture prevents the complete bounded collection, or the initial complete aggregate cannot be durably written
+      And a missing, invalid, or withheld individual allowlisted fact preserves its Finding or ScannerReviewObservation with the concise category or sufficiency reason required by REQ-SCAN-005 instead of failing the parent scan or dropping the item
       And provider selection neither changes the scan nor invokes a model
 
   @HS-006 @REQ-SCAN-005 @REQ-EVID-004 @REQ-EVID-008 @REQ-COMP-006 @REQ-SEC-003 @REQ-SEC-015 @ADR-0021
@@ -114,7 +115,7 @@ Feature: Non-negotiable boundaries for the portfolio MVP
       And there is no automatic retry, provider change, or fallback
       And any later attempt, or use of the other provider, requires the ordinary Analyze flow and a new independent PageAnalysisRun
 
-  @HS-010 @REQ-REV-001 @REQ-REV-008 @REQ-REV-009
+  @HS-010 @REQ-GEN-002 @REQ-REV-001 @REQ-REV-008 @REQ-REV-009
   Rule: No proposal becomes accepted without one human decision
 
     Scenario Outline: Apply one decision to one Finding
@@ -122,6 +123,8 @@ Feature: Non-negotiable boundaries for the portfolio MVP
       When the reviewer chooses "<decision>"
       Then the result is "<result>"
       And the original proposal remains distinguishable from reviewer-authored content
+      And approval or edit-and-accept is permitted only after the reviewer confirms that every material claim in the resulting proposal has the required support from cited guidance, recorded scanner evidence, or both
+      And any unsupported material claim must be resolved through the submitted edit or the proposal is rejected
       And the blocking pre-acceptance manual judgment is recorded
       And approval or edit-and-accept is permitted only when that judgment supports the resulting proposal or is explicitly not applicable with a reason
       And an unresolved or contradictory judgment must be resolved through the submitted edit or the proposal is rejected

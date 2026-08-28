@@ -12,17 +12,17 @@ This refinement preserves OD-019's controlled positive-to-violation binary regre
 
 ## Recommended minimal approach
 
-Use ordinary deterministic application logic to compare one selected baseline Finding with evidence from one later complete scan. Do not use an LLM, LangChain, embeddings, DOM diffing, fuzzy matching, or a generalized element-identity framework.
+Use ordinary deterministic application logic to compare one selected baseline Finding with evidence from one later complete scan. Exact target correlation is available only when that Finding has a valid retained locator. Do not use an LLM, LangChain, embeddings, DOM diffing, fuzzy matching, or a generalized element-identity framework.
 
-The minimum public-page comparison requires:
+The minimum public-page comparison begins with two complete scans. Assigning a matched, classifiable Finding outcome requires:
 
 1. the same normalized requested URL and observed final URL;
 2. the same exact three-rule scan profile and complete rule coverage;
 3. the selected baseline Finding's exact rule;
-4. one retained minimized exact locator string; and
-5. an exact search for a later result or narrow positive observation with that same rule and locator, which may yield one unique match or an explicit missing, duplicate, changed, or ambiguous disposition.
+4. one valid and available retained minimized exact locator string; and
+5. an exact search for a later result or narrow positive observation with that same rule and locator, which may yield one unique, unambiguous match or an explicit missing, duplicate, changed, or ambiguous disposition.
 
-A URL/profile mismatch is `not comparable`. A missing, changed, or duplicate target match is `inconclusive`. The application never guesses, ranks candidates, or interprets disappearance from the violation list as resolution.
+A URL/profile mismatch is `not comparable`. For an otherwise comparable pair, a missing, invalid, or intentionally withheld baseline locator preserves the Finding, makes exact correlation unavailable, and produces `inconclusive` when comparison is requested. A missing, changed, duplicate, or ambiguous later target match is also `inconclusive`. The application never guesses, ranks candidates, or interprets disappearance from the violation list as resolution.
 
 This is sufficient for the portfolio MVP because it demonstrates deterministic before/after evidence without building a general web-page correlation system. The three controlled profiles remain the place where every intended outcome is reproduced under stable, project-owned inputs.
 
@@ -42,24 +42,24 @@ Choosing the trusted page is an operator responsibility outside this comparison 
 
 ## Exact selected-target matching
 
-The user selects one baseline Finding. The application then looks only for:
+The user selects one baseline Finding. When its locator is valid and available, the application looks only for:
 
 `exact rule ID + exact retained minimized locator string`
 
-For a public page, the locator is the one normalized, sanitized string already retained for that Finding. For controlled evaluation, the manifest's stable target key supplies deterministic correlation. Neither is a permanent general web-element identity.
+For a public page, the locator is the one normalized, sanitized string retained for that Finding when valid and available. If it is missing, invalid, or intentionally withheld, the Finding and its concise unavailability reason remain intact, but exact correlation is unavailable and an otherwise comparable pair produces `inconclusive`. For controlled evaluation, the manifest's stable target key supplies deterministic correlation. Neither correlation input is a permanent general web-element identity.
 
 The matching rule is:
 
-- exactly one later match: compare its rule-specific evidence;
+- exactly one unambiguous later match: compare its rule-specific evidence;
 - no later match: `inconclusive`;
-- more than one later match: `inconclusive`; and
+- more than one or otherwise ambiguous later match: `inconclusive`; and
 - changed or unavailable locator evidence: `inconclusive`.
 
 Collection order, display index, raw HTML, arbitrary page text, screenshots, full DOM or accessibility-tree captures, hashes of large page fragments, embeddings, and model descriptions are not matching inputs.
 
 ### Narrow positive observation
 
-Absence from the later violation list is not enough for `resolved`. When a rescan is initiated for one selected baseline Finding, the scan/evidence path must retain one narrow native non-failing observation for the exact same rule and locator before assigning `resolved`. If that observation cannot be obtained uniquely, the result is `inconclusive`.
+Absence from the later violation list is not enough for `resolved`. When a rescan is initiated for one selected baseline Finding, the scan/evidence path must retain one narrow native non-failing observation for the exact same rule and locator before assigning `resolved`. If that observation cannot be obtained uniquely and unambiguously, the result is `inconclusive`.
 
 Do not persist the scanner's complete pass or inapplicable collections. Controlled fixtures use their stable manifest target to obtain the expected positive observation and demonstrate the full deterministic `resolved` case.
 
@@ -71,7 +71,7 @@ Do not persist the scanner's complete pass or inapplicable collections. Controll
 | `persistent` | Both scans contain one exact same-rule/same-locator violation. For `image-alt` and `label`, any still-failing change remains persistent. |
 | `improved` | `color-contrast` only: both exact matched observations remain violations and the later retained contrast margin is higher under identical measurement semantics. The Finding remains unresolved. |
 | `regressed` | Public runtime: two exact matched `color-contrast` violations have a lower later margin. Controlled evaluation only: a retained positive baseline becomes a same-target violation under the stable fixture key. Public binary `image-alt` and `label` comparison cannot produce this outcome because it starts from a baseline Finding. This does not prove causation. |
-| `inconclusive` | The pair passed the URL/profile gate, but the selected target has no exact unique match or lacks required evidence. |
+| `inconclusive` | The pair passed the URL/profile gate, but the selected target has no exact match that is unique and unambiguous or lacks required evidence. |
 | `not comparable` | Both source scans are complete, but the URL or exact scan/evidence profile differs. No Finding outcome is assigned. An invalid or incomplete source scan fails before comparison and creates no comparison result. |
 
 A later-only unmatched Finding remains visible in the later scan but receives no `new` or `regressed` label. The MVP does not automatically compare every Finding.
@@ -89,10 +89,10 @@ Compare margins only for an exact same-rule/same-locator match under identical m
 1. Load the selected baseline run/Finding and the later completed run.
 2. Compare the exact normalized requested/final URLs and scan/evidence profile.
 3. If they differ, record `not comparable` with the mismatch rationale and do not attempt target correlation.
-4. Match the exact rule and minimized locator.
-5. If the match is not unique, record `inconclusive`.
-6. Otherwise compare the rule-specific evidence and assign the applicable outcome.
-7. Store the baseline reference and evidence, match disposition and rationale, result when classifiable, limitation, and any applicable non-blocking post-change verification reminder. Store a current-target reference and after-evidence only for one unique later match.
+4. If the baseline locator is missing, invalid, or withheld, preserve the Finding and record `inconclusive` with the correlation-unavailable reason.
+5. Otherwise, match the exact rule and minimized locator; if the match is not unique or is otherwise ambiguous, record `inconclusive`.
+6. For one unique, unambiguous match, compare the rule-specific evidence and assign the applicable outcome.
+7. Store the baseline reference and evidence, match disposition and rationale, result when classifiable, limitation, and any applicable non-blocking post-change verification reminder. Store a current-target reference and after-evidence only for one unique, unambiguous later match.
 
 The same records must produce the same result. Comparison invokes no provider and changes no proposal or review decision.
 
@@ -126,15 +126,15 @@ For public runtime use, store one small comparison object in the later run, addr
 | --- | --- |
 | Source references | Baseline and later `runId` values and the selected baseline `findingId`; no separate scan or comparison ID. |
 | Pair gate | Requested/final URL equality and exact scan/evidence profile equality, with a bounded mismatch reason. |
-| Match | Present only for a comparable pair: exact rule, minimized locator, bounded rationale, and `unique`, `missing`, `changed`, `duplicate`, or `ambiguous` disposition. A pair-level mismatch performs no target correlation. |
-| Evidence | The baseline Finding reference and relevant rule-specific values are always present. A later Finding or narrow positive-observation reference and after-values are present only for one unique match; no later evidence is fabricated for another disposition. |
+| Match | Present only for a comparable pair: exact rule, a minimized locator when valid and available or its concise unavailability reason, bounded rationale, and a disposition covering one unique, unambiguous match, an unavailable baseline locator, or a `missing`, `changed`, `duplicate`, or `ambiguous` later match. A pair-level mismatch performs no target correlation. Baseline-locator unavailability is a match disposition whose comparison outcome is `inconclusive`, not another outcome. |
+| Evidence | The baseline Finding reference and relevant rule-specific values are always present. A later Finding or narrow positive-observation reference and after-values are present only for one unique, unambiguous match; no later evidence is fabricated for another disposition. |
 | Result | One outcome, limitations, and an optional contextual post-change verification reminder or note. |
 
 No separate correlation-policy registry, child-comparison graph, event history, or copied page payload is required. If a referenced run is deleted, expose broken lineage instead of retaining a hidden duplicate. Controlled comparison-only evaluation pairs do not create this public runtime object, a baseline `findingId`, or another canonical artifact.
 
 ## Privacy and public-demo boundary
 
-Retain only the target identity already allowed by the run record, the exact scan profile, the minimized locator, rule-specific evidence, outcome, and bounded notes. Do not persist screenshots, full HTML, DOM or accessibility-tree snapshots, browser/network traces, credentials, form values, arbitrary page text, or raw provider payloads.
+Retain only the target identity already allowed by the run record, the exact scan profile, a minimized locator when valid and available or its concise unavailability reason, rule-specific evidence, outcome, and bounded notes. Do not persist screenshots, full HTML, DOM or accessibility-tree snapshots, browser/network traces, credentials, form values, arbitrary page text, or raw provider payloads.
 
 Public demonstrations should use the project-owned controlled cases. A non-sensitive public-page example requires an explicit content choice; permission to scan does not imply permission to publish evidence.
 
@@ -149,7 +149,7 @@ Public demonstrations should use the project-owned controlled cases. A non-sensi
 
 - Both scans use the same trusted public URL and complete exact three-rule profile.
 - Page changes happen outside the product.
-- One privacy-safe normalized locator string can be retained for each supported Finding before implementation.
+- When a valid, privacy-safe normalized locator is available for a Finding produced by a supported rule, retain it; otherwise retain a concise unavailability reason with the Finding, which cannot then be correlated exactly.
 - Exact locator normalization remains a small per-rule implementation choice, not a framework.
 - If real pages frequently produce `inconclusive`, evidence may justify a later correlation decision; the MVP does not anticipate it.
 
@@ -172,10 +172,10 @@ Public demonstrations should use the project-owned controlled cases. A non-sensi
 
 This step is adequately defined when:
 
-1. comparison accepts only two complete scans with identical normalized requested/final URLs and exact scan/evidence profiles;
+1. comparison accepts only two complete scans; identical normalized requested/final URLs and exact scan/evidence profiles are required for a comparable pair, while a mismatch produces `not comparable`;
 2. public runtime comparison starts from only one selected baseline Finding;
-3. one exact unique same-rule/minimized-locator match is required for a matched outcome, while a non-unique or absent match remains representable;
-4. missing, changed, or duplicate matches are `inconclusive`;
+3. one valid and available baseline locator plus one exact same-rule/minimized-locator match that is unique and unambiguous is required for a matched outcome, while the Finding remains preserved when its locator is unavailable;
+4. after the scan pair passes the comparability gate, a missing, invalid, or withheld baseline locator and missing, changed, duplicate, or ambiguous later matches are `inconclusive`;
 5. `resolved` requires a narrow same-target native non-failing observation and never follows from absence alone;
 6. exact matched public binary failures remain `persistent`, while public `regressed` is limited to a lower margin between exact matched failing `color-contrast` observations;
 7. runtime and normal fixture contrast outcomes use exact matched scanner-emitted measurements, while the comparison-only still-failing policy vector exercises `improved` arithmetic without being treated as retained scanner evidence or adding another fixture revision or generation execution;

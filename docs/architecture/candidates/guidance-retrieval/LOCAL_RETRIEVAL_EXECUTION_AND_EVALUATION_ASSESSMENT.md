@@ -16,7 +16,7 @@ Retrieval processes one user-selected Finding and one query at a time for exactl
 | `form-input-label` | `label` | WCAG 2.2 SC 4.1.2 only |
 | `text-contrast` | `color-contrast` | WCAG 2.2 SC 1.4.3 |
 
-The scanned page is never corpus content. The query excludes the page URL, locator, raw HTML, arbitrary page text, form values, credentials, and sibling findings. Unsupported or insufficient input preserves the Finding and follows the accepted support-state and abstention behavior.
+The scanned page is never corpus content. The query excludes the page URL, locator, raw HTML, arbitrary page text, form values, credentials, and sibling findings. An invalid, unknown, or ambiguous fixed rule-to-guidance mapping is a configuration or integrity failure with no support state. Only incomplete required Finding evidence under a valid mapping, or a completed valid retrieval with an `incomplete`, `missing`, or `conflicting` support state, follows the terminal pre-call abstention path.
 
 ## Recommendation: one in-process exact vector search
 
@@ -62,7 +62,7 @@ The evaluation profile is fixed:
 - application-owned passage-ID sorting for equal scores, rather than reliance on framework ordering; and
 - no persisted vectors, vector-service endpoint, collection administration, HNSW or other approximate index, deletion workflow, backup, migration, or recovery procedure.
 
-The application retains passage IDs in document metadata and resolves all visible citation data from the canonical corpus. A similarity score is ranking evidence only; it is not confidence, source authority, correctness, accessibility status, or proof of conformance.
+The application retains passage IDs in document metadata and resolves all visible citation data from the canonical corpus. Each canonical passage has one application-owned guidance role for support evaluation, kept distinct from its normative or informative source authority. A similarity score is ranking evidence only; it is not confidence, source authority, correctness, accessibility status, or proof of conformance.
 
 ## Finding-to-query projection
 
@@ -88,11 +88,11 @@ The exact query text, query-template version, included fact categories, and with
 3. Apply only the broad rule/success-criterion filter within the validated catalog. Do not filter to exact source IDs, source types, or guidance roles before ranking.
 4. Run one exact cosine search with `top-k=3`, then apply the application-owned passage-ID sort for equal scores.
 5. Resolve each passage ID against the canonical corpus and reject a stale, missing, or incompatible passage.
-6. Preserve ranked order while showing each passage's normative or informative authority separately.
+6. Preserve ranked order while showing each passage's application-owned guidance role separately from its normative or informative authority.
 7. Construct citations from the canonical publisher, document title/version, section or Technique, exact heading/fragment, authority label, and URL.
 8. Apply the accepted deterministic support policy after passage resolution. Similarity alone never establishes support.
 
-After passage resolution, apply the accepted deterministic policy in this order: an execution or integrity failure has no state; a curator-declared unresolved material conflict after normative precedence is `conflicting`; zero applicable resolved passages is `missing`; some applicable guidance with a profile-required role absent is `incomplete`; and all required roles in the resolved top three with no conflict is `supported`. Required Finding-evidence completeness is a separate generation-gate input. Similarity never determines support.
+Apply the accepted deterministic policy across mapping validation and passage resolution in this order: an execution or integrity failure has no state; this includes an invalid, unknown, or ambiguous fixed mapping rejected before retrieval. A curator-declared unresolved material conflict after normative precedence is `conflicting`; zero applicable resolved passages is `missing`; some applicable guidance with a profile-required role absent is `incomplete`; and all required roles in the resolved top three with no conflict is `supported`. Required Finding-evidence completeness is a separate generation-gate input. Similarity never determines support.
 
 For the `image-alt` case, the top three must preserve the normative basis and purpose-dependent context plus enough technique guidance for a conditional proposal; the application must not claim that retrieval established whether the image is informative, functional, or decorative. For `label` and `color-contrast`, the expected normative, contextual, and remediation categories fit within the three-result boundary. Exact acceptable passage IDs are frozen before evaluation.
 
@@ -105,7 +105,7 @@ This is a documentation-level view of the planned conceptual nested retrieval re
 | Placement and lineage | Nested under the selected `findingId` in `run.json`; start/end time and successful or error disposition. No retrieval ID is required. |
 | Query | Exact privacy-safe query text, template version, included/withheld fact categories, and approved rule mapping. |
 | Retrieval configuration | Catalog preconditions and provenance (corpus version and English), configured EmbeddingGemma tag and resolved full digest, relevant preprocessing, exact cosine metric, applied rule/SC filter, application-owned equal-score ordering, and `top-k=3`. The disposable vectors require no identity or persisted record. |
-| Ranked passages | Rank, canonical passage ID, exact cosine score, and resolvable citation reference. Passage text and full citation metadata remain in the canonical corpus. |
+| Ranked passages | Rank, canonical passage ID, exact cosine score, and resolvable citation reference. Passage text, application-owned guidance role, normative-or-informative authority, and full citation metadata remain in the canonical corpus. |
 | Support | `supported`, `incomplete`, `missing`, or `conflicting`, with the deterministic reason and generation eligibility. An insufficient result supplies the terminal abstention's explanation and manual-investigation guidance; it creates no provider call or proposal-review decision. |
 
 Application-owned TypeScript records need runtime validation at the finding input, embedding/search output, and persisted-JSON boundaries. No JSON Schema, code generation, schema framework, vector-database record model, migration system, or compatibility layer is required.
@@ -127,7 +127,7 @@ At least one supported case must have more than three passages eligible after th
 | --- | --- |
 | Ranked relevance | Every supported case returns its frozen directly relevant categories and acceptable passage IDs within the top three. |
 | Genuine retrieval | At least one case ranks a gold passage above an eligible non-gold passage under the same broad filter. |
-| Citation integrity | Every returned passage ID resolves to the exact canonical text, locator, source version, authority label, and URL. |
+| Citation integrity | Every returned passage ID resolves to the exact canonical text, locator, source version, application-owned guidance role, authority label, and URL; the guidance role remains distinct from normative-or-informative authority. |
 | Filter correctness | The active corpus/version and English preconditions are validated and retained as provenance; every result matches the applied rule family and exact success-criterion filter, and no exact source or role allowlist predetermines the result. |
 | Mapping boundary | The `label` case remains restricted to SC 4.1.2 and never implies SC 3.3.2, SC 1.3.1, or complete non-conformance. |
 | Support behavior | The insufficiency case preserves the Finding and records its expected support state, terminal application-authored abstention explanation, and manual-investigation guidance; it invokes no model and creates no proposal-review decision. |
@@ -175,8 +175,8 @@ This retrieval-execution portion is adequately defined when:
 1. one selected Finding can produce one exact privacy-safe semantic query without page URL, locator, raw HTML, arbitrary page text, credentials, or sibling content;
 2. only an explicit retrieval request can trigger EmbeddingGemma work or `MemoryVectorStore` construction; the fixed passage vectors are built once per required in-process rebuild, query vectors are created locally, and one exact cosine search returns `top-k=3` with application-owned passage-ID ordering for equal scores;
 3. the active corpus/version and English are validated catalog preconditions and retained provenance, while the search applies only the broad rule/success-criterion filter and no exact source or guidance-role allowlist;
-4. every result resolves to inspectable canonical text and citation metadata;
-5. the accepted support states and abstention behavior remain deterministic and separate from similarity scores or execution errors;
+4. every result resolves to inspectable canonical text and citation metadata, including one application-owned guidance role kept distinct from normative-or-informative authority;
+5. the accepted support states and abstention behavior remain deterministic and separate from similarity scores or execution and integrity errors, including invalid, unknown, or ambiguous fixed mappings;
 6. the compact evaluation covers the three supported mappings plus one insufficiency case, and at least one supported case demonstrates ranking among more than three eligible passages;
 7. LangChain remains a thin, replaceable retrieval composition layer and no persistent vector service or index lifecycle is introduced; and
 8. the evaluation makes no claim of broad retrieval quality, accessibility, conformance, certification, or release support.

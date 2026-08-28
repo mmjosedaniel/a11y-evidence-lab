@@ -4,7 +4,7 @@
 
 **Status:** Proposed assessment as of 2026-08-24, refined on 2026-08-27 to apply YAGNI to the single-reviewer portfolio MVP. It is aligned with the trusted operator-input boundary in [ADR-0018](../decisions/ADR-0018-trusted-operator-url-boundary.md).
 
-The authoritative requirement IDs, wording, and statuses remain in [Evidence and review workflow requirements](../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#human-review-and-manual-checks). This assessment owns no requirement or decision, does not authorize development, and elaborates the accepted single-decision boundary in `REQ-REV-001`, `REQ-REV-008`, and `REQ-REV-009`. OD-022 supersedes or defers the earlier audit-history, proposal-version, manual-check-record, regeneration, and abstention-routing proposals.
+The authoritative requirement IDs, wording, and statuses remain in [Evidence and review workflow requirements](../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#human-review-and-manual-checks). This assessment owns no requirement or decision, does not authorize development, and elaborates the accepted semantic-support and single-decision boundary in `REQ-GEN-002`, `REQ-REV-001`, `REQ-REV-008`, and `REQ-REV-009`. OD-022 supersedes or defers the earlier audit-history, proposal-version, manual-check-record, regeneration, and abstention-routing proposals.
 
 ## Recommended minimal review experience
 
@@ -17,10 +17,11 @@ The MVP retains:
 - the immutable original AI proposal and its evidence and citation references;
 - one final action: `approve`, `edit and accept`, or `reject`;
 - the complete final reviewer-authored text only for `edit and accept`;
+- confirmation, as a condition of approval or edit-and-accept, that every material claim in the resulting proposal has the required support from cited guidance, recorded scanner evidence, or both;
 - one simple disposition for the proposal's blocking pre-acceptance judgment; and
 - one application-recorded decision timestamp and one optional bounded reviewer note, which also carries the reason when the judgment is marked not applicable.
 
-It does not need proposal-version chains, an append-only review history, actor identities, edit-event logs, immutable manual-check-definition entities, separate manual-check execution records, a reason taxonomy, draft persistence, undo, regeneration, or audit-workflow machinery. The original proposal plus the one final decision is enough to demonstrate that AI output remains subordinate to human judgment.
+It does not need proposal-version chains, an append-only review history, actor identities, edit-event logs, per-claim confirmation records, immutable manual-check-definition entities, separate manual-check execution records, a reason taxonomy, draft persistence, undo, regeneration, or audit-workflow machinery. The semantic-support check is a validation condition on the one final decision, not another stored checklist or workflow. The original proposal plus the one final decision is enough to demonstrate that AI output remains subordinate to human judgment.
 
 React should render application-owned text and hold only transient form state. The local service should resolve the selected proposal, validate the submitted final decision, and persist the original proposal reference and final decision together. No router, form library, state library, component kit, Markdown renderer, or workflow engine is required by this step.
 
@@ -30,8 +31,9 @@ React should render application-owned text and hold only transient form state. T
 2. Let the user select one Finding with a reviewable proposal.
 3. Present the deterministic evidence, retrieved guidance, AI interpretation, uncertainty, blocking pre-acceptance judgment, and non-blocking post-change verification reminder in one clear reading order.
 4. Let the reviewer choose `approve`, `edit and accept`, or `reject`.
-5. Validate that the proposal is still pending, required references resolve, prohibited claims are absent, and any blocking manual judgment is resolved.
-6. Persist one final review decision. A failed save leaves the proposal pending and reports the failure; it does not create a partial decision.
+5. For approval or edit-and-accept, require confirmation that every material claim in the resulting proposal has the required support from cited guidance, recorded scanner evidence, or both; an unsupported claim must be resolved in the submitted edit or the proposal must be rejected.
+6. Validate that the proposal is still pending for every action. For approval or edit-and-accept, also validate that required references resolve, prohibited claims are absent, the semantic-support condition is satisfied, and the blocking manual judgment is resolved. Rejection remains valid while those concerns are unresolved.
+7. Persist one final review decision. A failed save leaves the proposal pending and reports the failure; it does not create a partial decision.
 
 The findings list is navigation, not a queue. Reviewing one Finding must not retrieve, generate, decide, or change a sibling Finding.
 
@@ -43,8 +45,8 @@ All required information should be available on one page, with bounded details d
 2. **Evidence sufficiency.** Show why the Finding was eligible for generation, the proposal's uncertainty and assumptions, citation-resolution status, and any unresolved manual judgment. Evidence sufficiency is not model confidence or an accessibility score.
 3. **Deterministic evidence.** Show the rule result, minimized target facts, relevant scanner measurements, provenance, omissions, and coverage limits. Do not relabel the Finding as confirmed whole-page non-conformance.
 4. **Retrieved guidance.** Show the retained passage, publisher, source type, version or date, heading or locator, and canonical source link. Retrieval rank or vector distance is not authority.
-5. **AI proposal.** Clearly label the explanation, potential user impact, remediation approach, assumptions, limitations, and citations as AI-generated.
-6. **Manual work.** Show the one rule-specific pre-acceptance question and let the reviewer record a simple disposition. Its unresolved or contradictory state prevents acceptance. The decision's one optional reviewer note carries the required reason when the disposition is not applicable. Show the separate post-change verification reminder, but do not ask the reviewer to complete it before a change exists.
+5. **AI proposal.** Clearly label the explanation, potential user impact, remediation approach, assumptions, limitations, and citations as AI-generated. Present the cited guidance and recorded scanner evidence so the reviewer can verify the support for each material claim without creating a per-claim checklist.
+6. **Manual work.** Require one decision-level confirmation that every material claim in the resulting proposal has the required support from cited guidance, recorded scanner evidence, or both, and show the one rule-specific pre-acceptance question with its simple disposition. If any claim is unsupported or any judgment is unresolved or contradictory, the submitted edit must resolve each issue; otherwise the proposal must be rejected. The decision's one optional reviewer note carries the required reason when the disposition is not applicable. Show the separate post-change verification reminder, but do not ask the reviewer to complete it before a change exists.
 7. **Decision.** Keep the original AI proposal inspectable. For an edit, collect the complete final reviewer-authored proposal. For rejection, an optional bounded note is enough.
 
 Use native headings, landmarks, lists, links, buttons, labels, and form controls; one logical visual and DOM order; visible focus; and text labels that do not depend on color or icons. Validation errors should identify the problem, and status changes should be available to assistive technology without stealing focus.
@@ -78,15 +80,16 @@ Approval and edit-and-accept require:
 
 1. the original proposal is still pending and its evidence and passage references resolve;
 2. the reviewer can inspect evidence, citations, assumptions, limitations, the blocking judgment, and the post-change reminder;
-3. no prohibited accessibility, compliance, certification, applied-code, or “fixed” claim remains in the accepted text;
-4. the blocking manual judgment supports the plan or is validly marked not applicable; and
-5. the reviewer explicitly submits one final action.
+3. the reviewer confirms that each material claim in the resulting proposal has the required support from cited guidance, recorded scanner evidence, or both; an unsupported claim is removed or corrected in the submitted edit, or the proposal is rejected;
+4. no prohibited accessibility, compliance, certification, applied-code, or “fixed” claim remains in the accepted text;
+5. the blocking manual judgment supports the plan or is validly marked not applicable; and
+6. the reviewer explicitly submits one final action.
 
 | Action | Minimal behavior | Durable meaning |
 | --- | --- | --- |
-| **Approve** | Accept the displayed AI proposal unchanged. An optional note may be added. | Store `approve`, the original proposal reference, the blocking judgment disposition, optional note, and decision time. |
-| **Edit and accept** | Edit a transient working copy and submit the complete final text. Canceling creates no record. | Store `edit and accept`, the original proposal reference, complete reviewer-authored text, the blocking judgment disposition, optional note, and decision time. The original AI proposal remains unchanged and inspectable. |
-| **Reject** | Reject the proposal. An optional note may explain why. | Store `reject`, the original proposal reference, the current blocking judgment disposition, optional note, and decision time. The judgment may remain contradictory or unresolved. No accepted plan exists. |
+| **Approve** | Accept the displayed AI proposal unchanged only after confirming that every material claim has the required support from cited guidance, recorded scanner evidence, or both. An optional note may be added. | Store `approve`, the original proposal reference, the blocking judgment disposition, optional note, and decision time. The action records that the decision-level support gate passed; no per-claim record is added. |
+| **Edit and accept** | Edit a transient working copy, resolve every unsupported material claim, and submit the complete final text. Canceling creates no record. | Store `edit and accept`, the original proposal reference, complete reviewer-authored text, the blocking judgment disposition, optional note, and decision time. The action records that the resulting proposal passed the decision-level support gate; the original AI proposal remains unchanged and inspectable. |
+| **Reject** | Reject the proposal when unsupported material claims remain or for any other review reason. An optional note may explain why. | Store `reject`, the original proposal reference, the current blocking judgment disposition, optional note, and decision time. The judgment or semantic-support concern may remain unresolved. No accepted plan exists. |
 
 The minimal lifecycle is:
 
@@ -104,6 +107,7 @@ One Finding needs at most one review record:
 | --- | --- |
 | References | PageAnalysisRun, Finding, original proposal, evidence, retrieval, and cited passage references. |
 | Decision | `approve`, `edit and accept`, or `reject`; application-recorded time; optional bounded note. |
+| Semantic support gate | For `approve` or `edit and accept`, the one final action is valid only after the reviewer confirms that every material claim in the resulting proposal has the required support from cited guidance, recorded scanner evidence, or both. Unsupported claims require a resolving edit or rejection. This creates no per-claim field, checklist, or history. |
 | Pre-acceptance judgment | The final disposition for the original proposal's one rule-specific question, stored inline without duplicating the question. A required `not applicable` reason uses the decision's single bounded reviewer note. The proposal's post-change reminder remains referenced guidance rather than a completed review field. |
 | Edited result | Present only for `edit and accept`: the complete final reviewer-authored proposal text. |
 | Result | `accepted` for approve or edit-and-accept; `rejected` for reject. |
@@ -129,6 +133,7 @@ This step is adequately defined when:
 
 - one selected Finding's deterministic evidence, retrieved passages, AI interpretation, assumptions, limitations, and manual judgments are clearly distinguishable;
 - the reviewer can inspect the exact evidence and passages before making one decision;
+- approval and edit-and-accept require confirmation that every material claim in the resulting proposal has the required support from cited guidance, recorded scanner evidence, or both, while an unsupported claim requires a resolving edit or rejection;
 - approve, edit-and-accept, and reject affect only the selected Finding;
 - the original AI proposal remains inspectable after every decision;
 - edit-and-accept stores the complete final reviewer-authored text without creating a version graph;
@@ -158,7 +163,7 @@ This step is adequately defined when:
 ## Explicit non-goals
 
 - Accounts, login, reviewer authentication, teams, roles, assignments, queues, notifications, comments, or collaboration.
-- Proposal-version graphs, edit-event history, actor attribution, audit logs, check-definition entities, repeated check occurrences, decision correction, undo, persisted drafts, or regeneration.
+- Proposal-version graphs, edit-event history, actor attribution, audit logs, per-claim confirmation records, check-definition entities, repeated check occurrences, decision correction, undo, persisted drafts, or regeneration.
 - Bulk or cross-finding review, combined proposals, reviewer ranking, or second-signature approval.
 - Automatic code edits, repository access, deployment, remediation execution, rescanning, learning, or provider switching.
 - Treating approval, rejection, manual judgments, or later scan results as accessibility certification, legal compliance, whole-page accessibility, or automatic ground truth.

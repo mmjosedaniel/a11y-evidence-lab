@@ -7,7 +7,7 @@
 
 The complete local workflow must run on the existing reference computer: Windows, 32 GB RAM, an NVIDIA RTX 5060 Laptop GPU with 8 GB VRAM, and the documented available storage. The project should not spend evaluation effort on, recommend, or provision local models that exceed that computer's practical capacity.
 
-Practical capacity includes more than model-file size. It includes the model working set, configured context, browser, embeddings, retrieval, application services, system-memory fallback, and whether the application remains usable while the representative workflow is active.
+Practical capacity includes more than model-file size. It includes the model working set, configured context, browser, embeddings, retrieval, application services, paging or offload to CPU/system memory, and whether the application remains usable while the representative workflow is active.
 
 ### MVP scope amendment recorded 2026-08-25
 
@@ -38,7 +38,7 @@ Use a two-stage capacity gate before a local model configuration becomes an eval
 1. **Metadata prefilter:** exclude a configuration without downloading or benchmarking it when published artifact size, estimated runtime/context working set, storage needs, or supported runtime requirements clearly exceed the existing reference PC with a documented safety margin.
 2. **Manual on-device capacity smoke:** after the developer installs the one plausible configuration, run the representative browser, embedding, retrieval, and application workload once using its exact model digest, quantization, configured context, and runtime.
 
-A configuration passes only if the manual smoke completes on the existing PC without out-of-memory failure, storage exhaustion, or an unusable application interface. Record readily observable paging or fallback, duration, and UI responsiveness as evaluation context. No in-app hardware monitoring, repeated benchmark protocol, formal budget, or thermal qualification is required.
+A configuration passes only if the manual smoke completes on the existing PC without out-of-memory failure, storage exhaustion, or an unusable application interface. Record readily observable paging or offload to CPU/system memory, duration, and UI responsiveness as evaluation context. No in-app hardware monitoring, repeated benchmark protocol, formal budget, or thermal qualification is required.
 
 Only a configuration that passes both stages may enter the compact MVP evaluation or become the documented local evaluation configuration. Passing does not place a model in a supported-model catalog or justify a release, hardware-compatibility, latency, or thermal claim. When the fixed configuration fails, the project records the exclusion reason and pauses local evaluation; it performs no further quality evaluation until a new model-selection decision updates the exact configuration. Additional hardware, remote compute, or API inference must not be used to make a local configuration appear eligible.
 
