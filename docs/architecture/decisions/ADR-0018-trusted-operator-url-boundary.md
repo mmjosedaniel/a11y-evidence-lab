@@ -29,7 +29,7 @@ Accept option 3 for the portfolio MVP. This record supersedes ADR-0017 as the cu
 ### Trusted operator input
 
 - One `PageAnalysisRun` accepts exactly one operator-entered public HTTPS URL. Authorization, public reachability, and trust are operator responsibilities and supported-use assumptions, not an application admission workflow.
-- The application shows a visible limitation notice that only pages the operator is authorized to analyze and trusts are supported. It does not require a separate attestation or confirmation control, independently prove ownership, classify destination addresses, or claim that the target is harmless.
+- The application shows the limitation beside target entry and again where results are interpreted: only pages the operator is authorized to analyze and trusts are supported. It does not require a separate attestation or confirmation control, independently prove ownership, classify destination addresses, or claim that the target is harmless.
 - The MVP supports no credentials, authenticated browser state, client certificates, custom authorization headers, personal browser profile, private-page workflow, uploaded HTML, or local-file target.
 - Hostile or untrusted pages and production-scale arbitrary-URL scanning are unsupported. Documentation and the future interface must state that limitation without presenting it as technical isolation.
 
@@ -38,12 +38,12 @@ Accept option 3 for the portfolio MVP. This record supersedes ADR-0017 as the cu
 - Parse the entered value as one valid HTTPS URL and reject malformed input or embedded credentials. No application-owned DNS, IP-address, redirect, or subresource security classification is part of the MVP.
 - Launch the page in a fresh, non-persistent Playwright-managed Chromium context without imported cookies, storage state, credentials, extensions, permissions, or a personal browser profile.
 - Apply one finite navigation timeout, run the scan, and close the page, context, and managed browser after success, timeout, or failure. Exact timeout and cleanup mechanics are implementation details rather than architecture qualification gates.
-- Perform one passive top-level page analysis. Scan only the admitted top-level main document; iframe documents are excluded from the MVP scan. The product does not intentionally click controls, submit forms, upload or download files, discover or follow links as scan targets, execute user journeys, crawl, or scan multiple pages.
+- Perform one passive top-level page analysis. Scan the entire developer-selected top-level document in its current rendered state at the configured readiness condition; iframe documents and inactive/non-rendered states are excluded from the MVP scan. The product does not intentionally click controls, submit forms, upload or download files, discover or follow links as scan targets, execute user journeys, crawl, or scan multiple pages.
 - Browser redirects and subresources needed for an ordinary page load follow the managed browser's normal behavior. The application does not re-attest redirects or mediate every connection, and it makes no hostile-page containment claim.
 
 ### Deterministic three-rule result
 
-- Run one provider-independent axe-core scan against the admitted top-level main document, restricted to exactly `image-alt`, `label`, and `color-contrast`.
+- Run one provider-independent axe-core scan against the entire developer-selected top-level document in its current rendered state at the configured readiness condition, restricted to exactly `image-alt`, `label`, and `color-contrast`, with iframe documents excluded.
 - Normalize every violation node returned for those rules as an independent `Finding`; do not sample one result or combine unrelated nodes.
 - Keep native axe `incomplete` observations separate from violations and from scan failure.
 - A zero-finding result is valid only when navigation and the complete three-rule axe operation finish and the returned result validates. A navigation timeout, browser failure, scanner failure, malformed response, or interrupted collection is shown as failure, not as a complete zero-finding result.
@@ -51,8 +51,8 @@ Accept option 3 for the portfolio MVP. This record supersedes ADR-0017 as the cu
 
 ### Downstream workflow retained
 
-- Findings remain independently selectable for minimized evidence, curated retrieval, evidence-sufficiency evaluation, generation or deterministic abstention, human review, and later comparison. There is no page-wide prompt, combined remediation proposal, automatic all-findings processing, queue, agent, or workflow engine.
-- One immutable global `Local` or `Groq` mode belongs to the run. Selection does not invoke a provider; evidence insufficiency abstains without a call; provider failure never causes automatic fallback.
+- Findings remain independently selectable for minimized evidence, curated retrieval, and evidence-sufficiency evaluation. Incomplete required evidence or a completed `incomplete`, `missing`, or `conflicting` retrieval ends in a terminal application-authored abstention with a clear explanation and manual-investigation guidance but no provider call or proposal-review decision. A retrieval execution or integrity failure instead fails that FindingWorkflow with no support state. Complete required evidence plus a completed `supported` retrieval is eligible and may produce one validated proposal that alone enters human review. Comparison is a separate scan-evidence path that may start from any retained baseline Finding; retrieval, generation or abstention, and review are not prerequisites. There is no page-wide prompt, combined remediation proposal, automatic all-findings processing, queue, agent, or workflow engine.
+- One immutable global `Local` or `Groq` mode belongs to the run. Selection does not invoke a provider; a terminal evidence-sufficiency abstention invokes none; retrieval execution or integrity failure invokes none and has no support state; provider failure never causes automatic fallback.
 - Evidence minimization, provider-payload restrictions, credential handling, model-output validation, reviewer control, and conservative comparison remain application requirements. This decision changes the scan-target threat assumption, not the evidence-first or human-review boundaries.
 - The three project-owned synthetic failing and corrected profiles remain the fixed evaluation baseline. They do not become user-submitted runtime targets and do not qualify general Internet scanning.
 

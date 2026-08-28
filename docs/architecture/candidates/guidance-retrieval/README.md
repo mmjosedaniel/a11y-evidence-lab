@@ -18,9 +18,9 @@ One scan of the trusted operator-supplied page may produce many independent find
 | `label` | WCAG 2.2 SC 4.1.2 only |
 | `color-contrast` | WCAG 2.2 SC 1.4.3 and the accepted contrast guidance |
 
-The interface may list every retained finding, but retrieval starts only when the user selects one finding. One finding creates one privacy-safe query and one retrieval record. Findings are never combined, and a result for one target cannot support another target automatically.
+The interface lists every retained Finding, but retrieval starts only when the user selects one Finding. One Finding creates one privacy-safe query and one nested retrieval result. Findings are never combined, and a result for one target cannot support another target automatically.
 
-The scanned page is untrusted query context, not guidance. It is never downloaded into, segmented for, embedded in, or used to expand the curated corpus. Unknown rules, unsupported rule variants, withheld material evidence, or ambiguous mapping leave the finding visible and produce an ineligible/abstention handoff instead of web search or corpus mutation.
+The scanned page is untrusted query context, not guidance. It is never downloaded into, segmented for, embedded in, or used to expand the curated corpus. Withheld material evidence or a supported-rule contextual variant that lacks required support leaves the Finding visible and produces an ineligible/abstention handoff instead of web search or corpus mutation. An invalid, unknown, or ambiguous fixed rule-to-guidance mapping is instead a configuration or integrity failure: retrieval assigns no guidance-support state and generation does not treat it as an abstention.
 
 Controlled project-owned cases remain the fixed retrieval evaluation baseline for the three mappings. They do not make a changing public page a gold dataset.
 
@@ -49,11 +49,11 @@ LangChain may adapt canonical passages to framework documents, invoke EmbeddingG
 
 | Result | Per-finding handoff |
 | --- | --- |
-| `supported` | Complete mapped roles and required evidence permit at most one structured generation call for this finding. |
-| `incomplete` | Keep the finding visible; deterministic abstention/manual review; no provider call. |
-| `missing` | Keep the finding visible; deterministic abstention/manual review; no provider call. |
-| `conflicting` | Keep the finding and conflict references visible; deterministic abstention/manual review; no provider call. |
-| Retrieval-stage error | Fail this finding's workflow attempt with no support state; preserve the finding. |
+| `supported` | All profile-required guidance roles resolve within the top three and no curator-declared unresolved material conflict applies. Complete required Finding evidence is checked separately before the one permitted generation call. |
+| `incomplete` | Some applicable guidance resolves but a profile-required role is absent. Keep the Finding visible and publish a terminal application-authored abstention that names the missing role and provides manual-investigation guidance; no provider call or proposal-review decision. |
+| `missing` | Zero applicable passages resolve for the mapped rule and success criterion. Keep the Finding visible and publish a terminal application-authored abstention that explains the missing guidance and provides manual-investigation guidance; no provider call or proposal-review decision. |
+| `conflicting` | A curator-declared unresolved material conflict remains after normative precedence. Keep the Finding and conflict references visible and publish a terminal application-authored abstention that explains the conflict and provides manual-investigation guidance; no provider call or proposal-review decision. |
+| Retrieval-stage or fixed-mapping integrity error | Fail this Finding's workflow attempt with no support state; preserve the Finding. This includes an invalid, unknown, or ambiguous fixed rule-to-guidance mapping. |
 
 One finding may abstain while another finding from the same page remains eligible. Similarity values are ranking evidence, not confidence, authority, or accessibility scores.
 

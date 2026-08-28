@@ -6,13 +6,13 @@
 
 [ADR-0018](../../decisions/ADR-0018-trusted-operator-url-boundary.md) retains controlled fixtures as the deterministic evaluation baseline while accepting one trusted operator URL as the runtime product target. ADR-0008, ADR-0009, and ADR-0011 retain their evaluation-baseline scope; no fixture layout or technical detail becomes accepted by association.
 
-This assessment owns no requirement or decision, does not authorize development, and does not define runtime URL intake. Canonical behavior remains in [Evidence and review workflow requirements](../../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md), while exact evaluation authority remains in its owning evaluation requirements. Its recommendation uses ordinary product records plus a manifest-case reference, preserving the controlled-fixture identity and correlation evidence required by `REQ-EVID-002` and `REQ-COMP-002` without creating a second product model.
+This assessment owns no requirement or decision, does not authorize development, and does not define runtime URL intake. Canonical behavior remains in [Evidence and review workflow requirements](../../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md), while exact evaluation authority remains in its owning evaluation requirements. Its recommendation uses ordinary product scan/evidence field shapes plus a manifest-case reference, preserving the controlled-fixture identity and correlation evidence required by `REQ-EVID-002` and `REQ-COMP-002` without creating a second product model.
 
 ## Recommendation
 
 Use the project-owned synthetic states as evaluation/test configuration for the same scan and evidence-capture modules used by the product. Do not build a fixture selector, fixture authorization module, fixture-specific product API, separate workflow state machine, or second persistent fixture-record model.
 
-The evaluation harness selects a frozen synthetic revision, supplies it to the scan module through test-only configuration, and associates the resulting ordinary scan records with the expected manifest entry. The manifest owns the expected result. The controlled run aggregate may reference the scenario, revision role, and stable fixture target key required for evaluation lineage, but those gold fields do not enter prompts, public-page evidence, or the product's runtime UI.
+The evaluation harness selects a frozen synthetic revision, supplies it to the scan module through test-only configuration, and associates the resulting ordinary scan/evidence field shapes with the expected manifest entry. The manifest owns the expected result. The resulting evaluation-case artifact may reference the scenario, revision role, and stable fixture target key required for evaluation lineage, but it is not a runtime `PageAnalysisRun` or canonical product `run.json`; those gold fields do not enter prompts, public-page evidence, or the product's runtime UI.
 
 This shape demonstrates deterministic behavior without creating a second product:
 
@@ -77,7 +77,7 @@ The evaluation harness may choose content differently from the runtime URL intak
 6. records the common browser/scanner/profile provenance; and
 7. closes the page, context, and browser after success or failure.
 
-The same evidence-capture module then minimizes and persists ordinary Finding and ScannerReviewObservation records. The controlled run may carry its manifest-case reference and required fixture identity, but the scan module does not produce a fixture-specific Finding type, copy the expected outcome into scanner evidence, or create another storage hierarchy.
+The same evidence-capture module then produces the ordinary minimized Finding and ScannerReviewObservation field shapes for evaluation. The evaluation-case artifact may carry its manifest-case reference and required fixture identity, but the scan module does not produce a fixture-specific Finding type, copy the expected outcome into scanner evidence, create another product storage hierarchy, or turn that artifact into a runtime `PageAnalysisRun`.
 
 The evaluation harness separately joins the ordinary output to its manifest case and checks the expected observation. This join belongs to evaluation reporting, not to product behavior.
 
@@ -95,7 +95,7 @@ The stable evaluation target key comes from the manifest and is retained only in
 
 The controlled case fails when content setup, readiness, browser launch, scanner execution, result validation, evidence capture, timeout, or cleanup prevents a complete result. It must not publish a complete zero-Finding result or a silently partial result.
 
-A native axe `incomplete` result is scanner evidence requiring review, not a scan failure. A corrected case with zero violations is valid only when all three rules and both returned collections validate as complete.
+A native axe `incomplete` result is scanner evidence requiring review, not a scan failure. A corrected case with zero violations is valid only when all required native result arrays and exact per-rule coverage validate as complete.
 
 The MVP needs no automatic retry, fixture queue, concurrent execution, cancellation controller, worker, or resume state. A developer can rerun the evaluation command after inspecting a failure; no product retry feature follows from this assessment.
 
@@ -139,7 +139,7 @@ The controlled evaluation baseline is adequately defined when:
 - failing and corrected cases produce the expected target violation and native non-failing observation;
 - all three rules report complete coverage, even though the manifest assertion focuses on one intended target;
 - contrast retains the required scanner-emitted measurements;
-- expected outcomes remain in the evaluation manifest; the controlled run retains only its manifest reference and required scenario/revision/target lineage, and none of those gold fields enter prompts or public-page records;
+- expected outcomes remain in the evaluation manifest; the evaluation-case artifact retains only its manifest reference and required scenario/revision/target lineage, is not a runtime `PageAnalysisRun` or product `run.json`, and none of those gold fields enter prompts or public-page records;
 - malformed, incomplete, timed-out, or failed work never appears as valid zero or complete;
 - scanning works without LangChain or an LLM; and
 - results make no accessibility, compliance, certification, hostile-page-safety, or broad-support claim.

@@ -20,7 +20,7 @@ The minimum public-page comparison requires:
 2. the same exact three-rule scan profile and complete rule coverage;
 3. the selected baseline Finding's exact rule;
 4. one retained minimized exact locator string; and
-5. exactly one later result or narrow positive observation with that same rule and locator.
+5. an exact search for a later result or narrow positive observation with that same rule and locator, which may yield one unique match or an explicit missing, duplicate, changed, or ambiguous disposition.
 
 A URL/profile mismatch is `not comparable`. A missing, changed, or duplicate target match is `inconclusive`. The application never guesses, ranks candidates, or interprets disappearance from the violation list as resolution.
 
@@ -72,7 +72,7 @@ Do not persist the scanner's complete pass or inapplicable collections. Controll
 | `improved` | `color-contrast` only: both exact matched observations remain violations and the later retained contrast margin is higher under identical measurement semantics. The Finding remains unresolved. |
 | `regressed` | Public runtime: two exact matched `color-contrast` violations have a lower later margin. Controlled evaluation only: a retained positive baseline becomes a same-target violation under the stable fixture key. Public binary `image-alt` and `label` comparison cannot produce this outcome because it starts from a baseline Finding. This does not prove causation. |
 | `inconclusive` | The pair passed the URL/profile gate, but the selected target has no exact unique match or lacks required evidence. |
-| `not comparable` | The URL or exact scan/evidence profile differs, or either scan is incomplete. No Finding outcome is assigned. |
+| `not comparable` | Both source scans are complete, but the URL or exact scan/evidence profile differs. No Finding outcome is assigned. An invalid or incomplete source scan fails before comparison and creates no comparison result. |
 
 A later-only unmatched Finding remains visible in the later scan but receives no `new` or `regressed` label. The MVP does not automatically compare every Finding.
 
@@ -88,11 +88,11 @@ Compare margins only for an exact same-rule/same-locator match under identical m
 
 1. Load the selected baseline run/Finding and the later completed run.
 2. Compare the exact normalized requested/final URLs and scan/evidence profile.
-3. If they differ, record `not comparable`.
+3. If they differ, record `not comparable` with the mismatch rationale and do not attempt target correlation.
 4. Match the exact rule and minimized locator.
 5. If the match is not unique, record `inconclusive`.
 6. Otherwise compare the rule-specific evidence and assign the applicable outcome.
-7. Store the before/after references, result, limitation, and required manual follow-up.
+7. Store the baseline reference and evidence, match disposition and rationale, result when classifiable, limitation, and any applicable non-blocking post-change verification reminder. Store a current-target reference and after-evidence only for one unique later match.
 
 The same records must produce the same result. Comparison invokes no provider and changes no proposal or review decision.
 
@@ -116,7 +116,7 @@ Comparison reports scanner evidence only:
 - `label`: a person decides whether the rendered label is clear, visible, and associated with the intended control; and
 - `color-contrast`: a person confirms the measurement applies to the intended text and relevant visual state.
 
-The comparison may show the accepted plan and the reviewer's earlier notes as context. A later manual judgment may be recorded as a simple note or disposition with the comparison; no immutable check-definition, occurrence-history, or relationship graph is needed for the MVP.
+When present, the comparison may show the accepted plan, earlier review note, and proposal's post-change verification reminder as optional context. None is required, completed, or given a new disposition by comparison, and none gates or changes the deterministic result. The MVP creates no comparison-specific manual judgment, check record, history, or relationship graph.
 
 ## Conceptual comparison record
 
@@ -126,9 +126,9 @@ For public runtime use, store one small comparison object in the later run, addr
 | --- | --- |
 | Source references | Baseline and later `runId` values and the selected baseline `findingId`; no separate scan or comparison ID. |
 | Pair gate | Requested/final URL equality and exact scan/evidence profile equality, with a bounded mismatch reason. |
-| Match | Exact rule, minimized locator, and `unique`, `missing`, or `duplicate` disposition. |
-| Evidence | Baseline and later Finding or narrow positive-observation references and the relevant rule-specific values. |
-| Result | One outcome, limitations, and optional manual-follow-up note. |
+| Match | Present only for a comparable pair: exact rule, minimized locator, bounded rationale, and `unique`, `missing`, `changed`, `duplicate`, or `ambiguous` disposition. A pair-level mismatch performs no target correlation. |
+| Evidence | The baseline Finding reference and relevant rule-specific values are always present. A later Finding or narrow positive-observation reference and after-values are present only for one unique match; no later evidence is fabricated for another disposition. |
+| Result | One outcome, limitations, and an optional contextual post-change verification reminder or note. |
 
 No separate correlation-policy registry, child-comparison graph, event history, or copied page payload is required. If a referenced run is deleted, expose broken lineage instead of retaining a hidden duplicate. Controlled comparison-only evaluation pairs do not create this public runtime object, a baseline `findingId`, or another canonical artifact.
 
@@ -174,7 +174,7 @@ This step is adequately defined when:
 
 1. comparison accepts only two complete scans with identical normalized requested/final URLs and exact scan/evidence profiles;
 2. public runtime comparison starts from only one selected baseline Finding;
-3. one exact unique same-rule/minimized-locator match is required;
+3. one exact unique same-rule/minimized-locator match is required for a matched outcome, while a non-unique or absent match remains representable;
 4. missing, changed, or duplicate matches are `inconclusive`;
 5. `resolved` requires a narrow same-target native non-failing observation and never follows from absence alone;
 6. exact matched public binary failures remain `persistent`, while public `regressed` is limited to a lower margin between exact matched failing `color-contrast` observations;

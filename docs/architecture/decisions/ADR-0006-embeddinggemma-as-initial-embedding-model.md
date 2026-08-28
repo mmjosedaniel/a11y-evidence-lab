@@ -33,6 +33,10 @@ ADR-0015 and the accepted installation requirements replace the original general
 
 [ADR-0023](ADR-0023-local-mode-data-boundary.md) makes the local-embedding boundary explicit for both generation modes. Selected corpus text and privacy-safe finding-query text cross only the approved Ollama loopback endpoint to the locally present embedding model, and returned vectors remain in the local application process. The MVP uses no hosted embedding or vector service, but it does not claim that trusted-page navigation, the separately selected Groq generation path, the independently installed runtime, or the whole machine has zero external network activity.
 
+### Replacement-procedure clarification recorded 2026-08-27
+
+The smaller-candidate contingency below is not an automatic fallback or a pre-approved second embedding model. If `embeddinggemma` fails the required capacity or retrieval evaluation, evaluation pauses until the project records a new model-selection decision and updates the exact-model requirement and evaluation configuration. The replacement must pass the same gates and retain the same provenance contract; no model registry or generic selector is introduced.
+
 ## Considered options
 
 1. Use a hosted embedding API.
@@ -51,7 +55,7 @@ Use `embeddinggemma` as the initial embedding model for evaluation only.
 - Build the disposable in-process vectors once per required in-process rebuild, beginning with the first explicit retrieval request after process start. Rebuild when the model digest, preprocessing, passage segmentation, or normalization changes; never reuse vectors across incompatible embedding configurations.
 - Keep embedding local for both global generation modes. Selecting hosted generation does not silently move embeddings to an external API.
 
-Promoting `embeddinggemma` to a release configuration is Deferred. For the MVP it must pass the bounded retrieval checks and practical reference-PC screen; if it fails, replace it with one smaller capacity-screened local candidate while retaining the same retrieval provenance contract.
+Promoting `embeddinggemma` to a release configuration is Deferred. For the MVP it must pass the bounded retrieval checks and practical reference-PC screen. If it fails, evaluation pauses until a new recorded model-selection decision updates the exact-model requirement and evaluation configuration; only that newly selected replacement may then pass the same gates while retaining the retrieval provenance contract. No replacement is pre-approved or used as fallback.
 
 ## Consequences
 
@@ -59,7 +63,7 @@ Promoting `embeddinggemma` to a release configuration is Deferred. For the MVP i
 - A missing runtime or `embeddinggemma` artifact fails the requested retrieval visibly without creating an application-owned installation or recovery workflow.
 - A separate embedding adapter and recorded embedding configuration remain necessary; the generation-provider abstraction does not control embeddings. No canonical index identity is required.
 - The corpus and evaluation set determine suitability, not the model's general benchmark claims.
-- A replacement embedding model requires rebuilding the in-process vectors and rerunning the compact retrieval evaluation but does not change corpus-source lineage.
+- A replacement embedding model selected by a later recorded decision requires rebuilding the in-process vectors and rerunning the compact retrieval evaluation but does not change corpus-source lineage.
 
 ## Primary references
 

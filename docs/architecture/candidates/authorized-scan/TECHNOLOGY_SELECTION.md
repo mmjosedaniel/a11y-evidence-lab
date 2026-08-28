@@ -33,7 +33,7 @@ Exact versions are dated research seeds. They must be refreshed, pinned, and eva
 | Accessibility scanner | `@axe-core/playwright@4.13.0` with the resolved axe-core version recorded | axe-core through the Playwright adapter is **Accepted for evaluation** by [ADR-0009](../../decisions/ADR-0009-axe-core-as-initial-accessibility-scanner.md). |
 | Rule selection | One exact allowlist containing `image-alt`, `label`, and `color-contrast` in one axe execution | The three-rule product boundary is accepted by ADR-0018. The [minimal axe option profile](#proposed-minimal-axe-option-profile) states the Proposed configuration intent. Broad WCAG tags and package defaults must not expand it. |
 | Runtime target | One trusted operator-entered and authorized public HTTPS page; no authentication or imported browser state | Accepted policy in ADR-0018. The application validates URL syntax but does not prove public reachability or perform DNS, IP, redirect, or subresource security classification. |
-| Document scope | The admitted top-level main document only | Accepted product boundary through ADR-0018 and the applicable open-decision record. The Proposed axe profile sets `iframes` to `false`; exact main-document readiness and coverage checks remain Proposed. |
+| Document scope | The entire developer-selected top-level document in its current rendered state at the configured readiness condition; iframe documents and inactive/non-rendered states excluded | Accepted product boundary through ADR-0018 and the applicable open-decision record. The Proposed axe profile expresses the intended `iframes: false` boundary, but the pinned adapter behavior must pass the compatibility check below before implementation is frozen. Exact readiness and coverage checks remain Proposed. |
 | Evaluation target | Project-owned synthetic failing/corrected cases for all three rule families | Retained as the deterministic evaluation baseline. They do not replace runtime public-page admission or imply broad live-page reproducibility. |
 | Runtime validation | Small application-owned TypeScript record definitions and boundary checks | The minimal boundary is accepted in principle; exact code or library remains Proposed. No schema framework or code generation is required. |
 | Application topology | Loopback React UI plus admission, scan, and evidence modules in one local service | The local-service topology is Accepted by ADR-0015. ADR-0018 requires no egress proxy, separate browser worker, supervisor, or production sandbox for the trusted-input portfolio path. |
@@ -45,14 +45,17 @@ Each scan should materialize one application-owned option profile whose effectiv
 | Boundary | Proposed value | Purpose |
 | --- | --- | --- |
 | Rule selection | `runOnly: { type: "rule", values: ["image-alt", "label", "color-contrast"] }` | Select the three rule IDs directly. Do not use WCAG tags, omit `runOnly`, or merge user-supplied rule settings. axe-core otherwise runs its broader enabled-rule defaults. |
-| Document scope | `iframes: false` | Keep the accepted scan on the admitted top-level main document. The axe-core 4.13 default is `true`, so relying on the default would broaden the scope. |
-| Native result detail | `resultTypes: ["violations", "incomplete", "passes", "inapplicable"]` | Preserve complete native node detail for violations and review items, retain the pass nodes needed to locate a later same-target positive observation, and expose inapplicable rule coverage. |
+| Document scope | `iframes: false` as the intended option | Keep the accepted scan on the entire developer-selected top-level document in its current rendered state while excluding iframe documents. The axe-core 4.13 default is `true`, so relying on the default would broaden the scope; the Playwright adapter compatibility check below is still required. |
+| Native result detail for an ordinary scan | `resultTypes: ["violations", "incomplete"]` | Preserve full node detail for every Finding and ScannerReviewObservation. The other required native arrays remain available in their reduced per-rule form for coverage; retaining all pass nodes on every scan is unnecessary. |
+| Additional detail for an intentional comparison rescan | Add `"passes"` only when the selected baseline Finding requires a later same-target non-failing observation | Pass detail is transient and reduced immediately to the one correlated positive observation. Do not persist a page-wide pass collection or request full inapplicable-node detail. |
 
-The application should pass this complete profile on every scan rather than constructing it by subtracting rules from axe defaults. Adapter convenience methods, direct option calls, ordering of the three rule IDs, and the exact TypeScript representation remain Proposed implementation details; the effective `axe.run` configuration must be equivalent to the table above.
+The application should materialize the applicable closed profile rather than constructing it by subtracting rules from axe defaults. An ordinary scan uses the exact rule, document-scope, and two-detail settings above; an intentional comparison rescan may add pass detail only for its selected baseline need. Adapter convenience methods, direct option calls, ordering of the three rule IDs, and the exact TypeScript representation remain Proposed implementation details.
 
 After execution, the runtime boundary should require all four native result arrays, reject any result whose union of rule IDs differs from the exact three-rule set, and preserve every returned violation and incomplete node for Step 2. Passes and inapplicable results establish coverage transiently; Step 2 persists only the narrow same-target positive observation required for comparison. An `incomplete` result is scanner evidence, not scan failure. A missing array, unexpected rule, absent requested-rule coverage, malformed result, or truncated page-scan envelope is a visible scan failure rather than a valid zero-Finding result.
 
-This profile is a Proposed way to make the Accepted scope explicit, not a new ADR or an implementation prescription. The versioned axe-core API documents rule-ID `runOnly`, the four result collections, `resultTypes`, and the `iframes` default; the versioned Playwright adapter source shows that adapter options are passed to axe-core and that its rule helper produces rule-ID `runOnly` configuration.
+This profile is a Proposed way to make the Accepted scope explicit, not a new ADR or an implementation prescription. The versioned axe-core API documents rule-ID `runOnly`, the four result collections, `resultTypes`, the reduced non-requested result detail, and the `iframes` default. The versioned Playwright adapter source shows both an adapter-owned recursive frame path and the option handoff to axe-core, so configuration text alone is not sufficient evidence that iframe results are excluded.
+
+Before the implementation profile is frozen, one version-pinned synthetic probe must place a supported-rule violation only inside an iframe and confirm that `@axe-core/playwright` returns no violation node from that iframe under the intended configuration. If it does not, the implementation must use the smallest verified top-frame-only axe invocation instead of adding a frame-management subsystem. Until that probe passes, iframe exclusion is an accepted product boundary with a Proposed, unverified adapter mechanism—not an implemented capability claim.
 
 ## Why this is sufficient
 
@@ -64,7 +67,7 @@ The product uses the Playwright Library because scanning is application behavior
 
 ### axe-core supplies the exact three-rule source result
 
-One axe execution over the admitted page avoids three redundant navigations while keeping coverage closed. Each native violation node becomes an independent candidate finding. Rule-level grouping is presentation; it must not merge unrelated targets into one proposal. The three rule mappings remain:
+One axe execution over the developer-selected page's current rendered state avoids three redundant navigations while keeping coverage closed. Each native violation node becomes an independent candidate Finding. Rule-level grouping is presentation; it must not merge unrelated targets into one proposal. The three rule mappings remain:
 
 - `image-alt` → WCAG 2.2 SC 1.1.1;
 - `label` → WCAG 2.2 SC 4.1.2; and
@@ -109,6 +112,7 @@ Time-sensitive package seeds were checked on 2026-08-24; current versions must b
 - [Playwright 1.62.1 release](https://github.com/microsoft/playwright/releases/tag/v1.62.1)
 - [WHATWG URL Standard](https://url.spec.whatwg.org/)
 - [axe-core 4.13.0 API and result model](https://github.com/dequelabs/axe-core/blob/v4.13.0/doc/API.md)
+- [axe-core 4.13.0 partial-run guidance](https://github.com/dequelabs/axe-core/blob/v4.13.0/doc/run-partial.md)
 - [@axe-core/playwright 4.13.0 builder options and rule restriction](https://github.com/dequelabs/axe-core-npm/blob/v4.13.0/packages/playwright/src/index.ts)
 - [axe-core 4.13.0 rule descriptions](https://github.com/dequelabs/axe-core/blob/v4.13.0/doc/rule-descriptions.md)
 - [axe-core 4.13.0 `image-alt`](https://github.com/dequelabs/axe-core/blob/v4.13.0/lib/rules/image-alt.json)

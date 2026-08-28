@@ -11,11 +11,15 @@ This decision selects the first model configuration to put through the capacity 
 
 ### MVP narrowing amendment recorded 2026-08-25
 
-The original decision below preserved Qwen3.5 9B as a possible later capacity screen and quality-comparison participant and discussed a future release-qualified recommendation. OD-009, OD-010, OD-013, and OD-017 narrow the current portfolio MVP to one practical local configuration plus the fixed Groq evaluation path, with no local-model comparison, formal qualification, or release recommendation. Therefore `qwen3.5:9b` and any second local-model screen are Deferred for this MVP. The `qwen3.5:4b` configuration remains only the first model to put through the practical reference-PC screen; if it fails, select one smaller replacement rather than adding a comparison candidate. This amendment controls the original 9B and release-profile statements while preserving them as decision history.
+The original decision below preserved Qwen3.5 9B as a possible later capacity screen and quality-comparison participant and discussed a future release-qualified recommendation. OD-009, OD-010, OD-013, and OD-017 narrow the current portfolio MVP to one practical local configuration plus the fixed Groq evaluation path, with no local-model comparison, formal qualification, or release recommendation. Therefore `qwen3.5:9b` and any second local-model screen are Deferred for this MVP. The `qwen3.5:4b` configuration remains the only selected model for the practical reference-PC screen. If it fails, local evaluation pauses until a new recorded model-selection decision updates the exact-model requirement and evaluation configuration; no replacement is pre-approved. This amendment controls the original 9B and release-profile statements while preserving them as decision history.
 
 ### Portfolio YAGNI amendment recorded 2026-08-27
 
 [OD-022](../../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-022--portfolio-mvp-yagni-simplification), the current form of [ADR-0004](ADR-0004-reference-pc-capacity-gate-for-local-models.md), and [ADR-0020](ADR-0020-manual-developer-managed-local-model-setup.md) make the capacity screen developer-run evaluation work. The developer installs Ollama, pulls `qwen3.5:4b`, and performs one manual representative smoke on the reference PC. A11y Evidence Lab does not implement a capacity-preflight feature, model downloader, hardware monitor, connection probe, or readiness subsystem. This amendment controls any earlier wording below that could imply application-managed provisioning or preflight while retaining `qwen3.5:4b` as the one initial configuration.
+
+### Replacement-procedure clarification recorded 2026-08-27
+
+“Select one smaller replacement” does not pre-approve a second model or authorize dynamic selection or fallback. If `qwen3.5:4b` fails the required evaluation, evaluation pauses until the project records a new model-selection decision and updates the exact-model requirement and evaluation configuration. The replacement then passes the same capacity gate. No model registry, comparison workflow, or runtime fallback is introduced.
 
 ## Considered options
 
@@ -27,7 +31,7 @@ The original decision below preserved Qwen3.5 9B as a possible later capacity sc
 
 Use [`qwen3.5:4b`](https://ollama.com/library/qwen3.5%3A4b), through the initial local runtime selected in ADR-0005, as the first local capacity-screen configuration. On the decision date, Ollama listed a 3.4 GB, 4.66B-parameter Q4_K_M artifact, which leaves materially more nominal headroom on the reference GPU than the 9B option.
 
-Apply [ADR-0004](ADR-0004-reference-pc-capacity-gate-for-local-models.md) before treating the 4B configuration as an evaluation candidate. If it fails, exclude it and select a smaller configuration within the reference PC's capacity.
+Apply [ADR-0004](ADR-0004-reference-pc-capacity-gate-for-local-models.md) before treating the 4B configuration as an evaluation candidate. If it fails, exclude it and pause local evaluation. A smaller configuration may be evaluated only after a new recorded model-selection decision updates the exact-model requirement and evaluation configuration; it is not an automatic fallback or member of a pre-approved pool.
 
 [`qwen3.5:9b`](https://ollama.com/library/qwen3.5%3A9b), listed at 6.6 GB and 9.65B parameters in Q4_K_M, was originally retained as a later capacity-screen option that could enter quality comparison after passing the gate. The 2026-08-25 amendment Defers that option and any local-model comparison outside the MVP.
 

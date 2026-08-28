@@ -16,7 +16,7 @@ Step 1 supplies one complete, runtime-validated, transient axe result for one tr
 - a distinct list of minimized native `incomplete` observations; and
 - only the narrow same-target positive observation needed by an intentional later comparison.
 
-The product lists every Finding but processes none automatically. One selected Finding at a time may later enter retrieval, sufficiency evaluation, generation or abstention, and review. Findings never share a combined prompt, proposal, confidence, review decision, or comparison result.
+The product lists every Finding but processes none automatically. One selected Finding at a time may later enter retrieval and sufficiency evaluation. Insufficiency ends that FindingWorkflow in a terminal application-authored abstention with explanation and manual-investigation guidance but no model call or proposal-review decision; eligibility may produce one proposal that alone enters review. Findings never share a combined prompt, proposal, confidence, review decision, or comparison result.
 
 If required allowlisted evidence is missing, invalid, or contradictory, keep the deterministic Finding visible and mark its evidence insufficient. This blocks only that Finding's generation path.
 
@@ -32,9 +32,9 @@ Step 2 must reject a failed, truncated, malformed, or coverage-incomplete handof
 
 One application Finding corresponds to one axe violation node under one supported rule. Its minimum nested record needs:
 
-- the run's `runId` and a `findingId` unique within that run;
+- a `findingId` unique within the enclosing run; the aggregate supplies the run's `runId`;
 - the exact rule ID, native result category, impact when reported, and check identifiers;
-- one bounded, sanitized locator string for display and conservative later comparison;
+- one bounded, sanitized locator string for conservative later comparison when valid and available, otherwise one concise unavailability reason;
 - the rule-specific facts below;
 - an evidence-sufficiency value and concise reason when insufficient; and
 - the run-level scanner, browser, target, profile, coverage, and evidence-policy provenance.
@@ -45,7 +45,7 @@ The locator is minimized evidence, not a universal element identity. It must not
 
 ## Rule-specific evidence
 
-Common retained facts are limited to the rule/category, native check identities, scanner-reported impact, safe locator, rule-specific facts, and explicit missing or invalid categories. Exact scanner and adapter versions, page identity, viewport, locale, scan time, rule set, and coverage belong once at run level.
+Common retained facts are limited to the rule/category, native check identities, scanner-reported impact, a safe locator when valid and available or its concise unavailability reason, rule-specific facts, and explicit missing or invalid categories. Locator unavailability makes comparison unavailable or `inconclusive`; it does not by itself make generation evidence insufficient because the locator never enters retrieval or provider input. Exact scanner and adapter versions, page identity, viewport, locale, scan time, rule set, and coverage belong once at run level.
 
 Exclude native `node.html`, full HTML, arbitrary page or element text, page source, DOM or accessibility-tree snapshots, screenshots, browser traces, network bodies or logs, cookies, storage, credentials, headers, input values, image URLs, and unrelated attributes.
 
@@ -76,7 +76,7 @@ Preserve the measured ratio and expected threshold used by the scanner. Capture 
 
 ## Incomplete and positive observations
 
-Native axe `incomplete` nodes remain separate scanner-review observations. Retain only the rule/check identity, safe locator, and available reason needed to explain the limitation. They are not Findings, do not enter retrieval or proposal review, and do not become workflow failures.
+Native axe `incomplete` nodes remain separate scanner-review observations. Retain only the rule/check identity, a safe locator when valid and available or its concise unavailability reason, and the available scanner reason needed to explain the limitation. They are not Findings, do not enter retrieval or proposal review, and do not become workflow failures.
 
 For an intentional rescan, the application may request one narrow native non-failing observation for a baseline Finding's exact locator under the same rule. Retain only the evidence needed to show that exact target was evaluated. Absence from the later violation list is not enough. A missing, changed, duplicate, or ambiguous locator produces `inconclusive` rather than a fabricated positive observation.
 
@@ -87,8 +87,8 @@ This is documentation, not a TypeScript schema.
 | Location | Minimum content |
 | --- | --- |
 | Run scan section | Normalized requested and observed final page; scan time; browser, scanner, viewport, locale, exact rule profile, evidence-policy version, coverage, and completion status. |
-| Finding entry | `findingId`; rule/category; impact and checks; safe locator; nested rule-specific evidence; sufficiency and limitation reason. |
-| Incomplete-observation entry | Rule/check identity; safe locator; available reason; clear scanner-review classification. |
+| Finding entry | `findingId`; rule/category; impact and checks; safe locator when valid and available or its concise unavailability reason; nested rule-specific evidence; sufficiency and limitation reason. |
+| Incomplete-observation entry | Rule/check identity; safe locator when valid and available or its concise unavailability reason; available scanner reason; clear scanner-review classification. |
 | Targeted positive observation | Baseline finding reference; exact rule and locator; later non-failing evidence or an inconclusive reason. |
 
 The aggregate itself supplies lineage:
@@ -105,7 +105,7 @@ No separate evidence graph or child-file layout is needed.
 
 Retrieval receives one selected Finding's rule, native checks, and allowlisted rule-specific facts. It does not receive the page URL, locator, raw HTML, arbitrary text, sibling Findings, or excluded evidence. Opaque identifiers remain traceability fields and are not embedded.
 
-The scanned page never enters the curated guidance corpus. Missing core facts, an unsupported variant, or a conflicting mapping causes deterministic ineligibility or abstention; it does not trigger web search, corpus expansion, raw-page prompting, or a generic proposal.
+The scanned page never enters the curated guidance corpus. Missing core facts or a supported-rule contextual variant that lacks required support causes deterministic ineligibility or abstention. An invalid, unknown, or ambiguous fixed rule-to-guidance mapping instead fails configuration or integrity processing with no guidance-support state. Neither path triggers web search, corpus expansion, raw-page prompting, or a generic proposal.
 
 Generation and review refer to the same nested Finding without modifying its source evidence. Comparison uses the two complete runs and the exact rule-plus-locator policy accepted for public pages. Controlled fixtures continue to use their stable project-owned target keys.
 

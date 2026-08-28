@@ -32,7 +32,11 @@ Candidate technologies and architecture options not covered by these records rem
 
 ## Partial amendments to current decisions
 
+ADR-0020 narrows ADR-0005, ADR-0006, ADR-0014, and ADR-0015 only for MVP setup and attempt-time availability: the developer installs Ollama and pulls `embeddinggemma` before retrieval in either mode, additionally pulls `qwen3.5:4b` only for Local generation, and configures the Groq credential only for Groq generation. A11y Evidence Lab does not manage those artifacts or run separate provider preflights. The earlier records otherwise remain current within their stated evaluation scope.
+
 ADR-0023 supersedes only ADR-0005's requirement to disable or isolate unrelated runtime networking and its system-wide zero-egress release gate, plus ADR-0012's requirement that all Local-mode operations show no unapproved non-loopback egress and its description of Groq as the only external operation. ADR-0005 and ADR-0012 otherwise remain current. Groq remains the only external generation path; trusted-page navigation and developer-managed model acquisition are separate network operations.
+
+ADR-0018 replaces ADR-0017's amendments to ADR-0001, ADR-0005, ADR-0006, ADR-0008, ADR-0009, ADR-0010, and ADRs 0013 through 0016 wherever those amendments imposed the former hostile-network boundary. The current runtime boundary is one trusted, operator-entered and authorized public HTTPS page; the three synthetic profiles remain the separate fixed evaluation baseline.
 
 ## Superseded decision history
 
@@ -43,8 +47,6 @@ ADR-0023 supersedes only ADR-0005's requirement to disable or isolate unrelated 
 [ADR-0007: Chroma as the initial local vector store](ADR-0007-chroma-as-initial-local-vector-store.md) was Accepted for evaluation on 2026-08-23 and superseded for the MVP by [ADR-0019](ADR-0019-in-process-exact-vector-search.md) on 2026-08-27. Chroma is deferred until corpus size, mutability, persistence, or measured performance demonstrates a vector-database need.
 
 [ADR-0016: Filesystem run persistence](ADR-0016-filesystem-run-persistence.md) was Accepted on 2026-08-25 and superseded for the MVP by [ADR-0021](ADR-0021-single-file-run-aggregate.md) on 2026-08-27. Its local-directory/no-database direction remains, while independently versioned child records and an optional Markdown report are not current MVP work.
-
-ADR-0018 replaces ADR-0017's amendments to ADR-0001, ADR-0005, ADR-0006, ADR-0008, ADR-0009, ADR-0010, and ADRs 0013 through 0016 wherever those amendments imposed the former hostile-network boundary. The current runtime boundary is one trusted, operator-entered and authorized public HTTPS page; the three synthetic profiles remain the separate fixed evaluation baseline.
 
 ## Trusted-input portfolio boundary
 

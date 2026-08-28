@@ -37,9 +37,9 @@ Each retrieval run starts from one selected finding and resolves exactly one acc
 
 | Supported rule and evaluation profile | Rule/SC-tagged eligible passages | Guidance roles needed for a supported result |
 | --- | --- | --- |
-| `informative-image-alt` / SC 1.1.1 | Artifact 1 SC 1.1.1 and needed definitions; artifacts 2, 5, and 6 | Normative criterion and contextual purpose/exceptions, plus at least one technique passage directly used by the bounded proposal. A proposal must not make a technique-specific claim for a branch whose passage was not returned. |
-| `form-input-label` / SC 4.1.2 | Artifact 1 SC 4.1.2 and needed definitions; artifacts 3 and 7 | Normative criterion; programmatic-name context; applicable native-label association technique. |
-| `text-contrast` / SC 1.4.3 | Artifact 1 SC 1.4.3 and needed definitions; artifacts 4 and 8 | Normative criterion and thresholds/exceptions; interpretive context; contrast technique/calculation context. |
+| `informative-image-alt` / SC 1.1.1 | WCAG 2.2 Recommendation: SC 1.1.1 and needed definitions; Understanding SC 1.1.1; Techniques H37 and H67 | Normative criterion and contextual purpose/exceptions, plus at least one technique passage directly used by the bounded proposal. A proposal must not make a technique-specific claim for a branch whose passage was not returned. |
+| `form-input-label` / SC 4.1.2 | WCAG 2.2 Recommendation: SC 4.1.2 and needed definitions; Understanding SC 4.1.2; Technique H44 | Normative criterion; programmatic-name context; applicable native-label association technique. |
+| `text-contrast` / SC 1.4.3 | WCAG 2.2 Recommendation: SC 1.4.3 and needed definitions; Understanding SC 1.4.3; Technique G18 | Normative criterion and thresholds/exceptions; interpretive context; contrast technique/calculation context. |
 
 These rule/SC tags prevent a single finding query from searching the other rule mappings. Multiple findings from the same page are never combined into one query. Technique inclusion never implies that it is the only sufficient method or that its preconditions have been established automatically.
 

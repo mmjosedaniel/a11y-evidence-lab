@@ -15,6 +15,10 @@ They create no requirement, architectural decision, implementation authorization
 
 The accepted application-accessibility behavior is not duplicated as another feature matrix. `REQ-A11Y-006` keeps its verification to one automated check, one keyboard smoke path, and one screen-reader smoke path; omission of those detailed checks here does not weaken `REQ-A11Y-001`–`REQ-A11Y-004`, `REQ-A11Y-009`, or `REQ-A11Y-010`.
 
+An abstention is an application-authored terminal FindingWorkflow result. It explains the blocking evidence or guidance state, identifies missing or conflicting information, confirms that no provider was called, and gives manual-investigation guidance. It never enters the approve/edit-and-accept/reject proposal-review path. Only a validated generated proposal enters that review path.
+
+Each proposal carries one blocking pre-acceptance judgment and one non-blocking post-change verification reminder. Comparison is a separate scan-evidence path available from any retained baseline Finding; neither the proposal/abstention branch nor review is a prerequisite. These remain fields and behavior inside the existing aggregate, not additional workflow or record systems.
+
 ## Execution state
 
 Both feature files are **specified, not executed**. The repository contains no Gherkin runner, step definitions, bindings, test command, implementation fixture, or generated acceptance artifact. Their `.feature` extension provides readable planning notation only.

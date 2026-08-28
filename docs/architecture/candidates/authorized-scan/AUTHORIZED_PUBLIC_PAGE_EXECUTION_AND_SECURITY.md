@@ -16,7 +16,7 @@ The accepted MVP path is intentionally small:
 2. The service parses the URL and rejects malformed input or embedded credentials; it does not prove public reachability or classify network destinations.
 3. Playwright opens the page in a fresh non-persistent managed Chromium context with no imported cookies, storage, credentials, extensions, permissions, or personal profile.
 4. The scan uses one finite navigation timeout, performs no application-directed interaction or download, and closes the page, context, and browser after every outcome.
-5. One atomic axe-core execution scans the top-level main document for exactly `image-alt`, `label`, and `color-contrast` and preserves all returned violation nodes plus separate native `incomplete` observations.
+5. One atomic axe-core execution scans the entire top-level document in its current rendered state at the configured readiness condition, excluding iframe documents and inactive/non-rendered states, for exactly `image-alt`, `label`, and `color-contrast` and preserves all returned violation nodes plus separate native `incomplete` observations.
 6. Navigation, browser, scanner, malformed-result, timeout, interrupted-collection, or cleanup failure remains visible and cannot be reported as a complete zero-finding result.
 
 The scan does not authenticate, reuse a user browser profile, click controls, submit forms, upload or download files, discover links as targets, crawl, scan multiple pages, or broaden the rule set. Browser redirects and subresources use normal managed-browser behavior. The MVP makes no hostile-page containment, SSRF-resistance, or arbitrary-URL safety claim.

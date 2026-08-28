@@ -23,27 +23,30 @@ flowchart LR
     C --> O[User selects one finding]
     D[Curated guidance corpus plus local EmbeddingGemma vectors] --> E[In-process exact LangChain retrieval, top 3]
     O --> E
-    E --> M{Required evidence complete and guidance supported?}
+    E --> Q{Retrieval completed without execution or integrity failure?}
+    Q -->|No| X[Visible FindingWorkflow failure with no support state]
+    Q -->|Yes| M{Required evidence complete and completed guidance supported?}
     M -->|Yes| F[Provider-neutral AI generation]
-    M -->|No| N[Visible finding plus abstention and manual review]
+    M -->|No| N[Terminal application-authored abstention with explanation and manual-investigation guidance]
     A --> P[Immutable selected provider mode]
     P --> F
     F --> G{User review}
     G -->|Approve or edit| H[Accepted remediation plan]
     G -->|Reject| I[Recorded rejection]
-    H --> J[Rescan and compare]
+    C --> R[Intentional later rescan of the same trusted page]
+    R --> J[New independent run with a baseline reference and conservative comparison]
 ```
 
 ## Possible user flow
 
 1. To use retrieval in either generation mode, the developer first installs Ollama and pulls `embeddinggemma` with Ollama's own tools outside A11y Evidence Lab. Local generation additionally requires `qwen3.5:4b`; Groq generation instead requires a Groq credential in the local service. The application has no runtime installer, model downloader, acquisition-progress view, model manager, or provider-probe screen. The developer then starts the local application service and opens its loopback address in Chrome or Edge. There is no MVP installer, desktop wrapper, Start menu shortcut, or application-controlled webview.
 2. Before analysis, the user enters one non-authenticated public HTTPS URL that they are responsible for choosing and are permitted to analyze, and selects one global generation mode: the configured local model or Groq. The URL is trusted developer input; the application does not independently prove public reachability, ownership, or safety. The interface shows one concise run-level disclosure and keeps the selected provider and exact model visible. The mode is immutable for the analysis, and selecting it invokes or probes nothing.
-3. The user activates **Analyze** once. The local service creates the PageAnalysisRun, performs basic URL parsing, opens the page in a fresh non-persistent browser context without imported profile or cookie state, and runs one atomic scan containing exactly `image-alt`, `label`, and `color-contrast` against the top-level main document. Iframe documents are excluded. It does not discover or follow links, submit forms, interact with controls, upload files, or permit downloads. A simple timeout and cleanup path apply.
+3. The user activates **Analyze** once. The local service creates the PageAnalysisRun, performs basic URL parsing, opens the page in a fresh non-persistent browser context without imported profile or cookie state, and runs one atomic scan containing exactly `image-alt`, `label`, and `color-contrast` against the entire top-level document in its current rendered state at the configured readiness condition, with iframe documents excluded. It does not discover or follow links, submit forms, interact with controls, upload files, or permit downloads. A simple timeout and cleanup path apply.
 4. The application lists every axe violation node returned by the three-rule scan as an independent finding. Native `incomplete` observations remain visible and separate. Zero findings is valid only after complete three-rule coverage; a navigation, scanner, result-validation, timeout, or persistence failure remains visible and cannot produce a complete or silently truncated result.
 5. The user selects one finding. A retrieval pipeline uses only that finding's minimized evidence and the fixed corpus. On the first explicit retrieval request, the local adapter checks for Ollama and `embeddinggemma`, performs the actual embedding work, and builds the disposable in-memory vector collection once for that process; application startup performs neither a readiness probe nor embedding work. LangChain's in-process `MemoryVectorStore` applies the accepted broad rule/success-criterion filter, exact cosine ranking, and fixed top three. Other findings remain independent and are not combined into the query or proposal, and no Chroma or other vector-database service is involved.
-6. The application keeps the selected finding visible and deterministically checks whether its required evidence is complete and retrieved guidance is `supported`. If not, it records abstention and manual review without calling a model. If eligible, the user explicitly starts generation. The selected adapter performs only its attempt-time prerequisite check, makes the one actual request, and validates the returned structured value against the application-owned contract. A valid response supplies one explanation, remediation proposal, citations, confidence/uncertainty, and required manual checks. Provider provenance is recorded only for an attempted call. A missing prerequisite, request error, or invalid response remains visible and never triggers automatic fallback, provider mixing, a synthetic probe, or bulk retry.
-7. The application presents that proposal with its evidence, citations, evidence sufficiency, and manual checks so the user can approve, edit, or reject it independently. It creates no aggregate page proposal or decision.
-8. A later analysis of the same developer-selected page compares correlated finding evidence conservatively. Ambiguous target identity or changed page structure yields `inconclusive` or `not comparable`; no comparison outcome proves whole-page accessibility.
+6. The application keeps the selected Finding visible and deterministically checks whether its required evidence is complete and a completed retrieval is `supported`. Incomplete required evidence or a completed `incomplete`, `missing`, or `conflicting` retrieval ends the FindingWorkflow in an application-authored abstention that clearly explains the blocking sufficiency state and missing or conflicting information, confirms that no model was called, and provides manual-investigation guidance. A retrieval execution or passage-integrity failure instead fails the FindingWorkflow with no support state, abstention, or provider call. An abstention has no proposal-review decision. If eligible, the user explicitly starts generation. The selected adapter performs only its attempt-time prerequisite check, makes the one actual request, and validates the returned structured value against the application-owned contract. A valid response supplies one explanation, remediation proposal, citations, confidence/uncertainty, one blocking pre-acceptance judgment, and one non-blocking post-change verification reminder. Provider provenance is recorded only for an attempted call. A missing prerequisite, request error, or invalid response remains visible and never triggers automatic fallback, provider mixing, a synthetic probe, or bulk retry.
+7. For a validated proposal only, the application presents its evidence, citations, evidence sufficiency, pre-acceptance judgment, and post-change reminder so the user can approve, edit, or reject it independently. The judgment gates acceptance; the reminder does not. It creates no aggregate page proposal or decision.
+8. From any retained baseline Finding, a later analysis of the same developer-selected page compares correlated scan evidence conservatively without requiring prior retrieval, generation, abstention, or review. Ambiguous target identity or changed page structure yields `inconclusive` or `not comparable`; no comparison outcome proves whole-page accessibility.
 
 As the workflow progresses, the local service updates one canonical versioned `data/runs/<run-id>/run.json` aggregate containing the complete scan and current nested per-finding data. It creates no canonical child files, independently versioned workflow records, Markdown report, database, or audit graph.
 
@@ -55,7 +58,7 @@ The project objective is to demonstrate the practical use of RAG and LangChain a
 
 - RAG grounded in a curated and versioned corpus.
 - LangChain for bounded in-process exact-vector retrieval and the retrieve-then-generate-or-abstain integration; the fixed corpus does not justify a Chroma service.
-- Plain TypeScript state for the first linear workflow and one selected finding's review decision at a time.
+- Plain TypeScript state for the first linear workflow and one selected proposal's review decision at a time.
 - LangGraph only if a later demonstrated recovery or resume requirement needs it.
 - One content-safe versioned `run.json` aggregate per analysis plus local diagnostics and a compact fixed evaluation manifest; there is no Markdown report, and LangSmith is deferred outside the MVP.
 - Measurable retrieval and answer quality instead of relying only on a polished demo.

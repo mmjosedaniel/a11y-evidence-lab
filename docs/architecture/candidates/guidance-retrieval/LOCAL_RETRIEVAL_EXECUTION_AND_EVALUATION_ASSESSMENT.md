@@ -92,7 +92,7 @@ The exact query text, query-template version, included fact categories, and with
 7. Construct citations from the canonical publisher, document title/version, section or Technique, exact heading/fragment, authority label, and URL.
 8. Apply the accepted deterministic support policy after passage resolution. Similarity alone never establishes support.
 
-A `supported` result needs complete required Finding evidence, the mapped criterion basis, and enough directly applicable contextual or remediation guidance in the returned set for the bounded proposal. If a required role is absent, the existing `incomplete`, `missing`, or `conflicting` state applies as appropriate and generation abstains. Retrieval execution failure remains separate and has no guidance-support state.
+After passage resolution, apply the accepted deterministic policy in this order: an execution or integrity failure has no state; a curator-declared unresolved material conflict after normative precedence is `conflicting`; zero applicable resolved passages is `missing`; some applicable guidance with a profile-required role absent is `incomplete`; and all required roles in the resolved top three with no conflict is `supported`. Required Finding-evidence completeness is a separate generation-gate input. Similarity never determines support.
 
 For the `image-alt` case, the top three must preserve the normative basis and purpose-dependent context plus enough technique guidance for a conditional proposal; the application must not claim that retrieval established whether the image is informative, functional, or decorative. For `label` and `color-contrast`, the expected normative, contextual, and remediation categories fit within the three-result boundary. Exact acceptable passage IDs are frozen before evaluation.
 
@@ -106,7 +106,7 @@ This is a documentation-level view of the planned conceptual nested retrieval re
 | Query | Exact privacy-safe query text, template version, included/withheld fact categories, and approved rule mapping. |
 | Retrieval configuration | Catalog preconditions and provenance (corpus version and English), configured EmbeddingGemma tag and resolved full digest, relevant preprocessing, exact cosine metric, applied rule/SC filter, application-owned equal-score ordering, and `top-k=3`. The disposable vectors require no identity or persisted record. |
 | Ranked passages | Rank, canonical passage ID, exact cosine score, and resolvable citation reference. Passage text and full citation metadata remain in the canonical corpus. |
-| Support | `supported`, `incomplete`, `missing`, or `conflicting`, with the deterministic reason, generation eligibility, and manual-review direction. |
+| Support | `supported`, `incomplete`, `missing`, or `conflicting`, with the deterministic reason and generation eligibility. An insufficient result supplies the terminal abstention's explanation and manual-investigation guidance; it creates no provider call or proposal-review decision. |
 
 Application-owned TypeScript records need runtime validation at the finding input, embedding/search output, and persisted-JSON boundaries. No JSON Schema, code generation, schema framework, vector-database record model, migration system, or compatibility layer is required.
 
@@ -119,7 +119,7 @@ The compact set remains four checks:
 1. one complete `image-alt` / SC 1.1.1 input expected to return its accepted normative, purpose-context, and remediation categories within the top three and classify `supported`;
 2. one complete `label` / SC 4.1.2 input expected to return its normative, programmatic-name context, and H44 remediation categories within the top three and classify `supported`;
 3. one complete `color-contrast` / SC 1.4.3 input expected to return its normative threshold, interpretation context, and G18 remediation categories within the top three and classify `supported`; and
-4. one frozen representative insufficiency package expected to preserve the Finding and abstain without a model call.
+4. one frozen `incomplete` package in which at least one applicable passage resolves but the required remediation-guidance role is absent, expected to preserve the Finding and abstain without a model call.
 
 At least one supported case must have more than three passages eligible after the broad filter. Its expected passages must earn their top-three positions through similarity ranking rather than an exact source or guidance-role allowlist. This prevents the vector path from becoming a disguised deterministic lookup.
 
@@ -130,7 +130,7 @@ At least one supported case must have more than three passages eligible after th
 | Citation integrity | Every returned passage ID resolves to the exact canonical text, locator, source version, authority label, and URL. |
 | Filter correctness | The active corpus/version and English preconditions are validated and retained as provenance; every result matches the applied rule family and exact success-criterion filter, and no exact source or role allowlist predetermines the result. |
 | Mapping boundary | The `label` case remains restricted to SC 4.1.2 and never implies SC 3.3.2, SC 1.3.1, or complete non-conformance. |
-| Support behavior | The insufficiency case preserves the Finding, records its expected support state and manual-review direction, and invokes no model. |
+| Support behavior | The insufficiency case preserves the Finding and records its expected support state, terminal application-authored abstention explanation, and manual-investigation guidance; it invokes no model and creates no proposal-review decision. |
 | Practical operation | Corpus embedding and all four exact searches complete on the reference PC without making the interface unusable. Record observations without making performance or support claims. |
 
 A concrete miss should first be assigned to corpus boundaries, mapping, query projection, privacy withholding, embedding/preprocessing, broad filtering, or base similarity ranking. Adjust only the smallest responsible boundary before reconsidering the reranker deferred by ADR-0010.

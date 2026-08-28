@@ -8,7 +8,7 @@
 
 A11y Evidence Lab is a developer-operated portfolio MVP whose main purpose is to demonstrate deterministic accessibility evidence, curated RAG through LangChain, structured Local/Groq generation, human review, and rescan comparison. Earlier planning retained an application-triggered Ollama model pull with detailed disclosure, progress reporting, download states, and bounded readiness or connection probes.
 
-Those behaviors would create a small model manager and provider-diagnostics subsystem without improving the RAG demonstration. The developer already starts the local service manually and can install the separately owned Ollama runtime and selected model through Ollama's official tools. The fixed Groq adapter likewise does not need a synthetic request before the one explicit real generation request.
+Those behaviors would create a small model manager and provider-diagnostics subsystem without improving the RAG demonstration. The developer already starts the local service manually and can install the separately owned Ollama runtime, the embedding model required for retrieval in either mode, and the generation model required only for Local mode through Ollama's official tools. The fixed Groq adapter likewise does not need a synthetic request before the one explicit real generation request.
 
 This decision changes setup and disclosure mechanics only. It does not change the accepted provider-neutral contract, exact Local/Groq modes, fixed evaluation models, evidence-sufficiency gate, minimized provider input, structured validation, explicit invocation, provider provenance, or prohibition on provider mixing and automatic fallback.
 
@@ -25,17 +25,18 @@ Accept option 2.
 ### Developer-managed local setup
 
 - The developer installs Ollama outside A11y Evidence Lab by following the official [Ollama Windows instructions](https://docs.ollama.com/windows).
-- The developer pulls the fixed local generation and embedding models outside the application with `ollama pull qwen3.5:4b` and `ollama pull embeddinggemma`, following the official [Ollama CLI reference](https://docs.ollama.com/cli), [`qwen3.5:4b` model page](https://ollama.com/library/qwen3.5%3A4b), and [`embeddinggemma` model page](https://ollama.com/library/embeddinggemma).
+- For retrieval in either generation mode, the developer pulls the fixed embedding model outside the application with `ollama pull embeddinggemma`. Local generation additionally requires `ollama pull qwen3.5:4b`; Groq generation instead requires its configured credential. The applicable model pulls follow the official [Ollama CLI reference](https://docs.ollama.com/cli), [`qwen3.5:4b` model page](https://ollama.com/library/qwen3.5%3A4b), and [`embeddinggemma` model page](https://ollama.com/library/embeddinggemma).
 - A11y Evidence Lab does not install or update Ollama, invoke a model pull or removal, choose a model-storage location, report acquisition progress, retain a download state, recover a partial artifact, or expose a model manager.
-- The application may show the fixed prerequisite and link to official instructions when local generation cannot start. Completing or repairing that prerequisite remains a developer action outside the application.
+- The application may show the applicable fixed prerequisite and link to official instructions when retrieval or Local generation cannot start. Completing or repairing that prerequisite remains a developer action outside the application.
 - Runtime and model artifacts remain outside Git, the application repository, and any future base installer. Ollama owns its installation and model store.
 
 ### Attempt-time availability and validation
 
 - Selecting `Local` or `Groq` for a PageAnalysisRun performs no provider call, connection test, synthetic request, or capability-discovery probe and does not affect deterministic scanning.
 - When the user explicitly starts generation for an eligible selected finding in Local mode, the local adapter checks only that the approved Ollama loopback endpoint is reachable and `qwen3.5:4b` is present. It then makes the actual generation request and validates the returned structured value against the application-owned contract.
-- When retrieval is first requested, the embedding adapter checks only that the approved Ollama loopback endpoint is reachable and `embeddinggemma` is present. It then performs the actual corpus/query embedding work; there is no separate readiness probe.
+- Whenever retrieval is requested, the embedding adapter checks only that the approved Ollama loopback endpoint is reachable and `embeddinggemma` is present, then performs the actual query embedding and validates the result. The first retrieval after process start, and a later required rebuild after a material incompatibility, additionally embeds the fixed corpus to construct the disposable in-process vectors. There is no separate readiness probe or persisted index lifecycle.
 - When the user explicitly starts generation in Groq mode, the adapter checks only that its fixed configuration and credential are present. It then makes the actual Groq request to the already accepted model configuration and validates the returned structured value.
+- Only an attempted Local or Groq generation call creates invocation provenance. Its compact record references the immutable run provider/model context and the owning Finding plus corpus/passage context, and records the adapter identifier and version, non-secret endpoint identity, bounded material generation parameters, prompt/output-contract provenance, non-secret outcome, and validation result. Request time, runtime/model revision, and safe usage metadata are optional when available.
 - The bounded context-fit check remains deterministic application behavior before the actual request so required evidence, guidance, citations, or constraints are never silently truncated.
 - Missing setup, request failure, or invalid output remains a visible finding-level failure. It preserves the completed scan and evidence and never causes an automatic retry, provider switch, or fallback.
 
@@ -52,6 +53,7 @@ Accept option 2.
 - Local setup becomes a documented developer prerequisite. A missing runtime or model is discovered only when the corresponding retrieval or Local generation work is requested and is reported without blocking scanning or existing evidence.
 - The interface needs no download button, progress view, acquisition state machine, repeated provider-disclosure modal, connection-check action, or readiness report.
 - The fixed local and Groq evaluation configurations remain unchanged and unqualified for distribution or general support.
+- If a fixed local model, embedding model, local runtime, or Groq model fails its applicable evaluation, that evaluation pauses until a new recorded model- or runtime-selection decision updates the exact requirement and evaluation configuration. This does not create a pre-approved replacement pool, generic selector, or runtime fallback.
 - If a future distributable product needs non-developer onboarding, application-managed acquisition, offline import, model administration, or proactive provider diagnostics, it requires a new decision based on that demonstrated need. The superseded MVP mechanics do not reactivate automatically.
 
 ## Primary references

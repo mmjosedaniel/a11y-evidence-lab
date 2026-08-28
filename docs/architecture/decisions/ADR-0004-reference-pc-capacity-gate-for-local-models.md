@@ -15,11 +15,15 @@ The original decision anticipated provisional latency and thermal limits followe
 
 ### MVP candidate-count clarification recorded 2026-08-25
 
-For the fixed MVP, apply this gate to `qwen3.5:4b` as the single first local configuration. Only if that configuration fails may the project replace it with one smaller configuration that must pass the same gate. The plural candidate-set language in the original decision describes the reusable gate and possible future evaluation, not an active multi-model list, parallel screens, or a local-model comparison in this MVP. This clarification follows ADR-0003 and OD-009 while leaving the capacity gate itself Accepted.
+For the fixed MVP, apply this gate to `qwen3.5:4b` as the only selected local configuration. If it fails, local evaluation pauses until a new recorded model-selection decision updates the exact-model requirement and evaluation configuration; only that newly selected replacement may then pass through the same gate. The plural candidate-set language in the original decision describes the reusable gate and possible future evaluation, not an active or pre-approved model pool, parallel screens, or a local-model comparison in this MVP. This clarification follows ADR-0003 and OD-009 while leaving the capacity gate itself Accepted.
 
 ### Portfolio YAGNI amendment recorded 2026-08-27
 
 [OD-022](../../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-022--portfolio-mvp-yagni-simplification) makes the on-device step one manual representative capacity smoke performed by the developer after the developer-managed Ollama setup in ADR-0020. It is evaluation work, not an in-application preflight, benchmark screen, hardware monitor, or readiness subsystem. The metadata exclusion rule and reference-PC boundary remain Accepted.
+
+### Replacement-procedure clarification recorded 2026-08-27
+
+A failed fixed candidate does not activate another model automatically. Before a smaller replacement is evaluated, the project records a new model-selection decision and updates the exact-model requirement and evaluation configuration. This gate then applies to that one newly selected configuration; it does not create a standing candidate catalog, comparison workflow, model registry, or runtime fallback.
 
 ## Considered options
 
@@ -36,15 +40,15 @@ Use a two-stage capacity gate before a local model configuration becomes an eval
 
 A configuration passes only if the manual smoke completes on the existing PC without out-of-memory failure, storage exhaustion, or an unusable application interface. Record readily observable paging or fallback, duration, and UI responsiveness as evaluation context. No in-app hardware monitoring, repeated benchmark protocol, formal budget, or thermal qualification is required.
 
-Only configurations that pass both stages may enter the compact MVP evaluation or become the documented local evaluation configuration. Passing does not place a model in a supported-model catalog or justify a release, hardware-compatibility, latency, or thermal claim. A failed configuration is removed from the active candidate set; the project records the exclusion reason but performs no further quality evaluation on it. Additional hardware, remote compute, or API inference must not be used to make a local configuration appear eligible.
+Only a configuration that passes both stages may enter the compact MVP evaluation or become the documented local evaluation configuration. Passing does not place a model in a supported-model catalog or justify a release, hardware-compatibility, latency, or thermal claim. When the fixed configuration fails, the project records the exclusion reason and pauses local evaluation; it performs no further quality evaluation until a new model-selection decision updates the exact configuration. Additional hardware, remote compute, or API inference must not be used to make a local configuration appear eligible.
 
 The capacity gate applies to every local model, including the initial bootstrap. The Groq mode remains a separate user choice and cannot satisfy the local MVP capacity constraint.
 
 ## Consequences
 
-- Obviously oversized models do not appear in current candidate lists or consume download and evaluation effort.
+- An obviously oversized model is not selected or downloaded for the fixed MVP evaluation.
 - The one plausible configuration receives one manual representative smoke before quality work begins.
-- The candidate set may contain smaller models, different quantizations, or different context profiles, provided each configuration independently passes the gate.
+- The fixed MVP has one active local configuration rather than a standing candidate set. If it fails, local evaluation pauses until a new model-selection decision updates the exact-model requirements and frozen evaluation configuration; only then may one smaller replacement configuration pass through this gate.
 - A future hardware change requires a new recorded reference-machine decision before it broadens local-model eligibility.
 - Formal performance and broad compatibility qualification remain deferred; this gate supports only the controlled portfolio workflow on the documented PC.
 
