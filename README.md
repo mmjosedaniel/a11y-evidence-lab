@@ -52,15 +52,15 @@ Public comparison always starts from a baseline Finding. For binary `image-alt` 
 
 ## Project status
 
-Idea exploration only. No implementation, dependencies, tests, or technical setup have been started.
+Development ready. The accepted planning baseline and [development roadmap](docs/DEVELOPMENT_ROADMAP.md) now define the first portfolio slice and its implementation order. Implementation, dependencies, tests, fixtures, and technical setup have not started.
 
 ## Current scope
 
-This repository currently contains product planning and feasibility analysis only. No runnable application or implementation has been created.
+This repository currently contains the accepted product and architecture baseline, feasibility analysis, derived specifications, and the tracked development roadmap. No runnable application or implementation has been created.
 
 ## Documentation
 
-Start with the [project documentation index](docs/README.md) for the recommended reading order, current concept, context, [project requirements](docs/PROJECT_REQUIREMENTS.md), local MVP feasibility assessment, and the derived [documentation-only Gherkin specifications](docs/specs/README.md).
+Start with the [project documentation index](docs/README.md) for the recommended reading order, current concept, context, [project requirements](docs/PROJECT_REQUIREMENTS.md), [development roadmap](docs/DEVELOPMENT_ROADMAP.md), local MVP feasibility assessment, and the derived [documentation-only Gherkin specifications](docs/specs/README.md).
 
 ## License
 

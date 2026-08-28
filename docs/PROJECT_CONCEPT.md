@@ -6,7 +6,9 @@ A11y Evidence Lab.
 
 ## Status
 
-Idea only, recorded on 2026-08-20. No implementation has started.
+**Concept status:** Accepted; recorded on 2026-08-20.
+
+**Repository stage:** Development ready through OD-025 on 2026-08-28. Implementation follows the derived [development roadmap](DEVELOPMENT_ROADMAP.md); no implementation has started.
 
 ## Concept
 
