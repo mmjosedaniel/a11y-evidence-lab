@@ -23,7 +23,7 @@ Each proposal carries one blocking pre-acceptance judgment and one non-blocking 
 
 Both feature files are **specified, not executed**. The repository contains no Gherkin runner, step definitions, bindings, test command, implementation fixture, or generated acceptance artifact. Their `.feature` extension provides readable planning notation only.
 
-Executable acceptance work requires explicit development authorization. A future test strategy may reuse these examples, but these files do not prove that any behavior passes.
+Development is authorized through OD-025, but executable acceptance work begins only through a concrete user-requested roadmap task and belongs in future implementation/test surfaces rather than these documentation-only files. A future test strategy may reuse these examples, but these files do not prove that any behavior passes.
 
 ## Evaluation freeze boundary
 
@@ -46,7 +46,7 @@ Previously used `SPEC-*` or `HS-*` identifiers omitted from the compact views ar
 - Change an authoritative requirement or decision before changing product scope or status here.
 - Keep one concise scenario per essential concern unless a second branch is required to make a safety distinction observable.
 - Trace only the primary authorities needed to understand the scenario.
-- Do not add executable bindings, implementation artifacts, or exhaustive matrices during the idea-exploration stage.
+- Keep executable bindings and implementation artifacts outside this documentation-only specification directory and add them only through the applicable roadmap task. Do not expand these compact views into exhaustive matrices.
 
 ## Documentation navigation
 

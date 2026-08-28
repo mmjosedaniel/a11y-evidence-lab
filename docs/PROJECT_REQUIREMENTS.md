@@ -2,18 +2,19 @@
 
 ## Document status
 
-- **Repository stage:** Idea exploration
-- **Document status:** Planning baseline
+- **Repository stage:** Development ready
+- **Document status:** Accepted MVP requirements baseline
 - **Main goal status:** Accepted on 2026-08-23
 - **Current trusted developer-input MVP scope:** Accepted on 2026-08-27 through OD-021, narrowing OD-020's production-style public-target security boundary while retaining its one-page, exact-three-rule interaction
 - **Portfolio YAGNI boundary:** Accepted on 2026-08-27 through OD-022, removing infrastructure and lifecycle machinery that does not demonstrate the end-to-end RAG slice
 - **Additional post-MVP YAGNI deferrals:** Accepted on 2026-08-27 through OD-023 for dedicated prompt-injection hardening/evaluation and embedded inaccessible-fixture previews
 - **Minimum complete MVP behavior contracts:** Accepted on 2026-08-27 through OD-024 for the remaining scanner-evidence, generation-result, comparison, interface, and application-accessibility Must requirements
+- **Development authorization and roadmap:** Accepted on 2026-08-28 through OD-025; implementation must proceed through concrete user-requested tasks in the derived [development roadmap](DEVELOPMENT_ROADMAP.md)
 - **Closed corpus and Local-mode data boundaries:** Accepted on 2026-08-27 through ADR-0022 and ADR-0023
 - **Fixed three-scenario evaluation baseline:** Retained from OD-019 for deterministic evaluation
 - **MVP persona, provider, startup, retention, evaluation, and workflow narrowing:** Accepted or Deferred as recorded through OD-024
 - **Implementation status:** Not started
-- **Last reviewed:** 2026-08-27
+- **Last reviewed:** 2026-08-28
 
 This document is the canonical index and global authority for the current product goal and the modular, stage-scoped requirements baseline. The linked requirement modules collectively define the first portfolio slice and later distributable-product obligations; none describes implemented behavior. Requirement status has the following meaning:
 
@@ -74,7 +75,8 @@ Each identified requirement, assumption, risk, and open decision is defined in e
 | Release-inventory derivation or verification, packaged validation, release evidence, or release claims | [Release inventory, evidence, and claims](requirements/evaluation-and-release/RELEASE_INVENTORY_EVIDENCE_AND_CLAIMS.md), plus the Deferred [release-grade component-inventory requirements](requirements/quality-security-and-operations/RELIABILITY_REPRODUCIBILITY_AND_OPERATIONS.md) |
 | The single `run.json` aggregate, provenance, current review/comparison data, workflow state, or failure semantics | [Information and workflow lifecycle model](requirements/INFORMATION_AND_WORKFLOW_LIFECYCLE.md) |
 | Proposed system topology, technology constraints, or implementation patterns | [Candidate architecture](architecture/CANDIDATE_ARCHITECTURE.md) |
-| Delivery sequence, assumptions, risks, open decisions, or the pre-development readiness gate | [Delivery readiness and open decisions](requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md) |
+| Development authorization, slice-readiness gates, assumptions, risks, or open decisions | [Delivery readiness and open decisions](requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md) |
+| Implementation milestone order, task dependencies, integration checkpoints, execution-plan preparation, or progress | [Development roadmap](DEVELOPMENT_ROADMAP.md), then resolve the selected task's identifiers through its authority-location key and read the named requirement rows and ADRs |
 | Reference-PC capacity, local models, tools, runtime feasibility, or practical capacity-check setup | [Local MVP feasibility](LOCAL_MVP_FEASIBILITY.md), plus the applicable requirement and ADR modules |
 | Voxleaf-derived reuse candidates, adaptation limits, provenance, or non-adoptions | [Voxleaf implementation pattern assessment](architecture/candidates/VOXLEAF_IMPLEMENTATION_PATTERN_ASSESSMENT.md) |
 
@@ -114,6 +116,7 @@ Within the recorded OD-015 through OD-018 dispositions, OD-015 and OD-018 remain
 | `OD-022` | [Portfolio MVP YAGNI simplification](requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-022--portfolio-mvp-yagni-simplification) accepts in-process exact vector retrieval, manual developer-managed local-model setup, one `run.json`, no review decision while a proposal is pending and exactly one current decision after review completes, one run-level provider disclosure, exact-locator public comparison, compact application-accessibility smoke coverage, and slim planning specifications. |
 | `OD-023` | [Post-MVP YAGNI requirement deferrals](requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-023--post-mvp-yagni-requirement-deferrals) defers `REQ-GEN-007` and `REQ-A11Y-005` until richer model inputs/actions or an embedded inaccessible-fixture preview enter scope. It left the other fifteen Must requirements for the subsequent OD-024 decision. |
 | `OD-024`; `REQ-SCAN-002`, `REQ-SCAN-005`, `REQ-GEN-001`, `REQ-GEN-008`, `REQ-GEN-009`, `REQ-COMP-001`, `REQ-UX-002`, `REQ-UX-004`, `REQ-UX-005`, `REQ-A11Y-001`–`REQ-A11Y-004`, `REQ-A11Y-009`, and `REQ-A11Y-010` | [Minimum complete MVP behavior contracts](requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-024--minimum-complete-mvp-behavior-contracts) accepts the remaining evidence-first workflow and accessible-core Must requirements without general pass archives, raw-output/redaction machinery, duplicate abstention records, a generalized comparator, retry/resume/cancellation machinery, or an accessibility support matrix. Exact field names, UI layout/copy, and verification-tool literals remain implementation choices. |
+| `OD-025` | [Development authorization and roadmap governance](requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-025--development-authorization-and-roadmap-governance) moves the repository to Development ready and accepts the [development roadmap](DEVELOPMENT_ROADMAP.md) as the derived implementation sequence. It changes no requirement or ADR status and creates no implementation evidence. |
 | `REQ-AUTH-007`, `REQ-AUTH-008`, `REQ-SCAN-006`, `REQ-SCAN-007`, `REQ-EVID-007`–`REQ-EVID-011`, `REQ-RETR-005`, `REQ-GEN-010`, `REQ-REV-008`, and `REQ-UX-010`–`REQ-UX-012` | [OD-020](requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-020--authorized-public-page-analysis-scope), [OD-021](requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-021--trusted-operator-url-boundary-for-the-portfolio-mvp), [OD-022](requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-022--portfolio-mvp-yagni-simplification), [ADR-0018](architecture/decisions/ADR-0018-trusted-operator-url-boundary.md), [Project overview — Planned workflow](../README.md#planned-workflow), and [Project concept — Possible user flow](PROJECT_CONCEPT.md#possible-user-flow). `REQ-EVID-001` remains superseded history. |
 | `REQ-EVID-003` | [OD-022](requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-022--portfolio-mvp-yagni-simplification) and [ADR-0021](architecture/decisions/ADR-0021-single-file-run-aggregate.md) accept immutable completed scanner evidence within the single aggregate while later nested workflow data is added. |
 | `REQ-CORP-001`, `REQ-CORP-003`–`REQ-CORP-007`, `REQ-RETR-006`, and `REQ-REV-009` | [OD-004](requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md), [OD-016](requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md), [OD-022](requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-022--portfolio-mvp-yagni-simplification), [ADR-0019](architecture/decisions/ADR-0019-in-process-exact-vector-search.md), [ADR-0021](architecture/decisions/ADR-0021-single-file-run-aggregate.md), and [ADR-0022](architecture/decisions/ADR-0022-closed-versioned-guidance-corpus.md) accept the closed manifest, deterministic passage boundary, exact in-process retrieval, and one-current-decision-per-reviewed-proposal representations. Their superseded predecessors remain decision history. |
@@ -173,5 +176,6 @@ The requirements also reflect the W3C distinction between normative WCAG success
 
 - Previous: [Project concept](PROJECT_CONCEPT.md)
 - [Project documentation index](README.md)
+- [Development roadmap](DEVELOPMENT_ROADMAP.md)
 - Start with: [Product scope and glossary](requirements/PRODUCT_SCOPE_AND_GLOSSARY.md)
 - Related evidence: [Local MVP feasibility](LOCAL_MVP_FEASIBILITY.md)

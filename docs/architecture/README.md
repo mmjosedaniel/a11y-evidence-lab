@@ -1,6 +1,6 @@
 # Architecture
 
-This directory is the entry point for the architecture documentation of A11y Evidence Lab. It separates accepted decisions from proposed designs and will grow with the system as the project moves from idea exploration into development.
+This directory is the entry point for the architecture documentation of A11y Evidence Lab. It separates accepted decisions from proposed designs and remains the architecture authority as the Development-ready project proceeds through its roadmap.
 
 ## Current documentation
 

@@ -6,14 +6,14 @@ This document is part of the authoritative requirements baseline indexed by [Pro
 
 ## Delivery stages
 
-Development has not been authorized. If it is authorized later, the first implementation scope should be one vertical portfolio slice, not six independently generalized subsystems:
+Development of the accepted portfolio MVP is authorized through OD-025, but implementation has not started. Work must follow the derived [development roadmap](../DEVELOPMENT_ROADMAP.md) through concrete user-requested tasks. The first implementation scope remains one vertical portfolio slice, not six independently generalized subsystems:
 
 1. Freeze the product scope, the three controlled scenario profiles, and their expected deterministic scanner outcomes before implementation. Freeze the exact evaluation inputs, expected retrieved passages, and scoring rubric before inspecting model output; implementation literals that do not affect those outcomes may be chosen during development.
 2. Implement one reusable closed loop that accepts one trusted developer/operator-supplied public HTTPS page, runs one complete deterministic scan limited to `image-alt`, `label`, and `color-contrast`, and retains every violation node reported by those rules as an independently addressable Finding with nested minimized evidence. The user then selects one Finding at a time for LangChain-composed retrieval and evidence-sufficiency gating. Incomplete required evidence or a completed `incomplete`, `missing`, or `conflicting` retrieval ends in a terminal application-authored abstention with a clear explanation, confirmation that no provider was called, and manual-investigation guidance; it has no approve/edit/reject review decision. A retrieval execution or integrity error instead fails with no support state. An eligible Finding may produce one validated structured proposal that alone enters human review. Comparison is a separate scan-evidence path and may start from any retained baseline Finding without prior retrieval, generation, abstention, or review. The user selects one global Local-or-Groq mode for the analysis; Findings never mix providers, batch into one model call, or trigger fallback.
 3. Exercise the three canonical happy-path fixture packages once with the capacity-screened local configuration and once with the exact Groq evaluation configuration. Run shared deterministic collection, valid-zero-versus-failed-scan handling, abstention, review, comparison, and the small trusted-input browser checks without duplicating them per provider. Record limitations, but do not derive statistics, provider rankings, support claims, hostile-target safety claims, or generalized quality claims.
 4. Keep authenticated targets, crawling, crawler implementation, link discovery, broader rule coverage, downstream batch processing, installers, desktop packaging, signing, updates, uninstall, formal qualification, and release hardening outside the MVP. Also defer production URL-security controls—including DNS/IP filtering, egress mediation, redirect re-attestation, rebinding defenses, adversarial-page qualification, and exhaustive numeric request/resource policies—until demonstrated product need justifies a later decision.
 
-This sequence does not make implementation or release claims. A distributable product would still require the separate security, provider, application-accessibility, packaging, lifecycle, and release gates owned by their requirements modules.
+Authorization and sequencing do not make implementation, acceptance, qualification, or release claims. A distributable product would still require the separate security, provider, application-accessibility, packaging, lifecycle, and release gates owned by their requirements modules.
 
 ## Assumptions
 
@@ -84,6 +84,7 @@ Each mitigation becomes required before the capability or claim that creates its
 | OD-022 | **Accepted for the MVP on 2026-08-27.** | Apply a portfolio-first YAGNI boundary: in-process exact vector retrieval over the fixed corpus; developer-managed Ollama/model setup; one `run.json` aggregate; no review decision while a proposal is pending and exactly one current decision after review completes; one run-level provider disclosure plus explicit per-finding generation; conservative exact-locator public comparison; compact accessibility smoke coverage; and a slim non-executable specification set. | [OD-022 detail](#od-022--portfolio-mvp-yagni-simplification), [ADR-0019](../architecture/decisions/ADR-0019-in-process-exact-vector-search.md), [ADR-0020](../architecture/decisions/ADR-0020-manual-developer-managed-local-model-setup.md), and [ADR-0021](../architecture/decisions/ADR-0021-single-file-run-aggregate.md) |
 | OD-023 | **Accepted on 2026-08-27 as post-MVP deferrals.** | Defer the dedicated prompt-injection hardening/evaluation requirement and embedded inaccessible-fixture preview isolation until a later capability makes either necessary. The other fifteen Proposed Must requirements were left undecided by this decision and were subsequently resolved by OD-024. | [OD-023 detail](#od-023--post-mvp-yagni-requirement-deferrals), [Generated proposal requirements](EVIDENCE_AND_REVIEW_WORKFLOW.md#generated-explanations-and-remediation-proposals), and [Application accessibility](quality-security-and-operations/APPLICATION_ACCESSIBILITY.md) |
 | OD-024 | **Accepted for the MVP on 2026-08-27.** | Accept the remaining fifteen Must requirements at the smallest scope that preserves evidence capture, structured generation or abstention, actual-call provenance, deterministic controlled comparison, an understandable canonical UI, and an accessible core path. Keep exact record fields, layout, wording, and tool-specific implementation literals open; add no generalized comparator, retry system, accessibility matrix, or new platform component. | [OD-024 detail](#od-024--minimum-complete-mvp-behavior-contracts), [Evidence and review workflow](EVIDENCE_AND_REVIEW_WORKFLOW.md), and [Application accessibility](quality-security-and-operations/APPLICATION_ACCESSIBILITY.md) |
+| OD-025 | **Accepted on 2026-08-28.** | Move the repository to Development ready and accept `docs/DEVELOPMENT_ROADMAP.md` as the derived implementation sequence. Implementation remains Not started and begins only through a concrete user-requested roadmap task whose directly applicable gates are satisfied. The roadmap changes no requirement or ADR status and creates no implementation or release evidence. | [OD-025 detail](#od-025--development-authorization-and-roadmap-governance) and [Development roadmap](../DEVELOPMENT_ROADMAP.md) |
 
 ### OD-020 — Authorized public-page analysis scope
 
@@ -147,7 +148,7 @@ OD-022 does not remove RAG, LangChain, local embeddings, the Local/Groq provider
 
 ### OD-023 — Post-MVP YAGNI requirement deferrals
 
-**Status:** Accepted on 2026-08-27 as requirement-scope deferrals; development remains unauthorized.
+**Status:** Accepted on 2026-08-27 as requirement-scope deferrals. This decision did not itself authorize development; later authorization is recorded by OD-025.
 
 OD-023 reviews the seventeen remaining Proposed Must requirements against the bounded portfolio goal and defers only the two whose capabilities the MVP does not exercise:
 
@@ -158,7 +159,7 @@ The remaining fifteen requirements directly describe the evidence-first workflow
 
 ### OD-024 — Minimum complete MVP behavior contracts
 
-**Status:** Accepted for the MVP on 2026-08-27; development remains unauthorized.
+**Status:** Accepted for the MVP on 2026-08-27. This decision did not itself authorize development; later authorization is recorded by OD-025.
 
 OD-024 resolves the fifteen Must requirements left open by OD-023 using the lowest-cost behavior that still demonstrates the portfolio's evidence-first value:
 
@@ -170,11 +171,23 @@ OD-024 resolves the fifteen Must requirements left open by OD-023 using the lowe
 
 The most consequential accepted contracts are the scanner-evidence boundary, the proposal/abstention shape with actual-call provenance, and the exact manifest-declared comparison gate. They affect future persisted data and cross-step handoffs, so changing their semantics later would require an explicit decision and migration consideration. Exact TypeScript properties, parameter names, UI layout and copy, fixture literals, and smoke-test tool choices remain implementation literals rather than planning decisions.
 
-No ADR is added for OD-024 because it accepts bounded product behavior within the existing architecture and selects no new provider, service, framework, storage mechanism, or deployment topology. OD-024 does not authorize development.
+No ADR is added for OD-024 because it accepts bounded product behavior within the existing architecture and selects no new provider, service, framework, storage mechanism, or deployment topology. OD-024 did not authorize development; OD-025 records that later delivery decision.
+
+### OD-025 — Development authorization and roadmap governance
+
+**Status:** Accepted on 2026-08-28.
+
+OD-025 moves the repository from Idea exploration to Development ready and accepts [Development roadmap](../DEVELOPMENT_ROADMAP.md) as the derived implementation sequence for the first portfolio slice. This decision authorizes implementation within the already Accepted MVP scope but does not start implementation, select an entire milestone for immediate work, or create evidence that any behavior passes.
+
+Implementation begins only when the user requests a concrete roadmap task or milestone. Before that work starts, its directly applicable Must requirements and open-decision portions must be Accepted or explicitly Deferred, and its small evaluation inputs must be frozen at the boundary owned by the evaluation authority. Work remains bounded to that selected slice; Proposed candidate architecture, Deferred requirements, release work, and post-MVP capabilities do not enter scope implicitly.
+
+The roadmap owns task order, dependencies, integration checkpoints, and task progress only. It cannot change requirement or ADR status, weaken the documentation-only Gherkin boundaries, promote an evaluation candidate into a release dependency, or prove implementation, acceptance, qualification, or release readiness. A future change that selects a significant durable architecture mechanism still requires the normal ADR process.
+
+No ADR is added for OD-025 because repository stage, development authorization, and delivery sequencing are governance decisions rather than architectural mechanisms. The documentation change that records OD-025 adds no code, dependencies, tests, fixtures, infrastructure, or implementation scaffolding, so implementation status remains **Not started**.
 
 ## Remaining deferred or implementation-stage choices
 
-OD-001 and OD-003 through OD-024 now have an explicit MVP disposition above. These dispositions do not authorize development and do not turn evaluation candidates into release dependencies. No Proposed Must requirement remains in the current MVP baseline. The following implementation literals or deferred-scope choices remain open until implementation is authorized or the deferred capability enters scope:
+OD-001 and OD-003 through OD-025 now have an explicit MVP disposition above. OD-025 authorizes implementation of the Accepted MVP scope, but none of these dispositions turns evaluation candidates into release dependencies. No Proposed Must requirement remains in the current MVP baseline. The following implementation literals or deferred-scope choices remain open until the applicable roadmap task selects them or the deferred capability enters scope:
 
 - the physical fixture file layout and the exact pinned browser, viewport, and page-state literals;
 - the single finite navigation-timeout value and the exact minimal locator representation used by the conservative public-page comparison;
@@ -186,9 +199,10 @@ OD-001 and OD-003 through OD-024 now have an explicit MVP disposition above. The
 - every production URL-security decision, including technical public-reachability enforcement, DNS/IP filtering, egress mediation, redirect re-attestation, rebinding defenses, adversarial-page qualification, and exhaustive request/resource limits; and
 - every distribution decision, including installer, desktop wrapper, signing, update, repair, uninstall, support matrix, qualification process, and public release claim.
 
-No development may begin until the repository status and agent instructions explicitly authorize it. After authorization, each implementation slice may begin only when its directly applicable Must requirements and open-decision portions have an accepted or explicitly deferred disposition and its small evaluation set is frozen. Unrelated release-only decisions do not block a portfolio slice.
+The repository status and agent instructions now authorize development through OD-025. Each implementation slice may begin only after a concrete user request selects it, its directly applicable Must requirements and open-decision portions have an Accepted or explicitly Deferred disposition, and its small evaluation set is frozen. Unrelated release-only decisions do not block a portfolio slice, and authorization does not pull them into scope.
 
 ## Documentation navigation
 
 - [Project requirements index](../PROJECT_REQUIREMENTS.md)
+- [Development roadmap](../DEVELOPMENT_ROADMAP.md)
 - [Project documentation index](../README.md)
