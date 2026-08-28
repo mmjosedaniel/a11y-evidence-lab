@@ -21,7 +21,7 @@ Progress labels in this document mean:
 
 Only `RD-001` is Complete. Every implementation task is Not started.
 
-For dependency readiness, `RD-002`, `RD-003`, and `M2-01` are **Ready** because RD-001 is Complete. Every other Not started task is **Blocked** by the dependencies named in its task entry and becomes Ready only when all of them are Complete. Each task entry also states whether it is on the mandatory dependency spine or belongs to a named safe parallel group.
+For dependency readiness, only `RD-002` is **Ready** because RD-001 is Complete. Every other Not started task is **Blocked** by the dependencies named in its task entry and becomes Ready only when all of them are Complete. Each task entry also states whether it is on the mandatory dependency spine or belongs to a named safe parallel group.
 
 ## Implementation strategy
 
@@ -94,7 +94,7 @@ Every task's **Authorities** field uses stable identifiers from the owning sourc
 
 - **Parent milestone / role / status:** Walking-skeleton entry / validation / **Not started**.
 - **Objective:** Fix the smallest M1 literals needed to implement and verify exact-three-rule scanning without prematurely freezing generation details.
-- **Inputs, dependencies, and scheduling:** Ready after completed RD-001 and may proceed in parallel with RD-002. It joins RD-002 before M1-01.
+- **Inputs, dependencies, and scheduling:** Depends on completed RD-002 because the expected native results and browser/scanner profile are version-sensitive. It is on the critical dependency path before M1-01.
 - **Expected output:** Controlled failing/corrected fixture content, expected native outcomes, stable target keys, pinned browser/rule profile, readiness condition, finite timeout, locator representation, and rule-specific minimized evidence allowlists.
 - **User-visible outcome:** Enables a reproducible scan and evidence result; it creates no runtime behavior by itself.
 - **Authorities:** OD-003, OD-009, OD-021, OD-024, `REQ-SCAN-002`, `REQ-SCAN-005`, `REQ-EVID-002`, `REQ-EVAL-004`, `REQ-EVAL-005`, and the [evaluation freeze boundary](requirements/evaluation-and-release/EVALUATION_AND_ACCEPTANCE.md#freeze-boundary).
@@ -107,9 +107,8 @@ Every task's **Authorities** field uses stable identifiers from the owning sourc
 ```mermaid
 flowchart TD
     RD1[RD-001 Authorization and roadmap] --> RD2[RD-002 Toolchain literals]
-    RD1 --> RD3[RD-003 Scan evaluation boundary]
-    RD2 --> M101[M1-01 Run and scan contracts]
-    RD3 --> M101
+    RD2 --> RD3[RD-003 Scan evaluation boundary]
+    RD3 --> M101[M1-01 Run and scan contracts]
     M101 --> M102[M1-02 Local service and aggregate]
     M101 --> M103[M1-03 Real scan and evidence]
     M101 --> M104[M1-04 Target and results UI]
@@ -117,15 +116,14 @@ flowchart TD
     M103 --> M105
     M104 --> M105
 
-    RD1 --> M201[M2-01 Closed corpus snapshot]
-    M105 --> M202[M2-02 Lazy exact retrieval]
-    M201 --> M202
-    M202 --> M203[M2-03 Sufficiency, abstention, and detail UI]
+    M105 --> M201[M2-01 Closed corpus snapshot]
+    M201 --> M202[M2-02 Embedding retrieval and capacity gate]
+    M202 -->|capacity gate passes| M203[M2-03 Sufficiency, abstention, and detail UI]
     M203 --> M204[M2-04 Retrieval checkpoint]
 
     M204 --> M301[M3-01 Freeze generation evaluation package]
     M301 --> M302[M3-02 Shared generation stage]
-    M302 --> M303[M3-03 Local adapter and capacity screen]
+    M302 --> M303[M3-03 Qwen adapter and capacity screen]
     M302 --> M304[M3-04 Groq adapter]
     M303 --> M305[M3-05 Generation checkpoint]
     M304 --> M305
@@ -157,11 +155,11 @@ M5 is semantically dependent only on completed scan evidence from M1. It is sequ
 
 - **Parent milestone / role / status:** M1 / contract / **Not started**.
 - **Objective:** Define the minimum runtime-validated PageAnalysisRun, Finding, ScannerReviewObservation, scan coverage, provider-context, lifecycle, and failure shapes consumed immediately by M1.
-- **Inputs, dependencies, and scheduling:** Depends on RD-002 and RD-003; critical path. M1-02, M1-03, and M1-04 may begin only after this contract is stable.
-- **Expected output:** One bounded contract with exactly `running`, `completed`, or `failed` parent-run status, immutable completed scan evidence, independent nested Findings, distinct native incomplete observations, and one immutable mode context that is not a ProviderInvocation.
+- **Inputs, dependencies, and scheduling:** Depends on RD-003, which incorporates the completed RD-002 selections; critical path. M1-02, M1-03, and M1-04 may begin only after this contract is stable.
+- **Expected output:** One bounded contract with exactly `running`, `completed`, or `failed` parent-run status, a closed minimized aggregate shape, material run/scan provenance, immutable completed scan evidence, independent nested Findings, distinct native incomplete observations, and one immutable mode context that is not a ProviderInvocation.
 - **User-visible outcome:** Enables correct results, failure, mode, and reopen behavior.
-- **Authorities:** `REQ-LLM-002`, `REQ-SCAN-005`–`REQ-SCAN-007`, `REQ-EVID-003`, `REQ-EVID-007`–`REQ-EVID-011`, `REQ-QUAL-001`, `REQ-QUAL-010`–`REQ-QUAL-012`, `REQ-QUAL-019`, ADR-0021, BHV-01, and BHV-07.
-- **Verification:** The contract can represent complete nonzero, valid zero, native incomplete observations, parent failure, missing individual evidence facts, and immutable run-level Local/Groq context without adding child-record identities.
+- **Authorities:** `REQ-LLM-002`, `REQ-SCAN-005`–`REQ-SCAN-007`, `REQ-EVID-003`, `REQ-EVID-007`–`REQ-EVID-011`, `REQ-SEC-003`, `REQ-QUAL-001`, `REQ-QUAL-003`, `REQ-QUAL-010`–`REQ-QUAL-012`, `REQ-QUAL-019`, `REQ-QUAL-020`, ADR-0021, BHV-01, and BHV-07.
+- **Verification:** The contract can represent complete nonzero, valid zero, native incomplete observations, parent failure, missing individual evidence facts, material public-run provenance, and immutable run-level Local/Groq context without adding child-record identities; its allowed sections exclude raw page/scanner/provider material, and one Finding remains independently addressable without changing a sibling.
 - **Likely surfaces:** Future domain types, runtime validators, scanner boundary, local API contracts, and `run.json` format.
 - **Out of scope:** Retrieval, proposal, review, comparison, migration framework, generated schema system, and generalized workflow state machine.
 
@@ -172,8 +170,8 @@ M5 is semantically dependent only on completed scan evidence from M1. It is sequ
 - **Inputs, dependencies, and scheduling:** Depends on M1-01. Safely parallelizable with M1-03 and M1-04 only while the shared contract remains unchanged; all join at M1-05.
 - **Expected output:** A loopback-only service that reports ready or bounded startup failure, has a clean stop path, owns privileged work, separates service-owned AI configuration from run-mode selection without probing a provider, permits at most one user-requested operation at a time without a queue, and manages one `data/runs/<run-id>/run.json` repository with safe writes and read validation.
 - **User-visible outcome:** Service readiness/failure is understandable; a completed run can survive reload and reopen; persistence or busy-operation failure is visible.
-- **Authorities:** `REQ-INST-002`, `REQ-INST-004`, `REQ-EVID-003`, `REQ-EVID-011`, `REQ-SEC-002`, `REQ-SEC-006`, `REQ-SEC-027`, `REQ-QUAL-002`, `REQ-QUAL-005`, `REQ-QUAL-011`–`REQ-QUAL-013`, ADR-0015, ADR-0021, SPEC-007, and HS-006.
-- **Verification:** The service demonstrates ready/startup-failed/clean-stop paths; browser code receives no filesystem or credential authority; configuration neither selects a mode nor invokes/probes a provider; a second user operation cannot overlap the current one; reopening validates the aggregate; a failed write cannot publish completed work; manual/developer deletion of a run is demonstrated by removing only its exact run directory and never the corpus; later nested updates cannot alter completed scan evidence or sibling data.
+- **Authorities:** `REQ-INST-002`, `REQ-INST-004`, `REQ-EVID-003`, `REQ-EVID-011`, `REQ-SEC-002`, `REQ-SEC-006`, `REQ-SEC-012`, `REQ-SEC-027`, `REQ-QUAL-002`, `REQ-QUAL-005`, `REQ-QUAL-008`, `REQ-QUAL-011`–`REQ-QUAL-013`, ADR-0015, ADR-0021, SPEC-007, and HS-006.
+- **Verification:** The service demonstrates ready/startup-failed/clean-stop paths; browser code receives no filesystem or credential authority; configuration neither selects a mode nor invokes/probes a provider; a second user operation cannot overlap the current one; reopening validates the aggregate; a failed write cannot publish completed work; diagnostics and reproducibility records remain local, provider-neutral, content-safe, and free of hosted tracing or telemetry; manual/developer deletion of a run is demonstrated by removing only its exact run directory and never the corpus; later nested updates cannot alter completed scan evidence or sibling data.
 - **Likely surfaces:** Future local-service entry point, run repository, atomic-write/read boundary, loopback API, and run-loading UI route.
 - **Out of scope:** Database, child files, Markdown report, search/history dashboard, backup, synchronization, migration platform, authentication, or multi-user access.
 
@@ -182,12 +180,12 @@ M5 is semantically dependent only on completed scan evidence from M1. It is sequ
 - **Parent milestone / role / status:** M1 / service and validation / **Not started**.
 - **Objective:** Execute the accepted Playwright/axe path and normalize the complete result into the M1 contract.
 - **Inputs, dependencies, and scheduling:** Depends on M1-01 and the RD-003 literals. Safely parallelizable with M1-02 and M1-04 against the frozen contract; joins at M1-05.
-- **Expected output:** Basic input rejection, one fresh non-persistent browser context, finite navigation, exact `image-alt`/`label`/`color-contrast` execution over the top-level document with iframe documents excluded, all-node collection, rule-specific minimization, coverage validation, cleanup, and bounded failures.
+- **Expected output:** Basic input rejection, one fresh non-persistent browser context with downloads disabled, finite navigation, exact `image-alt`/`label`/`color-contrast` execution over the top-level document with iframe documents excluded, all-node collection, rule-specific minimization, coverage validation, cleanup, and bounded failures.
 - **User-visible outcome:** The application can produce real deterministic Findings and separate native incomplete observations for one trusted page.
 - **Authorities:** `REQ-AUTH-007`, `REQ-AUTH-008`, `REQ-SCAN-001`, `REQ-SCAN-005`–`REQ-SCAN-007`, `REQ-EVID-007`–`REQ-EVID-010`, `REQ-SEC-026`, ADR-0008, ADR-0009, ADR-0018, SPEC-001, HS-001, and HS-004.
-- **Verification:** Malformed input, credentials in the URL, and unsupported schemes fail before run creation/navigation; the scan invokes no provider; every returned node is retained; complete zero requires all three rules; timeout/fatal failure cannot become partial success; browser resources close after success or failure.
+- **Verification:** Malformed input, credentials in the URL, and unsupported schemes fail before run creation/navigation; the fresh context imports no personal state, accepts or retains no download, exposes no application download path, and performs no interaction or crawling; the scan invokes no provider; every returned node is retained; complete zero requires all three rules; timeout/fatal failure cannot become partial success; browser resources close after success or failure.
 - **Likely surfaces:** Future target validator, browser/scanner adapter, evidence normalizer, coverage validator, and scan-failure categories.
-- **Out of scope:** Crawling, link discovery, authentication, private-target handling, iframe scanning, page interaction, downloads, broad axe rules, hostile-target qualification, screenshots, traces, raw HTML, or raw scanner archives.
+- **Out of scope:** Crawling, link discovery, authentication, private-target handling, iframe scanning, page interaction, download workflows, broad axe rules, hostile-target qualification, screenshots, traces, raw HTML, or raw scanner archives.
 
 ### M1-04 — Present accessible target entry and complete results
 
@@ -205,10 +203,10 @@ M5 is semantically dependent only on completed scan evidence from M1. It is sequ
 
 - **Parent milestone / role / status:** M1 / integration and verification / **Not started**.
 - **Objective:** Join the service, scanner, persistence, and UI into the first real end-to-end user workflow.
-- **Inputs, dependencies, and scheduling:** Depends on M1-02, M1-03, and M1-04. Critical-path integration checkpoint; M2-02 and dependent work cannot start until it passes.
+- **Inputs, dependencies, and scheduling:** Depends on M1-02, M1-03, and M1-04. Critical-path integration checkpoint; M2-01 and dependent work cannot start until it passes.
 - **Expected output:** One integrated scan-to-disk slice exercised against the controlled cases and one trusted public-page smoke target.
 - **User-visible outcome:** The exact milestone outcome stated for M1 works end to end and can be demonstrated honestly.
-- **Authorities:** `REQ-AUTH-007`, `REQ-AUTH-008`, `REQ-LLM-002`, `REQ-LLM-003`, `REQ-LLM-020`, `REQ-INST-002`, `REQ-INST-004`, `REQ-SCAN-001`, `REQ-SCAN-005`–`REQ-SCAN-007`, `REQ-EVID-003`, `REQ-EVID-007`–`REQ-EVID-011`, `REQ-SEC-005`, `REQ-SEC-006`, `REQ-UX-002`–`REQ-UX-005`, `REQ-UX-010`–`REQ-UX-012`, `REQ-QUAL-011`, `REQ-QUAL-012`, BHV-01, BHV-07, HS-001, HS-004, HS-006, OD-021, and OD-024.
+- **Authorities:** `REQ-AUTH-007`, `REQ-AUTH-008`, `REQ-LLM-002`, `REQ-LLM-003`, `REQ-LLM-020`, `REQ-INST-002`, `REQ-INST-004`, `REQ-SCAN-001`, `REQ-SCAN-005`–`REQ-SCAN-007`, `REQ-EVID-003`, `REQ-EVID-007`–`REQ-EVID-011`, `REQ-SEC-005`, `REQ-SEC-006`, `REQ-UX-002`–`REQ-UX-005`, `REQ-UX-010`–`REQ-UX-012`, `REQ-QUAL-011`, `REQ-QUAL-012`, `REQ-QUAL-020`, BHV-01, BHV-07, HS-001, HS-004, HS-006, OD-021, and OD-024.
 - **Verification:** Demonstrate service readiness/failure/clean stop, valid nonzero, valid zero, native incomplete, malformed input, visible scan failure, durable reopen, the manual exact-directory deletion boundary, one-operation guarding, mode disclosure, configuration/selection separation, sibling preservation, cleanup, and no provider invocation. Include the applicable automated and keyboard checks rather than postponing accessible behavior.
 - **Likely surfaces:** Integrated local application, controlled fixtures, focused verification artifacts, and development instructions.
 - **Out of scope:** Claims about RAG, generation, provider readiness, review, comparison, hostile-URL safety, certification, or release readiness.
@@ -223,7 +221,7 @@ M5 is semantically dependent only on completed scan evidence from M1. It is sequ
 
 - **Parent milestone / role / status:** M2 / enabling and validation / **Not started**.
 - **Objective:** Acquire and prepare exactly the accepted eight W3C artifacts under one reviewed, immutable corpus version.
-- **Inputs, dependencies, and scheduling:** Depends on RD-001 and the accepted source pack. It may run in parallel with M1 because it does not change the run, scan, persistence, or UI contracts; it joins M1 at M2-02.
+- **Inputs, dependencies, and scheduling:** Depends on M1-05 and the accepted source pack so its controlled-profile gold mappings use the frozen RD-003 evidence boundary and the verified M1 Finding contract. It is on the critical dependency path before M2-02.
 - **Expected output:** Source/use-condition review, manifest metadata, manually selected heading-aware passages, stable passage IDs, required guidance roles, rule/SC mappings, conflict declarations, and gold passage mappings for the three controlled profiles.
 - **User-visible outcome:** Enables exact, attributable guidance inspection; no runtime behavior by itself.
 - **Authorities:** `REQ-CORP-001`, `REQ-CORP-003`–`REQ-CORP-007`, `REQ-EVAL-003`–`REQ-EVAL-005`, and ADR-0022.
@@ -231,27 +229,27 @@ M5 is semantically dependent only on completed scan evidence from M1. It is sequ
 - **Likely surfaces:** Future corpus manifest, permitted local source snapshot, deterministic passage data, and evaluation gold mapping.
 - **Out of scope:** Web search, corpus crawling, arbitrary uploads, automatic refresh, broad WCAG corpus, generic document ingestion, legal conclusion, reranking, or vector database.
 
-### M2-02 — Implement lazy local exact-vector retrieval
+### M2-02 — Implement and capacity-screen lazy local exact-vector retrieval
 
 - **Parent milestone / role / status:** M2 / service and integration / **Not started**.
-- **Objective:** Retrieve guidance for one selected Finding through the accepted bounded LangChain role.
-- **Inputs, dependencies, and scheduling:** Depends on M1-05 and M2-01. Critical path.
-- **Expected output:** Attempt-time Ollama/EmbeddingGemma availability handling, first-request vector construction, in-process MemoryVectorStore, rule/SC filtering, exact cosine ranking, deterministic passage-ID tie-breaking, `k = 3`, and persisted retrieval provenance.
-- **User-visible outcome:** One selected Finding returns up to three ranked passages with corpus version, section, source URL, passage identity, and score/order metadata.
-- **Authorities:** `REQ-RETR-001`, `REQ-RETR-002`, `REQ-RETR-005`, `REQ-RETR-006`, `REQ-INST-003`, `REQ-INST-006`, `REQ-INST-017`, ADR-0006, ADR-0013, ADR-0019, ADR-0020, ADR-0022, ADR-0023, and SPEC-002.
-- **Verification:** Startup performs no embedding work; only the selected Finding's privacy-safe query enters retrieval; vectors stay in process; no hosted embedding/vector service is used; missing setup produces a concise failure with official Ollama setup guidance; retrieval/integrity errors are bounded and preserve scan evidence.
-- **Likely surfaces:** Future corpus loader, embedding adapter, in-memory retrieval component, Finding-to-query projection, retrieval validator, and nested aggregate update.
-- **Out of scope:** Chroma, persistent vector service, hybrid search, reranking, agentic retrieval, web search, sibling Finding content, target URL, locator, or arbitrary page text in the query.
+- **Objective:** Retrieve guidance for one selected Finding through the accepted bounded LangChain role and screen the exact EmbeddingGemma configuration before retrieval-quality evaluation.
+- **Inputs, dependencies, and scheduling:** Depends on M2-01. First apply the metadata prefilter; only if it passes does the developer acquire `embeddinggemma` through developer-managed Ollama. After the real path exists, its one retrieval-specific capacity smoke must pass before M2-03 or M2-04 begins. Critical path.
+- **Expected output:** Recorded EmbeddingGemma metadata prefilter; attempt-time Ollama/EmbeddingGemma availability handling; first-request vector construction; in-process MemoryVectorStore; rule/SC filtering; exact cosine ranking; deterministic passage-ID tie-breaking; `k = 3`; persisted retrieval provenance; and one recorded provider-independent reference-PC retrieval-capacity smoke.
+- **User-visible outcome:** One selected Finding returns up to three ranked passages with corpus version, section, source URL, passage identity, and score/order metadata, or shows a bounded missing-prerequisite/retrieval failure without fallback.
+- **Authorities:** `REQ-RETR-001`, `REQ-RETR-002`, `REQ-RETR-005`, `REQ-RETR-006`, `REQ-INST-003`, `REQ-INST-006`, `REQ-INST-017`, `REQ-SEC-017`, `REQ-QUAL-009`, ADR-0004, ADR-0006, ADR-0013, ADR-0019, ADR-0020, ADR-0022, ADR-0023, and SPEC-002.
+- **Verification:** Startup performs no embedding work; only the selected Finding's privacy-safe query enters retrieval; vectors stay in process; no hosted embedding/vector service is used; the application does not initiate, proxy, monitor, or record model acquisition; missing setup produces a concise failure with official Ollama setup guidance; retrieval/integrity errors are bounded and preserve scan evidence. Before any frozen retrieval-quality case runs, record the exact EmbeddingGemma tag, full artifact digest, runtime/configuration identity, and metadata prefilter result, then run the real corpus/query embedding and exact retrieval once on the reference PC with the application and browser UI active. It must complete without out-of-memory failure, storage exhaustion, or an unusable interface; duration, offload, and responsiveness remain observations only. Failure pauses retrieval evaluation until a new model-selection decision updates the exact configuration; no fallback or model comparison occurs.
+- **Likely surfaces:** Future corpus loader, embedding adapter, in-memory retrieval component, Finding-to-query projection, retrieval validator, nested aggregate update, and one local capacity observation.
+- **Out of scope:** Application-managed model acquisition, hardware monitor, benchmark suite, Chroma, persistent vector service, hybrid search, reranking, agentic retrieval, web search, sibling Finding content, target URL, locator, or arbitrary page text in the query.
 
 ### M2-03 — Apply support states, abstention, and Finding-detail presentation
 
 - **Parent milestone / role / status:** M2 / validation, service, and UI / **Not started**.
 - **Objective:** Convert retrieval and evidence completeness into the accepted deterministic branch before any generation capability exists.
-- **Inputs, dependencies, and scheduling:** Depends on M2-02; critical path.
+- **Inputs, dependencies, and scheduling:** Depends on M2-02, including its passed EmbeddingGemma capacity gate; critical path.
 - **Expected output:** Exact `supported`, `incomplete`, `missing`, and `conflicting` meanings; citation resolution; evidence-sufficiency evaluation; terminal abstention record and explanation; distinct retrieval-failure state; and selected-Finding detail UI.
 - **User-visible outcome:** The user sees evidence and guidance as separate layers and receives either supported eligibility, a clear no-call abstention with manual-investigation guidance, or a visible retrieval failure.
-- **Authorities:** `REQ-EVID-004`, `REQ-EVID-007`, `REQ-RETR-004`, `REQ-RETR-005`, `REQ-GEN-001`, `REQ-GEN-009`, `REQ-GEN-010`, BHV-02, BHV-03, SPEC-002, the abstention/failure branches of SPEC-003, and HS-008.
-- **Verification:** Abstention occurs only for incomplete evidence or completed insufficient/conflicting guidance; it references available records, names the blocking information, confirms no provider call, proposes no remediation, creates no ProviderInvocation/review decision, and leaves siblings unchanged. Execution/integrity failure has no support state and is not called abstention.
+- **Authorities:** `REQ-EVID-004`, `REQ-EVID-007`, `REQ-RETR-004`, `REQ-RETR-005`, `REQ-GEN-001`, `REQ-GEN-009`, `REQ-GEN-010`, `REQ-A11Y-001`–`REQ-A11Y-004`, `REQ-A11Y-010`, BHV-02, the abstention and retrieval-failure portions of BHV-03, SPEC-002, the abstention and retrieval-failure scenarios of SPEC-003, and the no-call/abstention boundary of HS-008.
+- **Verification:** Abstention occurs only for incomplete evidence or completed insufficient/conflicting guidance; it references available records, names the blocking information, confirms no provider call, proposes no remediation, creates no ProviderInvocation/review decision, and leaves siblings unchanged. Execution/integrity failure has no support state and is not called abstention. Finding selection, evidence/citation inspection, retrieval status, abstention, and failure remain keyboard-operable; source layers and states are semantic and non-color-dependent; shared announcements do not disrupt focus; returning to the grouped list restores a predictable location.
 - **Likely surfaces:** Future sufficiency policy, citation resolver, abstention builder, Finding detail, guidance list, status projection, and aggregate update.
 - **Out of scope:** LLM invocation, fake proposal, approve/edit/reject review, provider probe, automatic retry, or combined Finding analysis.
 
@@ -259,10 +257,10 @@ M5 is semantically dependent only on completed scan evidence from M1. It is sequ
 
 - **Parent milestone / role / status:** M2 / integration and verification / **Not started**.
 - **Objective:** Prove the real closed-corpus path and deterministic no-call branch end to end.
-- **Inputs, dependencies, and scheduling:** Depends on M2-03; critical-path checkpoint before M3-01.
+- **Inputs, dependencies, and scheduling:** Depends on M2-03 and therefore on the passed M2-02 EmbeddingGemma gate; critical-path checkpoint before M3-01.
 - **Expected output:** Integrated selected-Finding retrieval, citation inspection, supported eligibility, abstention, and failure demonstrations persisted in the single aggregate.
 - **User-visible outcome:** The M2 milestone outcome works without any generation provider.
-- **Authorities:** `REQ-EVAL-002`–`REQ-EVAL-005`, BHV-02, BHV-03, SPEC-002, SPEC-003, HS-006, and HS-008.
+- **Authorities:** `REQ-EVAL-002`–`REQ-EVAL-005`, BHV-02, the abstention and retrieval-failure portions of BHV-03, SPEC-002, the abstention and retrieval-failure scenarios of SPEC-003, HS-006, and the no-call/abstention boundary of HS-008.
 - **Verification:** Exercise the frozen gold passage for each controlled profile, the shared `incomplete` abstention package, zero-applicable/missing, declared-conflict, execution failure, and passage-integrity failure without corrupting completed scan evidence.
 - **Likely surfaces:** Integrated retrieval flow, controlled evaluation inputs, focused verification artifacts, and accessibility checks for the new detail states.
 - **Out of scope:** Model quality, generated remediation, provider comparison, statistical scoring, or release qualification.
@@ -292,20 +290,20 @@ M5 is semantically dependent only on completed scan evidence from M1. It is sequ
 - **Inputs, dependencies, and scheduling:** Depends on M3-01. Critical path; M3-03 and M3-04 may begin in parallel only after this contract is stable.
 - **Expected output:** Context-fit gate, permitted one-Finding payload, small provider interface, proposal structure, actual-call provenance shape, structure/reference/citation/prohibited-claim validation, and bounded result categories.
 - **User-visible outcome:** Enables a validated proposal or an understandable pre-call/attempted-call failure without exposing provider-specific behavior to the workflow.
-- **Authorities:** `REQ-GEN-001`–`REQ-GEN-006`, `REQ-GEN-008`–`REQ-GEN-010`, `REQ-LLM-001`, `REQ-LLM-004`, `REQ-LLM-008`, `REQ-LLM-019`, `REQ-SEC-013`–`REQ-SEC-016`, ADR-0001, ADR-0011, ADR-0013, SPEC-003, SPEC-004, HS-008, and HS-009.
+- **Authorities:** `REQ-GEN-001`–`REQ-GEN-006`, `REQ-GEN-008`–`REQ-GEN-010`, `REQ-LLM-001`, `REQ-LLM-004`, `REQ-LLM-008`, `REQ-LLM-019`, `REQ-SEC-013`–`REQ-SEC-016`, `REQ-QUAL-003`, ADR-0001, ADR-0011, ADR-0013, SPEC-003, SPEC-004, HS-008, and HS-009.
 - **Verification:** Unsupported structure, evidence references, citations, or prohibited claims cannot become a proposal; context that cannot fit without truncation fails before invocation and is not an abstention; only an attempted call creates ProviderInvocation provenance.
 - **Likely surfaces:** Future generation contract, sufficiency/context assembler, provider interface, proposal validator, invocation provenance, and aggregate update.
 - **Out of scope:** Generic provider registry, user-configurable endpoints, agents, tools, fine-tuning, prompt platform, streaming, batch generation, retry, or fallback.
 
-### M3-03 — Integrate Local generation and run the capacity screen
+### M3-03 — Integrate Qwen Local generation and run its capacity screen
 
 - **Parent milestone / role / status:** M3 / service, integration, and verification / **Not started**.
-- **Objective:** Implement the fixed Ollama/Qwen Local path and prove it can run the representative complete workflow on the reference PC.
-- **Inputs, dependencies, and scheduling:** Depends on M3-02 and developer-managed Ollama plus `qwen3.5:4b`. Safely parallelizable with M3-04; both join at M3-05. It is on the Local-evaluation critical path.
-- **Expected output:** Loopback-only Local adapter, attempt-time prerequisite handling, actual request/response validation, compact provenance, and one recorded reference-PC capacity smoke.
+- **Objective:** Implement the fixed Ollama/Qwen Local path and prove the exact `qwen3.5:4b` generation configuration can run the representative complete workflow on the reference PC after the separate EmbeddingGemma gate has passed.
+- **Inputs, dependencies, and scheduling:** Depends on M3-02 and the passed M2-02 EmbeddingGemma gate. First apply the Qwen metadata prefilter; only if it passes does the developer acquire `qwen3.5:4b` through developer-managed Ollama. After the real path exists, run the one Qwen/full-local-stack smoke. Safely parallelizable with M3-04; both join at M3-05. It is on the Local-evaluation critical path.
+- **Expected output:** Loopback-only Local adapter, attempt-time prerequisite handling, actual request/response validation, compact provenance, recorded Qwen metadata prefilter, and one recorded Qwen/full-local-stack reference-PC capacity smoke.
 - **User-visible outcome:** An eligible Finding can produce a validated proposal in Local mode, or show a bounded missing-prerequisite/provider/validation failure with no fallback.
-- **Authorities:** `REQ-LLM-003`, `REQ-LLM-005`, `REQ-LLM-007`, `REQ-LLM-009`, `REQ-LLM-011`, `REQ-LLM-020`, `REQ-INST-005`, `REQ-INST-017`, `REQ-QUAL-006`, `REQ-QUAL-007`, `REQ-QUAL-009`, ADR-0003, ADR-0004, ADR-0005, ADR-0006, ADR-0020, ADR-0023, SPEC-004, and HS-009.
-- **Verification:** Prompt/response flow stays on the approved loopback boundary; missing runtime/model creates no invocation and shows concise official setup guidance; attempted failures retain bounded provenance; one manual representative smoke keeps the browser, EmbeddingGemma retrieval, application, Qwen generation, and single-reviewer UI active and completes without out-of-memory failure or an unusable interface; notes remain observational. Failure pauses Local evaluation and requires a recorded replacement decision, not fallback.
+- **Authorities:** `REQ-LLM-003`, `REQ-LLM-005`, `REQ-LLM-007`, `REQ-LLM-009`, `REQ-LLM-011`, `REQ-LLM-020`, `REQ-INST-005`, `REQ-INST-017`, `REQ-SEC-017`, `REQ-QUAL-006`, `REQ-QUAL-007`, `REQ-QUAL-009`, ADR-0003, ADR-0004, ADR-0005, ADR-0020, ADR-0023, SPEC-004, and HS-009.
+- **Verification:** The exact Qwen artifact passes its recorded metadata prefilter before project evaluation; prompt/response flow stays on the approved loopback boundary; the application does not initiate, proxy, monitor, or record model acquisition; missing runtime/model creates no invocation and shows concise official setup guidance; attempted failures retain bounded provenance; one manual representative smoke keeps the browser, the already screened EmbeddingGemma retrieval path, application, Qwen generation, and single-reviewer UI active and completes without out-of-memory failure or an unusable interface; notes remain observational. Qwen failure pauses Local generation evaluation and requires a recorded replacement decision, not fallback; it does not invalidate the separately recorded EmbeddingGemma retrieval gate.
 - **Likely surfaces:** Future Local adapter, Ollama client boundary, prerequisite/error mapping, capacity observation, and Local evaluation configuration.
 - **Out of scope:** Application-managed installation/downloads, dynamic model selection, automatic smaller-model fallback, performance SLA, hardware support matrix, or machine-wide offline claim.
 
@@ -328,8 +326,8 @@ M5 is semantically dependent only on completed scan evidence from M1. It is sequ
 - **Inputs, dependencies, and scheduling:** Depends on M3-03 and M3-04. Critical-path integration checkpoint before M4.
 - **Expected output:** Generate action only for eligible Findings, immutable visible provider/model context, clear pre-call and attempted-call failures, validated proposal detail, and preserved sibling/scan state.
 - **User-visible outcome:** The exact M3 milestone outcome works through either explicitly selected mode without mixing or fallback.
-- **Authorities:** `REQ-GEN-001`–`REQ-GEN-006`, `REQ-GEN-008`–`REQ-GEN-010`, `REQ-LLM-001`, `REQ-LLM-003`–`REQ-LLM-005`, `REQ-LLM-007`–`REQ-LLM-009`, `REQ-LLM-011`, `REQ-LLM-015`, `REQ-LLM-016`, `REQ-LLM-019`, `REQ-LLM-020`, `REQ-SEC-004`, `REQ-SEC-005`, `REQ-SEC-013`–`REQ-SEC-016`, BHV-03, BHV-04, SPEC-003, SPEC-004, HS-008, and HS-009.
-- **Verification:** Exercise one real eligible call through each adapter; show that scan and selection make no provider call; verify no action exists for abstentions; validate failures and provenance semantics; confirm the proposal separates evidence, guidance, AI interpretation, confidence, uncertainty, assumptions, blocking judgment, and post-change reminder.
+- **Authorities:** `REQ-GEN-001`–`REQ-GEN-006`, `REQ-GEN-008`–`REQ-GEN-010`, `REQ-LLM-001`, `REQ-LLM-003`–`REQ-LLM-005`, `REQ-LLM-007`–`REQ-LLM-009`, `REQ-LLM-011`, `REQ-LLM-015`, `REQ-LLM-016`, `REQ-LLM-019`, `REQ-LLM-020`, `REQ-SEC-004`, `REQ-SEC-005`, `REQ-SEC-013`–`REQ-SEC-016`, `REQ-A11Y-001`–`REQ-A11Y-004`, `REQ-A11Y-010`, BHV-03, BHV-04, SPEC-003, SPEC-004, HS-008, and HS-009.
+- **Verification:** Exercise one real eligible call through each adapter; show that scan and selection make no provider call; verify no action exists for abstentions; validate failures and provenance semantics; confirm the proposal separates evidence, guidance, AI interpretation, confidence, uncertainty, assumptions, blocking judgment, and post-change reminder. Generate, provider status, failure, and proposal inspection remain keyboard-operable and semantic; distinctions do not rely on color; provider attempts/failures and Finding state changes use the shared announcement pattern without disrupting focus or the predictable return to the selected Finding.
 - **Likely surfaces:** Integrated Finding detail, Generate control, provider/failure status, proposal view, aggregate persistence, and focused verification artifacts.
 - **Out of scope:** Review decision, combined proposal, regeneration, in-place retry, mode switch, batch action, chat, or quality comparison between providers.
 
@@ -384,24 +382,24 @@ M5 is semantically dependent only on completed scan evidence from M1. It is sequ
 ### M5-01 — Start an intentional later scan
 
 - **Parent milestone / role / status:** M5 / service, persistence, and UI / **Not started**.
-- **Objective:** Reuse the real scan path to create a distinct later PageAnalysisRun with an explicit baseline reference.
-- **Inputs, dependencies, and scheduling:** Depends on M4-03 by roadmap sequencing and reuses M1 without changing its scan semantics. Critical path.
-- **Expected output:** Rescan action from a retained baseline Finding, new run ID, immutable new global provider choice, `baselineRunId`, complete later scan, and preserved baseline data.
+- **Objective:** Reuse the real exact-three-rule scan to create a distinct later PageAnalysisRun and expose only the transient native candidate material needed for the later comparison gate.
+- **Inputs, dependencies, and scheduling:** Depends on M4-03 by roadmap sequencing and extends the M1 scan projection only for one explicitly selected comparison target. Critical path.
+- **Expected output:** Keyboard-operable rescan action from a retained baseline Finding; new run ID; immutable new global provider choice; `baselineRunId`; complete later scan; preserved baseline data; and transient native non-failing candidates limited to the selected baseline rule for M5-02 to evaluate before the combined native payload is discarded.
 - **User-visible outcome:** The user can intentionally rescan the same trusted page without overwriting the baseline or needing downstream workflow completion.
-- **Authorities:** `REQ-EVID-010`, `REQ-EVID-011`, `REQ-COMP-004`, `REQ-COMP-006`, ADR-0021, SPEC-006, and SPEC-007.
-- **Verification:** A later analysis is a new independent run; the baseline remains readable; no retry lineage is invented; comparison can start from a Finding with no retrieval/proposal/review; the new mode context does not affect scan evidence.
+- **Authorities:** `REQ-SCAN-005`, `REQ-EVID-008`, `REQ-EVID-010`, `REQ-EVID-011`, `REQ-COMP-004`, `REQ-COMP-006`–`REQ-COMP-008`, `REQ-A11Y-001`, `REQ-A11Y-002`, `REQ-A11Y-004`, `REQ-A11Y-010`, ADR-0009, ADR-0021, SPEC-006, and SPEC-007.
+- **Verification:** A later analysis is a new independent run; the baseline remains readable; no retry lineage is invented; comparison can start from a Finding with no retrieval/proposal/review; the new mode context does not affect scan evidence. No target match or comparison outcome is attempted before M5-02 checks pair comparability; candidate native non-failing nodes remain transient, rule-scoped, and unpersisted, and no general `passes` or `inapplicable` collection crosses the durable scan boundary. Rescan activation and state changes are keyboard-operable, semantic, announced without focus loss, and preserve a predictable return location.
 - **Likely surfaces:** Future rescan action, run-creation service, baseline reference, scanner reuse, aggregate repository, and run detail.
-- **Out of scope:** Scheduling, monitoring, background jobs, retry/resume, run history dashboard, multi-page comparison, or provider-state inheritance.
+- **Out of scope:** General `passes` or `inapplicable` archives, scheduling, monitoring, background jobs, retry/resume, run history dashboard, multi-page comparison, or provider-state inheritance.
 
 ### M5-02 — Apply comparability, correlation, and outcome rules
 
 - **Parent milestone / role / status:** M5 / service and validation / **Not started**.
 - **Objective:** Implement only the accepted pair and per-Finding comparison semantics.
-- **Inputs, dependencies, and scheduling:** Depends on M5-01; critical path.
-- **Expected output:** Page/scan-profile comparability gate, same-rule exact unique-locator correlation, evidence comparison, `resolved`, `improved`, `persistent`, `regressed`, `inconclusive`, and pair-level `not comparable` outcomes with rationale and limitations.
+- **Inputs, dependencies, and scheduling:** Depends on M5-01 and consumes its complete later scan plus transient rule-scoped non-failing candidates before they are discarded; critical path.
+- **Expected output:** Page/scan-profile comparability gate applied before target correlation; same-rule exact unique-locator correlation only for a comparable pair; at most one minimized later positive observation constructed for one unique native non-failing match; evidence comparison; `resolved`, `improved`, `persistent`, `regressed`, `inconclusive`, and pair-level `not comparable` outcomes with rationale and limitations.
 - **User-visible outcome:** The user receives a conservative explanation of what changed for the baseline Finding and what the evidence cannot prove.
-- **Authorities:** `REQ-COMP-001`–`REQ-COMP-008`, `REQ-EVID-010`, BHV-06, SPEC-006, and the accepted comparison definitions in the workflow requirements.
-- **Verification:** Binary public `image-alt`/`label` paths produce resolved or persistent only; public `color-contrast` may use the ordered margin for improved/persistent/regressed; missing/changed/duplicate/ambiguous matches are inconclusive; material profile mismatch is not comparable; later-only unmatched Findings are visible but not labeled new/regressed.
+- **Authorities:** `REQ-SCAN-005`, `REQ-EVID-008`, `REQ-EVID-010`, `REQ-COMP-001`–`REQ-COMP-008`, BHV-06, SPEC-006, and the accepted comparison definitions in the workflow requirements.
+- **Verification:** A material pair mismatch becomes `not comparable` without target correlation. For a comparable pair, `resolved` requires complete later rule coverage plus one constructed unique same-rule/same-locator native non-failing observation; absence from the later violation list alone never resolves a Finding. Exact matched binary public `image-alt`/`label` failures are persistent; public `color-contrast` may use the ordered margin for improved/persistent/regressed; missing/changed/duplicate/ambiguous matches or a missing required positive observation are inconclusive; later-only unmatched Findings are visible but not labeled new/regressed.
 - **Likely surfaces:** Future comparison policy, comparability validator, locator correlator, rule-specific evidence comparator, rationale builder, and comparison record.
 - **Out of scope:** Fuzzy matching, DOM diff, page fingerprinting, generalized comparator, materiality engine, inferred remediation causality, `new` classification, or accessibility/conformance verdict.
 
@@ -410,10 +408,10 @@ M5 is semantically dependent only on completed scan evidence from M1. It is sequ
 - **Parent milestone / role / status:** M5 / persistence and UI / **Not started**.
 - **Objective:** Add the comparison result to the later aggregate and render before/after evidence without conflating it with AI or human work.
 - **Inputs, dependencies, and scheduling:** Depends on M5-02; critical path.
-- **Expected output:** Baseline/later references, pair disposition, finding identity, available before/after evidence, target-match disposition where applicable, outcome, rationale, limitations, and non-blocking follow-up checks in the later `run.json` and UI.
+- **Expected output:** Baseline/later references, pair disposition, finding identity, available baseline evidence, the relevant later Finding or one narrow positive observation when uniquely matched, target-match disposition where applicable, outcome, rationale, limitations, and non-blocking follow-up checks in the later `run.json` and UI.
 - **User-visible outcome:** The user can inspect why a result is resolved, improved, persistent, regressed, inconclusive, or not comparable.
-- **Authorities:** `REQ-COMP-004`–`REQ-COMP-008`, `REQ-UX-002`, `REQ-UX-004`, `REQ-A11Y-003`, `REQ-A11Y-004`, SPEC-006, SPEC-008, and HS-015.
-- **Verification:** Missing matches do not fabricate current target/evidence; proposal/review/manual judgment appear only as context; differences do not rely only on color; limitations and post-change reminders remain visible.
+- **Authorities:** `REQ-COMP-004`–`REQ-COMP-008`, `REQ-UX-002`, `REQ-UX-004`, `REQ-A11Y-001`–`REQ-A11Y-004`, `REQ-A11Y-010`, SPEC-006, SPEC-008, and HS-015.
+- **Verification:** Missing matches do not fabricate current target/evidence; proposal/review/manual judgment appear only as context; before/after inspection and comparison controls are keyboard-operable and semantic; differences do not rely only on color; result announcements preserve focus and a predictable return location; limitations and post-change reminders remain visible.
 - **Likely surfaces:** Future comparison aggregate section, run repository update, comparison detail, before/after evidence view, status and limitation components.
 - **Out of scope:** Historical dashboard, trend analytics, alerts, CI integration, automated remediation validation, or causal claims.
 
@@ -425,7 +423,7 @@ M5 is semantically dependent only on completed scan evidence from M1. It is sequ
 - **Expected output:** Integrated resolved, persistent, inconclusive, not-comparable, ordered contrast improved/regressed, and preserved-lineage demonstrations.
 - **User-visible outcome:** The exact M5 milestone outcome works without requiring or mutating proposal/review state.
 - **Authorities:** `REQ-SEC-006`, `REQ-COMP-001`–`REQ-COMP-008`, BHV-06, SPEC-006, and the comparison-only vector in the evaluation authority.
-- **Verification:** Exercise manifest-declared controlled transitions, the comparison-only contrast vector, ambiguous/missing matching, profile mismatch, baseline preservation, and prohibited-claim wording. After exact baseline-directory deletion, an already persisted later comparison remains viewable with a broken-lineage limitation but cannot be recomputed or used to start another comparison. Binary regression remains controlled-policy evaluation only and is not persisted as a public runtime outcome.
+- **Verification:** Exercise manifest-declared controlled transitions, the comparison-only contrast vector, ambiguous/missing matching, profile mismatch, baseline preservation, prohibited-claim wording, and the applicable bounded keyboard/announcement/focus path. For a comparable pair with complete later coverage, one unique same-rule/same-locator native non-failing observation produces `resolved`; absence from the violation list without that observation produces `inconclusive`, never `resolved`. After exact baseline-directory deletion, an already persisted later comparison remains viewable with a broken-lineage limitation but cannot be recomputed or used to start another comparison. Binary regression remains controlled-policy evaluation only and is not persisted as a public runtime outcome.
 - **Likely surfaces:** Integrated rescan/comparison flow, controlled comparison inputs, focused verification artifacts, and accessible difference presentation.
 - **Out of scope:** General regression platform, arbitrary scan-pair browser, long-term analytics, release gate, or proof that remediation caused the change.
 
@@ -442,7 +440,7 @@ M6 is a final verification and evidence gate, not another vertical implementatio
 - **Inputs, dependencies, and scheduling:** Depends on M5-04 and the frozen manifest. Critical dependency path to M6-02.
 - **Expected output:** Recorded controlled scanner/evidence/retrieval outcomes, valid-zero versus failure behavior, trusted-URL boundary, shared abstention, review transitions, comparison outcomes, cleanup, persistence, and limitations.
 - **User-visible outcome:** Provides evidence that the non-generative portions of the portfolio workflow behave as documented.
-- **Authorities:** `REQ-EVAL-001`–`REQ-EVAL-005`, `REQ-EVAL-007`, `REQ-SCAN-002`, `REQ-SCAN-004`, `REQ-EVID-002`, SPEC-001–SPEC-008, HS-001, HS-004, HS-006, HS-008, HS-009, HS-010, and HS-015.
+- **Authorities:** `REQ-EVAL-001`–`REQ-EVAL-005`, `REQ-EVAL-007`, `REQ-SCAN-002`, `REQ-SCAN-004`, `REQ-EVID-002`, `REQ-QUAL-020`, SPEC-001, SPEC-002, the abstention and retrieval-failure scenarios of SPEC-003, SPEC-005–SPEC-008, HS-001, HS-004, HS-006, the no-call/abstention boundary of HS-008, HS-010, and HS-015.
 - **Verification:** Each shared check runs once rather than once per provider; observations stay separate; failures remain failures; no aggregate score, percentage, provider comparison, or broad coverage claim is produced.
 - **Likely surfaces:** Future evaluation manifest runner or documented execution path, controlled fixtures, captured bounded results, and evaluation notes.
 - **Out of scope:** Statistical study, benchmark suite, adversarial-page qualification, hostile-target security test program, provider ranking, or release gate.
@@ -451,10 +449,10 @@ M6 is a final verification and evidence gate, not another vertical implementatio
 
 - **Parent gate / role / status:** M6 / verification / **Not started**.
 - **Objective:** Exercise one eligible structured-generation case per controlled profile in Local mode and the same three in Groq mode.
-- **Inputs, dependencies, and scheduling:** Depends on M6-01, the M3-03 capacity screen, the frozen M3-01 package, and current availability of the exact Groq evaluation model. Critical path to M6-04.
+- **Inputs, dependencies, and scheduling:** Depends on M6-01, the passed M2-02 EmbeddingGemma gate, the passed M3-03 Qwen/full-local-stack gate, the frozen M3-01 package, and current availability of the exact Groq evaluation model. Critical path to M6-04.
 - **Expected output:** Three Local and three Groq case records against the same application-owned structure, with groundedness, citation, remediation-usefulness, safety, and limitation observations kept separate.
 - **User-visible outcome:** Demonstrates both accepted provider paths for the exact portfolio cases.
-- **Authorities:** `REQ-EVAL-001`, `REQ-EVAL-002`, `REQ-EVAL-004`–`REQ-EVAL-009`, ADR-0003, ADR-0004, ADR-0014, and HS-015.
+- **Authorities:** `REQ-EVAL-001`, `REQ-EVAL-002`, `REQ-EVAL-004`–`REQ-EVAL-009`, the eligible-proposal scenario of SPEC-003, the eligible-call/no-mixing/no-fallback portions of SPEC-004, the eligible-call gate of HS-008, the eligible-call/no-mixing/no-fallback portions of HS-009, ADR-0003, ADR-0004, ADR-0014, and HS-015.
 - **Verification:** Generation count is exactly six; invalid/failed output fails its case without fallback; Local and Groq are reported separately; no ranking, aggregate score, statistical claim, support claim, or dependency promotion occurs.
 - **Likely surfaces:** Future fixed-case records, separate Local/Groq result sections, proposal rubric observations, and limitation notes.
 - **Out of scope:** Provider comparison, multiple reviewers, significance claims, generalized model quality, cost/performance qualification, or public availability commitment.
@@ -478,8 +476,8 @@ M6 is a final verification and evidence gate, not another vertical implementatio
 - **Inputs, dependencies, and scheduling:** Depends on M6-02 and M6-03. Final critical-path checkpoint.
 - **Expected output:** A local, content-safe compact result set that identifies exact configurations, completion/failure per case, separate observations, known limitations, and rerun triggers.
 - **User-visible outcome:** The repository can demonstrate the accepted MVP honestly as a portfolio project.
-- **Authorities:** `REQ-SEC-007`, `REQ-SEC-021`, `REQ-EVAL-002`, `REQ-EVAL-004`–`REQ-EVAL-009`, `REQ-QUAL-006`, `REQ-QUAL-007`, `REQ-QUAL-009`, and HS-015.
-- **Verification:** Every Accepted MVP capability has traceable evidence; tracked or public portfolio material uses only project-owned synthetic inputs or separately approved non-sensitive minimized evidence and excludes raw/public-page/private evidence, prompts, provider payloads, model responses, screenshots, traces, and private journals; all temporary development substitutes have been removed or replaced; Deferred and Proposed items remain outside claims; Local/Groq results remain separate; no accessibility, compliance, provider, hardware-support, production-security, distribution, or release claim is made.
+- **Authorities:** `REQ-SEC-003`, `REQ-SEC-007`, `REQ-SEC-021`, `REQ-EVAL-002`, `REQ-EVAL-004`–`REQ-EVAL-009`, `REQ-QUAL-003`, `REQ-QUAL-006`, `REQ-QUAL-007`, `REQ-QUAL-009`, and HS-015.
+- **Verification:** Every Accepted MVP capability has traceable evidence; each fixed case records the material run, scan, corpus, retrieval, prompt/output-contract, application, provider/model-context, and actual-call provenance applicable to it without inventing invocation provenance when no call occurred; populated `run.json` sections pass the closed allowlist and negative-content inspection; tracked or public portfolio material uses only project-owned synthetic inputs or separately approved non-sensitive minimized evidence and excludes raw/public-page/private evidence, prompts, provider payloads, model responses, screenshots, traces, and private journals; all temporary development substitutes have been removed or replaced; Deferred and Proposed items remain outside claims; Local/Groq results remain separate; no accessibility, compliance, provider, hardware-support, production-security, distribution, or release claim is made.
 - **Likely surfaces:** Future bounded evaluation report, evidence links, repository status, and portfolio demonstration documentation.
 - **Out of scope:** Public release, installer, signed artifact, support matrix, qualification authority, promotion process, analytics, or marketing claims beyond observed evidence.
 
@@ -487,19 +485,17 @@ M6 is a final verification and evidence gate, not another vertical implementatio
 
 Only these groups are eligible for parallel scheduling when the user explicitly selects both tasks and a focused execution plan confirms non-overlapping ownership:
 
-1. **RD-002 and RD-003:** toolchain selection and scan-evaluation literals. They join before M1-01.
-2. **M1-02, M1-03, and M1-04:** service/persistence, scanner/evidence, and UI work after M1-01 freezes their shared contract. They join at M1-05. None may independently change that contract.
-3. **M2-01 and M1:** corpus preparation may proceed beside the walking skeleton because it owns separate source/corpus artifacts. It joins at M2-02.
-4. **M3-03 and M3-04:** Local and Groq adapters after M3-02 freezes the shared provider/output contract. They join at M3-05.
+1. **M1-02, M1-03, and M1-04:** service/persistence, scanner/evidence, and UI work after M1-01 freezes their shared contract. They join at M1-05. None may independently change that contract.
+2. **M3-03 and M3-04:** Local and Groq adapters after M3-02 freezes the shared provider/output contract. They join at M3-05.
 After each group, its named checkpoint must integrate and verify the combined behavior before dependent work begins. No artificial parallelism is created inside one aggregate mutation, shared lifecycle, UI composition, or integration boundary.
 
 ## Review checkpoints
 
 - **After M1:** Confirm the scan-to-evidence claim, exact rule scope, trusted-input limitation, durable aggregate, valid-zero/failure distinction, no-call behavior, and accessible results path.
-- **After M2:** Confirm corpus provenance, deterministic retrieval, exact citations, support-state definitions, abstention versus failure semantics, and absence of LLM calls.
-- **After M3:** Confirm the frozen contract, real Local/Groq paths, capacity observation, minimized egress, actual-call provenance, output validation, immutable mode, and no fallback.
+- **After M2:** Confirm corpus provenance, the passed EmbeddingGemma metadata/retrieval-capacity gate, deterministic retrieval, exact citations, support-state definitions, abstention versus failure semantics, and absence of generation calls.
+- **After M3:** Confirm the frozen contract, real Local/Groq paths, passed Qwen/full-local-stack gate, minimized egress, actual-call provenance, output validation, immutable mode, and no fallback.
 - **After M4:** Confirm proposal-only review, all three actions, support/judgment gates, original-proposal preservation, and no audit/collaboration expansion.
-- **After M5:** Confirm comparison independence, exact correlation, ordered contrast behavior, conservative uncertainty, preserved lineage, and prohibited claims.
+- **After M5:** Confirm comparison independence, exact correlation, one-target positive-observation minimization, `resolved` only with that unique native evidence, ordered contrast behavior, conservative uncertainty, preserved lineage, and prohibited claims.
 - **After M6:** Confirm exact evaluation counts, separate observations, application-accessibility evidence, limitations, rerun triggers, and absence of release or support claims.
 
 Each checkpoint should end in one of three outcomes: proceed; correct the current milestone; or record a newly discovered significant decision before proceeding. A checkpoint does not silently broaden scope.
@@ -508,9 +504,9 @@ Each checkpoint should end in one of three outcomes: proceed; correct the curren
 
 Without task-duration estimates, this is the mandatory dependency spine rather than a schedule-proven duration critical path:
 
-`RD-001 → RD-002/RD-003 join → M1-01 → M1-02/M1-03/M1-04 join → M1-05 → M2-02 → M2-03 → M2-04 → M3-01 → M3-02 → M3-03/M3-04 join → M3-05 → M4 → M5 → M6-01 → M6-02 → M6-03 → M6-04`
+`RD-001 → RD-002 → RD-003 → M1-01 → M1-02/M1-03/M1-04 join → M1-05 → M2-01 → M2-02 → M2-03 → M2-04 → M3-01 → M3-02 → M3-03/M3-04 join → M3-05 → M4 → M5 → M6-01 → M6-02 → M6-03 → M6-04`
 
-This ordering assumes M2-01 finishes no later than M1-05; that branch could become duration-critical in a future estimated execution plan. The Local capacity screen in M3-03 must complete before fixed Local generation evidence in M6-02.
+The EmbeddingGemma metadata prefilter and retrieval-specific capacity smoke in M2-02 must pass before M2-03, M2-04, or any later retrieval-dependent work. The separate Qwen/full-local-stack gate in M3-03 must pass before the fixed Local generation evidence in M6-02. Each is one role-specific screen, not repeated benchmarking, model comparison, or a support claim.
 
 ## Temporary substitutes and real-integration rule
 
