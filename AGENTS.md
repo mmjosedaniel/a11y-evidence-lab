@@ -31,6 +31,12 @@ Before implementation, confirm that the user selected a concrete roadmap task or
 
 When the selected task materially changes rendered UI, CSS, layout, visual hierarchy, responsive presentation, or visible interaction states, use the repository-local [frontend-quality skill](.agents/skills/frontend-quality/SKILL.md) as a bounded visual-quality overlay. It does not authorize development, change roadmap dependencies, add product behavior, or apply to nonvisual frontend or backend work.
 
+## Agent coordination
+
+When delegation would materially improve a repository task, follow the project-scoped [agent coordination workflow](.codex/README.md). Keep the primary agent responsible for authority interpretation, risk and role routing, synthesis, integration, final verification, roadmap-status changes, and user communication. Delegate only bounded work with explicit authorities, permissions, output, budget, and stop conditions; for implementation, also require the selected roadmap scope, paths, readiness gates, and validation. Never run more than one writer at a time in the same worktree.
+
+Use the root [execution-plan convention](PLANS.md) only when its activation conditions are met. An execution plan is a subordinate coordination record, not a second roadmap, architecture decision, authorization, or proof of completion.
+
 ## Documentation rules
 
 - Keep the repository minimal. Update the existing document or module whose declared responsibility owns the information; create another document only for a distinct responsibility that cannot remain coherent in an existing authority.
