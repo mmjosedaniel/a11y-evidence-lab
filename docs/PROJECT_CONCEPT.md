@@ -6,7 +6,7 @@ A11y Evidence Lab.
 
 ## Status
 
-**Concept status:** Accepted; recorded on 2026-08-20.
+**Document status:** Product-intent and planning-context summary, reviewed on 2026-08-28. This document is not acceptance authority; individual directions are Accepted, Proposed, Deferred, or Superseded only where the canonical requirements baseline or an ADR records that status.
 
 **Repository stage:** Development ready through OD-025 on 2026-08-28. Implementation follows the derived [development roadmap](DEVELOPMENT_ROADMAP.md); no implementation has started.
 
