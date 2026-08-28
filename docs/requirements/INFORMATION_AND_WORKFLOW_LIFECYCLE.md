@@ -2,90 +2,109 @@
 
 ## Authority and use
 
-This document is part of the authoritative requirements baseline indexed by [Project requirements](../PROJECT_REQUIREMENTS.md). The index defines status vocabulary, priority semantics, ID stability, and precedence. This file describes planned behavior, not implemented behavior; each identified row's recorded status controls.
+This document is part of the authoritative requirements baseline indexed by [Project requirements](../PROJECT_REQUIREMENTS.md). The index defines status vocabulary, priority semantics, ID stability, and precedence. This file describes planned behavior, not implemented behavior.
 
-## Core information and provenance model
+## Decision scope and history
 
-**Status:** Proposed until the data, retention, and persistence decisions are accepted. This is a conceptual information model, not a database design.
+**Status: Accepted for the MVP information and lifecycle boundary.** OD-012 accepted local filesystem persistence and canonical JSON. [OD-022](DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-022--portfolio-mvp-yagni-simplification) and [ADR-0021](../architecture/decisions/ADR-0021-single-file-run-aggregate.md) now supersede [ADR-0016](../architecture/decisions/ADR-0016-filesystem-run-persistence.md) for the MVP by narrowing that decision to one versioned `run.json` aggregate per PageAnalysisRun directory and at most one current review decision for a proposal, created only when review completes. ADR-0016 remains decision history; its independently identified and versioned child records and optional Markdown report no longer govern the MVP.
 
-| Record | Minimum required information |
+[OD-020](DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-020--authorized-public-page-analysis-scope) retains one **PageAnalysisRun**, one public HTTPS page, one immutable global Local-or-Groq provider/exact-model context, one complete provider-independent three-rule scan, a variable Finding collection, and one selected Finding workflow at a time. [OD-021](DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-021--trusted-operator-url-boundary-for-the-portfolio-mvp) and [ADR-0018](../architecture/decisions/ADR-0018-trusted-operator-url-boundary.md) retain the trusted developer-input target boundary.
+
+OD-018's simple `running -> completed / failed` parent operation, no-overwrite rule, and deferral of queues, cancellation, resume, workers, and workflow engines remain current where they do not conflict with OD-020 or ADR-0021. Starting Analyze again after a failure creates another independent run and never overwrites the failed aggregate; the MVP requires no retry-specific identity or lineage. OD-003 and OD-019 remain controlled evaluation-fixture history.
+
+The aggregate sections below are conceptual responsibilities, not separate files, database tables, schemas, or services. Diagnostics remain local and content-safe but are not another canonical run-record type. LangSmith, hosted tracing, telemetry, and analytics remain outside the MVP.
+
+## Accepted minimal information model
+
+Each PageAnalysisRun uses exactly one canonical machine-readable artifact outside Git:
+
+`data/runs/<run-id>/run.json`
+
+The file has one top-level format version. It contains the complete run aggregate and may be updated as the user processes selected Findings, but a downstream update must not alter completed scan evidence or a sibling Finding's data. If a later nested retrieval, generation, review, or comparison update cannot be durably written, the already completed parent and last valid aggregate remain unchanged, the application reports that selected action as failed, and no unsaved state is presented as durable. The MVP has no canonical child files, independent nested-record versions, Markdown report, event log, recovery journal, transaction service, or migration system.
+
+| Aggregate section | Minimum required information |
 | --- | --- |
-| Target | Identifier, type, URL or fixture reference, authorization attestation, declared scope, sensitivity classification, and owner-provided state description |
-| Scan run | Target, timestamp, page state, viewport, locale, browser, scanner/rules/configuration, execution status, coverage, and evidence-package reference when capture succeeds |
-| Finding | Stable record identifier, scan, rule, result type, impact metadata as reported by the scanner, affected target, correlation fingerprint version, and evidence references |
-| Evidence item | Type, exactly one source finding, minimal sanitized content, capture/sanitization policy and omissions, integrity metadata, sensitivity, access policy, and retention status |
-| Positive target observation | Stable identifier, scan, rule/profile, stable fixture-element key, narrow non-failing observation, capture policy, and the finding or baseline target whose later comparison it supports |
-| Corpus source and snapshot | Publisher, title, canonical URL, authority type, version/date, license notes, checksum, snapshot ID, and ingestion configuration |
-| Corpus derivation profile | Versioned source allowlist, normalization, segmentation, chunk-identity, locator, and snapshot-publication rules. Continuation, concurrency, cancellation, and generalized resource-budget fields are added only when a later corpus build needs them. |
-| Guidance passage | Snapshot, source, exact locator, text checksum, chunk identifier, and derivation metadata |
-| Retrieval run | Finding, source-evidence, normalized-projection, rule and scenario-mapping inputs; exact privacy-safe query or complete reconstruction inputs; query digest; filters; embedding/index/config versions; ranked passage IDs; support state; and operation status |
-| Provider profile | Identifier, local or external type, adapter and runtime versions, approved endpoint reference and class, model ID and revision or digest, capability-snapshot reference, non-secret configuration, privacy/cost disclosure version, consent status, secret-store reference only, and last validation state |
-| Readiness snapshot | Privacy-safe bounded observations for host capacity, runtime identity and availability, artifact installation and integrity, adapter capabilities and health, workload eligibility, observation freshness, unknown facts, and resulting eligibility |
-| Acquisition manifest | Approved artifact and profile IDs, sources and origins, revision and digests, license, transfer/installed/temporary/free-space sizes, dependencies, compatibility profile, staging and promotion rules, and install/removal ownership |
-| Model artifact | Purpose, source, exact tag and digest, format or quantization, size, location, license and integrity metadata, acquisition and verification times, lifecycle status, and dependent provider profiles |
-| Work operation | Operation ID, type, input identities, state, start/completion times, failure reason, result reference when completed, and a cancellation reason only if that later capability is supported. Revision, supersession, queue, cancellation, and stale-publication fields are added only when concurrency, replacement, or interactive cancellation is introduced. |
-| Generation run | Retrieval and evidence inputs; prompt/schema/config versions; proposal-or-abstention result; and validation outcome. A model-invoking run also records the provider profile, capability snapshot, local/API mode, model identity, no-fallback state, safe provider request/response references, and available usage/cost metadata. A deterministic policy abstention records that no provider call occurred. |
-| Setup or model-lifecycle action | Actor, time, action, affected runtime/model/profile, disclosure and consent versions, source/destination, planned and actual transfer/storage, integrity result, outcome, and recovery state without credentials |
-| Proposal version | Generation source, authorship type (`AI-generated` or `reviewer-edited`), predecessor when edited, complete submitted content, evidence-sufficiency state and authority, citations, manual-check definitions, and lifecycle state |
-| Review action | Proposal version, actor, timestamp, action, reason or note, edits, and resulting state |
-| Manual-check definition | Stable identifier, proposal/finding source, instructions, purpose, timing, blocking classification, and author |
-| Manual-check result | Definition, proposal, actor, timestamp, execution status, evidence or note, and—only when completed—observed accessibility outcome and one proposal relationship. A post-change occurrence may also reference its later scan and comparison. |
-| Scan-pair comparison | Baseline and later scans, operation status, comparability assessment, profile, limitations, and identified finding-comparison entries. A comparable first `image-alt` demonstration contains exactly one entry; a `not comparable` pair contains none, and broader comparable pairs may contain more. |
-| Finding-comparison entry | Parent scan-pair comparison, correlated finding or positive-observation references, outcome, rationale, before/after evidence, uncertainty, and follow-up checks |
-| Evaluation authority | Authority version and status, pilot/official classification, exact candidates, dataset and transforms, rubric and gates, runtime rules, software and hardware identities, result schema, privacy rules, interpretation policy, and authority digest |
-| Evaluation run and decision | Authority reference, exact profile and artifact identities, implementation revision and locks, measured results, validity state, decision state, reviewer or decision authority, failure evidence, and content-safe trace references |
-| Support qualification | Exact provider-profile, artifact/runtime configuration, hardware-profile, workload, and evaluation-authority identities; support state; applicable passed, failed, unavailable, or deferred gates; evidence digests; decision time and scope; and superseding qualification |
-| Release inventory and claim | Exact component inventory and tested artifact digests, validation classes, applicable profile qualifications, signing state, notices, audit blind spots, release-claim scope, outcome, and superseding evidence set |
+| Run identity | Top-level format version; immutable `runId` and creation time; normalized requested and observed final public-page identities; immutable global Local-or-Groq mode, selected provider, and exact selected model identifier as run configuration; application revision; optional `baselineRunId` only for an intentional later verification scan. Provider/model configuration is not evidence that a call occurred. |
+| Target and scan context | Basic public-HTTPS parse result; fresh non-persistent context and no-imported-state disposition; no-interaction/no-crawl scope; simple timeout and cleanup disposition; page-state/readiness description; browser, scanner, exact three-rule configuration, viewport, locale, and other material provenance. No URL credential, imported authentication material, attestation, DNS/IP admission, egress-gate, or hostile-target safety result. |
+| Parent scan status | `running`, `completed`, or `failed`; start and completion/failure time; bounded content-safe failure when applicable. `completed` requires the complete validated scan collections described below. |
+| Coverage and collections | Exactly one coverage entry for each of `image-alt`, `label`, and `color-contrast`; every retained violation node as a nested Finding; every native axe `incomplete` node as a separate nested ScannerReviewObservation; complete, untruncated collection disposition. ScannerReviewObservations need no independent stable ID and never enter retrieval, generation, or review. |
+| Finding | Stable within-run `findingId`; exact rule/check and native bucket; immutable minimized rule-specific evidence; relevant measured facts; a valid bounded comparison locator when available or one concise unavailability reason; other omission or sanitization notes; and current finding-level state. Run and Finding context replace separate scan, evidence-item, and workflow IDs. |
+| Selected-finding analysis | Nested only for a Finding the user processes: the privacy-safe query representation; corpus version; ordered stable `passageId` references and metrics; retrieval support result; optional provider invocation; proposal or abstention; no review decision while a proposal is pending and exactly one after review completes; and bounded content-safe failure when applicable. It contains no sibling Finding content. |
+| Optional provider invocation | Exists only after one Local or Groq call is attempted. It inherits or references the immutable run mode/provider/model configuration and its owning selected-Finding retrieval context, including `findingId`, corpus version, and relevant `passageId` values, without duplicating them. It records the actual adapter identifier and version, non-secret endpoint identity, prompt/output-contract provenance, bounded material generation parameters, non-secret outcome, and validation result. Runtime/model revision, request time, and safe usage metadata are optional when available. It has no independent ID and stores no credential or raw request/response payload. |
+| Proposal or abstention | A proposal retains the immutable generated finding summary, explanation, evidence and `passageId` citations, remediation, confidence/uncertainty, assumptions, the rule profile's blocking pre-acceptance manual judgment, its non-blocking post-change verification reminder, and validation result. A terminal pre-call application-authored abstention exists only for incomplete required Finding evidence or a completed retrieval with `incomplete`, `missing`, or `conflicting` support. It retains references to the Finding, available evidence and retrieval; the applicable evidence or guidance state; missing or conflicting information; a clear reason; confirmation that no provider was called; and manual-investigation guidance. Retrieval execution/integrity and post-call response failures are not abstentions. An abstention has no provider invocation or review decision. |
+| Review decision | Absent while the immutable original proposal is pending review. After review completes, exactly one current final object records action `approve`, `edit and accept`, or `reject`; decision time; a concise disposition for the blocking pre-acceptance manual judgment; an optional bounded reviewer note for any action; and the complete reviewer-edited proposal only for `edit and accept`. The post-change verification reminder remains proposal guidance, is not completed at review, and creates no second record. The decision has no actor identity, independent review ID, proposal-successor graph, audit event history, reason taxonomy, per-claim confirmation records, or separately versioned manual-check definitions/results. |
+| Comparison | For persisted public runtime comparison on a later run: `baselineRunId`; baseline `findingId` and minimized evidence; pair comparability with bounded rationale; a target-match disposition only when the pair is comparable; the relevant current Finding or nested positive observation plus after-evidence only when exact rule-and-locator correlation yields one unique later target; outcome when classifiable; applicable rule-specific delta; and limitations. A missing, invalid, or withheld baseline locator, or a missing, changed, duplicate, or ambiguous later match, remains representable as `inconclusive` without a current-target reference or after-evidence. A pair-level `not comparable` result records its mismatch and performs no target correlation. It has no independent comparison ID or file and makes no page-level accessibility claim. Controlled comparison-only evaluation pairs do not enter the run aggregate or require a baseline `findingId`. |
 
-## Workflow state and recovery model
+Only `runId`, within-run `findingId`, and curated-corpus `passageId` are required as stable domain identifiers. `baselineRunId` reuses another run's `runId`. Corpus, application, browser, scanner, provider/model, prompt, evidence-policy, and comparison-policy versions remain provenance values, not independently addressable run-record identities. The MVP requires no separate scan, observation, evidence, retrieval-run, invocation, generation, proposal-version, review-action, manual-check, or comparison ID.
 
-**Status:** The high-level first-run provider choice is Accepted; detailed setup, persistence, review, and deletion transitions remain Proposed until their policies are accepted.
+TypeScript record definitions and runtime validation at external and persisted-JSON boundaries remain governed by `REQ-QUAL-010` and `REQ-QUAL-011`. This model selects no schema framework, code generator, database, or safe-write library; the implementation must choose the smallest write protocol that prevents a failed update from being presented as durable success.
 
-The proposed installation and provider-readiness path is:
+## PageAnalysisRun lifecycle
 
-`installed -> first launch -> choose recommended local / choose external API / defer AI setup -> validate or provision selected provider -> application ready`
+At most one user-requested PageAnalysisRun is active at a time:
 
-Deferring setup or losing provider readiness disables generation visibly but does not block authorized scanning, evidence inspection, or history. Switching provider creates or selects a versioned provider profile and affects only later generation runs.
+`running -> completed`
 
-The proposed readiness dimensions are evaluated separately rather than collapsed into one optimistic status:
+`running -> failed`
 
-`host compatible -> required runtime available -> exact artifact installed and verified -> adapter healthy and capable -> requested workload eligible`
+`completed` means only that target parsing and navigation succeeded, the provider-independent scan executed all three supported rules, the complete untruncated Finding and ScannerReviewObservation collections were runtime-validated, and the canonical aggregate became durable. It does **not** mean every Finding was processed or reviewed, that every ScannerReviewObservation was resolved, that the selected provider was called, that the application proved the target safe, or that the page is accessible or conformant.
 
-The proposed application-owned optional-artifact lifecycle is:
+Malformed target input is rejected before a PageAnalysisRun is created. Once a run exists, the parent becomes `failed` after a navigation, readiness, or scanner failure; malformed top-level output; a fatal failure in result validation or evidence capture that prevents the complete bounded scan collection; a timeout; shutdown; or failure to durably write the initial complete scan aggregate. A failed parent operation, including one with coverage-incomplete scanning, never publishes a valid zero or complete findings list. An individual missing, invalid, or withheld allowlisted fact instead preserves its Finding or ScannerReviewObservation with the concise category or sufficiency reason required by `REQ-SCAN-005`; it does not by itself fail the parent. Bounded failure information may remain in `run.json`; it does not turn the run into a completed scan.
 
-`absent -> confirming -> acquiring by managed download / offline import / runtime-managed pull -> verifying -> installed -> activated`
+After parent completion, a failed write for a nested retrieval, generation, review, or comparison update does not move the parent to `failed` and does not publish a partial update. The last valid aggregate remains authoritative, the selected action is reported as failed, and the application must not claim that its unsaved result or state transition is durable.
 
-Cancellation or failure can occur at every active phase. It must leave partial staging unavailable and preserve the last verified selection. Installation, activation, deactivation, selection, and removal are distinct explicit actions. An adapter for an independently installed runtime may observe and request its supported operations rather than duplicate that runtime's model store.
+The immutable global generation mode, selected provider, and exact model identifier are recorded when the PageAnalysisRun begins, but scanner execution does not depend on them. This run configuration creates no provider invocation, performs no automatic Finding processing, and cannot change the rule set or Findings collection.
 
-The proposed durable proposal path is:
+## Finding lifecycle
 
-`target declared -> scan running -> evidence available -> retrieval complete -> proposal generated -> pending review -> accepted / edited and accepted -> rescan requested -> comparison operation complete`
+Every completed PageAnalysisRun lists all Findings with independent downstream state. Selecting one Finding activates only its nested analysis and does not create or change sibling data. The minimum paths remain:
 
-`pending review -> rejected`
+`unprocessed -> active -> abstained`
 
-A completed comparable comparison operation contains one or more finding outcomes such as `resolved`, `persistent`, `regressed`, or `inconclusive`. `Inconclusive` is not an operation state. A materially mismatched valid pair completes with pair-level `not comparable` and contains no finding outcomes; an invalid or incomplete source pair blocks or fails the operation.
+`unprocessed -> active -> proposal pending review -> accepted / edited and accepted / rejected`
 
-The separate abstention path is:
+`unprocessed -> active -> failed`
 
-`retrieval complete -> abstained -> acknowledged / manual triage / explicit retry after inputs change`
+Only one Finding may be `active` at a time. This is sequential application state inside `run.json`, not a queue or separately versioned FindingWorkflow record.
 
-An abstention cannot become an accepted remediation plan. Any first-slice stage may enter a visible failure state. Timeout or application shutdown aborts the current work without publishing completed output; an explicit retry starts a linked operation from the last valid durable input. A visible `cancelled` state is added only if a later stage introduces interactive cancellation. A new generation after rejection or abstention creates a linked result version; it does not erase the earlier record. Optional tracing failure does not destroy deterministic evidence or an existing human decision.
+- Incomplete required Finding evidence, or a completed retrieval with `incomplete`, `missing`, or `conflicting` support, produces the terminal `abstained` state, preserves the Finding, and records a clear application-authored explanation plus manual-investigation guidance without a provider invocation or proposal-review decision.
+- A retrieval execution or passage-integrity failure has no guidance-support state and produces `failed` for that Finding.
+- A provider invocation is nested only when the user explicitly starts generation for one eligible Finding and one call is attempted. A readiness, context-fit, authentication, quota, network, provider, or response-validation failure remains visible for that Finding and never causes automatic retry, a second call, or fallback.
+- A validated proposal enters `proposal pending review`. The one final review decision moves that Finding to `accepted`, `edited and accepted`, or `rejected`; there is no separate proposal-version lifecycle.
+- ScannerReviewObservations never use this lifecycle and cannot become proposals.
 
-The minimal operation lifecycle is:
+A completed parent scan may contain a truthful mix of these Finding states. That is not a partially completed scan: the provider-independent scan and collection are already complete. The interface must never aggregate Finding decisions into page-level approval or accessibility status.
 
-`created -> running -> completed / failed`
+## Repeated analysis, provider change, and rescan
 
-A later cancellable stage may add `running -> cancelled`; that transition is not part of the first portfolio slice.
+The MVP has no in-place retry, regeneration, provider switch, or resume. Starting Analyze again after a failed scan or Finding action creates another independent `runId` and directory. It preserves the earlier directory and makes no retry-history graph or `retryOfRunId` necessary. Choosing the other provider requires another explicit analysis run and remains new work, not fallback.
 
-The controlled-fixture portfolio slice runs one user-requested operation per stage and needs no queue, child-worker lifecycle, replace-in-flight action, or generalized publication-eligibility protocol. Explicit retry creates a linked operation and must not automatically resubmit an ambiguous billable provider request. If later concurrency introduces replacement or late results, OD-018 must define the additional identity and eligibility semantics before that behavior is implemented.
+An intentional later verification scan is also a new PageAnalysisRun, but its aggregate records `baselineRunId`. It parses and navigates the same trusted developer-supplied page and reruns the exact provider-independent three-rule scan. Any retained baseline Finding may be selected for comparison regardless of downstream state. Finding-level comparison data is nested in the later aggregate. Retrieval, generation or abstention, ProviderInvocation, proposal, and review are not comparison prerequisites, and the rescan does not automatically perform or change any of them.
 
-The proposed evaluation lifecycle is:
+The MVP has no `created`, `queued`, `cancelled`, `paused`, `resuming`, or parent partial-success state. It also has no automatic fan-out, combined prompt, checkpoint, cancellation controller, background worker, replacement-in-flight behavior, or workflow engine.
 
-`non-promotable calibration -> authority frozen -> official execution -> validity determination -> accepted / deferred / rejected -> exact-profile support state`
+## Comparison lifecycle
 
-Historical authorities and results remain immutable. One current support matrix identifies the effective status without rewriting the evidence that produced earlier states.
+**Status:** The exact-locator public-page model is Accepted through OD-022, `REQ-EVID-010`, `REQ-COMP-007`, and `REQ-COMP-008`; the frozen fixture-key evaluation model remains Accepted under `REQ-EVID-002` and `REQ-COMP-002`.
+
+Both source scans must be complete. A material mismatch in normalized page identity or the applicable exact three-rule, browser, viewport, locale, evidence, coverage, or contrast-measurement provenance produces pair-level `not comparable` and no classified finding outcome.
+
+For a comparable pair, correlation uses the exact rule and one valid retained locator string that matches uniquely. A missing, invalid, or withheld baseline locator, or a missing, changed, duplicate, or ambiguous later match, is `inconclusive`, never a forced match; the Finding remains preserved with its concise reason, and the MVP adds no fingerprint, weighted descriptor, threshold, fuzzy matcher, or new identity. Public runtime comparison always starts from a baseline Finding. `resolved` requires complete later coverage and a unique same-target native non-failing observation; disappearance from the violation list, target removal, or locator failure is insufficient. Exact matched binary failures are `persistent`; public `image-alt` and `label` comparisons cannot produce `regressed` because no retained non-failing baseline is selectable as a Finding. Exact comparable `color-contrast` baseline and later failures use the retained contrast margin for `improved`, `persistent`, or `regressed`. OD-019's reverse positive-to-violation binary case remains a controlled-fixture, logic-only evaluation input under a stable fixture key; it creates no canonical run comparison or new identity. A later-only unmatched Finding remains visible without being called `regressed`; `new` remains Deferred.
+
+When present, review decisions, pre-acceptance judgments, and post-change reminders may be displayed as contextual data but never alter deterministic comparability or outcome calculation. No comparison proves accessibility, conformance, certification, or remediation causality.
+
+## Retention and deletion boundary
+
+The MVP retains one minimized `run.json` aggregate needed to reopen a PageAnalysisRun. It contains immutable run and selected-provider configuration; target and scan provenance; complete Finding and ScannerReviewObservation collections; per-Finding evidence and downstream data; retrieval passage references; optional actual-call invocation provenance; proposal or abstention; one final proposal-review decision when applicable; comparison data when applicable; and bounded failure information.
+
+Deleting a run means deleting its exact local directory. The MVP adds no per-finding deletion, database cascade, backup, cloud synchronization, telemetry store, analytics store, audit store, or multi-user retention policy. An already persisted comparison in a later aggregate remains viewable with a visible broken-lineage limitation when its `baselineRunId` target is deleted, but it cannot be recomputed or used to start another comparison. That later aggregate retains only the baseline evidence it already explicitly owns as comparison data; the application creates no hidden duplicate.
+
+## Deferred lifecycle concepts
+
+The following remain outside the MVP: canonical child files; independently versioned nested records; Markdown reports; audit or event histories; authenticated, private, or intentionally hostile-page support; multiple targets; crawling; generalized project management; automatic collection processing; bulk generation/review; parallel finding workflows; queues; selective in-place retry or resume; retry-lineage graphs; provider mixing; combined prompts/proposals; fuzzy or AI target correlation; databases, migrations, backup, and synchronization; multi-user history; long-term analytics; support qualification; release inventories; and public claim publication.
 
 ## Documentation navigation
 
+- [ADR-0021: Single-file run aggregate](../architecture/decisions/ADR-0021-single-file-run-aggregate.md)
 - [Project requirements index](../PROJECT_REQUIREMENTS.md)
 - [Project documentation index](../README.md)

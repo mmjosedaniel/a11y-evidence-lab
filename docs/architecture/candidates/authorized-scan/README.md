@@ -2,42 +2,58 @@
 
 ## Authority, status, and scope
 
-**Document status: Proposed architecture assessment.** ADR-0008, ADR-0009, and ADR-0011 retain their accepted evaluation-baseline scope; no part of this assessment family becomes accepted by association.
+**Document status: Proposed architecture assessment.** [ADR-0018](../../decisions/ADR-0018-trusted-operator-url-boundary.md) owns the accepted MVP trusted operator URL policy. [ADR-0017](../../decisions/ADR-0017-authorized-public-page-scan-boundary.md) is superseded decision history. ADR-0008, ADR-0009, and ADR-0011 retain their evaluation-baseline scope. This assessment family proposes technical detail only; it does not authorize implementation, accept exact packages, or promote an evaluation technology to release adoption.
 
-Assessment date: 2026-08-23. Simplified for the portfolio vertical slice on 2026-08-24.
+Assessment date: 2026-08-23. Reframed for the trusted operator URL boundary on 2026-08-27.
 
-This family describes the smallest proposed approach for the first workflow step: **scan an authorized controlled fixture with deterministic browser checks**. It does not authorize implementation, dependency installation, live-page scanning, or release adoption.
+This family describes the smallest proposed approach for the first workflow step: **scan one operator-entered public HTTPS page under the authorized-and-trusted supported-use assumption with the exact three accepted axe-core rules**. Canonical behavior remains in [Evidence and review workflow requirements — Target authorization and scanning](../../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#target-authorization-and-scanning), the applicable [quality, security, and operations requirements](../../../requirements/quality-security-and-operations/README.md), and accepted ADRs. If an assessment conflicts with one of those authorities, the authority controls.
 
-The authoritative behavior remains in [Evidence and review workflow requirements — Target authorization and scanning](../../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#target-authorization-and-scanning), the applicable focused modules in [Quality, security, and operations requirements](../../../requirements/quality-security-and-operations/README.md), and accepted ADRs. If an assessment conflicts with an identified requirement or accepted ADR, that authority controls.
+## MVP runtime boundary
 
-## Initial portfolio slice
+One admitted scan:
 
-The accepted first portfolio scenario is deliberately narrow; this assessment proposes only how Step 1 executes it:
+1. accepts one operator-entered public HTTPS page URL and displays that only authorized pages trusted by the operator are supported, without a separate attestation or confirmation control;
+2. parses the requested URL and rejects malformed input or embedded credentials without claiming to prove public reachability or safety;
+3. opens only that page in a fresh non-persistent Playwright-managed Chromium context with no imported state, applies one finite navigation timeout, and scans its entire top-level document in the current rendered state at the configured readiness condition while excluding iframe documents;
+4. runs one atomic axe-core scan restricted to `image-alt`, `label`, and `color-contrast`;
+5. returns all violation nodes reported for those rules plus distinct native `incomplete` observations and scan coverage; and
+6. reports navigation, scanner, malformed-result, interrupted-collection, timeout, or cleanup failure visibly rather than publishing a complete zero-finding result.
 
-- One synthetic, project-owned product-image scenario represented by a baseline fixture and one corrected revision.
-- The baseline contains one informative image without an alternative-text attribute.
-- The corrected revision contains an appropriate alternative for the same image.
-- One pinned axe-core rule, **image-alt**, runs in one pinned Playwright-managed Chromium profile.
-- No arbitrary URL, uploaded HTML, credential, crawling, or live-page access.
+The scan does not activate inactive/non-rendered states, crawl, follow page links as targets, authenticate, intentionally interact with controls, submit forms, upload or download files, accept custom headers or cookies, scan iframe documents, or broaden the rule set. A successful Step 1 handoff is one page-level transient observation, not three scans and not a completed end-to-end workflow. Coverage of the entire top-level document in its current rendered state and the trusted-input assumption are Accepted through ADR-0018 and the applicable open-decision record. Exact readiness, timeout, cleanup mechanics, and the pinned iframe-exclusion compatibility check remain Proposed implementation details; production hostile-URL and resource-bound qualification is Deferred.
 
-This is enough to supply deterministic evidence to the later retrieval and generation stages while keeping the portfolio focus on RAG, LangChain, grounded generation, tracing, evaluation, and human review.
+Each violation node becomes an independent candidate finding in Step 2, and the interface lists all retained findings. Only one selected finding proceeds through retrieval and evidence-sufficiency evaluation at a time. Incomplete required evidence or a completed `incomplete`, `missing`, or `conflicting` retrieval ends in a terminal application-authored abstention with an explanation and manual-investigation guidance but no model call or proposal-review decision. A retrieval execution or integrity failure instead fails that FindingWorkflow with no support state. Complete required evidence plus a completed `supported` retrieval is eligible and may produce one proposal that alone enters review. No scan-wide prompt, combined remediation proposal, bulk decision, queue, parallel provider work, or workflow engine is introduced.
+
+## Evaluation baseline
+
+The project-owned synthetic failing and corrected cases remain the deterministic evaluation baseline for the three rule families. They freeze known content, expected native results, and comparison evidence independently of changing public pages. They are evaluation inputs, not the product's runtime target intake.
+
+| Rule family | Controlled evaluation mapping |
+| --- | --- |
+| `image-alt` | Missing text alternative; WCAG 2.2 SC 1.1.1 |
+| `label` | Form control without an accessible name; WCAG 2.2 SC 4.1.2 |
+| `color-contrast` | Insufficient normal-text contrast; WCAG 2.2 SC 1.4.3 |
+
+An automated result remains evidence about one rule under the recorded scan profile. It does not establish complete success-criterion non-conformance, page accessibility, legal compliance, or certification.
 
 ## Assessment map
 
 | Assessment | Responsibility |
 | --- | --- |
 | [Technology selection](TECHNOLOGY_SELECTION.md) | Minimal TypeScript, Playwright, Chromium, and axe-core proposal, with alternatives and primary-source evidence. |
-| [Controlled-fixture execution and security](CONTROLLED_FIXTURE_EXECUTION_AND_SECURITY.md) | Exact fixture slice, minimal authorization attestation, page-state profile, execution sequence, scan outcome, Step 1 handoff, security limits, and live-page prerequisites. |
+| [Deferred hostile-URL and public-page hardening assessment](AUTHORIZED_PUBLIC_PAGE_EXECUTION_AND_SECURITY.md) | Preserved post-MVP research for hostile-URL containment; it is not the current execution design or a development prerequisite. |
+| [Controlled-fixture evaluation assessment](CONTROLLED_FIXTURE_EXECUTION_AND_SECURITY.md) | Project-owned deterministic evaluation baseline and its network-independent, no-external-resource fixture profile. |
 
 ## Step boundary
 
-Step 1 ends with a runtime-validated, **transient native scanner observation held in memory**. Step 2 exclusively owns evidence allowlisting, privacy sanitization, normalization, finding and evidence records, redaction information, and durable publication.
+Step 1 ends with a runtime-validated, **transient native page-scan observation held in memory**. Step 2 exclusively owns rule-specific evidence allowlisting, privacy sanitization, per-node finding identity, minimized evidence, and durable publication.
 
-All application-owned scan logic is proposed as ordinary modules in one local TypeScript application process. Playwright still launches and owns its managed Chromium process; the MVP does not add an application child worker, IPC protocol, process-tree supervisor, policy proxy, or microservice.
+All application-owned scan logic remains ordinary modules in one local TypeScript service. The loopback React UI is unprivileged; it does not receive raw page/scanner payloads, filesystem authority, provider credentials, local-model-runtime access, or Playwright authority. The service owns the fresh managed scan context and cleanup. It does not need an egress proxy, worker, supervisor, or hostile-page sandbox for the trusted-input portfolio path.
 
 ## Documentation navigation
 
 - Next workflow step: [Accessibility finding and evidence capture assessment](../ACCESSIBILITY_FINDING_EVIDENCE_CAPTURE_ASSESSMENT.md)
+- [ADR-0018: Trusted operator URL boundary for the portfolio MVP](../../decisions/ADR-0018-trusted-operator-url-boundary.md)
+- [ADR-0017: Authorized public-page scan boundary](../../decisions/ADR-0017-authorized-public-page-scan-boundary.md) — superseded history
 - [Architecture index](../../README.md)
 - [Candidate architecture](../../CANDIDATE_ARCHITECTURE.md)
 - [Local MVP feasibility](../../../LOCAL_MVP_FEASIBILITY.md)

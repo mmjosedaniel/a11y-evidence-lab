@@ -2,172 +2,165 @@
 
 ## Authority, status, and scope
 
-**Status:** Proposed architecture detail for the controlled-fixture MVP. This assessment does not change any requirement or architecture-decision status, authorize implementation, select persistence technology, or enable live-target scanning.
+**Status:** Proposed architecture detail for the second workflow step, aligned on 2026-08-27 with [OD-022](../../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-022--portfolio-mvp-yagni-simplification) and [ADR-0021](../decisions/ADR-0021-single-file-run-aggregate.md). This assessment owns no requirement IDs or statuses, authorizes no implementation, and selects no schema library.
 
-**Assessment date:** 2026-08-24.
+Canonical behavior remains in [Evidence and review workflow requirements — Evidence and provenance](../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#evidence-and-provenance). Accepted policy controls if it conflicts with this assessment.
 
-The authoritative requirement IDs, wording, and recorded statuses for this workflow step remain in [Evidence and review workflow requirements](../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#evidence-and-provenance). This supporting assessment owns no requirement IDs or statuses and cannot override an identified requirement or accepted ADR.
+## Recommendation: minimize directly into the run aggregate
 
-## Exact first portfolio slice
+Step 1 supplies one complete, runtime-validated, transient axe result for one trusted operator-entered public HTTPS page and exactly `image-alt`, `label`, and `color-contrast`. Step 2 should validate and minimize that result directly into the current `run.json`:
 
-The first slice should use one project-owned controlled fixture with one informative product image and one axe rule:
+- one run-level scan section with target, tool, profile, time, coverage, and completion provenance;
+- one nested Finding for every returned violation node;
+- one nested minimized evidence object inside each Finding;
+- a distinct list of minimized native `incomplete` observations; and
+- only the narrow same-target positive observation needed by an intentional later comparison.
 
-- **Baseline revision:** the image has no `alt` attribute and the pinned `image-alt` rule reports one violation for one affected node.
-- **Corrected revision:** the same logical image has a context-appropriate `alt` value and the same rule/profile records one narrow same-target non-failing observation.
+The product lists every Finding but processes none automatically. One selected Finding at a time may later enter retrieval and sufficiency evaluation. Insufficiency ends that FindingWorkflow in a terminal application-authored abstention with explanation and manual-investigation guidance but no model call or proposal-review decision; eligibility may produce one proposal that alone enters review. Findings never share a combined prompt, proposal, confidence, review decision, or comparison result.
 
-This slice is intentionally smaller than a general evidence platform. It is enough to demonstrate the project’s distinguishing path:
+If required allowlisted evidence is missing, invalid, or contradictory, keep the deterministic Finding visible and mark its evidence insufficient. This blocks only that Finding's generation path.
 
-`Playwright + axe-core -> deterministic evidence -> retrieval input -> RAG -> structured proposal -> human review -> rescan comparison`
+## Step boundary
 
-The scanner cannot determine whether alternative text is contextually appropriate. That remains an explicit manual check, and disappearance of the automated finding must not be presented as proof that the page is accessible or conformant.
+`complete transient axe result -> minimized scan and Findings in run.json -> one selected Finding -> retrieval`
 
-## Smallest sufficient boundary
+Step 1 owns navigation, fresh browser execution, exact rule configuration, native collection, runtime validation, timeout, and cleanup. Step 2 owns rule-specific allowlisting, sanitization, the durable Finding list, distinct incomplete observations, and evidence-sufficiency inputs.
 
-The scan and evidence steps should remain separate ordinary application functions, even if they run sequentially in one TypeScript process:
+Step 2 must reject a failed, truncated, malformed, or coverage-incomplete handoff. It must not publish fewer Findings as a successful scan. The unredacted native result remains transient and is discarded after minimization succeeds or fails.
 
-`Step 1 transient native scan observation in memory -> Step 2 capture and publication record -> Step 3 retrieval-input assembly`
+## Minimum finding identity and evidence
 
-### Step 1 output consumed here
+One application Finding corresponds to one axe violation node under one supported rule. Its minimum nested record needs:
 
-Step 1 owns authorization, browser/scanner execution, declared configuration, coverage, and execution status. It returns one runtime-validated **transient scan observation** containing the native axe result and the minimum provenance needed by Step 2. The unredacted native result is not a durable record and is never sent to the UI, retrieval system, or model.
+- a `findingId` unique within the enclosing run; the aggregate supplies the run's `runId`;
+- the exact rule ID, native result category, impact when reported, and check identifiers;
+- one bounded, sanitized locator string for conservative later comparison when valid and available, otherwise one concise unavailability reason;
+- the rule-specific facts below;
+- an evidence-sufficiency value and concise reason when insufficient; and
+- the run-level scanner, browser, target, profile, coverage, and evidence-policy provenance.
 
-Step 2 does not run the browser, reinterpret execution success, or independently discover frame coverage. It accepts only a successfully completed transient observation for the exact fixture and `image-alt` profile. A failed, timed-out, interrupted, partial, stale, or mismatched observation is rejected rather than turned into evidence.
+No separate scan ID, evidence ID, projection ID, policy ID, target fingerprint, occurrence identity, digest, or independently versioned child record is required. Multiple Findings may retain the same locator. They remain independently addressable by `findingId`, while duplicate locator matches make later public-page correlation `inconclusive`.
 
-### Step 2 responsibilities
+The locator is minimized evidence, not a universal element identity. It must not contain credentials, form values, raw HTML, arbitrary text, executable URLs, or an unbounded DOM path.
 
-Step 2 is the single logical owner of the evidence transformation:
+## Rule-specific evidence
 
-1. Validate the expected native axe fields and bounds.
-2. Apply the versioned evidence allowlist and sanitizer before any durable write.
-3. Construct the scan-run publication record and one finding record for the affected baseline node.
-4. Construct exactly one immutable sanitized source-evidence item for that finding. The first slice does not share or de-duplicate source-evidence items across findings.
-5. Derive one versioned normalized finding projection from that source item.
-6. Calculate the retained source-evidence digest, normalized-projection digest, and configuration digest using the selected canonical serialization.
-7. For the corrected scan, retain only the narrow positive same-target observation defined below; do not retain all native pass nodes.
-8. Construct one evidence publication bundle for local storage. The storage mechanism remains an open decision and does not change these logical responsibilities.
+Common retained facts are limited to the rule/category, native check identities, scanner-reported impact, a safe locator when valid and available or its concise unavailability reason, rule-specific facts, and explicit missing or invalid categories. Locator unavailability makes exact correlation unavailable and, if the scan pair otherwise passes the comparability gate, makes a requested comparison `inconclusive`; it does not by itself make generation evidence insufficient because the locator never enters retrieval or provider input. Exact scanner and adapter versions, page identity, viewport, locale, scan time, rule set, and coverage belong once at run level.
 
-Sanitization, normalization, digest creation, and publication-record construction must not also occur in Step 1. Keeping one owner prevents two components from creating different “authoritative” evidence from the same scanner result. No message broker, worker protocol, event store, or separate evidence service is needed for this slice.
+Exclude native `node.html`, full HTML, arbitrary page or element text, page source, DOM or accessibility-tree snapshots, screenshots, browser traces, network bodies or logs, cookies, storage, credentials, headers, input values, image URLs, and unrelated attributes.
 
-This approach reuses the Playwright and axe-core evaluation baselines recorded in [ADR-0008](../decisions/ADR-0008-playwright-as-initial-browser-automation.md) and [ADR-0009](../decisions/ADR-0009-axe-core-as-initial-accessibility-scanner.md). It does not promote either candidate to release adoption. The tagged [`axe-core` result definitions](https://github.com/dequelabs/axe-core/blob/v4.13.0/axe.d.ts) expose native result categories, rules, nodes, checks, targets, URL, timestamp, and engine metadata. The tagged [`axe-core` API documentation](https://github.com/dequelabs/axe-core/blob/v4.13.0/doc/API.md) states that `incomplete` results require further review. Those fields are source material, not a trusted persistence schema.
+### `image-alt`
 
-## First-slice allowlist
+Retain element kind `img`, native check identities, and bounded facts describing whether a text-alternative mechanism was present according to the scanner. Do not retain `src`, filenames, surrounding text, or a model-inferred image purpose.
 
-The `image-alt` evidence profile should retain only what the six-step demonstration needs:
+The automated result cannot establish whether the image is informative, functional, or decorative, or what alternative wording is appropriate. Those are manual judgments.
 
-- native rule ID and result category;
-- scanner-reported impact without inventing an order;
-- one structured affected-target locator and one fixture-owned, privacy-safe element key used only as a correlation input;
-- element kind `img` and the derived fact `alt attribute missing` for the baseline violation;
-- allowlisted axe check identifiers and a bounded failure summary;
-- exact fixture, page-state, browser, scanner, rule-profile, sanitizer, and projection identities; and
-- explicit omitted, truncated, withheld, or insufficient markers.
+### `label`
 
-Native `node.html` is excluded by default. If the portfolio UI needs an excerpt to show where the evidence came from, the `image-alt` profile may retain one bounded sanitized excerpt containing only the `img` tag and the `alt` attribute state. It must remove `src`, URL data, arbitrary IDs and classes, inline style, event handlers, unrelated attributes, and surrounding text. The excerpt is supporting evidence, never executable markup or element identity.
+Retain the element kind, safe input type, native check identities, and bounded facts about programmatic accessible-name or label-association mechanisms reported for the target. Do not retain the current value, arbitrary placeholder text, submission data, or a person's name.
 
-The profile does not retain the whole page, screenshot, accessibility tree, browser trace, network log, cookie, storage, credential, form value, or arbitrary axe check `data`.
+The product's rule mapping is SC 4.1.2. This evidence alone does not prove complete success-criterion non-conformance or label quality.
 
-## Narrow corrected-scan observation
+### `color-contrast`
 
-The corrected revision needs one **positive target observation** so comparison does not infer resolution merely because the violation disappeared. For the same `image-alt` rule and logical fixture image, retain:
+Retain these scanner-emitted values when present and valid:
 
-- corrected scan-run and rule-profile references;
-- native category `pass` for the selected node;
-- the same structured locator and fixture-owned correlation input permitted by the profile;
-- element kind `img` and derived fact `alt attribute present and non-empty`;
-- source-result and sanitizer identities plus a retained-content digest; and
-- a limitation stating that axe observed a structurally acceptable alternative, not that the wording is contextually appropriate.
+- `fgColor`;
+- `bgColor`;
+- `contrastRatio`;
+- `expectedContrastRatio`;
+- `fontSize`; and
+- `fontWeight`.
 
-This observation is an allowlisted component of the corrected scan publication record, not a general pass-retention feature and not an accessibility verdict. All other pass and inapplicable nodes remain unpersisted for the first slice.
+Preserve the measured ratio and expected threshold used by the scanner. Capture does not recompute contrast or override the native result. Missing or inconsistent material measurements keep the Finding visible but make its evidence insufficient for generation.
 
-## Conceptual evidence record
+## Incomplete and positive observations
 
-This is a documentation-level composition of the existing **Scan run**, **Finding**, **Evidence item**, and **Positive target observation** concepts in the [information and workflow lifecycle](../../requirements/INFORMATION_AND_WORKFLOW_LIFECYCLE.md), not a database schema or programming-language contract. Identifiers provide references, retained-content digests identify stored content, and correlation inputs only support later matching; they are not interchangeable.
+Native axe `incomplete` nodes remain separate scanner-review observations. Retain only the rule/check identity, a safe locator when valid and available or its concise unavailability reason, and the available scanner reason needed to explain the limitation. They are not Findings, do not enter retrieval or proposal review, and do not become workflow failures.
 
-| Component | Minimum retained information | Purpose |
-| --- | --- | --- |
-| Scan-run publication record | Schema version; scan-run, target, authorization, fixture/revision, page-state, time, viewport, browser, scanner, `image-alt` profile, coverage, sanitizer, and configuration references; execution and publication eligibility; configuration digest. | Establishes what authorized state was scanned and what actually ran. |
-| Finding record | Finding, scan-run, rule-manifest, source-evidence, and normalized-projection references; native `violation` category; scanner impact; affected target; correlation-profile version and inputs. | Represents the one baseline node reported by `image-alt`. |
-| Per-finding source-evidence item | Evidence, scan, and finding references; allowlisted native rule/node/check fields; structured target; derived missing-alt fact; optional minimal sanitized excerpt; sanitizer version; retained-content digest; omission markers. | Preserves what axe reported without storing the native payload or sharing one source item across findings. |
-| Normalized finding projection | Projection version; finding and source-evidence references; rule `image-alt`; category `violation`; element kind `img`; normalized missing-text-alternative fact; deterministic ordering; projection digest. | Supplies stable, privacy-safe facts for display and later retrieval while remaining traceable to source evidence. |
-| Positive target observation | Corrected scan and rule references; native `pass`; same-target correlation inputs; `img` and non-empty-alt derived facts; sanitizer identity; retained-content digest; limitation. | Allows the later comparison to distinguish a reported pass on the same target from silence or missing coverage. It is separate from a finding-owned evidence item. |
-| Redaction summary | Evidence-policy and sanitizer versions; removed or transformed field categories; reason codes; retained-content digest. | Makes minimization inspectable without copying removed values. |
+For an intentional rescan, the application may request one narrow native non-failing observation for a baseline Finding's exact locator under the same rule. Retain only the evidence needed to show that exact target was evaluated. Absence from the later violation list is not enough. A missing, changed, duplicate, or ambiguous locator produces `inconclusive` rather than a fabricated positive observation.
 
-The minimum trace path is:
+## Conceptual `run.json` placement
 
-`finding -> per-finding source evidence -> scan run -> authorized fixture revision and declared state`
+This is documentation, not a TypeScript schema.
 
-and:
+| Location | Minimum content |
+| --- | --- |
+| Run scan section | Normalized requested and observed final page; scan time; browser, scanner, viewport, locale, exact rule profile, evidence-policy version, coverage, and completion status. |
+| Finding entry | `findingId`; rule/category; impact and checks; safe locator when valid and available or its concise unavailability reason; nested rule-specific evidence; sufficiency and limitation reason. |
+| Incomplete-observation entry | Rule/check identity; safe locator when valid and available or its concise unavailability reason; available scanner reason; clear scanner-review classification. |
+| Targeted positive observation | Baseline finding reference; exact rule and locator; later non-failing evidence or an inconclusive reason. |
 
-`finding -> rule manifest -> exact scanner release and scanner guidance metadata`
+The aggregate itself supplies lineage:
 
-Scanner metadata remains informative source context. It is not a substitute for retrieved W3C guidance.
+`Finding -> nested evidence -> run scan provenance`
 
-## Handoff to retrieval and later steps
+and, for retrieval:
 
-Step 2 publishes named references, not one flattened “RAG document.” Step 3 should assemble its privacy-safe retrieval input by resolving the **finding record**, **per-finding source-evidence item**, **normalized finding projection**, **rule manifest**, **approved scenario/rule-to-guidance mapping**, and the eligible **scan-run publication record**. The normalized projection supplies stable facts, but it is not sufficient lineage by itself. Step 3 owns the deterministic query representation and retrieval-run record.
+`Finding -> rule mapping -> retrieved passage IDs`
 
-The same records support the remaining steps without mutation:
+No separate evidence graph or child-file layout is needed.
 
-- Generation cites the exact finding/evidence and retrieved passage references it receives; it cannot rewrite scanner evidence.
-- Human review displays deterministic evidence, retrieved guidance, AI interpretation, and reviewer content as separate layers.
-- Comparison uses the baseline finding and corrected positive target observation only after the scan pair passes its prerequisites. A valid pair with ambiguous same-target correlation is `inconclusive`; a material target, state, configuration, rule, evidence-semantic, or coverage mismatch is `not comparable`. Missing, failed, partial, or invalid source scans block comparison rather than becoming either classification.
+## Handoff to later steps
 
-## Privacy and public-demo boundary
+Retrieval receives one selected Finding's rule, native checks, and allowlisted rule-specific facts. It does not receive the page URL, locator, raw HTML, arbitrary text, sibling Findings, or excluded evidence. Opaque identifiers remain traceability fields and are not embedded.
 
-The unredacted native result exists only in memory during Step 2 and is not written to logs, diagnostics, exports, temporary artifacts, vector storage, or traces. The evidence allowlist is applied before local persistence.
+The scanned page never enters the curated guidance corpus. Missing core facts or a supported-rule contextual variant that lacks required support causes deterministic ineligibility or abstention. An invalid, unknown, or ambiguous fixed rule-to-guidance mapping instead fails configuration or integrity processing with no guidance-support state. Neither path triggers web search, corpus expansion, raw-page prompting, or a generic proposal.
 
-A public demo must use only the project-owned synthetic fixture and synthetic review history. Private sessions, real customer pages, credentials, proprietary markup, and personal data must never become demo evidence. Digests and fixture keys are not anonymization and must not be derived from sensitive raw values.
+Generation and review refer to the same nested Finding without modifying its source evidence. Comparison uses the two complete runs and the exact rule-plus-locator policy accepted for public pages. Controlled fixtures continue to use their stable project-owned target keys.
 
-When the policy removes material evidence, record `withheld` or `insufficient`; do not reconstruct it with an LLM or weaken the policy to force a conclusion.
+## Privacy and portfolio boundary
 
-## Meaningful alternatives
+Persist only the minimized facts needed to inspect the three-rule workflow. Public reachability does not make page content safe to retain, send, or publish. Groq may receive only the selected eligible Finding's permitted facts and retrieved guidance after the explicit Generate action; it receives no URL, locator, raw page, sibling Finding, or review history.
 
-| Alternative | Trade-off | Proposed disposition |
-| --- | --- | --- |
-| Store the complete native axe result | Simplifies initial extraction but retains unnecessary page content and couples persistence to an external tool schema. | Reject for the MVP. |
-| Store only the normalized projection | Is very small but loses inspectable source evidence and weakens provenance. | Reject as the canonical evidence record; retain the small per-finding source item as well. |
+A public portfolio demonstration should use the project-owned synthetic evaluation material or separately approved non-sensitive minimized evidence. The application makes no certification, compliance, or hostile-page-safety claim.
 
-## Assumptions and open questions
+## Alternatives
+
+| Alternative | Disposition |
+| --- | --- |
+| Persist the complete native axe result | Reject: it retains unnecessary content and couples durable data to the scanner payload. |
+| Create separate scan, evidence, projection, and policy records with their own identities and versions | Defer: the one-run portfolio workflow can preserve traceability through nesting. |
+| Merge every node for one rule into one Finding | Reject: separate targets require separate evidence and review. |
+
+## Assumptions, open questions, and non-goals
 
 Assumptions:
 
-- The first evaluation uses exactly the project-owned baseline and corrected fixture revisions described above, one main frame, one informative image, and the pinned `image-alt` profile.
-- The fixture-owned element key is synthetic, non-sensitive, stable across the two revisions, and only one correlation input; it does not independently prove identity.
-- The corrected fixture’s alternative text is reviewed manually because the scanner verifies structure, not contextual quality.
+- the operator supplies one trusted, authorized public HTTPS page;
+- the scan covers exactly the three accepted rules; and
+- one local user processes one retained Finding at a time.
 
-Open decisions remain limited to:
+The exact bounded locator syntax, rule-specific field names, evidence-policy version label, and targeted-positive-observation procedure remain implementation details.
 
-- the exact fixture content, stable correlation inputs, and accepted manual-check wording;
-- canonical serialization, digest algorithm, schema compatibility, and local persistence;
-- retention, deletion, export, and public-demo policies; and
-- the exact rule-to-guidance mapping and small evaluation criteria.
+Explicit non-goals are raw-page storage or prompting, screenshots, DOM or accessibility-tree capture, fuzzy or AI element matching, automatic all-finding processing, authenticated pages, crawling, broader rule coverage, multiple scanners, automatic remediation, and certification or compliance determination.
 
-## Explicit non-goals
+## Planning acceptance criteria
 
-- Live or authenticated pages, crawling, arbitrary local files, multiple fixtures, multiple rules, multiple scanners, or cross-browser equivalence.
-- General DOM snapshots, screenshots, accessibility trees, HAR files, browser traces, or network capture.
-- Shared evidence de-duplication, a universal DOM evidence model, generalized pass retention, fuzzy matching, or historical analytics.
-- A worker service, queue, event-sourcing system, distributed pipeline, or production-scale storage design.
-- Using LangChain, an LLM, embedding model, or vector store for deterministic capture, sanitization, correlation, or comparison.
-- Automatic remediation, certification, compliance determination, or treating a passed rule as proof that the image or page is accessible.
+This step is adequately defined when:
 
-## Acceptance criteria for this planning definition
+1. one complete transient scan produces every returned violation node as an independent nested Finding;
+2. incomplete observations remain separate and visible;
+3. the allowlist retains the minimum facts for the three rules and excludes raw page/browser payloads;
+4. insufficient evidence keeps the Finding visible and blocks only its generation path;
+5. retrieval can build a privacy-safe query without URL, locator, arbitrary text, or HTML;
+6. one `run.json` preserves traceability without separate evidence identities or files; and
+7. later comparison can request a narrow exact-target positive observation and otherwise remains conservative.
 
-This workflow step is defined adequately for later evaluation when:
+## Primary sources
 
-1. Step 1 ends with one transient native observation, and Step 2 is the only owner of allowlisting, sanitization, source-evidence construction, normalization, digests, and publication-record construction.
-2. The baseline creates one `image-alt` finding and exactly one minimal immutable source-evidence item, with traceability to the authorized fixture revision, declared state, scan time, exact tool/profile versions, affected target, and redaction summary.
-3. The allowlist excludes the native payload and raw HTML; any displayed excerpt is bounded to the rule-approved `img`/`alt` representation and contains no URL, credential, private value, or executable markup.
-4. The corrected scan retains exactly one narrow same-target `pass` observation with an explicit contextual-quality limitation, rather than all passing nodes.
-5. Step 3 can construct a privacy-safe reproducible query from the named record references without embedding opaque IDs or requiring raw page content.
-6. The baseline finding and corrected observation provide the evidence needed for a later conservative `resolved` classification when all pair prerequisites and unique correlation pass; ambiguity produces `inconclusive`, while material pair mismatch produces `not comparable`.
-7. Evidence, guidance, generated interpretation, manual checks, and reviewer content remain separate and no record makes an accessibility, compliance, certification, or automatic-fix claim.
-8. Persistence, retention, schema, and release technologies remain visibly undecided, so this Proposed assessment does not accidentally authorize implementation or accept them.
+- [axe-core 4.13.0 API and result model](https://github.com/dequelabs/axe-core/blob/v4.13.0/doc/API.md)
+- [axe-core 4.13.0 TypeScript result definitions](https://github.com/dequelabs/axe-core/blob/v4.13.0/axe.d.ts)
+- [axe-core 4.13.0 contrast evaluator](https://github.com/dequelabs/axe-core/blob/v4.13.0/lib/checks/color/color-contrast-evaluate.js)
+- [WCAG 2.2 SC 1.1.1](https://www.w3.org/TR/WCAG22/#non-text-content)
+- [WCAG 2.2 SC 4.1.2](https://www.w3.org/TR/WCAG22/#name-role-value)
+- [WCAG 2.2 SC 1.4.3](https://www.w3.org/TR/WCAG22/#contrast-minimum)
 
 ## Documentation navigation
 
 - Previous workflow step: [Authorized deterministic web scan assessments](authorized-scan/README.md)
 - Next workflow step: [Accessibility guidance retrieval assessments](guidance-retrieval/README.md)
+- [ADR-0021: Single-file run aggregate](../decisions/ADR-0021-single-file-run-aggregate.md)
 - [Evidence and review workflow requirements](../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md)
 - [Architecture index](../README.md)
 - [Project documentation index](../../README.md)

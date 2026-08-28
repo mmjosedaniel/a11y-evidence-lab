@@ -2,107 +2,132 @@
 
 ## Authority, status, and scope
 
-**Document status: Proposed architecture assessment.** ADR-0008, ADR-0009, and ADR-0011 retain their accepted evaluation-baseline scope; no part of this assessment becomes accepted by association.
+**Document status: Proposed architecture assessment.** [ADR-0018](../../decisions/ADR-0018-trusted-operator-url-boundary.md) owns the accepted trusted operator URL policy. [ADR-0017](../../decisions/ADR-0017-authorized-public-page-scan-boundary.md) is superseded decision history. ADR-0008, ADR-0009, and ADR-0011 retain their evaluation-baseline scope. This assessment does not authorize implementation, accept exact package versions, or promote a technology to release adoption.
 
-Assessment date: 2026-08-23. Simplified for the portfolio vertical slice on 2026-08-24.
+Assessment date: 2026-08-23. Reframed for the trusted operator URL boundary on 2026-08-27.
 
-This assessment owns the technology-selection portion of the [authorized deterministic web scan assessment family](README.md). It owns no requirement or ADR status and does not authorize implementation or live-page scanning. Canonical behavior remains in [Evidence and review workflow requirements — Target authorization and scanning](../../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#target-authorization-and-scanning).
+Canonical behavior remains in [Evidence and review workflow requirements — Target authorization and scanning](../../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#target-authorization-and-scanning). This assessment owns only the proposed technology shape for the [authorized deterministic web scan family](README.md).
 
 ## Minimal recommendation
 
-Use ordinary TypeScript modules in **one local application process**:
+Use ordinary TypeScript modules in one local application service:
 
-1. An authorization/admission module accepts only a project-owned fixture ID and an explicit attestation.
-2. A scan module uses the Playwright Library to launch its managed Chromium build and create a fresh browser context.
-3. An axe adapter runs one pinned rule, **image-alt**, and returns a transient native axe result.
-4. A small runtime boundary validates the supported result shape before the in-memory handoff to Step 2.
+1. An admission module accepts one trusted operator-entered public HTTPS page URL, exposes the supported-use limitation without a separate attestation gate, parses the URL, and rejects malformed input or embedded credentials.
+2. A scan module uses the Playwright Library with its matching managed Chromium in a fresh non-persistent context without imported user state.
+3. The scan module applies one finite navigation timeout, performs no intentional page interaction or download, and closes the page, context, and browser after every outcome.
+4. One axe adapter performs one atomic scan restricted to `image-alt`, `label`, and `color-contrast` and returns all reported violation nodes plus separate native incomplete observations and coverage.
+5. A small runtime boundary validates the transient page-scan observation before the in-memory handoff to Step 2; an invalid or interrupted result remains a visible failure.
 
-Playwright-managed Chromium is necessarily a browser process, but the application does not add its own scan worker, IPC protocol, supervisor, policy proxy, or service boundary for this slice.
-
-The scan stage remains intentionally small. LangChain, retrieval, embeddings, vector storage, LangGraph, LangSmith, and LLM providers do not belong in Step 1; they consume its captured evidence in later stages.
+The user opens the React interface from the local service's loopback address in Chrome or Edge. That UI browser is distinct from Playwright-managed Chromium and has no direct browser-automation authority. LangChain, retrieval, embeddings, vector storage, generation providers, and review do not belong in Step 1.
 
 ## Technology profile
 
-Exact versions are dated research seeds, not release selections. They must be refreshed and pinned before an authorized evaluation.
+Exact versions are dated research seeds. They must be refreshed, pinned, and evaluated after development is authorized.
 
 | Concern | Minimal candidate | Status and boundary |
 | --- | --- | --- |
-| Application language | TypeScript with strict independent type checking | **Accepted for evaluation** by [ADR-0011](../../decisions/ADR-0011-typescript-as-initial-application-language.md). |
-| Local JavaScript runtime | Node.js 24 LTS; 24.19.0 is the dated seed | **Proposed.** ADR-0011 does not select a runtime. |
-| Browser automation | playwright@1.62.1 Library | Playwright with pinned Chromium is **Accepted for evaluation** by [ADR-0008](../../decisions/ADR-0008-playwright-as-initial-browser-automation.md); this exact package version remains Proposed. |
-| Browser | Matching Playwright-managed Chromium, headless, sandbox explicitly enabled, in a fresh non-persistent context | The pinned-Chromium evaluation baseline is accepted; exact artifact identity, packaging, update policy, and release support remain Proposed. Never use a personal profile or silently fall back to an installed Chrome or Edge. |
-| Accessibility scanner | @axe-core/playwright@4.13.0 with the resolved axe-core version recorded | axe-core through its Playwright adapter is **Accepted for evaluation** by [ADR-0009](../../decisions/ADR-0009-axe-core-as-initial-accessibility-scanner.md). |
-| Rule selection | Explicit **image-alt** rule only | The scenario is accepted by OD-002; this exact execution profile remains Proposed. Package defaults and broad WCAG tags do not define this slice. |
-| Fixture loading | Two bundled static HTML revisions loaded with Playwright page content; image bytes are embedded and no network resource is required | **Proposed.** This is sufficient for the one-document fixture and is not evidence for real navigation or live-page safety. |
-| Runtime validation | One small versioned schema for the transient scanner observation | Required by REQ-QUAL-010. The schema authority and validation library remain open under OD-015; no IPC schema is needed. |
-| Application topology | Authorization, scan, and evidence modules in one local TypeScript application process | **Proposed YAGNI choice.** The React renderer remains unable to call Playwright directly, as required by REQ-SEC-019. |
+| Application language | TypeScript with strict independent type checking | **Accepted for evaluation** by [ADR-0011](../../decisions/ADR-0011-typescript-as-initial-application-language.md). Runtime validation still applies to external data. |
+| Local JavaScript runtime | Node.js 24 LTS; 24.19.0 is the dated seed | **Proposed.** ADR-0011 does not select a runtime or web-service framework. |
+| Browser automation | `playwright@1.62.1` Library | Playwright with pinned managed Chromium is **Accepted for evaluation** by [ADR-0008](../../decisions/ADR-0008-playwright-as-initial-browser-automation.md); this version remains Proposed. |
+| Browser context | Matching managed Chromium, fresh non-persistent context, no personal profile, cookies, storage, credentials, extensions, or granted permissions | The hygiene direction follows ADR-0018 and ADR-0008. Exact browser artifact, readiness procedure, finite timeout, and cleanup mechanics remain Proposed. This is not hostile-page isolation. |
+| Accessibility scanner | `@axe-core/playwright@4.13.0` with the resolved axe-core version recorded | axe-core through the Playwright adapter is **Accepted for evaluation** by [ADR-0009](../../decisions/ADR-0009-axe-core-as-initial-accessibility-scanner.md). |
+| Rule selection | One exact allowlist containing `image-alt`, `label`, and `color-contrast` in one axe execution | The three-rule product boundary is accepted by ADR-0018. The [minimal axe option profile](#proposed-minimal-axe-option-profile) states the Proposed configuration intent. Broad WCAG tags and package defaults must not expand it. |
+| Runtime target | One trusted operator-entered and authorized public HTTPS page; no authentication or imported browser state | Accepted policy in ADR-0018. The application validates URL syntax but does not prove public reachability or perform DNS, IP, redirect, or subresource security classification. |
+| Document scope | The entire developer-selected top-level document in its current rendered state at the configured readiness condition; iframe documents and inactive/non-rendered states excluded | Accepted product boundary through ADR-0018 and the applicable open-decision record. The Proposed axe profile expresses the intended `iframes: false` boundary, but the pinned adapter behavior must pass the compatibility check below before implementation is frozen. Exact readiness and coverage checks remain Proposed. |
+| Evaluation target | Project-owned synthetic failing/corrected cases for all three rule families | Retained as the deterministic evaluation baseline. They do not replace runtime public-page admission or imply broad live-page reproducibility. |
+| Runtime validation | Small application-owned TypeScript record definitions and boundary checks | The minimal boundary is accepted in principle; exact code or library remains Proposed. No schema framework or code generation is required. |
+| Application topology | Loopback React UI plus admission, scan, and evidence modules in one local service | The local-service topology is Accepted by ADR-0015. ADR-0018 requires no egress proxy, separate browser worker, supervisor, or production sandbox for the trusted-input portfolio path. |
 
-The scanner configuration should request native violations, incomplete results, passes, and inapplicable results for **image-alt**. Step 1 returns those categories transiently; Step 2 decides which permitted fields become evidence. In particular, a passing observation for the corrected image can support later comparison, but it does not establish that the alternative text is contextually appropriate.
+### Proposed minimal axe option profile
+
+Each scan should materialize one application-owned option profile whose effective axe-core values are:
+
+| Boundary | Proposed value | Purpose |
+| --- | --- | --- |
+| Rule selection | `runOnly: { type: "rule", values: ["image-alt", "label", "color-contrast"] }` | Select the three rule IDs directly. Do not use WCAG tags, omit `runOnly`, or merge user-supplied rule settings. axe-core otherwise runs its broader enabled-rule defaults. |
+| Document scope | `iframes: false` as the intended option | Keep the accepted scan on the entire developer-selected top-level document in its current rendered state while excluding iframe documents. The axe-core 4.13 default is `true`, so relying on the default would broaden the scope; the Playwright adapter compatibility check below is still required. |
+| Native result detail for an ordinary scan | `resultTypes: ["violations", "incomplete"]` | Preserve full node detail for every Finding and ScannerReviewObservation. The other required native arrays remain available in their reduced per-rule form for coverage; retaining all pass nodes on every scan is unnecessary. |
+| Additional detail for an intentional comparison rescan | Add `"passes"` only when the selected baseline Finding requires a later same-target non-failing observation | Pass detail is transient and reduced immediately to the one correlated positive observation. Do not persist a page-wide pass collection or request full inapplicable-node detail. |
+
+The application should materialize the applicable closed profile rather than constructing it by subtracting rules from axe defaults. An ordinary scan uses the exact rule, document-scope, and two-detail settings above; an intentional comparison rescan may add pass detail only for its selected baseline need. Adapter convenience methods, direct option calls, ordering of the three rule IDs, and the exact TypeScript representation remain Proposed implementation details.
+
+After execution, the runtime boundary should require all four native result arrays, reject any result whose union of rule IDs differs from the exact three-rule set, and preserve every returned violation and incomplete node for Step 2. Passes and inapplicable results establish coverage transiently; Step 2 persists only the narrow same-target positive observation required for comparison. An `incomplete` result is scanner evidence, not scan failure. A missing array, unexpected rule, absent requested-rule coverage, malformed result, or truncated page-scan envelope is a visible scan failure rather than a valid zero-Finding result.
+
+This profile is a Proposed way to make the Accepted scope explicit, not a new ADR or an implementation prescription. The versioned axe-core API documents rule-ID `runOnly`, the four result collections, `resultTypes`, the reduced non-requested result detail, and the `iframes` default. The versioned Playwright adapter source shows both an adapter-owned recursive frame path and the option handoff to axe-core, so configuration text alone is not sufficient evidence that iframe results are excluded.
+
+Before the implementation profile is frozen, one version-pinned synthetic probe must place a supported-rule violation only inside an iframe and confirm that `@axe-core/playwright` returns no violation node from that iframe under the intended configuration. If it does not, the implementation must use the smallest verified top-frame-only axe invocation instead of adding a frame-management subsystem. Until that probe passes, iframe exclusion is an accepted product boundary with a Proposed, unverified adapter mechanism—not an implemented capability claim.
 
 ## Why this is sufficient
 
-### Playwright supplies the deterministic rendered page
+### Playwright supplies rendered-page execution
 
-Playwright can launch the matching managed browser, create an isolated context, set a fixed viewport and locale, load the bundled static page, block unexpected network requests, and run axe against the rendered DOM. That demonstrates browser automation without building a general browser-execution platform.
+Playwright supplies a managed browser, fresh contexts, navigation timeouts, axe integration, and lifecycle cleanup. For this portfolio path, a non-persistent context with no imported state, one finite navigation timeout, no application-directed interaction or downloads, and cleanup after every outcome are sufficient. They reduce accidental state reuse but do not establish a hostile-page security boundary.
 
-The product uses the Playwright Library because scanning is application behavior. A future evaluation may use @playwright/test as test tooling, but the test runner does not need to become the product runtime.
+The product uses the Playwright Library because scanning is application behavior. `@playwright/test` may later be used for executable tests, but it need not become the product runtime.
 
-### axe-core supplies source evidence without replacing human review
+### axe-core supplies the exact three-rule source result
 
-axe-core provides a stable rule identifier and native result categories. The initial slice needs only one rule:
+One axe execution over the developer-selected page's current rendered state avoids three redundant navigations while keeping coverage closed. Each native violation node becomes an independent candidate Finding. Rule-level grouping is presentation; it must not merge unrelated targets into one proposal. The three rule mappings remain:
 
-- The baseline fixture should produce one **image-alt** violation for the selected image.
-- The corrected fixture should no longer produce that violation and should include the same subject in the rule's passing result.
-- Native incomplete results remain distinguishable from both violations and scan-operation failures.
+- `image-alt` → WCAG 2.2 SC 1.1.1;
+- `label` → WCAG 2.2 SC 4.1.2; and
+- `color-contrast` → WCAG 2.2 SC 1.4.3.
 
-These are automated observations under a recorded configuration, not a certification or a determination that the page or alternative text is accessible.
+These mappings provide retrieval vocabulary. A rule result does not establish complete success-criterion non-conformance or page accessibility.
 
-### TypeScript keeps the adapter small and visible
+### TypeScript keeps the boundary inspectable
 
-TypeScript fits the accepted evaluation baseline and the Playwright ecosystem. It also lets the portfolio show a clear adapter boundary between third-party axe data and application-owned records. Static types do not validate runtime scanner data, so a small runtime check is still required before Step 2 consumes it.
-
-The initial slice does not need a second application process. Fault isolation, IPC compatibility, process-tree supervision, and restart protocols would add implementation surface without improving the RAG demonstration.
+TypeScript aligns with Playwright and the accepted language evaluation baseline. Compile-time types do not validate axe results, URLs, persisted JSON, or third-party responses at runtime, so small application-owned checks remain necessary. A worker protocol, schema platform, code generator, or general scanner framework adds no value to this fixed page/rule scope.
 
 ## Responsibilities deliberately excluded
 
-This technology choice does not make Step 1 responsible for:
+Step 1 does not own:
 
-- Evidence allowlisting, sanitization, redaction, normalization, or fingerprints.
-- Finding or evidence record construction.
-- Persistence or publication.
-- Retrieval, prompting, generation, review, or comparison.
-- Arbitrary URL input, crawling, authentication, uploaded HTML, or browser profiles.
-- Production-scale browser isolation, parallel scans, or cross-browser coverage.
+- evidence allowlisting, page-content sanitization, finding persistence, or per-finding normalized evidence;
+- corpus ingestion, retrieval, prompting, generation, human review, or comparison;
+- automatic processing of the findings collection or a combined remediation proposal;
+- authentication, cookies, custom headers, private targets, uploaded HTML, local files, or personal browser profiles;
+- crawling, link discovery, multi-page scanning, multiple tabs, scripted task flows, form submission, or SPA route exploration;
+- any rule beyond the exact three-rule allowlist, a second scanner, cross-browser equivalence, or mobile coverage;
+- scheduled, parallel, queued, CI, or production-scale scanning; or
+- installer, desktop-shell, embedded-webview, or release packaging work.
 
-Those boundaries prevent the scan adapter from becoming a second evidence domain.
-
-## Meaningful alternatives
+## Alternatives
 
 | Alternative | Trade-off |
 | --- | --- |
-| Playwright route fulfillment on a virtual fixture origin | Adds realistic URL and relative-resource behavior, but also adds a manifest and routing policy. Adopt it only if the selected fixture later requires multiple resources, frames, or navigation that page-content loading cannot represent. |
-| Puppeteer with the axe-core adapter | Could perform the same narrow scan, but it duplicates the already accepted Playwright evaluation direction and adds no portfolio value for this scenario. Reconsider only if Playwright fails the controlled-fixture evaluation. |
+| One project-owned, preconfigured public lab URL | Further reduces live-page variability, but no longer demonstrates the accepted operator-entered URL interaction. The three controlled profiles already supply the reproducible evaluation baseline, so this restriction adds little portfolio value. |
+| Puppeteer with axe-core | Could perform the same narrow work, but duplicates the accepted Playwright evaluation direction without adding portfolio value. Reconsider only if Playwright cannot support the simple trusted-page scan. |
 
 ## Primary sources
 
-Time-sensitive version sources were checked on 2026-08-23.
+Time-sensitive package seeds were checked on 2026-08-24; current versions must be rechecked before evaluation.
 
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/intro)
 - [Node.js release status](https://nodejs.org/en/about/previous-releases)
 - [Playwright Library](https://playwright.dev/docs/library)
 - [Playwright browser management](https://playwright.dev/docs/browsers)
 - [Playwright browser-context isolation](https://playwright.dev/docs/browser-contexts)
-- [Playwright network interception](https://playwright.dev/docs/network)
 - [Playwright accessibility testing](https://playwright.dev/docs/accessibility-testing)
 - [Playwright 1.62.1 release](https://github.com/microsoft/playwright/releases/tag/v1.62.1)
+- [WHATWG URL Standard](https://url.spec.whatwg.org/)
 - [axe-core 4.13.0 API and result model](https://github.com/dequelabs/axe-core/blob/v4.13.0/doc/API.md)
+- [axe-core 4.13.0 partial-run guidance](https://github.com/dequelabs/axe-core/blob/v4.13.0/doc/run-partial.md)
+- [@axe-core/playwright 4.13.0 builder options and rule restriction](https://github.com/dequelabs/axe-core-npm/blob/v4.13.0/packages/playwright/src/index.ts)
 - [axe-core 4.13.0 rule descriptions](https://github.com/dequelabs/axe-core/blob/v4.13.0/doc/rule-descriptions.md)
+- [axe-core 4.13.0 `image-alt`](https://github.com/dequelabs/axe-core/blob/v4.13.0/lib/rules/image-alt.json)
+- [axe-core 4.13.0 `label`](https://github.com/dequelabs/axe-core/blob/v4.13.0/lib/rules/label.json)
+- [axe-core 4.13.0 `color-contrast`](https://github.com/dequelabs/axe-core/blob/v4.13.0/lib/rules/color-contrast.json)
+- [axe-core 4.13.0 contrast evaluator](https://github.com/dequelabs/axe-core/blob/v4.13.0/lib/checks/color/color-contrast-evaluate.js)
 - [@axe-core/playwright 4.13.0 package](https://github.com/dequelabs/axe-core-npm/tree/v4.13.0/packages/playwright)
 
 ## Documentation navigation
 
 - Up: [Authorized deterministic web scan candidate assessments](README.md)
-- Next within this workflow step: [Controlled-fixture execution and security](CONTROLLED_FIXTURE_EXECUTION_AND_SECURITY.md)
+- Deferred hardening research: [Deferred hostile-URL and public-page hardening assessment](AUTHORIZED_PUBLIC_PAGE_EXECUTION_AND_SECURITY.md)
+- Evaluation baseline: [Controlled-fixture evaluation assessment](CONTROLLED_FIXTURE_EXECUTION_AND_SECURITY.md)
+- [ADR-0018: Trusted operator URL boundary for the portfolio MVP](../../decisions/ADR-0018-trusted-operator-url-boundary.md)
+- [ADR-0017: Authorized public-page scan boundary](../../decisions/ADR-0017-authorized-public-page-scan-boundary.md) — superseded history
 - [Architecture index](../../README.md)
 - [Local MVP feasibility](../../../LOCAL_MVP_FEASIBILITY.md)
 - [Project documentation index](../../../README.md)

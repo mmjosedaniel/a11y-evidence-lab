@@ -1,226 +1,175 @@
-# Authorized deterministic web scan controlled-fixture execution and security assessment
+# Controlled-fixture evaluation assessment
 
 ## Authority, status, and scope
 
-**Document status: Proposed architecture assessment.** ADR-0008, ADR-0009, and ADR-0011 retain their accepted evaluation-baseline scope; no part of this assessment becomes accepted by association.
+**Status:** Proposed evaluation architecture assessment. Originally assessed on 2026-08-23, expanded to three scenarios on 2026-08-24, and refined on 2026-08-27 to remove a separate fixture-selection product workflow.
 
-Assessment date: 2026-08-23. Simplified for the portfolio vertical slice on 2026-08-24.
+[ADR-0018](../../decisions/ADR-0018-trusted-operator-url-boundary.md) retains controlled fixtures as the deterministic evaluation baseline while accepting one trusted operator URL as the runtime product target. ADR-0008, ADR-0009, and ADR-0011 retain their evaluation-baseline scope; no fixture layout or technical detail becomes accepted by association.
 
-This assessment owns the proposed controlled-fixture execution, authorization, Step 1 handoff, failure, and minimum security boundary for the [authorized deterministic web scan assessment family](README.md). It owns no requirement ID or status, changes no ADR scope, and does not authorize implementation or live-page scanning.
+This assessment owns no requirement or decision, does not authorize development, and does not define runtime URL intake. Canonical behavior remains in [Evidence and review workflow requirements](../../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md), while exact evaluation authority remains in its owning evaluation requirements. Its recommendation uses ordinary product scan/evidence field shapes plus a manifest-case reference, preserving the controlled-fixture identity and correlation evidence required by `REQ-EVID-002` and `REQ-COMP-002` without creating a second product model.
 
-Canonical behavior remains in [Evidence and review workflow requirements — Target authorization and scanning](../../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#target-authorization-and-scanning), [Privacy and security requirements](../../../requirements/quality-security-and-operations/PRIVACY_AND_SECURITY.md), and [Reliability, reproducibility, and operations requirements](../../../requirements/quality-security-and-operations/RELIABILITY_REPRODUCIBILITY_AND_OPERATIONS.md).
+## Recommendation
 
-## Smallest portfolio scenario
+Use the project-owned synthetic states as evaluation/test configuration for the same scan and evidence-capture modules used by the product. Do not build a fixture selector, fixture authorization module, fixture-specific product API, separate workflow state machine, or second persistent fixture-record model.
 
-The first vertical slice should demonstrate one accessibility scenario through the complete product pipeline, not broad scanner coverage.
+The evaluation harness selects a frozen synthetic revision, supplies it to the scan module through test-only configuration, and associates the resulting ordinary scan/evidence field shapes with the expected manifest entry. The manifest owns the expected result. The resulting evaluation-case artifact may reference the scenario, revision role, and stable fixture target key required for evaluation lineage, but it is not a runtime `PageAnalysisRun` or canonical product `run.json`; those gold fields do not enter prompts, public-page evidence, or the product's runtime UI.
 
-| Fixture revision | Controlled content | Expected automated observation |
-| --- | --- | --- |
-| Baseline | One synthetic product card with one informative product image whose alternative-text attribute is missing | Exactly one **image-alt** violation for the selected image |
-| Corrected | The same product card and stable image subject with a context-appropriate alternative-text value | No **image-alt** violation for that subject and a native passing observation for the rule |
+This shape demonstrates deterministic behavior without creating a second product:
 
-Both revisions belong to one project-owned scenario and use synthetic, publicly shareable content. The static page contains no script, frame, form submission, external resource, credential, or personal data. The image bytes are embedded in the fixture.
+`evaluation manifest -> controlled document configuration -> normal scan module -> normal evidence capture -> evaluation assertion`
 
-The corrected result proves only that axe-core no longer reports the selected structural rule for that image under the recorded profile. It does not prove that the alternative text is contextually appropriate, that the page is accessible, or that it conforms to WCAG. The later generation and review steps must preserve that distinction and require the relevant manual check.
+The runtime product still starts from the operator-entered HTTPS URL. The controlled harness is evaluation infrastructure to be created only after development is authorized.
 
-Additional scenarios, ambiguous fixture variants, and broader rule sets are deferred until this one path works and evaluation evidence shows that another scenario is useful.
+## Smallest deterministic evaluation set
 
-## Minimal component boundary
+The fixed portfolio evaluation covers exactly three rule families. Each logical scenario has one failing and one corrected state:
 
-The proposed flow is:
+| Scenario profile | Failing revision | Corrected revision | Expected target observation |
+| --- | --- | --- | --- |
+| `informative-image-alt` | One informative synthetic image has no `alt` attribute. | The same image has a manually reviewed, context-appropriate alternative. | One `image-alt` violation, then a same-target native non-failing observation; WCAG 2.2 SC 1.1.1. |
+| `form-input-label` | Visible text `Email address` is adjacent to one email input but is not associated and no other name source exists. | The same input has an explicit visible label associated through matching `for` and `id`. | One `label` violation, then a same-target native non-failing observation; WCAG 2.2 SC 4.1.2. |
+| `text-contrast` | One normal-text target uses `#888888` on `#ffffff` at 16 CSS px and weight 400. | The same target uses `#767676` on `#ffffff` with the other profile values unchanged. | One `color-contrast` violation, then a same-target native non-failing observation; WCAG 2.2 SC 1.4.3. |
 
-**React presentation → local TypeScript application → authorization module → scan module → Playwright-managed Chromium → transient native scanner observation → evidence-capture module**
+The six logical states do not require six projects or a product-facing selector. Physical file layout is an implementation detail. Each controlled state is static, synthetic, project-owned, publicly shareable, and contains no credentials, personal data, authentication, external resource, frame, or scripted interaction.
 
-The authorization, scan, and evidence-capture components are ordinary modules in one local TypeScript application process. The React renderer can request an allowed scan and display application-owned projections, but it never receives browser-automation authority or raw page/scanner objects. Playwright launches and cleans up its managed Chromium process as part of normal browser automation.
+Each controlled scan should run the same exact three-rule scan module as the runtime path. The evaluation assertion focuses on the manifest's intended rule and target while also confirming that complete three-rule coverage was retained. It does not invoke a special one-rule scanner path.
 
-The initial slice does not introduce:
+Corrected observations prove only the applicable automated rule result under the frozen profile. They do not prove alt-text quality, label accuracy, text readability in all conditions, whole-page accessibility, or WCAG conformance.
 
-- An application-owned child worker or IPC protocol.
-- Process-tree supervision, Job Objects, restart handshakes, or a worker capability protocol.
-- A fixture web server, policy proxy, or microservice.
-- Concurrent scans, queues, distributed work, or production orchestration.
+## Evaluation configuration
 
-These mechanisms can be reconsidered only if a measured security, reliability, or scale requirement cannot be met by the single-process design.
+Before evaluation, freeze:
 
-## Minimal authorization attestation
+- the controlled fixture content under one scenario and revision entry in the evaluation manifest;
+- the expected target rule result and stable evaluation target key;
+- the exact managed Chromium and axe-core identities;
+- viewport, locale, color preferences, and other rule-relevant browser values; and
+- the evidence shape and expected retained measurements.
 
-The interface should present only the baseline and corrected fixture revisions from a closed project-owned list. Before each scan, the user confirms:
+The exact serialized values remain Proposed. A sufficient initial profile is:
 
-> I confirm that this project-owned controlled fixture is authorized for this scan.
-
-The scan admission record needs only:
-
-- The selected fixture ID and revision.
-- The authorization-statement version.
-- An affirmative confirmation.
-- The confirmation time.
-- The scan-run ID created after successful admission.
-
-A missing confirmation or unknown fixture ID rejects the request before Chromium launches. The interface accepts no arbitrary URL, filesystem path, uploaded HTML, browser option, header, cookie, or credential.
-
-This attestation is intentionally small for a single-user portfolio fixture. Live targets need a different, accepted authorization and threat model.
-
-## Proposed deterministic browser profile
-
-The exact serialized configuration remains Proposed under OD-003. The first evaluation needs only these fixed facts:
-
-| Concern | Proposed value |
+| Concern | Proposed evaluation value |
 | --- | --- |
-| Browser | Exact Playwright-managed Chromium artifact; headless with its sandbox explicitly enabled |
-| Context | One fresh non-persistent context for each scan |
+| Browser | The same pinned Playwright-managed Chromium used by the scan module |
+| Context | One fresh non-persistent context per scan |
 | Viewport | 1280 by 720 |
-| Locale and timezone | en-US and UTC |
-| Color preferences | Light color scheme, no forced colors |
-| Permissions and state | No granted permissions, storage state, credential, extension, or personal profile |
-| Networking | Abort every HTTP, HTTPS, and WebSocket request; the fixture requires none |
-| Fixture loading | Load the selected bundled static HTML through Playwright page-content loading |
-| Readiness | Page-content loading completed and one fixed fixture marker is present |
-| Scanner | Pinned axe-core adapter and resolved axe-core version |
-| Rule | Explicit **image-alt** only |
-| Bounds | One page, one rule, fixed fixture-size limit, fixed result-size limit, and explicit timeout |
+| Locale and timezone | `en-US` and UTC |
+| Color preferences | Light color scheme and no forced colors |
+| State | No credentials, imported storage, personal profile, extension, or granted permission |
+| Content | One selected immutable synthetic revision supplied by the evaluation harness |
+| Networking | No external dependency; an unexpected external request fails the evaluation case |
+| Readiness | Static content loaded and its evaluation marker available |
+| Scanner | The same pinned axe adapter and axe-core version as the runtime scan module |
+| Rules | Exactly `image-alt`, `label`, and `color-contrast` in one complete scan |
+| Bounds | One document and one finite scan timeout |
 
-Do not use a sleep or a network-idle heuristic as readiness. Do not use a custom browser executable, persistent profile, extension, or unsafe sandbox-disabling option.
+These values make the synthetic cases reproducible; they are not a second browser-security architecture or a claim about hostile pages.
 
-This profile is enough for the static scenario. It does not claim to represent real navigation, server behavior, authenticated state, cross-frame behavior, or live-page networking.
+## Shared scan-module boundary
 
-## Conceptual transient scanner observation
+The evaluation harness may choose content differently from the runtime URL intake, but after target setup it calls the same scan module. That module:
 
-Step 1 should return one small in-memory observation. This is a conceptual boundary, not an implementation schema.
+1. creates the fresh managed-browser context;
+2. waits for the configured simple readiness condition;
+3. runs the exact three-rule axe scan;
+4. validates complete per-rule result coverage;
+5. returns every violation node and every native `incomplete` observation;
+6. records the common browser/scanner/profile provenance; and
+7. closes the page, context, and browser after success or failure.
 
-It contains:
+The same evidence-capture module then produces the ordinary minimized Finding and ScannerReviewObservation field shapes for evaluation. The evaluation-case artifact may carry its manifest-case reference and required fixture identity, but the scan module does not produce a fixture-specific Finding type, copy the expected outcome into scanner evidence, create another product storage hierarchy, or turn that artifact into a runtime `PageAnalysisRun`.
 
-- Scan-run ID and the authorization-attestation facts.
-- Fixture ID, revision, content digest, and declared baseline or corrected state.
-- Scan time and fixed page-state profile.
-- Exact Playwright, Chromium, axe adapter, and axe-core identities.
-- Explicit **image-alt** rule configuration.
-- Scan-operation status and, when applicable, a bounded failure reason.
-- Coverage facts showing whether the fixture reached readiness and the rule executed.
-- The bounded native axe result categories and node data returned for this rule.
+The evaluation harness separately joins the ordinary output to its manifest case and checks the expected observation. This join belongs to evaluation reporting, not to product behavior.
 
-The axe value is treated as unknown at the adapter boundary and runtime-validated against the small supported shape before handoff. Unsupported categories, unexpected rule IDs, excessive values, or malformed fields make the scan incomplete or failed.
+## Rule-specific retained evidence
 
-The observation is not a finding record, evidence record, normalized result, fingerprint, redaction record, or persistence envelope. Unredacted native output exists only transiently in memory and is discarded after Step 2 consumes it or the run fails.
-
-## Step 1 and Step 2 ownership
-
-| Step 1: authorized scan | Step 2: evidence capture |
+| Profile | Minimum evaluation evidence |
 | --- | --- |
-| Validate the minimal fixture authorization attestation | Apply the evidence allowlist |
-| Resolve the allowed fixture revision | Sanitize and minimize page/scanner content |
-| Launch Playwright-managed Chromium and apply the fixed page-state profile | Create redaction information |
-| Execute pinned axe-core **image-alt** | Create finding and evidence records |
-| Record execution status, coverage, and tool/configuration provenance | Create normalized finding projections and comparison-ready evidence |
-| Runtime-validate and return the transient native observation | Compute evidence identities or digests required by the selected policy |
-| Close the page, context, and browser | Publish permitted records through the selected local persistence mechanism |
+| `informative-image-alt` | Native rule/check result, intended evaluation target key in the manifest, minimized image/alternative state, and the corrected same-target non-failing observation. |
+| `form-input-label` | Native rule/check result, intended target key in the manifest, minimized input type/name-source/association facts without input value, and the corrected non-failing observation. |
+| `text-contrast` | Native rule/check result, intended target key in the manifest, emitted foreground/background colors, measured and expected ratios, font size/weight, and corrected non-failing observation. |
 
-There is one validation and transformation path: Step 1 validates third-party runtime data without coercing, filtering, or converting it; Step 2 is the only owner of evidence policy and durable domain records. Step 1 must not create an evidence fingerprint or sanitize, normalize, or persist a competing representation.
+The stable evaluation target key comes from the manifest and is retained only in the controlled evaluation lineage required by `REQ-EVID-002` and `REQ-COMP-002`. It never becomes the identity rule for a public-page Finding.
 
-Physical co-location does not change this logical ownership. Both modules may run consecutively in the same TypeScript process.
+## Failure and valid-zero behavior
 
-## Candidate end-to-end scan sequence
+The controlled case fails when content setup, readiness, browser launch, scanner execution, result validation, evidence capture, timeout, or cleanup prevents a complete result. It must not publish a complete zero-Finding result or a silently partial result.
 
-If evaluation is authorized, one scan runs as follows:
+A native axe `incomplete` result is scanner evidence requiring review, not a scan failure. A corrected case with zero violations is valid only when all required native result arrays and exact per-rule coverage validate as complete.
 
-1. The user selects the baseline or corrected fixture and confirms the authorization statement.
-2. The application rejects a missing attestation or unknown fixture, then creates one scan-run ID and freezes the fixed scan profile.
-3. The scan module resolves the selected bundled fixture and verifies its recorded content digest.
-4. Playwright launches its matching managed Chromium build and creates one fresh context with network requests blocked.
-5. The module loads the bundled static HTML, confirms the fixture marker, and runs only the pinned **image-alt** rule.
-6. The axe adapter returns its native result; the module verifies the expected rule, supported result shape, result limits, and coverage.
-7. The module closes the page, context, and browser, even after timeout or failure and, where possible, during application shutdown.
-8. A completed run passes its transient observation directly to Step 2 in memory. A timed-out, interrupted, stale, malformed, incomplete, or failed run cannot be presented as a successful zero-finding scan.
-9. Step 2 applies the evidence policy, creates durable records, and supplies the finding projection to retrieval.
+The MVP needs no automatic retry, fixture queue, concurrent execution, cancellation controller, worker, or resume state. A developer can rerun the evaluation command after inspecting a failure; no product retry feature follows from this assessment.
 
-There is no automatic retry. A user-requested retry is a new scan run.
+## Minimal evaluation sequence
 
-## Repeatability meaning
+1. The evaluation harness selects one frozen manifest case.
+2. It supplies that synthetic revision and the shared scan configuration to the normal scan module.
+3. The normal module runs all three supported rules and returns its ordinary transient result.
+4. The normal evidence-capture module creates minimized ordinary records.
+5. The harness compares those records with the frozen expected target observation.
+6. Downstream retrieval, generation, review, and comparison evaluations consume the same ordinary records used by the product.
 
-Step 1 supports deterministic scanning by pinning the fixture bytes, page state, browser, scanner, and rule. It should not compare raw axe payload bytes because timestamps, ordering, or diagnostic fields may differ.
+No UI fixture selector or fixture-specific authorization record is involved.
 
-For this slice, repeatability means:
+## Reproducibility and comparison
 
-- Repeated baseline runs reach readiness and report the same **image-alt** rule, result category, finding count, and stable fixture subject.
-- Repeated corrected runs reach readiness and report the same passing rule/subject observation without the baseline violation.
-- The combined Step 1 and Step 2 evaluation produces the same normalized finding and coverage representation for the same fixture revision and configuration.
+For each scenario, one failing and one corrected execution verifies the frozen expected observation. The corrected target supplies the narrow native non-failing evidence needed for deterministic `resolved` comparison. The contrast case retains the scanner-emitted measurement fields; the native axe bucket remains authoritative.
 
-Step 2 owns that normalized representation and any fingerprint. Step 1 records the pinned inputs and native observation needed to reproduce it.
+The compact manifest supports a deterministic demonstration, not statistical repeatability, provider ranking, security qualification, or generalized scanner correctness. Formal repeated-run evaluation remains deferred.
 
-## Minimal outcome semantics
+## Minimal controlled-content hygiene
 
-Scan-operation status and native axe categories are separate:
+Because the project owns the synthetic content, only inexpensive evaluation hygiene is needed:
 
-| Operation status | Meaning |
-| --- | --- |
-| Rejected | Admission failed, such as missing attestation or unknown fixture; Chromium did not start. |
-| Completed | The fixture reached readiness and the configured rule executed over the declared scope. The native result may contain a violation, pass, inapplicable result, or axe incomplete result. |
-| Incomplete | Some browser or coverage work occurred, but readiness or the declared rule scope was not established. It must not appear as zero findings. |
-| Failed | Chromium could not launch, fixture loading failed, axe execution failed, runtime validation failed, the timeout elapsed, or required cleanup failed. Application shutdown publishes no completed result. |
+- static content with no credentials, personal data, scripts, frames, form submission, or external resources;
+- a fresh non-persistent context with no imported user state;
+- no required external network access;
+- a finite timeout and cleanup;
+- raw scanner output remains transient until evidence capture minimizes it; and
+- only synthetic approved content appears in portfolio demonstrations.
 
-An axe **incomplete** result is scanner evidence requiring review; it is not the same as an incomplete scan operation.
+This is reproducibility configuration, not a hostile-content security boundary.
 
-## Minimum fixture security
+## Acceptance criteria
 
-The synthetic fixture remains untrusted browser content even though the project owns it. The smallest adequate controls are:
+The controlled evaluation baseline is adequately defined when:
 
-- Resolve only the two bundled fixture revisions by closed ID and verify their content digests.
-- Use static synthetic content with embedded image bytes and no scripts, frames, forms, or external resources.
-- Create a fresh browser context with no credential, storage state, personal profile, extension, or granted permission.
-- Block every attempted HTTP, HTTPS, and WebSocket request; an unexpected request makes the run incomplete.
-- Keep downloads disabled, set fixed content/result/time bounds, and close the page, context, and browser on every outcome.
-- Run the controlled-fixture evaluation with non-loopback egress disabled and verify that the workflow has no external-network dependency.
-- Keep raw target and scanner values out of the React renderer and durable storage until Step 2 has minimized and sanitized them.
-- Use only synthetic or explicitly approved non-sensitive fixture data in portfolio demonstrations.
+- the manifest contains only the failing and corrected states of the three accepted scenarios;
+- the harness, not the product UI, selects a manifest case;
+- every case exercises the same exact-three-rule scan and evidence-capture modules as the runtime path;
+- failing and corrected cases produce the expected target violation and native non-failing observation;
+- all three rules report complete coverage, even though the manifest assertion focuses on one intended target;
+- contrast retains the required scanner-emitted measurements;
+- expected outcomes remain in the evaluation manifest; the evaluation-case artifact retains only its manifest reference and required scenario/revision/target lineage, is not a runtime `PageAnalysisRun` or product `run.json`, and none of those gold fields enter prompts or public-page records;
+- malformed, incomplete, timed-out, or failed work never appears as valid zero or complete;
+- scanning works without LangChain or an LLM; and
+- results make no accessibility, compliance, certification, hostile-page-safety, or broad-support claim.
 
-This is a controlled-fixture boundary, not a general hostile-web isolation design.
+## Open questions and explicit non-goals
 
-## Prerequisites before any live page
+Implementation planning still needs to choose the physical fixture layout, the test-only content-loading mechanism, and exact pinned profile values. Those choices do not justify a fixture selector or separate product domain.
 
-Live user-selected pages remain a later gated extension. Before that work begins, the project must accept and verify:
+Explicit non-goals include:
 
-1. A live-target threat model and data-flow review.
-2. Explicit authorization and scope semantics for one URL and declared page state.
-3. HTTPS scheme, redirect, subresource, destination, and browser-capability restrictions.
-4. Credential and private-data handling, or an explicit no-credential policy.
-5. Resource, timeout, cancellation, and retained-evidence limits.
-6. A tested isolation and network-control design appropriate to untrusted live content.
-
-This assessment intentionally does not select a proxy, operating-system containment mechanism, authentication design, or live-page implementation.
-
-## Acceptance criteria for the planned step
-
-The first workflow step is adequately defined for the portfolio slice when a future evaluation can demonstrate that:
-
-- Only the two project-owned revisions can be selected, and each scan requires the recorded attestation.
-- One pinned Playwright/Chromium/axe configuration executes exactly **image-alt**.
-- The baseline produces the expected single violation and the corrected revision produces the corresponding passing observation.
-- Fixture, page-state, tool, rule, operation, and coverage provenance appear in the transient observation.
-- External network access is unnecessary and blocked for the controlled-fixture run.
-- Malformed, incomplete, timed-out, interrupted, failed, or stale work never appears as a successful zero-finding result.
-- The raw scanner observation remains transient and Step 2 alone creates sanitized, normalized, and durable evidence.
-- Repeated runs meet the semantic repeatability definition above.
-- Scanning works without retrieval, LangChain, an LLM, or any generation provider.
-- Results state the tested rule and limitations and make no accessibility, compliance, or certification claim.
-
-## Open decisions and explicit non-goals
-
-OD-002 accepts the `image-alt` scenario. This assessment still does not accept its proposed execution details: OD-003 must accept the exact fixture and browser profile, OD-014 must select the runtime and browser ownership needed for the authorized stage, and OD-015 must decide the minimum runtime-validation authority. Evidence retention and persistence remain owned by Step 2 and their applicable open decisions; packaging is deferred until distribution enters scope.
-
-Explicit non-goals are arbitrary pages, crawling, authentication, cross-browser equivalence, multi-rule coverage, production concurrency, browser-worker isolation, process supervision, automatic remediation, and any claim of accessibility conformance.
+- a product-facing scenario or revision selector;
+- a fixture-specific product API, authorization module, workflow state machine, persistence format, Finding type, or scan implementation;
+- using fixture gold metadata as public-page evidence or model input;
+- authenticated targets, crawler behavior, a fourth rule, broad WCAG coverage, concurrency, automatic remediation, or conformance claims; and
+- production hostile-page qualification, packaging, or distribution.
 
 ## Primary sources
 
 The shared browser and scanner sources are listed in [Technology selection — Primary sources](TECHNOLOGY_SELECTION.md#primary-sources).
 
-- [W3C Understanding Success Criterion 1.1.1: Non-text Content](https://www.w3.org/WAI/WCAG22/Understanding/non-text-content.html)
+- [W3C Understanding SC 1.1.1](https://www.w3.org/WAI/WCAG22/Understanding/non-text-content.html)
+- [W3C ACT rule: Form field has non-empty accessible name](https://www.w3.org/WAI/standards-guidelines/act/rules/e086e5/)
+- [W3C Understanding SC 4.1.2](https://www.w3.org/WAI/WCAG22/Understanding/name-role-value.html)
+- [W3C Understanding SC 1.4.3](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html)
 - [axe-core 4.13.0 rule descriptions](https://github.com/dequelabs/axe-core/blob/v4.13.0/doc/rule-descriptions.md)
-- [Playwright page content API](https://playwright.dev/docs/api/class-page#page-set-content)
 - [Playwright browser-context isolation](https://playwright.dev/docs/browser-contexts)
-- [Playwright network interception](https://playwright.dev/docs/network)
 
 ## Documentation navigation
 
-- Previous within this workflow step: [Technology selection](TECHNOLOGY_SELECTION.md)
+- Deferred post-MVP research: [Deferred hostile-URL and public-page hardening assessment](AUTHORIZED_PUBLIC_PAGE_EXECUTION_AND_SECURITY.md)
 - Up: [Authorized deterministic web scan candidate assessments](README.md)
 - Next workflow step: [Accessibility finding and evidence capture assessment](../ACCESSIBILITY_FINDING_EVIDENCE_CAPTURE_ASSESSMENT.md)
 - [Architecture index](../../README.md)

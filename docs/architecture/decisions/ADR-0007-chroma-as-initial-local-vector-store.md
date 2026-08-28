@@ -1,13 +1,27 @@
 # ADR-0007: Chroma as the initial local vector store
 
-- **Status:** Accepted for evaluation
+- **Status:** Superseded for the MVP by [ADR-0019](ADR-0019-in-process-exact-vector-search.md); Chroma is Deferred
 - **Decision date:** 2026-08-23
+
+## MVP supersession recorded 2026-08-27
+
+[ADR-0019](ADR-0019-in-process-exact-vector-search.md) replaces Chroma with an in-process exact vector search for the portfolio MVP. The fixed corpus is too small to justify a persistent vector service, its startup and lifecycle, or approximate-index behavior. Chroma remains documented below as decision history and may be reconsidered only if corpus scale, index persistence, or measured search cost creates a demonstrated need.
+
+This supersession does not remove local embeddings, semantic retrieval, cosine ranking, LangChain's bounded integration role, passage-level citations, or retrieval-quality evaluation. Those concerns continue under ADR-0006, ADR-0013, and ADR-0019.
+
+Because this record is fully superseded, every Chroma-specific “MVP” check below—including its zero-egress wording—is historical and is not a current development gate. [ADR-0023](ADR-0023-local-mode-data-boundary.md) separately defines the current application-owned local-embedding boundary without requiring machine-wide zero-egress proof.
 
 ## Context
 
 The MVP needs local vector storage for a small, immutable accessibility-guidance corpus. The store must preserve passage identifiers and source metadata, support reproducible filtered retrieval, survive restarts, and participate in atomic rebuild, deletion, backup, and migration behavior without requiring cloud access.
 
 Chroma documents local in-memory and persistent clients, a local server mode, collections, metadata, and vector queries. Its documented TypeScript getting-started path connects the client to a running Chroma service; it does not establish an embedded TypeScript persistence mode for this project. These capabilities make Chroma a plausible evaluation baseline, but they do not by themselves prove deterministic index behavior, safe recovery, or compatibility with the project's retention and zero-egress requirements.
+
+### MVP narrowing amendment recorded 2026-08-25
+
+OD-006, OD-012, and OD-017 replace the original production-oriented lifecycle assumptions for the portfolio MVP. Chroma remains only a replaceable derived-index evaluation candidate; it is not the canonical run store or a release-qualified dependency. Its MVP evaluation is limited to exact lookup and metadata filtering, corpus/index identity checks, deterministic rebuild from the one fixed approved snapshot, deletion of the derived index, loopback/zero-egress behavior, visible startup or failure, and practical resource use.
+
+The original 2026-08-23 decision also required cascading deletion, backup/restore, migration, corruption recovery, side-by-side atomic activation, and release-promotion gates. Those obligations are preserved here as decision history but are Deferred for the MVP. They require a new demonstrated persistence, private-data, update, distribution, or release need before evaluation. This amendment controls wherever the original Decision or Consequences below assigned those broader responsibilities.
 
 ## Considered options
 
@@ -24,8 +38,8 @@ Use Chroma as the initial local vector-store technology for evaluation only.
 - Treat it as a derived, rebuildable index; canonical corpus snapshots, source passages, evidence, and audit records remain outside Chroma.
 - Supply versioned embeddings and explicit passage/corpus metadata from the application rather than allowing an implicit external embedding function.
 - Record the Chroma version, client/server mode, collection and index configuration, distance metric, embedding dimensions, persistence path identity, and corpus snapshot for each evaluation.
-- Validate exact passage lookup, metadata filtering, deterministic rebuild behavior, index/corpus compatibility checks, cascading deletion, backup/restore, migration, corruption recovery, disk and memory use, and zero-egress operation.
-- Build a new versioned index beside the last valid index and activate it atomically only after validation.
+- For the MVP, validate exact passage lookup, metadata filtering, deterministic rebuild behavior, index/corpus compatibility checks, deletion of the derived index, visible startup and failure, disk and memory use, and zero-egress operation. Cascading deletion, backup/restore, migration, formal corruption recovery, and release-promotion gates from the original decision are Deferred by the 2026-08-25 amendment.
+- Rebuild the one fixed corpus index deterministically and use it only after the bounded identity and retrieval checks pass. The original side-by-side atomic-activation requirement is Deferred until mutable corpus management or production recovery enters scope.
 - Protect destructive reset or collection-deletion operations behind application policy; they must not be exposed as an ordinary user shortcut.
 
 Promoting Chroma to the release architecture requires passing those gates. A failure replaces the store behind the retrieval boundary without changing corpus, passage, or retrieval-run identifiers.
@@ -34,7 +48,7 @@ Promoting Chroma to the release architecture requires passing those gates. A fai
 
 - The first retrieval implementation has a local persistence path and documented collection/query API.
 - With TypeScript as the initial application-language baseline, Chroma's documented TypeScript setup expects a running Chroma service. Whether the application owns that loopback service, uses an approved helper, selects another compatible mode, or replaces Chroma remains an implementation and packaging decision; this ADR does not accept a server topology.
-- Index migration, atomic activation, and backup behavior remain application responsibilities even when Chroma persists data automatically.
+- The original decision assigned index migration, atomic activation, and backup behavior to the application. The 2026-08-25 amendment defers those responsibilities for the MVP; only the bounded rebuild, identity, deletion, failure-visibility, and zero-egress checks apply.
 - Chroma-specific identifiers or distance semantics must be normalized before they enter domain records.
 
 ## Primary references
@@ -46,8 +60,10 @@ Promoting Chroma to the release architecture requires passing those gates. A fai
 ## Related decisions and requirements
 
 - [ADR-0006: EmbeddingGemma as the initial embedding model](ADR-0006-embeddinggemma-as-initial-embedding-model.md)
+- [ADR-0019: In-process exact vector search for the MVP](ADR-0019-in-process-exact-vector-search.md) — current MVP replacement
+- [ADR-0023: Local-mode data boundary](ADR-0023-local-mode-data-boundary.md)
 - [ADR-0011: TypeScript as the initial application language](ADR-0011-typescript-as-initial-application-language.md)
 - [Evidence and review workflow requirements](../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md): `REQ-CORP-*` and `REQ-RETR-*`
 - [Reliability, reproducibility, and operations requirements](../../requirements/quality-security-and-operations/RELIABILITY_REPRODUCIBILITY_AND_OPERATIONS.md): `REQ-QUAL-003`, `REQ-QUAL-004`, and `REQ-QUAL-010`
-- [Privacy and security requirements](../../requirements/quality-security-and-operations/PRIVACY_AND_SECURITY.md): `REQ-SEC-006` and `REQ-SEC-018`
+- [Privacy and security requirements](../../requirements/quality-security-and-operations/PRIVACY_AND_SECURITY.md): `REQ-SEC-006` and `REQ-SEC-027`
 - [Local guidance retrieval execution and evaluation assessment](../candidates/guidance-retrieval/LOCAL_RETRIEVAL_EXECUTION_AND_EVALUATION_ASSESSMENT.md) — Proposed store profile and evaluation detail; it does not change this ADR's evaluation-only scope.
