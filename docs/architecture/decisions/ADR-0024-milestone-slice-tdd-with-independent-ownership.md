@@ -56,7 +56,7 @@ The earlier 2026-08-29 clarification retained optional hooks and agent-flow metr
 
 Later on 2026-08-29, the project owner explicitly requested a task-by-task project and agent-workflow progress directory. That direction activates only the smallest manual summary layer: one indexed, living record per existing roadmap task after it starts, updated at material accepted checkpoints. It supersedes the folder's deferral without changing the original telemetry rejection. The progress record remains subordinate to the roadmap, ExecPlan, authoritative decisions, validation evidence, and task-closure gate.
 
-The same owner direction confirms the Rick-and-Morty milestone-slice TDD semantics for production behavior and replaces the earlier absolute prohibition on direct coordinator implementation edits with the narrow test-correction exception above. The implementation worker still cannot edit the accepted test contract during Green, and any coordinator or test-worker change to that contract invalidates the prior Red or characterization evidence before it can be reused or Green resumes.
+The same owner direction confirms this repository's milestone-slice TDD semantics for production behavior and replaces the earlier absolute prohibition on direct coordinator implementation edits with the narrow test-correction exception above. The implementation worker still cannot edit the accepted test contract during Green, and any coordinator or test-worker change to that contract invalidates the prior Red or characterization evidence before it can be reused or Green resumes.
 
 ## Related documentation
 
