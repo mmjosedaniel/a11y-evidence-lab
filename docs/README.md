@@ -7,7 +7,8 @@ This index is the starting point for project work. Use the task router to load o
 | Document set | Responsibility | Authority and status |
 | --- | --- | --- |
 | [Agent instructions](../AGENTS.md) | Repository working rules and required context | Governs agent work in this repository. |
-| [Agent coordination workflow](../.codex/README.md) and [execution-plan convention](../PLANS.md) | Bounded delegation, review, handoff, and conditional durable coordination for selected roadmap work | Repository working procedures subordinate to `AGENTS.md` and the canonical authorities. They cannot authorize development, change scope or status, record architecture decisions, or prove completion. |
+| [Agent coordination workflow](../.codex/README.md), [worker-first implementation workflow](../.codex/execplan-implementation-workflow.md), [write-lease guard](../.codex/write-lease-guard.md), and optional [agent-flow metrics](../.codex/agent-flow-metrics.md) | Cost-routed research and decision work, role-separated implementation, bounded writes, independent review, handoff, and optional local observations | Repository working procedures subordinate to `AGENTS.md` and the canonical authorities. They cannot authorize development, change scope or status, record architecture decisions, or prove completion. Metrics are non-authoritative and fail open; lease violations stop only the affected write branch. |
+| [Execution-plan convention](../PLANS.md) and [plan index](plans/README.md) | Living task-scoped coordination, recovery, and evidence identity for selected roadmap work | Subordinate to the roadmap and canonical authorities. One plan owns one existing status-bearing roadmap task; it creates no second task graph or completion proof. |
 | [Project requirements](PROJECT_REQUIREMENTS.md) | Main goal, status vocabulary, priority semantics, precedence, traceability, and routing for the modular requirements baseline | Canonical requirements index. The identified row in its owning module controls each requirement's status. |
 | [Requirements baseline](#requirements-baseline) | Canonical topic requirements, lifecycle models, and delivery gates organized into focused modules and family indexes | The identified row in its focused canonical module controls. A family index routes ownership but owns no requirement row or status. |
 | [Development roadmap](DEVELOPMENT_ROADMAP.md) | Ordered milestones, task dependencies, integration checkpoints, verification expectations, and progress for the first portfolio slice | Accepted derived implementation sequence through OD-025. It owns roadmap task order and status only; it cannot override requirements or ADRs or prove implementation, acceptance, qualification, or release readiness. |
@@ -25,7 +26,9 @@ If two authoritative documents appear inconsistent, do not infer a new decision.
 
 | Task | Read first | Then read as applicable |
 | --- | --- | --- |
-| Codex delegation, multi-agent implementation, independent agent review, handoff, or focused execution-plan preparation | [Agent instructions](../AGENTS.md) and [agent coordination workflow](../.codex/README.md) | Read the [execution-plan convention](../PLANS.md) only when its activation conditions apply, then follow the roadmap route below for the selected work |
+| Bounded research, consequential decision analysis, or research-derived drafting/review | [Agent instructions](../AGENTS.md), this authority map, and [agent coordination workflow](../.codex/README.md#research-work) | Read the exact authority owners for the question; keep the Decision Review Contract in a task-scoped [ExecPlan](../PLANS.md) when roadmap-task-backed, or in the coordinating prompt for a standalone policy decision; do not invent another task ID |
+| Multi-agent implementation, worker handoff, write-lease operation, or independent implementation review | [Agent instructions](../AGENTS.md), [development roadmap](DEVELOPMENT_ROADMAP.md), and [plan index](plans/README.md) | Resolve the selected existing task's authorities and readiness conditions, then read [PLANS.md](../PLANS.md), the [worker-first workflow](../.codex/execplan-implementation-workflow.md), [write-lease guard](../.codex/write-lease-guard.md), and [ADR-0024](architecture/decisions/ADR-0024-milestone-slice-tdd-with-independent-ownership.md); read the optional [metrics guide](../.codex/agent-flow-metrics.md) only when a present measurement question justifies it |
+| Review or change the repository's Codex workflow, roles, hooks, leases, metrics, or ExecPlan policy | [Agent instructions](../AGENTS.md) and [agent coordination workflow](../.codex/README.md) | Read the exact affected workflow artifact, [PLANS.md](../PLANS.md) when its contract changes, [ADR-0024](architecture/decisions/ADR-0024-milestone-slice-tdd-with-independent-ownership.md) when development-method semantics change, and current official Codex documentation for time-sensitive behavior |
 | Product purpose, users, authorized-public-page scope, fixed evaluation scenarios, exclusions, or terminology | [Project requirements](PROJECT_REQUIREMENTS.md) and [Product scope and glossary](requirements/PRODUCT_SCOPE_AND_GLOSSARY.md) | [OD-020](requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-020--authorized-public-page-analysis-scope), [OD-021](requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-021--trusted-operator-url-boundary-for-the-portfolio-mvp), [OD-022](requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-022--portfolio-mvp-yagni-simplification), [Project context](PROJECT_CONTEXT.md), and [Project concept](PROJECT_CONCEPT.md) |
 | Trusted operator URL input, deterministic browser scanning, three-rule coverage, scan completeness, or deferred production URL hardening | [Project requirements](PROJECT_REQUIREMENTS.md), [Evidence and review workflow — Target authorization and scanning](requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#target-authorization-and-scanning), and [ADR-0018](architecture/decisions/ADR-0018-trusted-operator-url-boundary.md) | Start with the [authorized deterministic web scan assessment family](architecture/candidates/authorized-scan/README.md), then load its technology or execution assessment and applicable feasibility or quality material only as needed; consult superseded [ADR-0017](architecture/decisions/ADR-0017-authorized-public-page-scan-boundary.md) only for decision history |
 | Finding capture, page evidence, sanitization, or provenance | [Project requirements](PROJECT_REQUIREMENTS.md) and [Evidence and review workflow — Evidence and provenance](requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#evidence-and-provenance) | [Accessibility finding evidence-capture assessment](architecture/candidates/ACCESSIBILITY_FINDING_EVIDENCE_CAPTURE_ASSESSMENT.md), then the lifecycle or quality module when directly applicable |
@@ -73,6 +76,7 @@ Do not load every requirements module automatically. Read the master index, the 
 ### Development planning
 
 - [Development roadmap](DEVELOPMENT_ROADMAP.md) — accepted derived milestone sequence, task dependency graph, integration checkpoints, critical path, scope guards, and implementation progress for the first portfolio slice.
+- [Execution-plan index](plans/README.md) — active and completed task-scoped ExecPlans; currently empty because no implementation task is In progress.
 
 ### Derived planning specifications
 
@@ -82,7 +86,7 @@ Do not load every requirements module automatically. Read the master index, the 
 
 - [Architecture index](architecture/README.md) — entry point for accepted decisions and proposed architecture material.
 - [Candidate architecture](architecture/CANDIDATE_ARCHITECTURE.md) — Proposed system topology, technology constraints, and implementation patterns; it is not part of the authoritative requirements baseline.
-- [Architecture Decision Record index](architecture/decisions/README.md) — status, scope, and links for accepted ADRs, including the MVP YAGNI decisions for [in-process retrieval](architecture/decisions/ADR-0019-in-process-exact-vector-search.md), [manual local-model setup](architecture/decisions/ADR-0020-manual-developer-managed-local-model-setup.md), the [single-file run aggregate](architecture/decisions/ADR-0021-single-file-run-aggregate.md), the [closed guidance corpus](architecture/decisions/ADR-0022-closed-versioned-guidance-corpus.md), and the [Local-mode data boundary](architecture/decisions/ADR-0023-local-mode-data-boundary.md).
+- [Architecture Decision Record index](architecture/decisions/README.md) — status, scope, and links for accepted ADRs, including the MVP YAGNI decisions for [in-process retrieval](architecture/decisions/ADR-0019-in-process-exact-vector-search.md), [manual local-model setup](architecture/decisions/ADR-0020-manual-developer-managed-local-model-setup.md), the [single-file run aggregate](architecture/decisions/ADR-0021-single-file-run-aggregate.md), the [closed guidance corpus](architecture/decisions/ADR-0022-closed-versioned-guidance-corpus.md), the [Local-mode data boundary](architecture/decisions/ADR-0023-local-mode-data-boundary.md), and the repository's [milestone-slice TDD method](architecture/decisions/ADR-0024-milestone-slice-tdd-with-independent-ownership.md).
 - [Voxleaf implementation pattern assessment](architecture/candidates/VOXLEAF_IMPLEMENTATION_PATTERN_ASSESSMENT.md) — explicitly unaccepted external-reference assessment and adaptation gates.
 
 #### Workflow-step technical assessments
@@ -98,5 +102,21 @@ Do not load every requirements module automatically. Read the master index, the 
 
 - [Project overview](../README.md) — public summary and repository status.
 - [Agent instructions](../AGENTS.md) — repository-wide rules and selective context-loading requirements.
-- [Agent coordination workflow](../.codex/README.md) — cost-aware, responsibility-separated research, implementation, and review routing for bounded repository work.
-- [Execution-plan convention](../PLANS.md) — conditional living coordination record for work that needs durable sequencing, recovery, or roadmap-approved parallel ownership.
+- [Agent coordination workflow](../.codex/README.md) — complete cost-aware, responsibility-separated research, decision, implementation, review, correction, and closure routing.
+- [Worker-first implementation workflow](../.codex/execplan-implementation-workflow.md) — Milestone Assignment Packet v2, preflight, serial Red–Green–Refactor, corrections, handoffs, and risk-routed review.
+- [Automatic write-lease guard](../.codex/write-lease-guard.md) — machine-verified path and Git-control containment for one worker write turn.
+- [Optional agent-flow metrics](../.codex/agent-flow-metrics.md) — local fail-open lifecycle and semantic observations that never replace evidence or block closure.
+- [Execution-plan convention](../PLANS.md) and [plan index](plans/README.md) — living task-scoped coordination, recovery, evidence identities, and completed-plan preservation.
+
+## Task-closure documentation gate
+
+Every completed repository task receives a documentation-impact review before handoff:
+
+1. Compare completed scope, changed paths, decisions, and new evidence with the authority map and task router above.
+2. For write-authorized work, update every materially affected authority, current-status statement, command, artifact location, and navigation link.
+3. For read-only work, report required documentation follow-ups without modifying files.
+4. Preserve stable requirement, OD, ADR, roadmap, BHV, SPEC, and HS identifiers and superseded decision history. Do not convert a plan, agent report, review, lease receipt, or metric into implementation evidence.
+5. Run the smallest relevant configuration and task checks, resolve affected Markdown links, inspect authority/status consistency, and run `git diff --check`.
+6. End the handoff with `Documentation impact: Updated ...`, `Documentation impact: None — ...`, or `Documentation impact: Proposed ...; not written because the task was read-only`.
+
+The primary coordinator owns this gate even when bounded edits and independent review are delegated. A roadmap task is not Complete until this gate and its own Verification pass.

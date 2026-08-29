@@ -33,9 +33,19 @@ When the selected task materially changes rendered UI, CSS, layout, visual hiera
 
 ## Agent coordination
 
-When delegation would materially improve a repository task, follow the project-scoped [agent coordination workflow](.codex/README.md). Keep the primary agent responsible for authority interpretation, risk and role routing, synthesis, integration, final verification, roadmap-status changes, and user communication. Delegate only bounded work with explicit authorities, permissions, output, budget, and stop conditions; for implementation, also require the selected roadmap scope, paths, readiness gates, and validation. Never run more than one writer at a time in the same worktree.
+For bounded repository research, decisions, implementation, and independent review, follow the full project-scoped [agent coordination workflow](.codex/README.md). Keep the primary agent responsible for authority interpretation, R/S risk and role routing, research synthesis, every authoritative research-derived repository write, implementation integration, evidence acceptance, approvals, roadmap-status changes, final verification, closure, and user communication. Explicit role-level model and reasoning settings prevent a high-effort primary coordinator from making every subagent equally expensive.
 
-Use the root [execution-plan convention](PLANS.md) only when its activation conditions are met. An execution plan is a subordinate coordination record, not a second roadmap, architecture decision, authorization, or proof of completion.
+Use the objective `R0` through `R3` research route and issue [Research Assignment Capsule v1](.codex/README.md#research-assignment-capsule-v1) whenever a research role is needed. Consequential decision work uses the sole-writer topology and a living Decision Review Contract: keep it in the owning ExecPlan when the decision belongs to a selected roadmap task, or in the coordinating prompt when a standalone policy decision has no roadmap-task owner. Do not invent a plan or task ID solely to host that contract. Research, analysis, drafting, and review roles remain read-only. Their reports cannot accept an ADR, change a requirement or open-decision status, authorize implementation, or close a roadmap task.
+
+For any roadmap task that changes application source, tests, dependencies, fixtures, or executable configuration—and for other substantial work when the owner requests it—maintain one living, task-scoped ExecPlan under `docs/plans/` according to [PLANS.md](PLANS.md). An ExecPlan is subordinate to the roadmap and canonical authorities; it cannot create another task graph, change dependencies or status, accept a decision, or prove completion. Move it to `docs/plans/completed/` only after its owning existing roadmap task is Complete and the documentation closure gate passes.
+
+For an owner-authorized implementation ExecPlan whose existing roadmap task is `In progress`, use the [worker-first implementation workflow](.codex/execplan-implementation-workflow.md) and [ADR-0024](docs/architecture/decisions/ADR-0024-milestone-slice-tdd-with-independent-ownership.md). The primary issues Milestone Assignment Packet v2, delegates read-only preflight and the test boundary to `test_worker`, then delegates minimum Green to `code_worker` or, only for a rendered-UI slice, `frontend_code_worker`. Red, Green, and Refactor remain sequential. Apply structural or manual evidence instead of fabricating a Red for documentation, declarative setup, corpus preparation, capacity screens, or external evaluations with no meaningful executable behavior.
+
+Every implementation-worker write turn requires a fresh path contract opened and terminally closed by the primary through the [automatic write-lease guard](.codex/write-lease-guard.md). A worker never manages its own lease. The primary does not make an unleased application implementation edit; when integration reveals another source, test, dependency, fixture, or executable-configuration change, it issues a new bounded worker assignment. Primary-owned ExecPlan, authority, status, and guard-control maintenance occurs only between leases and is not an implementation-worker turn. Only one write lease may be active in one worktree; concurrent independent writers require separate worktrees, baselines, task-scoped ExecPlans, and an already authorized roadmap parallel group. [Agent-flow metrics](.codex/agent-flow-metrics.md) and hooks are optional, local, fail-open observations and never replace leases, tests, review, evidence, or closure.
+
+Delegate only bounded work with exact authority anchors, permissions, expected output, execution budget, stop conditions, and—when writes are possible—selected roadmap scope, readiness and freeze evidence, paths, commands, and validation. Keep the source workflow's one bounded correction per role and stop on a changed contract, repeated decisive failure, two no-diff write handoffs, exhausted budget, conflicting authority, or unexpected overlapping change. The primary must inspect the actual worktree and cannot treat a worker report, reviewer verdict, lease receipt, or metric as self-validating proof.
+
+Apply YAGNI to repository workflow as well as product code. Use only the roles, reviews, plan sections, metrics, or parallelism triggered by the current work. The existence of eleven role definitions is capacity, not a requirement to invoke them all.
 
 ## Documentation rules
 
@@ -45,6 +55,18 @@ Use the root [execution-plan convention](PLANS.md) only when its activation cond
 - Record accepted significant architectural decisions in `docs/architecture/decisions/` and link each record from its `README.md`; keep speculative alternatives in explicitly Proposed candidate documents.
 - Do not present the future product as an accessibility certification tool.
 - After moving or renaming documents, update affected indexes and references and verify that relative links resolve.
+
+## Task-closure documentation gate
+
+Before marking any repository task Complete or presenting a final implementation handoff:
+
+1. Compare the completed scope, changed paths, decisions, and new evidence with the documentation authority map.
+2. Update every materially affected authority, navigation link, roadmap status, development instruction, and current-status statement; preserve superseded decision history.
+3. For read-only work, report required documentation follow-ups without modifying files.
+4. Run proportional configuration, link, authority-consistency, formatting, and task-specific validators.
+5. End the handoff with an explicit documentation-impact statement, including a concrete reason when no documentation change was needed.
+
+The primary coordinator owns this gate. A roadmap task is not Complete until the gate and the task's own Verification both pass.
 
 ## Public content
 

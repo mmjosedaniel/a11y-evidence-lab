@@ -29,7 +29,9 @@ The MVP is one portfolio slice delivered through progressively complete vertical
 
 The first milestone is a real scan-to-evidence walking skeleton. Later milestones add curated retrieval and abstention, structured generation, human review, and conservative comparison; the final gate performs bounded evaluation. Application accessibility is built into each UI task and verified again at that final evaluation gate.
 
-The roadmap applies YAGNI throughout: direct application-owned logic, one local service, one versioned `run.json` aggregate per run, sequential work on one selected Finding, a closed corpus, and exactly two fixed generation modes. No task introduces a crawler, workflow engine, queue, database, generic provider registry, or release platform.
+The roadmap applies YAGNI throughout: direct application-owned logic, one local service, one versioned `run.json` aggregate per run, sequential work on one selected Finding, a closed corpus, and exactly two fixed generation modes. No product task introduces a crawler, product-runtime workflow engine, queue, database, generic provider registry, or release platform.
+
+Implementation of automatable production behavior follows the task-scoped ExecPlan and independent test/implementation ownership accepted in [ADR-0024](architecture/decisions/ADR-0024-milestone-slice-tdd-with-independent-ownership.md). This is a repository development method, not product orchestration. Documentation, declarative setup, corpus preparation, manual capacity screens, and external evaluation observations use proportional non-TDD evidence when no meaningful executable Red exists.
 
 ## Bounded MVP outcome
 
@@ -81,12 +83,12 @@ Every task's **Authorities** field uses stable identifiers from the owning sourc
 ### RD-002 — Select the minimum development toolchain literals
 
 - **Parent milestone / role / status:** Walking-skeleton entry / enabling / **Not started**.
-- **Objective:** Select only the JavaScript runtime, package manager, build arrangement, local-service host, and exact dependency versions required by M1.
+- **Objective:** Select only the JavaScript runtime, package manager, build arrangement, local-service host, focused test harness, and exact dependency versions required by M1.
 - **Inputs, dependencies, and scheduling:** Ready after completed RD-001. It is on the critical dependency path and must complete before scaffolding. A durable architecture consequence requires an ADR; ordinary implementation literals do not.
-- **Expected output:** One small, reproducible development baseline compatible with the recorded TypeScript, React, localhost-service, Playwright, and axe-core decisions at their existing statuses, including a pinned TypeScript compiler, strict compiler configuration, and an independently executable type-check command.
+- **Expected output:** One small, reproducible development baseline compatible with the recorded TypeScript, React, localhost-service, Playwright, and axe-core decisions at their existing statuses, including a pinned TypeScript compiler, strict compiler configuration, independently executable type-check command, and the smallest focused test harness and command needed for M1's milestone-slice TDD workflow.
 - **User-visible outcome:** Enables the developer to start the future service and UI; it creates no product capability by itself.
-- **Authorities:** ADR-0008, ADR-0009, ADR-0011, ADR-0012, ADR-0015, `REQ-INST-002`, `REQ-QUAL-010`, and `REQ-QUAL-012`.
-- **Verification:** Every selected tool is needed by M1 and its material versions are pinned; the strict TypeScript compiler check executes successfully on its own rather than being inferred from transpilation, a build, a test runner, or editor diagnostics; and no installer, desktop wrapper, database, hosted service, or generalized framework enters scope.
+- **Authorities:** ADR-0008, ADR-0009, ADR-0011, ADR-0012, ADR-0015, ADR-0024, `REQ-INST-002`, `REQ-QUAL-010`, and `REQ-QUAL-012`.
+- **Verification:** Every selected tool is needed by M1 and its material versions are pinned; the strict TypeScript compiler check executes successfully on its own rather than being inferred from transpilation, a build, a test runner, or editor diagnostics; one focused test command executes independently and can demonstrate a genuine failing and passing behavior slice without requiring the complete future suite; and no installer, desktop wrapper, database, hosted service, generalized testing platform, or speculative framework enters scope.
 - **Likely surfaces:** Future package metadata, TypeScript/build configuration, local-service and UI entry points, and development instructions.
 - **Out of scope:** Package upgrades unrelated to M1, production deployment, distribution, component inventories, release locks, and framework selection for hypothetical later needs.
 
@@ -293,7 +295,7 @@ M5 is semantically dependent only on completed scan evidence from M1. It is sequ
 - **Authorities:** `REQ-GEN-001`–`REQ-GEN-006`, `REQ-GEN-008`–`REQ-GEN-010`, `REQ-LLM-001`, `REQ-LLM-004`, `REQ-LLM-008`, `REQ-LLM-019`, `REQ-SEC-013`–`REQ-SEC-016`, `REQ-QUAL-003`, ADR-0001, ADR-0011, ADR-0013, the `Generate one eligible proposal` and `Fail before invocation when required input does not fit` scenarios of SPEC-003, the provider-neutral contract and ProviderInvocation portions of `Use one mode without mixing or fallback`, the bounded-result portion of `Fail before invocation when the selected prerequisite is missing`, and the provenance/result-category portion of `Keep an attempted-call failure bounded and visible` in SPEC-004, the eligibility/context-fit boundary of HS-008, and the shared immutable-mode/provenance boundary of HS-009.
 - **Verification:** Unsupported structure, evidence references, citations, or prohibited claims cannot become a proposal; context that cannot fit without truncation fails before invocation and is not an abstention; only an attempted call creates ProviderInvocation provenance.
 - **Likely surfaces:** Future generation contract, sufficiency/context assembler, provider interface, proposal validator, invocation provenance, and aggregate update.
-- **Out of scope:** Generic provider registry, user-configurable endpoints, agents, tools, fine-tuning, prompt platform, streaming, batch generation, retry, or fallback.
+- **Out of scope:** Generic provider registry, user-configurable endpoints, product-runtime agents, tools, fine-tuning, prompt platform, streaming, batch generation, retry, or fallback.
 
 ### M3-03 — Integrate Qwen Local generation and run its capacity screen
 
@@ -347,7 +349,7 @@ M5 is semantically dependent only on completed scan evidence from M1. It is sequ
 - **Authorities:** `REQ-REV-001`, `REQ-REV-008`, `REQ-REV-009`, `REQ-UX-011`, ADR-0021, SPEC-005, and HS-010.
 - **Verification:** Abstentions and failed/invalid proposals cannot enter review; approval/edit-and-accept require supported material claims and a resolved or explicitly not-applicable blocking judgment; rejection accepts bounded feedback; the original proposal remains unchanged.
 - **Likely surfaces:** Future review validator/service, decision shape nested in `run.json`, aggregate update, and error categories.
-- **Out of scope:** Actor identity, authentication, teams, assignment, per-edit history, proposal versions, audit graph, per-claim records, bulk review, regeneration, or workflow engine.
+- **Out of scope:** Actor identity, authentication, teams, assignment, per-edit history, proposal versions, audit graph, per-claim records, bulk review, regeneration, or product-runtime workflow engine.
 
 ### M4-02 — Present the accessible review interaction
 
@@ -483,11 +485,11 @@ M6 is a final verification and evidence gate, not another vertical implementatio
 
 ## Parallel work and integration rules
 
-Only these groups are eligible for parallel scheduling when the user explicitly selects both tasks and a focused execution plan confirms non-overlapping ownership:
+Only these groups are eligible for parallel scheduling when the user explicitly selects every participating task and one task-scoped ExecPlan per task confirms non-overlapping ownership, a separate worktree and baseline, and the named join:
 
 1. **M1-02, M1-03, and M1-04:** service/persistence, scanner/evidence, and UI work after M1-01 freezes their shared contract. They join at M1-05. None may independently change that contract.
 2. **M3-03 and M3-04:** Local and Groq adapters after M3-02 freezes the shared provider/output contract. They join at M3-05.
-After each group, its named checkpoint must integrate and verify the combined behavior before dependent work begins. No artificial parallelism is created inside one aggregate mutation, shared lifecycle, UI composition, or integration boundary.
+After each group, its named checkpoint must integrate and verify the combined behavior before dependent work begins. Without separate worktrees, execute the tasks serially. No artificial parallelism is created inside one aggregate mutation, shared lifecycle, UI composition, or integration boundary.
 
 ## Review checkpoints
 
@@ -530,7 +532,7 @@ Later placement does not make these capabilities optional. Their Accepted requir
 
 ### Proposed or open implementation choices
 
-- JavaScript runtime, package manager, build tool, local-service framework, exact package versions, exact aggregate fields, UI layout/copy, and small verification-tool choices remain implementation literals until the applicable task selects them.
+- JavaScript runtime, package manager, build tool, focused test runner, local-service framework, exact package versions, exact aggregate fields, UI layout/copy, and small verification-tool choices remain implementation literals until the applicable task selects them.
 - Proposed candidate architecture and Voxleaf-derived patterns may inform a focused task only when an immediate Accepted requirement needs them. They are not implementation authority.
 - A significant durable mechanism not already covered by an ADR requires a new decision before implementation.
 
@@ -538,7 +540,7 @@ Later placement does not make these capabilities optional. Their Accepted requir
 
 - `REQ-GEN-007` dedicated prompt-injection hardening/evaluation and `REQ-A11Y-005` embedded inaccessible-preview isolation.
 - General export/settings/history management; audit-grade review history; regeneration and review triage; teams, roles, assignments, and collaboration.
-- User-configurable remote generation endpoints, additional providers, provider discovery/comparison, hosted tracing, telemetry, analytics, agents, LangGraph, queues, concurrency, cancellation, checkpoint/resume, and workflow engines.
+- User-configurable remote generation endpoints, additional providers, provider discovery/comparison, hosted tracing, telemetry, analytics, product-runtime agents, LangGraph, queues, concurrency, cancellation, checkpoint/resume, and workflow engines.
 - Chroma or another vector service, reranking, web search, automatic corpus crawling/refresh, generic ingestion, and broad WCAG/rule coverage.
 - Authenticated/private targets, link discovery, crawling, multi-page or batch analysis, hostile-target isolation, production URL-security enforcement, and adversarial qualification.
 - Installer, desktop wrapper, application-managed model acquisition/removal, signing, update/repair/uninstall, formal support matrix, release qualification, and public release claims.

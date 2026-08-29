@@ -13,6 +13,8 @@ They create no requirement, architectural decision, implementation authorization
 
 [OD-021](../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-021--trusted-operator-url-boundary-for-the-portfolio-mvp) owns the trusted developer-input assumption. [OD-022](../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-022--portfolio-mvp-yagni-simplification) owns the compact planning boundary used here. [OD-024](../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-024--minimum-complete-mvp-behavior-contracts) accepts the minimum scanner-evidence, structured-result, comparison, interface, and application-accessibility contracts reflected by these views. [ADR-0018](../architecture/decisions/ADR-0018-trusted-operator-url-boundary.md) owns the single-page browser boundary, [ADR-0022](../architecture/decisions/ADR-0022-closed-versioned-guidance-corpus.md) owns the closed corpus, and [ADR-0023](../architecture/decisions/ADR-0023-local-mode-data-boundary.md) owns the Local-mode data boundary. The [requirements index](../PROJECT_REQUIREMENTS.md) and [ADR index](../architecture/decisions/README.md) own all other statuses and decisions.
 
+[ADR-0024](../architecture/decisions/ADR-0024-milestone-slice-tdd-with-independent-ownership.md) governs how future automatable production behavior is implemented and tested. It does not make these documentation-only files executable or promote a derived scenario above its linked authority.
+
 The accepted application-accessibility behavior is not duplicated as another feature matrix. `REQ-A11Y-006` keeps its verification to one automated check, one keyboard smoke path, and one screen-reader smoke path; omission of those detailed checks here does not weaken `REQ-A11Y-001`–`REQ-A11Y-004`, `REQ-A11Y-009`, or `REQ-A11Y-010`.
 
 An abstention is an application-authored terminal FindingWorkflow result. It explains the blocking evidence or guidance state, identifies missing or conflicting information, confirms that no provider was called, and gives manual-investigation guidance. It never enters the approve/edit-and-accept/reject proposal-review path. Only a validated generated proposal enters that review path.
@@ -23,7 +25,7 @@ Each proposal carries one blocking pre-acceptance judgment and one non-blocking 
 
 Both feature files are **specified, not executed**. The repository contains no Gherkin runner, step definitions, bindings, test command, implementation fixture, or generated acceptance artifact. Their `.feature` extension provides readable planning notation only.
 
-Development is authorized through OD-025, but executable acceptance work begins only through a concrete user-requested roadmap task and belongs in future implementation/test surfaces rather than these documentation-only files. A future test strategy may reuse these examples, but these files do not prove that any behavior passes.
+Development is authorized through OD-025, but executable acceptance work begins only through a concrete user-requested roadmap task and belongs in future implementation/test surfaces rather than these documentation-only files. Under ADR-0024, a focused executable test may derive its behavior from an applicable example while retaining direct authority traceability, but these `.feature` files remain planning views and prove no behavior passes.
 
 ## Evaluation freeze boundary
 
