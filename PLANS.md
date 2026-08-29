@@ -58,7 +58,7 @@ An ExecPlan decision is not architectural approval. A significant architectural 
 
 ### Outcomes & Retrospective
 
-At each major work slice and at completion, compare the observed result with the original purpose. Record what was achieved, what remains, unexpected costs, and lessons that should affect later work. An empty initial entry may state that execution has not started. A future project-progress folder may summarize accepted task and agent-workflow progress when implementation creates that need, but no telemetry or generated progress ledger is required by this plan format.
+At each major work slice and at completion, compare the observed result with the original purpose. Record what was achieved, what remains, unexpected costs, and lessons that should affect later work. An empty initial entry may state that execution has not started. The manual [project-progress directory](docs/progress/README.md) may summarize only coordinator-accepted task and agent-workflow outcomes; this ExecPlan remains the detailed execution and evidence record. Update the task summary only at material checkpoints or closure, and do not add telemetry or a generated progress ledger.
 
 ## Required execution sections
 
@@ -124,7 +124,7 @@ Every production behavior follows one coherent milestone-slice Red-Green-Refacto
 
 Before each behavior-bearing work slice completes, audit affected tests, fixtures, mocks, helpers, snapshots, skipped tests, and focused-test markers. Record why each remains, changes, consolidates, or is removed; then run the affected suite and build or type boundary. Run the complete authoritative suite once at task closure, or earlier only when risk, tree drift, or a failed prerequisite makes narrower evidence insufficient. If a task changes no tests or no executable suite exists yet, record that fact instead of inventing a command.
 
-Finally, apply the [task-closure documentation gate](docs/README.md#task-closure-documentation-gate). Update materially affected authority owners, navigation, and current-status statements; preserve history; run proportional validators; and record one explicit documentation-impact result. The owning roadmap task remains incomplete until this gate and its own Verification pass.
+Finally, apply the [task-closure documentation gate](docs/README.md#task-closure-documentation-gate). Update materially affected authority owners, navigation, current-status statements, and the task's indexed [progress summary](docs/progress/README.md); preserve history; run proportional validators; and record one explicit documentation-impact result. The owning roadmap task remains incomplete until this gate and its own Verification pass.
 
 ## Revision note
 

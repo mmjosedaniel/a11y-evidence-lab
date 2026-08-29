@@ -6,6 +6,7 @@
 - **Clarified:** 2026-08-29 — optional metrics are retained only for one bounded first-implementation pilot and must be disabled/deferred rather than expanded if that pilot is unhelpful; metrics remain non-authoritative and fail open.
 - **Replaced:** 2026-08-29 — the later project-owner direction recorded below removes that unactivated metrics pilot under YAGNI and clarifies the non-TDD setup route and bounded coordinator test-correction exception.
 - **Clarified:** 2026-08-29 — lease evidence covers path containment and only the explicitly sealed Git index, `HEAD` object and symbolic ref, selected settings, and ignore controls; every other Git write operation or metadata mutation remains prohibited by the worker contract but is not claimed as guard-detected.
+- **Clarified:** 2026-08-29 — later project-owner direction activates one manual, non-authoritative progress index with one living summary per started roadmap task; it does not restore hooks, metrics, telemetry, or another evidence or status authority.
 
 ## Context
 
@@ -46,12 +47,14 @@ This decision governs the repository development method. It does not add applica
 - The primary coordinator remains responsible for accepting evidence; worker handoffs, reviews, and lease receipts are supporting inputs only.
 - The workflow adds repository coordination overhead, so work slices and validation must remain coarse enough to prove an observable contract and small enough to review independently.
 - Python remains an internal dependency-free workflow-tooling prerequisite for automatic leases. It is not an application language, product dependency, installer prerequisite, or user runtime requirement.
-- No hook or agent-flow metrics sidecar is part of the current workflow. It produced no runtime evidence, was not required by a gate, and duplicated information that a future small project-progress record can capture if implementation establishes that need.
+- No hook or agent-flow metrics sidecar is part of the current workflow. It produced no runtime evidence, was not required by a gate, and duplicated the bounded outcome summary now owned manually by the [project and agent-workflow progress directory](../../progress/README.md).
 - A future change to the ownership model, correction budget, or TDD applicability requires an explicit amendment or replacement of this decision.
 
 ## Decision history
 
-The earlier 2026-08-29 clarification retained optional hooks and agent-flow metrics for a first-implementation pilot. Before that pilot was activated, review found that the sidecar did not model persistent subagent turns correctly and could not associate all observed reviewer or preflight work with a workflow. The project owner chose the YAGNI outcome: remove the unproven sidecar rather than repair optional telemetry. A future progress folder is Deferred until implementation creates a concrete reporting need; it must not become an automatic evidence or closure authority merely by being added.
+The earlier 2026-08-29 clarification retained optional hooks and agent-flow metrics for a first-implementation pilot. Before that pilot was activated, review found that the sidecar did not model persistent subagent turns correctly and could not associate all observed reviewer or preflight work with a workflow. The project owner chose the YAGNI outcome: remove the unproven sidecar rather than repair optional telemetry. At that point, a progress folder was Deferred until a concrete reporting need existed and was prohibited from becoming an automatic evidence or closure authority.
+
+Later on 2026-08-29, the project owner explicitly requested a task-by-task project and agent-workflow progress directory. That direction activates only the smallest manual summary layer: one indexed, living record per existing roadmap task after it starts, updated at material accepted checkpoints. It supersedes the folder's deferral without changing the original telemetry rejection. The progress record remains subordinate to the roadmap, ExecPlan, authoritative decisions, validation evidence, and task-closure gate.
 
 The same owner direction confirms the Rick-and-Morty milestone-slice TDD semantics for production behavior and replaces the earlier absolute prohibition on direct coordinator implementation edits with the narrow test-correction exception above. The implementation worker still cannot edit the accepted test contract during Green, and any coordinator or test-worker change to that contract invalidates the prior Red or characterization evidence before it can be reused or Green resumes.
 
@@ -61,5 +64,6 @@ The same owner direction confirms the Rick-and-Morty milestone-slice TDD semanti
 - [Worker-first ExecPlan implementation workflow](../../../.codex/execplan-implementation-workflow.md)
 - [ExecPlan convention](../../../PLANS.md)
 - [Development roadmap](../../DEVELOPMENT_ROADMAP.md)
+- [Project and agent-workflow progress](../../progress/README.md)
 - [ADR-0011: TypeScript as the initial application language](ADR-0011-typescript-as-initial-application-language.md)
 - [Documentation-only Gherkin specifications](../../specs/README.md)

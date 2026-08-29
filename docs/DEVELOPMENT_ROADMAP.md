@@ -10,6 +10,8 @@
 
 This roadmap turns the accepted planning baseline into an implementation order. It owns milestone order, task dependencies, integration checkpoints, and progress status. It does not create or override a product requirement, architecture decision, behavioral contract, evaluation result, or release claim. If this roadmap conflicts with an identified requirement or Accepted ADR, the requirement or ADR controls and the roadmap must be corrected.
 
+Concise task narratives are indexed in the [project and agent-workflow progress directory](progress/README.md). Those manual records mirror only coordinator-accepted facts from this roadmap, an owning ExecPlan, and decisive evidence; they cannot change task status, authorize work, prove Verification, or close a task.
+
 The controlling sources are the [project requirements](PROJECT_REQUIREMENTS.md), [delivery-readiness decisions](requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md), applicable focused requirement modules, [Accepted ADRs](architecture/decisions/README.md), the [evaluation authority](requirements/evaluation-and-release/EVALUATION_AND_ACCEPTANCE.md), and the derived [Gherkin specifications](specs/README.md). Candidate assessments remain Proposed research. `Accepted for evaluation` does not mean implemented, generally supported, or release-qualified.
 
 Progress labels in this document mean:
@@ -553,6 +555,7 @@ Later placement does not make these capabilities optional. Their Accepted requir
 ## Documentation navigation
 
 - [Project documentation index](README.md)
+- [Project and agent-workflow progress](progress/README.md)
 - [Project requirements](PROJECT_REQUIREMENTS.md)
 - [Delivery readiness and open decisions](requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md)
 - [Architecture Decision Records](architecture/decisions/README.md)

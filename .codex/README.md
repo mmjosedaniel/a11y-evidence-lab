@@ -14,6 +14,7 @@ These agents support repository work. They do not change product scope, approve 
 | Consequential decision work | [Decision work](#decision-work) | Decision Review Contract in the owning ExecPlan when roadmap-task-backed, or in the coordinating prompt for a standalone policy decision, plus the applicable research tier |
 | Owner-authorized implementation ExecPlan | [Implementation workflow](./execplan-implementation-workflow.md) | [Write-lease guard](./write-lease-guard.md) and owning ExecPlan |
 | Visible frontend implementation work slice | [Frontend quality skill](../.agents/skills/frontend-quality/SKILL.md) | Conditional `frontend-visual` profile in the implementation workflow; standard slices remain unchanged |
+| Task-level project and agent-workflow progress | [Progress index](../docs/progress/README.md) | Existing roadmap task, owning ExecPlan when applicable, and accepted checkpoint evidence |
 | Custom role selection | [Agent registry](#agent-registry) | Exact role TOML and bounded instance assignment |
 | Operator-managed runtime concurrency | [Runtime concurrency capacity](#runtime-concurrency-capacity) | [Collaboration topology](#collaboration-topology), [implementation workflow](./execplan-implementation-workflow.md), and [write-lease guard](./write-lease-guard.md) |
 
@@ -192,6 +193,10 @@ Review is risk-routed:
 An unresolved Blocker or Major from an ordinary reviewer, or explicit project-owner direction, also triggers critical review. Final ordinary integration uses a fresh `independent_reviewer`; use `critical_reviewer` only when a critical trigger remains. Reviewers reuse fresh evidence and rerun missing, stale, contradictory, externally mutable, or risk-critical checks rather than reflexively repeating every suite.
 
 The implementation topology above remains unchanged by research-tier routing: write-capable implementation workers do not perform research assignments, draft ADRs, resolve gates, or replace the primary decision writer. Research roles never receive implementation write leases, and Research Assignment Capsules never authorize repository edits.
+
+### Progress summaries
+
+The primary coordinator maintains the manual [project and agent-workflow progress index](../docs/progress/README.md). Create one living summary only after an existing roadmap task enters `In progress`; update it after an accepted material work-slice or integration checkpoint and at task closure. Include a reconciled blocker or next-boundary change only when it is part of that accepted checkpoint. Record outcomes, roles and routes actually used, accepted review or correction results, decisive evidence links, and the next boundary. Do not record every turn, duplicate the ExecPlan, copy raw reports or lease state, or add hooks, token/cost tracking, or generated telemetry. The roadmap remains the status authority, and the ExecPlan remains the detailed coordination and evidence record.
 
 ## Decision Review Contract and Risk Tier
 
