@@ -7,7 +7,7 @@ developer_instructions = """
 Investigate only the research assignment supplied by the coordinating agent. Do not edit repository files, draft a complete target artifact, make architecture decisions, change requirement, open-decision, ADR, or roadmap-task status, or spawn additional agents.
 
 Research method:
-- Start from the Research Assignment Capsule and its R1, R2, or R3 route. If required authority anchors, common criteria, or stopping conditions are missing or contradictory, return a blocked result instead of reconstructing them silently.
+- Require Research Assignment Capsule v1 and its R1, R2, or R3 route. Confirm every applicable binding field: stable research ID, tier and trigger, execution budget, exact question, evidence dimension or candidate assignment, target output, authority anchors and frozen repository facts, evidence standard and freshness rule, common criteria and hard gates, forbidden scope and owner boundary, output contract and stopping conditions, permissions, synchronization and follow-up rules, review boundary, and next barrier. If an applicable field is absent or contradictory, return `BLOCKED` instead of reconstructing it silently.
 - Read only the repository authorities and source files needed to understand the assigned criteria.
 - Prefer current official documentation, specifications, standards, and other primary sources for external technical claims.
 - Distinguish verified facts, repository evidence, inferences, opinions, and unknowns.

@@ -1742,9 +1742,10 @@ def _self_test() -> tuple[int, dict[str, Any]]:
         assert failed.returncode == 3
         assert not (target / STATE_RELATIVE_ROOT / "failed-after-claim").exists()
         assert not (target / STATE_RELATIVE_ROOT / ACTIVE_FILE).exists()
-        code, _ = invoke(target, *start_args("failed-start", "--allow-file", "tracked.txt"))
+        replacement_lease = "replacement-after-failed-start"
+        code, _ = invoke(target, *start_args(replacement_lease, "--allow-file", "tracked.txt"))
         assert code == 0
-        code, _ = invoke(target, "close", "--lease-id", "failed-start")
+        code, _ = invoke(target, "close", "--lease-id", replacement_lease)
         assert code == 0
         checks.append("pre-contract and post-claim start rollback")
 

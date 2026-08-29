@@ -14,7 +14,7 @@ The controlling sources are the [project requirements](PROJECT_REQUIREMENTS.md),
 
 Progress labels in this document mean:
 
-- **Complete:** the task's stated verification evidence exists.
+- **Complete:** the task's stated verification evidence exists and the repository task-closure documentation gate has passed.
 - **In progress:** a concrete user request selected the task and work has started.
 - **Not started:** no implementation claim is made.
 - **Blocked:** an identified prerequisite or governing decision prevents work.

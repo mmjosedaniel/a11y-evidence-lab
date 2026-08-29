@@ -4,6 +4,7 @@
 - **Decision date:** 2026-08-28
 - **Clarified:** 2026-08-29 — attempt-2 corrections now carry an enforceable terminal attempt-1 parent identity and single-child guard projection; the correction budget and ownership decision are unchanged.
 - **Clarified:** 2026-08-29 — optional metrics are retained only for one bounded first-implementation pilot and must be disabled/deferred rather than expanded if that pilot is unhelpful; metrics remain non-authoritative and fail open.
+- **Replaced:** 2026-08-29 — the later project-owner direction recorded below removes that unactivated metrics pilot under YAGNI and clarifies the non-TDD setup route and bounded coordinator test-correction exception.
 
 ## Context
 
@@ -26,13 +27,13 @@ Use option 3 for implementation governed by the accepted [development roadmap](.
 - Search absence alone is not proof that behavior is missing.
 - Existing covered behavior reuses fresh evidence without another test. Existing uncovered behavior receives one passing characterization. Missing or regressed behavior receives one coherent failing Red before production implementation. A confirmed isolated gap from `PARTIAL` follows the same Red–Green route; `CONFLICTING` or `UNKNOWN` stops for coordinator triage.
 - One coherent slice may include related assertions that jointly prove one indivisible observable outcome. It must not combine unrelated roadmap behavior or devolve into one agent handoff per assertion.
-- The primary coordinator accepts and freezes the test boundary. A separate `code_worker`, or `frontend_code_worker` only for an accepted `frontend-visual` slice, implements the minimum Green and may perform a small behavior-preserving Refactor while the accepted tests remain unchanged.
+- The primary coordinator accepts the test boundary. A separate `code_worker`, or `frontend_code_worker` only for an accepted `frontend-visual` slice, implements the minimum Green and may perform a small behavior-preserving Refactor while the accepted test-owned files remain unchanged during that Green assignment.
 - Red, Green, and Refactor remain sequential. There is at most one active writer in a worktree. Concurrent independent writers require separate Git worktrees, baselines, ExecPlans, and the roadmap's existing parallel authorization.
-- Every implementation-worker write turn uses the repository's [Milestone Assignment Packet v2](../../../.codex/execplan-implementation-workflow.md#milestone-assignment-packet-v2) and [automatic write-lease guard](../../../.codex/write-lease-guard.md). The primary makes no unleased application implementation edit; primary-owned ExecPlan, authority, status, and guard-control maintenance occurs only between leases. A compliant lease proves path and Git-control containment, not semantic correctness.
+- Every implementation-worker write turn uses the repository's [Milestone Assignment Packet v2](../../../.codex/execplan-implementation-workflow.md#milestone-assignment-packet-v2) and [automatic write-lease guard](../../../.codex/write-lease-guard.md). The test worker owns ordinary test creation and correction. The primary may make an exceptional direct test correction only between leases, records the reason, paths, and validation in the ExecPlan, and invalidates the affected Red or characterization evidence. The corrected test and fresh result must be accepted before that evidence is reused or Green continues. Other application implementation edits remain worker-owned. A compliant lease proves worker path and Git-control containment, not semantic correctness or direct coordinator activity between leases.
 - Each role receives at most one same-contract correction using attempt 2. The correction names its terminal attempt-1 parent; the guard requires matching workflow, task, work slice, phase, worker role, and path scope and rejects a second attempt-2 child for that parent. The coordinator remains responsible for semantic same-contract and replacement-instance validation. A changed contract, repeated decisive failure, exhausted budget, or unresolved authority conflict stops automatic continuation.
 - The coordinator inspects the actual diff and evidence, runs proportional work-slice validation, routes a fresh review by risk, and alone reconciles canonical status and closure.
 - Before a behavior-bearing slice completes, audit affected tests, fixtures, mocks, helpers, snapshots, skipped tests, and focused-test markers for continued relevance.
-- Documentation-only changes, declarative setup, dependency selection, corpus preparation, manual capacity screens, and external evaluation observations use structural, semantic, manual, or negative evidence when no meaningful executable Red exists. They must record why TDD does not apply; they must not fabricate a failing test.
+- Documentation-only changes, declarative setup, dependency selection, corpus preparation, manual capacity screens, and external evaluation observations use structural, semantic, manual, or negative evidence when no meaningful executable Red exists. They record `TDD: Not applicable` and the replacement evidence; a guarded `code_worker` setup may proceed without test-worker preflight. They must not fabricate a failing test.
 - The exact test runner and test packages remain RD-002 implementation literals. RD-002 must select the smallest harness needed by M1, pin every material version it introduces, and provide a focused independently executable test command. Later material dependencies are pinned when introduced and checked again at M6-04.
 
 This decision governs the repository development method. It does not add application agents, queues, leases, telemetry, concurrency, workflow orchestration, or runtime behavior to the product.
@@ -41,11 +42,17 @@ This decision governs the repository development method. It does not add applica
 
 - Test intent and implementation intent remain in separate role contexts for behavior-bearing work.
 - Pre-existing behavior is not forced through an artificial failing test.
-- The primary coordinator remains responsible for accepting evidence; worker handoffs, reviews, metrics, and lease receipts are supporting inputs only.
+- The primary coordinator remains responsible for accepting evidence; worker handoffs, reviews, and lease receipts are supporting inputs only.
 - The workflow adds repository coordination overhead, so work slices and validation must remain coarse enough to prove an observable contract and small enough to review independently.
-- Python remains an internal dependency-free workflow-tooling prerequisite for automatic leases and optional metrics. It is not an application language, product dependency, installer prerequisite, or user runtime requirement.
-- The optional hook metrics remain local, best effort, fail open, and non-authoritative. They are retained only for the bounded first-implementation pilot defined by the metrics policy; their absence cannot block implementation or closure, and an unhelpful pilot does not justify broader telemetry.
+- Python remains an internal dependency-free workflow-tooling prerequisite for automatic leases. It is not an application language, product dependency, installer prerequisite, or user runtime requirement.
+- No hook or agent-flow metrics sidecar is part of the current workflow. It produced no runtime evidence, was not required by a gate, and duplicated information that a future small project-progress record can capture if implementation establishes that need.
 - A future change to the ownership model, correction budget, or TDD applicability requires an explicit amendment or replacement of this decision.
+
+## Decision history
+
+The earlier 2026-08-29 clarification retained optional hooks and agent-flow metrics for a first-implementation pilot. Before that pilot was activated, review found that the sidecar did not model persistent subagent turns correctly and could not associate all observed reviewer or preflight work with a workflow. The project owner chose the YAGNI outcome: remove the unproven sidecar rather than repair optional telemetry. A future progress folder is Deferred until implementation creates a concrete reporting need; it must not become an automatic evidence or closure authority merely by being added.
+
+The same owner direction confirms the Rick-and-Morty milestone-slice TDD semantics for production behavior and replaces the earlier absolute prohibition on direct coordinator implementation edits with the narrow test-correction exception above. The implementation worker still cannot edit the accepted test contract during Green, and any coordinator or test-worker change to that contract invalidates the prior Red or characterization evidence before it can be reused or Green resumes.
 
 ## Related documentation
 

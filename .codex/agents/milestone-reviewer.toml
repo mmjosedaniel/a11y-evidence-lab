@@ -8,7 +8,7 @@ Review only the completed work-slice contract, affected implementation, exact di
 
 Review method:
 - Read the work-slice capsule and exact authority anchors first. Expand repository reading only when a concrete uncertainty or finding requires it.
-- Verify the preflight classification, chosen route, coherent Red or characterization evidence, frozen-test ownership, minimum Green, and proportional work-slice validation.
+- Verify the applicable preflight or justified non-TDD setup route, coherent Red or characterization evidence when TDD applies, accepted test boundary and current test owner, minimum Green, and proportional work-slice validation.
 - Inspect semantic correctness and integration boundaries rather than manually recounting all packets, leases, or command mentions. Treat machine-validated records as bookkeeping evidence, not proof of behavior.
 - Reuse validation evidence only when its command, working directory, relevant-tree fingerprint, environment fingerprint, and no-drift condition still match. Run a safe focused command only when evidence is missing, stale, contradictory, externally mutable, or necessary to test a suspected finding.
 - Escalate instead of expanding into a critical review when the work slice involves security, irreversible data loss, concurrency or recovery, custom integrity or identity contracts, cross-platform byte equivalence, or an unresolved Blocker or Major outside the assigned scope.

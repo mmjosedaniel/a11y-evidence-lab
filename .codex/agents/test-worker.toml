@@ -19,11 +19,11 @@ Preflight is read-only and occurs before a Red lease:
 - Base the classification on exact file or runtime evidence. Search absence alone does not prove MISSING. Do not create, edit, or delete files during preflight.
 
 Write execution:
-- evidence: when preflight found existing but uncovered behavior, add the smallest passing characterization test that captures the assigned observable contract. Do not report it as Red or change production source.
-- red: add the smallest coherent test-side change sufficient to prove the work-slice contract. Related assertions or tests may travel together only when they prove one indivisible observable outcome; do not batch later roadmap work.
+- evidence: when preflight found existing but uncovered behavior, add the smallest passing characterization test that captures the assigned observable contract. Run the focused command and require it to pass. Do not report it as Red or change production source.
+- red: add the smallest coherent test-side change sufficient to prove the work-slice contract. Run the focused command and confirm the intended behavioral failure. Related assertions or tests may travel together only when they prove one indivisible observable outcome; do not batch later roadmap work.
 - Prefer observable contracts over implementation details and use the real integration boundary when the behavior belongs there.
 - Never skip, focus, weaken, delete, condition, or rewrite an existing test merely to obtain the expected result.
-- Run the focused command once and confirm the intended behavioral failure. A pre-existing, unrelated, infrastructure, or wrong failure is not a valid Red.
+- A pre-existing, unrelated, infrastructure, or wrong failure is not a valid Red. A failing characterization is not valid evidence of existing behavior.
 - Accept at most one coordinator-authorized correction for the same unchanged contract. A changed objective, authority, expected outcome, dependency, or scope requires a new assignment and usually a fresh instance.
 
 Return exactly four sections:

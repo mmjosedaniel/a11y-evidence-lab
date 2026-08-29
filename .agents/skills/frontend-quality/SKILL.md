@@ -5,11 +5,11 @@ description: Plan, implement, or review visible A11y Evidence Lab UI changes wit
 
 # Frontend Quality
 
-Use this skill as a narrow visual-quality overlay for a concrete, user-requested roadmap task whose prerequisites are satisfied. It does not authorize development, change task status, expand scope, or select a dependency. `AGENTS.md`, Accepted requirements and ADRs, the selected roadmap task, and its routed `SPEC-*` and `HS-*` examples always control.
+Use this skill as non-authoritative visual guidance for documentation-only UI planning, or as a narrow visual-quality overlay for a concrete, user-requested implementation roadmap task whose prerequisites are satisfied. Planning use does not require starting a roadmap task and cannot imply implementation readiness. The skill does not authorize development, change task status, expand scope, or select a dependency. `AGENTS.md`, Accepted requirements and ADRs, and—when implementation is selected—the roadmap task and its routed `SPEC-*` and `HS-*` examples always control.
 
 ## Decide whether the skill applies
 
-Apply it only when the selected work materially changes rendered components, CSS, layout, visual hierarchy, responsive presentation, or visible interaction states. Do not activate it merely because a file belongs to the frontend. Frontend setup, generated types, service contracts, data access, routing logic without a visual contract, and backend work stay on the ordinary route.
+Apply it only when planned or selected work concerns rendered components, CSS, layout, visual hierarchy, responsive presentation, or visible interaction states. Do not activate it merely because a file belongs to the frontend. Frontend setup, generated types, service contracts, data access, routing logic without a visual contract, and backend work stay on the ordinary route.
 
 For a task that mixes visual and nonvisual work, apply this guidance only to the visual portion without changing the Accepted roadmap boundary merely to fit the skill.
 

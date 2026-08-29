@@ -6,7 +6,7 @@ The guard is a repository workflow control. It validates the packet projection's
 
 The dependency-free Python implementation is repository workflow tooling, not application source, a product test harness, or completion evidence for any roadmap task. Python does not select or modify the MVP application toolchain governed by RD-002; end users do not need it to run the future TypeScript application.
 
-Guarded implementation requires Git and Python 3.10 or newer on the development host. Research, decision, planning, and read-only review can still operate without Python, and missing metrics never block work. A write-authorized worker turn cannot claim this full guarded workflow without the lease tool; stop and obtain the prerequisite or record and approve a replacement control instead of silently downgrading to an unenforced manual lease.
+Guarded implementation requires Git and Python 3.10 or newer on the development host. Research, decision, planning, and read-only review can still operate without Python. A write-authorized worker turn cannot claim this full guarded workflow without the lease tool; stop and obtain the prerequisite or record and approve a replacement control instead of silently downgrading to an unenforced manual lease.
 
 ## Lifecycle
 
@@ -21,11 +21,11 @@ flowchart LR
     F -- "violated" --> H["Stop writes; coordinator triages and reconciles without automatic revert"]
 ```
 
-Only one worker lease may be active in one Git worktree. Independent work can use separate Git worktrees with separate baselines. One persistent test or selected implementation agent may receive multiple sequential assignments inside a work slice, but persistence never extends a lease: the agent cannot write between turns, and every follow-up needs a new lease ID, fresh baseline, digest, and terminal close. The coordinator first drafts the semantic packet, starts the guard from its exact identity and path projection, inserts the returned digest, verifies that both representations match, and then sends the complete packet to the worker. The worker never invokes the guard or edits its runtime records. Read-only test-worker preflight has no lease and authorizes no writes.
+Only one worker lease may be active in one Git worktree. Independent work can use separate Git worktrees with separate baselines. One persistent test or selected implementation agent may receive multiple sequential assignments inside a work slice, but persistence never extends a lease: the agent cannot write between turns, and every follow-up needs a new lease ID, fresh baseline, digest, and terminal close. The coordinator first drafts the semantic packet, starts the guard from its exact identity and path projection, inserts the returned digest, verifies that both representations match, and then sends the complete packet to the worker. The worker never invokes the guard or edits its runtime records. Read-only test-worker preflight has no lease and authorizes no writes. The bounded coordinator test-correction exception also occurs only when no lease is active; because the guard does not cover it, the ExecPlan record, focused validation, evidence invalidation, and test-boundary re-acceptance are mandatory before a later Green lease.
 
 ## Commands
 
-Run commands from the repository root in PowerShell. The identifiers and paths below are illustrative; replace them with the active M1-03 ExecPlan packet's real work-slice identity and frozen paths after RD-002 establishes the physical application layout. `start` emits JSON; retain its `contract_digest` exactly:
+Run commands from the repository root in PowerShell. The identifiers and paths below are illustrative; replace them with the active M1-03 ExecPlan packet's real work-slice identity and allowed or forbidden paths after RD-002 establishes the physical application layout. `start` emits JSON; retain its `contract_digest` exactly:
 
 ```powershell
 $lease = python -B .codex\leases\lease_guard.py start `
@@ -120,7 +120,7 @@ Runtime data lives under the already ignored `logs/agent-flow-leases/v2/` direct
 
 The guard proves net endpoint state between baseline and inspection. It cannot prove that a file was changed and restored byte-for-byte before closure. Ignored descendants, empty directory creation, Windows alternate data streams, access-control lists, extended attributes, and targets outside the worktree are outside its proof boundary. Concurrent forbidden or unleased endpoint changes and scan-time movement fail closed, but a concurrent process that leaves only an allowed net endpoint state is indistinguishable from the assigned worker and cannot be attributed. Unsupported path types or a tree that changes during inspection fail closed.
 
-The guard is intentionally separate from [agent-flow metrics](./agent-flow-metrics.md). Lease closure is blocking evidence for path ownership. Metrics and asynchronous hooks remain best-effort observations and cannot accept or reject a lease.
+Lease closure is the workflow's machine-enforced path-ownership evidence for worker turns. It remains subordinate to semantic validation, coordinator inspection, independent review, and the task-closure gate.
 
 ## Related policy
 
