@@ -14,7 +14,7 @@
 - **Closed corpus and Local-mode data boundaries:** Accepted on 2026-08-27 through ADR-0022 and ADR-0023
 - **Fixed three-scenario evaluation baseline:** Retained from OD-019 for deterministic evaluation
 - **MVP persona, provider, startup, retention, evaluation, and workflow narrowing:** Accepted or Deferred as recorded through OD-024
-- **Implementation status:** Not started
+- **Implementation status:** RD-002 toolchain selection is in progress; application implementation has not started
 - **Last reviewed:** 2026-08-29
 
 This document is the canonical index and global authority for the current product goal and the modular, stage-scoped requirements baseline. The linked requirement modules collectively define the first portfolio slice and later distributable-product obligations; none describes implemented behavior. Requirement status has the following meaning:

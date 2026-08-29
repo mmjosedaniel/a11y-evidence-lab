@@ -4,7 +4,7 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-None. Create a plan only after the project owner selects its existing roadmap task and the activation conditions in `PLANS.md` apply.
+- [RD-002 — Select the minimum development toolchain literals](rd-002-minimum-development-toolchain-literals.md) — **In progress**. The project owner selected RD-002 on 2026-08-29; the living plan owns its R2 selection contract, non-TDD setup route, and evidence identities.
 
 ## Completed plans
 

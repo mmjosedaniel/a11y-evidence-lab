@@ -52,11 +52,11 @@ Public comparison always starts from a baseline Finding. For binary `image-alt` 
 
 ## Project status
 
-Development ready. The accepted planning baseline and [development roadmap](docs/DEVELOPMENT_ROADMAP.md) now define the first portfolio slice and its implementation order. Implementation, dependencies, tests, fixtures, and technical setup have not started.
+Development ready. The accepted planning baseline and [development roadmap](docs/DEVELOPMENT_ROADMAP.md) define the first portfolio slice and its implementation order. [RD-002 toolchain selection](docs/plans/rd-002-minimum-development-toolchain-literals.md) is in progress; no application source, dependency installation, executable test, controlled fixture, or product behavior has been created yet.
 
 ## Current scope
 
-This repository currently contains the accepted product and architecture baseline, feasibility analysis, derived specifications, and the tracked development roadmap. No runnable application or implementation has been created.
+This repository currently contains the accepted product and architecture baseline, feasibility analysis, derived specifications, the tracked development roadmap, and the active RD-002 ExecPlan. No runnable application or application implementation has been created.
 
 ## Documentation
 

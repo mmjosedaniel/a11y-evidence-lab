@@ -4,8 +4,8 @@
 
 - **Repository stage:** Development ready
 - **Roadmap status:** Accepted implementation sequence on 2026-08-28 through OD-025
-- **Implementation status:** Not started
-- **Current task in progress:** None
+- **Implementation status:** RD-002 toolchain selection is in progress; application implementation has not started
+- **Current task in progress:** RD-002 — Select the minimum development toolchain literals
 - **Scope:** The accepted local portfolio MVP only
 
 This roadmap turns the accepted planning baseline into an implementation order. It owns milestone order, task dependencies, integration checkpoints, and progress status. It does not create or override a product requirement, architecture decision, behavioral contract, evaluation result, or release claim. If this roadmap conflicts with an identified requirement or Accepted ADR, the requirement or ADR controls and the roadmap must be corrected.
@@ -21,9 +21,9 @@ Progress labels in this document mean:
 - **Not started:** no implementation claim is made.
 - **Blocked:** an identified prerequisite or governing decision prevents work.
 
-Only `RD-001` is Complete. Every implementation task is Not started.
+Only `RD-001` is Complete. `RD-002` is In progress. Every application implementation task is Not started.
 
-For dependency readiness, only `RD-002` is **Ready** because RD-001 is Complete. Every other Not started task is **Blocked** by the dependencies named in its task entry and becomes Ready only when all of them are Complete. Each task entry also states whether it is on the mandatory dependency spine or belongs to a named safe parallel group.
+RD-002 was the only Ready task after RD-001 and entered **In progress** when the project owner selected it on 2026-08-29. Every other Not started task remains **Blocked** by the dependencies named in its task entry and becomes Ready only when all of them are Complete. Each task entry also states whether it is on the mandatory dependency spine or belongs to a named safe parallel group.
 
 ## Implementation strategy
 
@@ -84,7 +84,7 @@ Every task's **Authorities** field uses stable identifiers from the owning sourc
 
 ### RD-002 — Select the minimum development toolchain literals
 
-- **Parent milestone / role / status:** Walking-skeleton entry / enabling / **Not started**.
+- **Parent milestone / role / status:** Walking-skeleton entry / enabling / **In progress**.
 - **Objective:** Select only the JavaScript runtime, package manager, build arrangement, local-service host, focused test harness, and exact dependency versions required by M1.
 - **Inputs, dependencies, and scheduling:** Ready after completed RD-001. It is on the critical dependency path and must complete before scaffolding. A durable architecture consequence requires an ADR; ordinary implementation literals do not.
 - **Expected output:** One small, reproducible development baseline compatible with the recorded TypeScript, React, localhost-service, Playwright, and axe-core decisions at their existing statuses, including a pinned TypeScript compiler, strict compiler configuration, independently executable type-check command, and the smallest focused test harness and command needed for M1's milestone-slice TDD workflow.
