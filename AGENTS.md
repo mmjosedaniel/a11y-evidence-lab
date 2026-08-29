@@ -12,6 +12,16 @@ Development work is permitted only for a concrete user-requested roadmap task or
 
 Treat all described product behavior and technology choices as proposals unless a document explicitly records them as decisions. An evaluation baseline is not an implemented, release-qualified, or generally supported dependency. Update project status only after the corresponding implementation and verification evidence exists.
 
+## Engineering principles
+
+Apply these principles to application code, tests, configuration, documentation, and repository workflow:
+
+- **YAGNI:** Implement only what the selected roadmap task and the Accepted MVP contract require now. Do not add speculative abstractions, extension points, generic subsystems, services, layers, configuration, dependencies, or workflow machinery for hypothetical future needs. Defer them until a demonstrated requirement and its owning task need them.
+- **Do not over-engineer:** Choose the smallest complete solution that delivers the required observable behavior and verification. A future possibility alone is not a requirement. Introduce an abstraction only when current code has a demonstrated variation or repeated concept that the abstraction makes clearer.
+- **KISS:** Prefer direct, obvious designs and readable control flow over cleverness, indirection, or unnecessary flexibility. Keep interfaces, data models, modules, and processes as small as the accepted behavior permits.
+- **Clean Code:** Use intention-revealing names, focused and cohesive functions and modules, explicit boundaries and error handling, behavior-oriented tests, and comments that explain why rather than restating what the code does. Keep each change locally understandable; remove duplication only when it represents the same proven concept.
+- These principles do not authorize skipping an Accepted requirement, accessibility behavior, evidence traceability, validation, error handling, or an explicit privacy or security boundary. Simplify the implementation, not the contract.
+
 ## Required context and task routing
 
 Before making changes:
@@ -27,7 +37,7 @@ Before making changes:
 
 Do not load every requirements module by default. Follow the task router, then follow direct links to the authorities affected by the change.
 
-Before implementation, confirm that the user selected a concrete roadmap task or milestone, its dependencies are complete, its directly applicable Must requirements and open-decision portions are Accepted or explicitly Deferred, and its stated evaluation-freeze condition is satisfied. Do not mark a roadmap task Complete until its verification evidence exists.
+Before implementation, confirm that the user selected a concrete roadmap task or milestone, its dependencies are complete, its directly applicable Must requirements and open-decision portions are Accepted or explicitly Deferred, and its stated evaluation-freeze condition is satisfied. Ordinary implementation literals that the roadmap explicitly assigns to the selected task may remain open at entry and must be resolved inside that task; an unresolved significant or durable architecture decision still blocks dependent implementation and follows the ADR process. Do not mark a roadmap task Complete until its verification evidence exists.
 
 When the selected task materially changes rendered UI, CSS, layout, visual hierarchy, responsive presentation, or visible interaction states, use the repository-local [frontend-quality skill](.agents/skills/frontend-quality/SKILL.md) as a bounded visual-quality overlay. It does not authorize development, change roadmap dependencies, add product behavior, or apply to nonvisual frontend or backend work.
 
@@ -47,7 +57,7 @@ Write-capable workers may use Git only for read-only inspection. They must not s
 
 Delegate only bounded work with exact authority anchors, permissions, expected output, execution budget, stop conditions, and—when writes are possible—selected roadmap scope, readiness evidence, accepted test boundary, paths, commands, and validation. Keep the source workflow's one bounded correction per role and stop on a changed contract, repeated decisive failure, two no-diff write handoffs, exhausted budget, conflicting authority, or unexpected overlapping change. The primary must inspect the actual worktree and cannot treat a worker report, reviewer verdict, or lease receipt as self-validating proof.
 
-Apply YAGNI to repository workflow as well as product code. Use only the roles, reviews, plan sections, or parallelism triggered by the current work. The existence of eleven role definitions is capacity, not a requirement to invoke them all. Use the manual [progress index](docs/progress/README.md) for concise task-by-task project and agent-workflow summaries: create one record only after an existing roadmap task enters `In progress`, and update it only after accepted material checkpoints or closure. The roadmap, ExecPlan, authorities, and evidence remain controlling. Do not log every agent turn, prompt, transcript, token count, or cost, and do not add workflow telemetry or a generated progress ledger.
+Apply the [engineering principles](#engineering-principles) to repository workflow as well as product code. Use only the roles, reviews, plan sections, abstractions, or parallelism triggered by the current work. The existence of eleven role definitions is capacity, not a requirement to invoke them all. Use the manual [progress index](docs/progress/README.md) for concise task-by-task project and agent-workflow summaries: create one record only after an existing roadmap task enters `In progress`, and update it only after accepted material checkpoints or closure. The roadmap, ExecPlan, authorities, and evidence remain controlling. Do not log every agent turn, prompt, transcript, token count, or cost, and do not add workflow telemetry or a generated progress ledger.
 
 ## Documentation rules
 
