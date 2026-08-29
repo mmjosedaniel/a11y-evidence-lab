@@ -10,11 +10,12 @@
 - **Additional post-MVP YAGNI deferrals:** Accepted on 2026-08-27 through OD-023 for dedicated prompt-injection hardening/evaluation and embedded inaccessible-fixture previews
 - **Minimum complete MVP behavior contracts:** Accepted on 2026-08-27 through OD-024 for the remaining scanner-evidence, generation-result, comparison, interface, and application-accessibility Must requirements
 - **Development authorization and roadmap:** Accepted on 2026-08-28 through OD-025; implementation must proceed through concrete user-requested tasks in the derived [development roadmap](DEVELOPMENT_ROADMAP.md)
+- **Development method:** Accepted on 2026-08-28 through ADR-0024; automatable production behavior uses milestone-slice TDD with independent test and implementation ownership, without adding product-runtime orchestration
 - **Closed corpus and Local-mode data boundaries:** Accepted on 2026-08-27 through ADR-0022 and ADR-0023
 - **Fixed three-scenario evaluation baseline:** Retained from OD-019 for deterministic evaluation
 - **MVP persona, provider, startup, retention, evaluation, and workflow narrowing:** Accepted or Deferred as recorded through OD-024
 - **Implementation status:** Not started
-- **Last reviewed:** 2026-08-28
+- **Last reviewed:** 2026-08-29
 
 This document is the canonical index and global authority for the current product goal and the modular, stage-scoped requirements baseline. The linked requirement modules collectively define the first portfolio slice and later distributable-product obligations; none describes implemented behavior. Requirement status has the following meaning:
 
@@ -169,6 +170,7 @@ The earlier installer and application-managed acquisition requirements remain hi
 | [ADR-0021](architecture/decisions/ADR-0021-single-file-run-aggregate.md) | Accepts one versioned `run.json` aggregate per run directory, with nested finding workflows and at most one current review decision for each proposal that reaches review, no child files, Markdown report, database, or audit graph. |
 | [ADR-0022](architecture/decisions/ADR-0022-closed-versioned-guidance-corpus.md) | Accepts exactly eight official W3C artifacts, one identified immutable corpus snapshot/version at a time, stable application-owned passage identities, and manual deterministic heading-aware passage selection without crawling, generic splitting, or automatic refresh; a reviewed source or selected-text change creates a new corpus version. |
 | [ADR-0023](architecture/decisions/ADR-0023-local-mode-data-boundary.md) | Accepts loopback-only Local-generation prompt/response flow and local embedding/vector computation while preserving the separately authorized Groq payload and rejecting offline or machine-wide zero-egress claims. |
+| [ADR-0024](architecture/decisions/ADR-0024-milestone-slice-tdd-with-independent-ownership.md) | Accepts the repository development method for behavior-bearing roadmap work: read-only preflight, independently owned coherent Red, separate minimum Green, bounded correction, path leases, risk-routed review, and proportional non-TDD evidence when no meaningful executable Red exists. It changes no product runtime scope. |
 
 The requirements also reflect the W3C distinction between normative WCAG success criteria and informative supporting guidance, and the documented limitation that accessibility evaluation requires both automated and human evaluation. The official sources linked in the [curated accessibility guidance corpus assessment](architecture/candidates/guidance-retrieval/CURATED_GUIDANCE_CORPUS_ASSESSMENT.md#accepted-closed-eight-artifact-w3c-pack) retain their recorded verification dates.
 

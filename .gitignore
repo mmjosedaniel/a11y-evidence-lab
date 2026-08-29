@@ -1,1 +1,3 @@
 temp/
+logs/
+.codex/leases/__pycache__/

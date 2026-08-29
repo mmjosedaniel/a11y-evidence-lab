@@ -10,11 +10,13 @@
 
 This roadmap turns the accepted planning baseline into an implementation order. It owns milestone order, task dependencies, integration checkpoints, and progress status. It does not create or override a product requirement, architecture decision, behavioral contract, evaluation result, or release claim. If this roadmap conflicts with an identified requirement or Accepted ADR, the requirement or ADR controls and the roadmap must be corrected.
 
+Concise task narratives are indexed in the [project and agent-workflow progress directory](progress/README.md). Those manual records mirror only coordinator-accepted facts from this roadmap, an owning ExecPlan, and decisive evidence; they cannot change task status, authorize work, prove Verification, or close a task.
+
 The controlling sources are the [project requirements](PROJECT_REQUIREMENTS.md), [delivery-readiness decisions](requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md), applicable focused requirement modules, [Accepted ADRs](architecture/decisions/README.md), the [evaluation authority](requirements/evaluation-and-release/EVALUATION_AND_ACCEPTANCE.md), and the derived [Gherkin specifications](specs/README.md). Candidate assessments remain Proposed research. `Accepted for evaluation` does not mean implemented, generally supported, or release-qualified.
 
 Progress labels in this document mean:
 
-- **Complete:** the task's stated verification evidence exists.
+- **Complete:** the task's stated verification evidence exists and the repository task-closure documentation gate has passed.
 - **In progress:** a concrete user request selected the task and work has started.
 - **Not started:** no implementation claim is made.
 - **Blocked:** an identified prerequisite or governing decision prevents work.
@@ -29,7 +31,9 @@ The MVP is one portfolio slice delivered through progressively complete vertical
 
 The first milestone is a real scan-to-evidence walking skeleton. Later milestones add curated retrieval and abstention, structured generation, human review, and conservative comparison; the final gate performs bounded evaluation. Application accessibility is built into each UI task and verified again at that final evaluation gate.
 
-The roadmap applies YAGNI throughout: direct application-owned logic, one local service, one versioned `run.json` aggregate per run, sequential work on one selected Finding, a closed corpus, and exactly two fixed generation modes. No task introduces a crawler, workflow engine, queue, database, generic provider registry, or release platform.
+The roadmap applies YAGNI throughout: direct application-owned logic, one local service, one versioned `run.json` aggregate per run, sequential work on one selected Finding, a closed corpus, and exactly two fixed generation modes. No product task introduces a crawler, product-runtime workflow engine, queue, database, generic provider registry, or release platform.
+
+Implementation of automatable production behavior follows the task-scoped ExecPlan and independent test/implementation ownership accepted in [ADR-0024](architecture/decisions/ADR-0024-milestone-slice-tdd-with-independent-ownership.md). This is a repository development method, not product orchestration. Documentation, declarative setup, corpus preparation, manual capacity screens, and external evaluation observations use proportional non-TDD evidence when no meaningful executable Red exists.
 
 ## Bounded MVP outcome
 
@@ -81,12 +85,12 @@ Every task's **Authorities** field uses stable identifiers from the owning sourc
 ### RD-002 — Select the minimum development toolchain literals
 
 - **Parent milestone / role / status:** Walking-skeleton entry / enabling / **Not started**.
-- **Objective:** Select only the JavaScript runtime, package manager, build arrangement, local-service host, and exact dependency versions required by M1.
+- **Objective:** Select only the JavaScript runtime, package manager, build arrangement, local-service host, focused test harness, and exact dependency versions required by M1.
 - **Inputs, dependencies, and scheduling:** Ready after completed RD-001. It is on the critical dependency path and must complete before scaffolding. A durable architecture consequence requires an ADR; ordinary implementation literals do not.
-- **Expected output:** One small, reproducible development baseline compatible with the recorded TypeScript, React, localhost-service, Playwright, and axe-core decisions at their existing statuses, including a pinned TypeScript compiler, strict compiler configuration, and an independently executable type-check command.
+- **Expected output:** One small, reproducible development baseline compatible with the recorded TypeScript, React, localhost-service, Playwright, and axe-core decisions at their existing statuses, including a pinned TypeScript compiler, strict compiler configuration, independently executable type-check command, and the smallest focused test harness and command needed for M1's milestone-slice TDD workflow.
 - **User-visible outcome:** Enables the developer to start the future service and UI; it creates no product capability by itself.
-- **Authorities:** ADR-0008, ADR-0009, ADR-0011, ADR-0012, ADR-0015, `REQ-INST-002`, `REQ-QUAL-010`, and `REQ-QUAL-012`.
-- **Verification:** Every selected tool is needed by M1 and its material versions are pinned; the strict TypeScript compiler check executes successfully on its own rather than being inferred from transpilation, a build, a test runner, or editor diagnostics; and no installer, desktop wrapper, database, hosted service, or generalized framework enters scope.
+- **Authorities:** ADR-0008, ADR-0009, ADR-0011, ADR-0012, ADR-0015, ADR-0024, `REQ-INST-002`, `REQ-QUAL-010`, and `REQ-QUAL-012`.
+- **Verification:** Every selected tool is needed by M1 and its material versions are pinned; the strict TypeScript compiler check executes successfully on its own rather than being inferred from transpilation, a build, a test runner, or editor diagnostics; one focused test command executes independently and can demonstrate a genuine failing and passing behavior slice without requiring the complete future suite; and no installer, desktop wrapper, database, hosted service, generalized testing platform, or speculative framework enters scope.
 - **Likely surfaces:** Future package metadata, TypeScript/build configuration, local-service and UI entry points, and development instructions.
 - **Out of scope:** Package upgrades unrelated to M1, production deployment, distribution, component inventories, release locks, and framework selection for hypothetical later needs.
 
@@ -168,10 +172,10 @@ M5 is semantically dependent only on completed scan evidence from M1. It is sequ
 - **Parent milestone / role / status:** M1 / service and persistence / **Not started**.
 - **Objective:** Provide the minimum application-owned boundary for service startup/shutdown and for creating, durably writing, validating, and reopening one local run aggregate.
 - **Inputs, dependencies, and scheduling:** Depends on M1-01. Safely parallelizable with M1-03 and M1-04 only while the shared contract remains unchanged; all join at M1-05.
-- **Expected output:** A loopback-only service that reports ready or bounded startup failure, has a clean stop path, owns privileged work, separates service-owned AI configuration from run-mode selection without probing a provider, permits at most one user-requested operation at a time without a queue, and manages one `data/runs/<run-id>/run.json` repository with safe writes and read validation.
+- **Expected output:** A loopback-only service that reports ready or bounded startup failure, has a clean stop path, owns privileged work, separates service-owned AI configuration from run-mode selection without probing a provider, permits at most one user-requested operation at a time without a queue, and manages one `data/runs/<run-id>/run.json` repository under a Git-ignored application data root with safe writes and read validation.
 - **User-visible outcome:** Service readiness/failure is understandable; a completed run can survive reload and reopen; persistence or busy-operation failure is visible.
-- **Authorities:** `REQ-INST-002`, `REQ-INST-004`, `REQ-EVID-003`, `REQ-EVID-011`, `REQ-SEC-002`, `REQ-SEC-006`, `REQ-SEC-012`, `REQ-SEC-027`, `REQ-QUAL-002`, `REQ-QUAL-005`, `REQ-QUAL-008`, `REQ-QUAL-011`–`REQ-QUAL-013`, ADR-0015, ADR-0021, SPEC-007, and HS-006.
-- **Verification:** The service demonstrates ready/startup-failed/clean-stop paths; browser code receives no filesystem or credential authority; configuration neither selects a mode nor invokes/probes a provider; a second user operation cannot overlap the current one; reopening validates the aggregate; a failed write cannot publish completed work; diagnostics and reproducibility records remain local, provider-neutral, content-safe, and free of hosted tracing or telemetry; manual/developer deletion of a run is demonstrated by removing only its exact run directory and never the corpus; later nested updates cannot alter completed scan evidence or sibling data.
+- **Authorities:** `REQ-INST-002`, `REQ-INST-004`, `REQ-EVID-003`, `REQ-EVID-011`, `REQ-SEC-002`, `REQ-SEC-006`, `REQ-SEC-012`, `REQ-SEC-027`, `REQ-QUAL-002`, `REQ-QUAL-005`, `REQ-QUAL-008`, `REQ-QUAL-011`–`REQ-QUAL-013`, the [accepted minimal information model](requirements/INFORMATION_AND_WORKFLOW_LIFECYCLE.md#accepted-minimal-information-model), ADR-0015, ADR-0021, SPEC-007, and HS-006.
+- **Verification:** Before the first aggregate write, a representative `data/runs/<run-id>/run.json` path is confirmed Git-ignored and no generated run under that root is tracked. The service demonstrates ready/startup-failed/clean-stop paths; browser code receives no filesystem or credential authority; configuration neither selects a mode nor invokes/probes a provider; a second user operation cannot overlap the current one; reopening validates the aggregate; a failed write cannot publish completed work; diagnostics and reproducibility records remain local, provider-neutral, content-safe, and free of hosted tracing or telemetry; manual/developer deletion of a run is demonstrated by removing only its exact run directory and never the corpus; later nested updates cannot alter completed scan evidence or sibling data.
 - **Likely surfaces:** Future local-service entry point, run repository, atomic-write/read boundary, loopback API, and run-loading UI route.
 - **Out of scope:** Database, child files, Markdown report, search/history dashboard, backup, synchronization, migration platform, authentication, or multi-user access.
 
@@ -293,7 +297,7 @@ M5 is semantically dependent only on completed scan evidence from M1. It is sequ
 - **Authorities:** `REQ-GEN-001`–`REQ-GEN-006`, `REQ-GEN-008`–`REQ-GEN-010`, `REQ-LLM-001`, `REQ-LLM-004`, `REQ-LLM-008`, `REQ-LLM-019`, `REQ-SEC-013`–`REQ-SEC-016`, `REQ-QUAL-003`, ADR-0001, ADR-0011, ADR-0013, the `Generate one eligible proposal` and `Fail before invocation when required input does not fit` scenarios of SPEC-003, the provider-neutral contract and ProviderInvocation portions of `Use one mode without mixing or fallback`, the bounded-result portion of `Fail before invocation when the selected prerequisite is missing`, and the provenance/result-category portion of `Keep an attempted-call failure bounded and visible` in SPEC-004, the eligibility/context-fit boundary of HS-008, and the shared immutable-mode/provenance boundary of HS-009.
 - **Verification:** Unsupported structure, evidence references, citations, or prohibited claims cannot become a proposal; context that cannot fit without truncation fails before invocation and is not an abstention; only an attempted call creates ProviderInvocation provenance.
 - **Likely surfaces:** Future generation contract, sufficiency/context assembler, provider interface, proposal validator, invocation provenance, and aggregate update.
-- **Out of scope:** Generic provider registry, user-configurable endpoints, agents, tools, fine-tuning, prompt platform, streaming, batch generation, retry, or fallback.
+- **Out of scope:** Generic provider registry, user-configurable endpoints, product-runtime agents, tools, fine-tuning, prompt platform, streaming, batch generation, retry, or fallback.
 
 ### M3-03 — Integrate Qwen Local generation and run its capacity screen
 
@@ -311,11 +315,11 @@ M5 is semantically dependent only on completed scan evidence from M1. It is sequ
 
 - **Parent milestone / role / status:** M3 / service and integration / **Not started**.
 - **Objective:** Implement the fixed Groq path behind the same application-owned contract.
-- **Inputs, dependencies, and scheduling:** Depends on M3-02 and a developer-configured Groq credential. Safely parallelizable with M3-03; both join at M3-05.
-- **Expected output:** Fixed Groq adapter for the accepted evaluation model, bounded minimized egress, attempt-time credential/configuration handling, returned-value validation, and compact non-secret provenance.
+- **Inputs, dependencies, and scheduling:** Depends on M3-02. Before any real Groq credential is configured, establish the selected ignored local secret mechanism; the developer may then configure the credential for this task. Safely parallelizable with M3-03; both join at M3-05.
+- **Expected output:** Fixed Groq adapter for the accepted evaluation model, service-owned credential loading from the selected ignored local secret mechanism, bounded minimized egress, attempt-time credential/configuration handling, returned-value validation, and compact non-secret provenance.
 - **User-visible outcome:** An eligible Finding can produce the same validated proposal shape in Groq mode, or show a bounded missing-prerequisite/authentication/quota/network/provider/validation failure with no fallback.
 - **Authorities:** `REQ-LLM-003`–`REQ-LLM-005`, `REQ-LLM-007`, `REQ-LLM-009`, `REQ-LLM-015`, `REQ-LLM-016`, `REQ-LLM-019`, `REQ-LLM-020`, `REQ-INST-017`, `REQ-SEC-005`, `REQ-SEC-013`–`REQ-SEC-016`, ADR-0014, ADR-0020, ADR-0023, SPEC-004, and HS-009.
-- **Verification:** The target URL, locator, sibling Findings, credentials, raw payloads, and prior review history are excluded; the exact provider/model remain visible; missing credentials create no invocation and show concise setup guidance; authentication, quota, and rate-limit responses are bounded failures; current fixed-model availability is checked before evaluation; attempted failures retain bounded provenance; Local is never called automatically.
+- **Verification:** Before a real credential is configured, the exact selected local secret path is confirmed Git-ignored and untracked without placing a real secret in a validation artifact. The target URL, locator, sibling Findings, credentials, raw payloads, and prior review history are excluded; the exact provider/model remain visible; missing credentials create no invocation and show concise setup guidance; authentication, quota, and rate-limit responses are bounded failures; current fixed-model availability is checked before evaluation; attempted failures retain bounded provenance; Local is never called automatically.
 - **Likely surfaces:** Future Groq adapter, service-owned credential configuration, request mapper, error mapping, and Groq evaluation configuration.
 - **Out of scope:** Additional provider, generic remote endpoint, arbitrary headers/protocols, provider discovery, cost management, automatic resubmission, fallback, or provider comparison.
 
@@ -347,7 +351,7 @@ M5 is semantically dependent only on completed scan evidence from M1. It is sequ
 - **Authorities:** `REQ-REV-001`, `REQ-REV-008`, `REQ-REV-009`, `REQ-UX-011`, ADR-0021, SPEC-005, and HS-010.
 - **Verification:** Abstentions and failed/invalid proposals cannot enter review; approval/edit-and-accept require supported material claims and a resolved or explicitly not-applicable blocking judgment; rejection accepts bounded feedback; the original proposal remains unchanged.
 - **Likely surfaces:** Future review validator/service, decision shape nested in `run.json`, aggregate update, and error categories.
-- **Out of scope:** Actor identity, authentication, teams, assignment, per-edit history, proposal versions, audit graph, per-claim records, bulk review, regeneration, or workflow engine.
+- **Out of scope:** Actor identity, authentication, teams, assignment, per-edit history, proposal versions, audit graph, per-claim records, bulk review, regeneration, or product-runtime workflow engine.
 
 ### M4-02 — Present the accessible review interaction
 
@@ -483,11 +487,11 @@ M6 is a final verification and evidence gate, not another vertical implementatio
 
 ## Parallel work and integration rules
 
-Only these groups are eligible for parallel scheduling when the user explicitly selects both tasks and a focused execution plan confirms non-overlapping ownership:
+Only these groups are eligible for parallel scheduling when the user explicitly selects every participating task and one task-scoped ExecPlan per task confirms non-overlapping ownership, a separate worktree and baseline, and the named join:
 
 1. **M1-02, M1-03, and M1-04:** service/persistence, scanner/evidence, and UI work after M1-01 freezes their shared contract. They join at M1-05. None may independently change that contract.
 2. **M3-03 and M3-04:** Local and Groq adapters after M3-02 freezes the shared provider/output contract. They join at M3-05.
-After each group, its named checkpoint must integrate and verify the combined behavior before dependent work begins. No artificial parallelism is created inside one aggregate mutation, shared lifecycle, UI composition, or integration boundary.
+After each group, its named checkpoint must integrate and verify the combined behavior before dependent work begins. Without separate worktrees, execute the tasks serially. No artificial parallelism is created inside one aggregate mutation, shared lifecycle, UI composition, or integration boundary.
 
 ## Review checkpoints
 
@@ -514,7 +518,7 @@ No production-path temporary mock is planned. The controlled fixtures are real, 
 
 Permanent test doubles may later be used only inside focused automated tests for deterministic boundary and failure behavior. They must preserve the real contract and must never be persisted or displayed as a real run. They may verify adapter validation and bounded error mapping, including failures that would be brittle or costly to provoke against a real provider, but they cannot be the sole evidence that Playwright, axe-core, EmbeddingGemma, Ollama/Qwen, Groq, filesystem persistence, or the browser UI actually integrates and works.
 
-If a future execution plan proposes a temporary substitute, it must add a named replacement task before use and record the real dependency, reason, preserved contract, demonstrable behavior, excluded claims, replacement acceptance criteria, and removal point. This roadmap currently contains no such substitute.
+If future work requires a temporary substitute, the coordinator must first add the named replacement task to this roadmap and obtain the required project-owner authorization before the substitute is used. The applicable task-scoped ExecPlan may then record and execute only that already-authorized roadmap work, including the real dependency, reason, preserved contract, demonstrable behavior, excluded claims, replacement acceptance criteria, and removal point; it cannot create or authorize the task. This roadmap currently contains no such substitute.
 
 ## Scope that must remain separated
 
@@ -530,7 +534,7 @@ Later placement does not make these capabilities optional. Their Accepted requir
 
 ### Proposed or open implementation choices
 
-- JavaScript runtime, package manager, build tool, local-service framework, exact package versions, exact aggregate fields, UI layout/copy, and small verification-tool choices remain implementation literals until the applicable task selects them.
+- JavaScript runtime, package manager, build tool, focused test runner, local-service framework, exact package versions, exact aggregate fields, UI layout/copy, and small verification-tool choices remain implementation literals until the applicable task selects them.
 - Proposed candidate architecture and Voxleaf-derived patterns may inform a focused task only when an immediate Accepted requirement needs them. They are not implementation authority.
 - A significant durable mechanism not already covered by an ADR requires a new decision before implementation.
 
@@ -538,7 +542,7 @@ Later placement does not make these capabilities optional. Their Accepted requir
 
 - `REQ-GEN-007` dedicated prompt-injection hardening/evaluation and `REQ-A11Y-005` embedded inaccessible-preview isolation.
 - General export/settings/history management; audit-grade review history; regeneration and review triage; teams, roles, assignments, and collaboration.
-- User-configurable remote generation endpoints, additional providers, provider discovery/comparison, hosted tracing, telemetry, analytics, agents, LangGraph, queues, concurrency, cancellation, checkpoint/resume, and workflow engines.
+- User-configurable remote generation endpoints, additional providers, provider discovery/comparison, hosted tracing, telemetry, analytics, product-runtime agents, LangGraph, queues, concurrency, cancellation, checkpoint/resume, and workflow engines.
 - Chroma or another vector service, reranking, web search, automatic corpus crawling/refresh, generic ingestion, and broad WCAG/rule coverage.
 - Authenticated/private targets, link discovery, crawling, multi-page or batch analysis, hostile-target isolation, production URL-security enforcement, and adversarial qualification.
 - Installer, desktop wrapper, application-managed model acquisition/removal, signing, update/repair/uninstall, formal support matrix, release qualification, and public release claims.
@@ -551,6 +555,7 @@ Later placement does not make these capabilities optional. Their Accepted requir
 ## Documentation navigation
 
 - [Project documentation index](README.md)
+- [Project and agent-workflow progress](progress/README.md)
 - [Project requirements](PROJECT_REQUIREMENTS.md)
 - [Delivery readiness and open decisions](requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md)
 - [Architecture Decision Records](architecture/decisions/README.md)

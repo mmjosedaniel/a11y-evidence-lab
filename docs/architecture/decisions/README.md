@@ -25,8 +25,9 @@ The following current decisions have been accepted at the scope stated in each r
 17. [ADR-0021: Single-file run aggregate](ADR-0021-single-file-run-aggregate.md)
 18. [ADR-0022: Closed, versioned guidance corpus](ADR-0022-closed-versioned-guidance-corpus.md)
 19. [ADR-0023: Local-mode data boundary](ADR-0023-local-mode-data-boundary.md)
+20. [ADR-0024: Milestone-slice TDD with independent ownership](ADR-0024-milestone-slice-tdd-with-independent-ownership.md)
 
-`Accepted for evaluation` selects a bounded configuration to measure after development is authorized; it does not mean implemented, bundled, generally supported, or release-qualified. `Accepted` records a binding project direction or, for ADR-0010, an explicit deferral. ADR-0014 deliberately splits these scopes: Groq and the explicit dual-mode/no-fallback boundary are binding MVP decisions, while its exact model is only a fixed evaluation configuration. ADR-0018 accepts the trusted single-page scan boundary. ADR-0019, ADR-0020, and ADR-0021 apply the portfolio YAGNI boundary to retrieval, model setup, and persistence. ADR-0022 accepts the closed, manually segmented corpus boundary, and ADR-0023 accepts a local-inference data boundary without a system-wide zero-egress claim. Release adoption remains subject to a later decision.
+`Accepted for evaluation` selects a bounded configuration to measure after development is authorized; it does not mean implemented, bundled, generally supported, or release-qualified. `Accepted` records a binding project direction or, for ADR-0010, an explicit deferral. ADR-0014 deliberately splits these scopes: Groq and the explicit dual-mode/no-fallback boundary are binding MVP decisions, while its exact model is only a fixed evaluation configuration. ADR-0018 accepts the trusted single-page scan boundary. ADR-0019, ADR-0020, and ADR-0021 apply the portfolio YAGNI boundary to retrieval, model setup, and persistence. ADR-0022 accepts the closed, manually segmented corpus boundary, and ADR-0023 accepts a local-inference data boundary without a system-wide zero-egress claim. ADR-0024 governs the repository development method and does not add agents, queues, leases, telemetry, or orchestration to the product runtime. Release adoption remains subject to a later decision.
 
 Candidate technologies and architecture options not covered by these records remain proposals until an ADR or another authoritative project document explicitly records a decision.
 
@@ -61,7 +62,7 @@ The following topics are intentionally outside the portfolio MVP and have no res
 - Broader hardware compatibility and production retention, backup, migration, or synchronization.
 - Additional hosted providers, provider comparison, and generalized provider discovery.
 - Hosted tracing, telemetry, and analytics.
-- Workflow orchestration, concurrency, cancellation, checkpoints, and resume.
+- Product-runtime workflow orchestration, concurrency, cancellation, checkpoints, and resume. Repository-local Codex coordination under ADR-0024 is development tooling, not product scope.
 
 The detailed [candidate architecture patterns](../CANDIDATE_ARCHITECTURE.md) and [Voxleaf implementation references](../candidates/VOXLEAF_IMPLEMENTATION_PATTERN_ASSESSMENT.md) are **Proposed** planning inputs only. They do not modify the accepted scope or status of any ADR. If a deferred topic is accepted later, create the next sequential ADR at that time and update requirements traceability; do not reinterpret candidate material as a decision.
 
