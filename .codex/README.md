@@ -127,40 +127,45 @@ Research routing ends at an evidence-backed answer, recommendation, or primary-w
 
 ### Decision work
 
-Decision-oriented work uses the generic research tiers with a contract-first, sole-writer graph:
+Decision-oriented work uses the generic research tiers with a contract-first, sole-writer graph. This diagram is a navigation aid; the surrounding prose defines the binding routing and review semantics.
 
-```text
-Primary Codex thread (coordinator, sole decision-artifact writer, final closure owner)
-  |
-  +-- objective R tier + living Decision Review Contract
-  |      +-- owning ExecPlan when roadmap-task-backed
-  |      +-- coordinating prompt when a standalone policy decision has no roadmap task
-  |
-  +-- optional bounded discovery for R2/R3; then freeze comparative contract
-  |
-  +-- zero, one, two, or strict-path ordinary/critical researchers by unresolved evidence dimension
-  +-- research synchronization barrier and shared-evidence reconciliation
-  |
-  +-- primary synthesis, or decision_analyst when the tier/trigger requires it
-  |      +-- DRAFT READY
-  |      +-- RETURN FOR RESEARCH
-  |      +-- OWNER DIRECTION
-  |
-  +-- if R3: fresh critical_research_reviewer instance A
-  +-- if an R1/R2 contract trigger applies: fresh independent_reviewer instance A
-  |      +-- contract checkpoint before drafting
-  |
-  +-- optional one read-only research_drafter creates one non-authoritative draft
-  +-- primary reconciles and writes the only authoritative decision artifact
-  |
-  +-- fresh final reviewer when the tier or artifact authority requires it
-  |      +-- critical_research_reviewer for R3; independent_reviewer otherwise
-  |      +-- evidence checkpoint on the complete artifact and exact diff
-  |      +-- findings -> risk-proportional correction and re-review
-  |
-  +-- primary post-verdict reconciliation barrier
-  |
-  +-- project-owner approval checkpoint
+```mermaid
+flowchart TD
+    A["Primary Codex thread<br/>coordinator, sole decision-artifact writer, final closure owner"] --> B["Classify the objective R tier<br/>and create the living Decision Review Contract"]
+    B --> B0{"Decision context"}
+    B0 -- "Roadmap-task-backed" --> B1["Keep the contract in the owning ExecPlan"]
+    B0 -- "Standalone policy" --> B2["Keep the contract in the coordinating prompt"]
+    B1 --> C{"Bounded discovery needed?<br/>R2 or R3 only"}
+    B2 --> C
+    C -- "Yes" --> D["Run non-ranking discovery<br/>then freeze the comparative contract"]
+    C -- "No" --> E["Confirm the frozen comparative contract"]
+    D --> F["Assign ordinary or critical researchers<br/>by unresolved evidence dimension"]
+    E --> F
+    F --> G["Research synchronization barrier<br/>and shared-evidence reconciliation"]
+    G --> H["Primary synthesis, or decision_analyst<br/>when the tier or trigger requires it"]
+    H --> I{"Synthesis result"}
+    I -- "RETURN FOR RESEARCH" --> J["Use only the remaining recorded research budget"]
+    J --> F
+    I -- "OWNER DIRECTION" --> K["Stop for project-owner direction"]
+    I -- "DRAFT READY" --> L{"Pre-draft contract checkpoint required?"}
+    L -- "R3" --> M["Fresh critical_research_reviewer"]
+    L -- "Triggered R1 or R2" --> N["Fresh independent_reviewer"]
+    L -- "No" --> Q{"Use the optional research_drafter?"}
+    M --> O{"Contract checkpoint passes?"}
+    N --> O
+    O -- "No" --> P["Return to research, analysis,<br/>tier escalation, or owner direction"]
+    O -- "Yes" --> Q
+    Q -- "Yes" --> R["One read-only research_drafter<br/>creates a non-authoritative draft"]
+    Q -- "No" --> S["Primary writes the only<br/>authoritative decision artifact"]
+    R --> S
+    S --> T{"Final review required?"}
+    T -- "Yes" --> U["Fresh final reviewer<br/>and complete-artifact evidence checkpoint"]
+    T -- "No" --> X["Primary post-verdict<br/>reconciliation barrier"]
+    U --> V{"Review findings?"}
+    V -- "Yes" --> W["Risk-proportional correction"]
+    W --> U
+    V -- "No" --> X
+    X --> Y["Project-owner approval checkpoint"]
 ```
 
 The contract and evidence checkpoints are agent-workflow controls, not product requirements, ADRs, open-decision resolutions, or the task-closure documentation gate. The reviewer labels belong to instances, not permanent definitions. When both pre-draft and final review are required, use separate fresh instances: `critical_research_reviewer` for R3 and `independent_reviewer` for an ordinary triggered R1/R2 decision. No permanent panel is required.
