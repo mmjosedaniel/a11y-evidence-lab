@@ -24,7 +24,7 @@ from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence, TextIO
 
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 HOOK_EVENT_TYPES = {
     "SubagentStart": "agent_started",
     "SubagentStop": "agent_stopped",
@@ -79,6 +79,7 @@ EVENT_FIELDS = frozenset(
         "task_id",
         "cycle_id",
         "lease_id",
+        "correction_parent_lease_id",
         "phase",
         "attempt",
         "reason_code",
@@ -103,7 +104,7 @@ def _parse_timestamp(value: str) -> datetime:
 
 def _default_events_dir() -> Path:
     repository_root = Path(__file__).resolve().parents[2]
-    return repository_root / "logs" / "agent-flow-metrics" / "v1" / "events"
+    return repository_root / "logs" / "agent-flow-metrics" / "v2" / "events"
 
 
 def _bounded_string(value: Any) -> str | None:
@@ -250,6 +251,14 @@ def _record_event(arguments: argparse.Namespace) -> dict[str, Any]:
             "agent_id",
             "agent_type",
         )
+        if arguments.attempt not in (1, 2):
+            raise ValueError(f"{arguments.event} requires --attempt 1 or 2")
+        if arguments.attempt == 2:
+            _require(arguments, "correction_parent_lease_id")
+            if arguments.correction_parent_lease_id == arguments.lease_id:
+                raise ValueError(f"{arguments.event} parent lease must differ from its lease")
+        elif arguments.correction_parent_lease_id is not None:
+            raise ValueError(f"{arguments.event} attempt 1 cannot name a correction parent")
     elif arguments.event in {"red_accepted", "red_rejected"}:
         _require(arguments, "cycle_id", "attempt")
     elif arguments.event == "correction_requested":
@@ -257,6 +266,7 @@ def _record_event(arguments: argparse.Namespace) -> dict[str, Any]:
             arguments,
             "cycle_id",
             "lease_id",
+            "correction_parent_lease_id",
             "phase",
             "attempt",
             "agent_id",
@@ -265,10 +275,21 @@ def _record_event(arguments: argparse.Namespace) -> dict[str, Any]:
         )
         if arguments.attempt != 2:
             raise ValueError("correction_requested requires --attempt 2")
+        if arguments.correction_parent_lease_id == arguments.lease_id:
+            raise ValueError("correction_requested parent lease must differ from its lease")
     elif arguments.event == "regression_confirmed":
         _require(arguments, "cycle_id", "check_id", "reason_code")
     elif arguments.event == "token_usage_reported":
         _require(arguments, "agent_id", "agent_type")
+
+    if (
+        arguments.correction_parent_lease_id is not None
+        and arguments.event
+        not in {"lease_started", "lease_completed", "correction_requested"}
+    ):
+        raise ValueError(
+            "correction parent is valid only for lease_started, lease_completed, or correction_requested"
+        )
 
     if arguments.event == "red_rejected":
         _require(arguments, "reason_code")
@@ -294,6 +315,7 @@ def _record_event(arguments: argparse.Namespace) -> dict[str, Any]:
         "task_id",
         "cycle_id",
         "lease_id",
+        "correction_parent_lease_id",
         "phase",
         "attempt",
         "agent_id",
@@ -390,6 +412,7 @@ def _validate_event(event: Mapping[str, Any]) -> list[str]:
         "task_id",
         "cycle_id",
         "lease_id",
+        "correction_parent_lease_id",
         "phase",
         "reason_code",
         "check_id",
@@ -416,6 +439,18 @@ def _validate_event(event: Mapping[str, Any]) -> list[str]:
         ):
             if event.get(field) is None:
                 errors.append(f"{event_type} requires {field}")
+        if isinstance(attempt, int) and not isinstance(attempt, bool):
+            if attempt not in (1, 2):
+                errors.append(f"{event_type} requires attempt 1 or 2")
+            elif attempt == 2 and event.get("correction_parent_lease_id") is None:
+                errors.append(f"{event_type} attempt 2 requires correction_parent_lease_id")
+            elif (
+                attempt == 2
+                and event.get("correction_parent_lease_id") == event.get("lease_id")
+            ):
+                errors.append(f"{event_type} parent lease must differ from its lease")
+            elif attempt == 1 and event.get("correction_parent_lease_id") is not None:
+                errors.append(f"{event_type} attempt 1 cannot name a correction parent")
     if event_type in {"red_accepted", "red_rejected"}:
         for field in ("cycle_id", "attempt"):
             if event.get(field) is None:
@@ -431,6 +466,7 @@ def _validate_event(event: Mapping[str, Any]) -> list[str]:
         for field in (
             "cycle_id",
             "lease_id",
+            "correction_parent_lease_id",
             "phase",
             "attempt",
             "agent_id",
@@ -441,6 +477,15 @@ def _validate_event(event: Mapping[str, Any]) -> list[str]:
                 errors.append(f"correction_requested requires {field}")
         if isinstance(attempt, int) and not isinstance(attempt, bool) and attempt != 2:
             errors.append("correction_requested requires attempt 2")
+        if event.get("correction_parent_lease_id") == event.get("lease_id"):
+            errors.append("correction_requested parent lease must differ from its lease")
+    if (
+        event.get("correction_parent_lease_id") is not None
+        and event_type not in {"lease_started", "lease_completed", "correction_requested"}
+    ):
+        errors.append(
+            "correction parent is valid only for lease_started, lease_completed, or correction_requested"
+        )
     if event_type == "regression_confirmed":
         for field in ("cycle_id", "check_id", "reason_code"):
             if event.get(field) is None:
@@ -521,6 +566,7 @@ def _logical_key(event: Mapping[str, Any]) -> tuple[Any, ...]:
             "agent_lifecycle",
             event_type,
             event.get("session_id"),
+            event.get("turn_id"),
             event.get("agent_id"),
         )
     return ("event", event.get("event_id"))
@@ -592,6 +638,7 @@ def _association_errors(
         "task_id",
         "cycle_id",
         "lease_id",
+        "correction_parent_lease_id",
         "phase",
         "attempt",
         "agent_id",
@@ -603,7 +650,7 @@ def _association_errors(
             lease_groups[str(event["lease_id"])].append(event)
     for lease_id, group in lease_groups.items():
         identities = {
-            tuple(event[field] for field in lease_identity_fields) for event in group
+            tuple(event.get(field) for field in lease_identity_fields) for event in group
         }
         if len(identities) > 1:
             errors.append(f"lease {lease_id!r} has conflicting assignment identities")
@@ -636,22 +683,64 @@ def _association_errors(
             errors.append(f"token report for lease-linked agent {key!r} has wrong task/role")
             quarantined_ids.add(str(event["event_id"]))
 
-    lifecycle_groups: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    lifecycle_turn_groups: dict[tuple[str, str, str], list[dict[str, Any]]] = defaultdict(list)
+    lifecycle_agent_groups: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for event in events:
         if event["event_type"] in {"agent_started", "agent_stopped"}:
-            lifecycle_groups[str(event["agent_id"])].append(event)
-    for agent_id, group in lifecycle_groups.items():
-        identities = {
-            (
+            key = (
                 str(event["session_id"]),
                 str(event["turn_id"]),
-                str(event["agent_type"]),
+                str(event["agent_id"]),
             )
-            for event in group
-        }
-        if len(identities) > 1:
-            errors.append(f"agent {agent_id!r} has conflicting lifecycle identity")
+            lifecycle_turn_groups[key].append(event)
+            lifecycle_agent_groups[str(event["agent_id"])].append(event)
+    for key, group in lifecycle_turn_groups.items():
+        roles = {str(event["agent_type"]) for event in group}
+        if len(roles) > 1:
+            errors.append(f"agent lifecycle {key!r} has conflicting role identity")
             quarantined_ids.update(str(event["event_id"]) for event in group)
+    for agent_id, group in lifecycle_agent_groups.items():
+        roles = {str(event["agent_type"]) for event in group}
+        if len(roles) > 1:
+            errors.append(f"agent {agent_id!r} changes lifecycle role across turns")
+            quarantined_ids.update(str(event["event_id"]) for event in group)
+
+    correction_parent_groups: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for event in semantic_events:
+        if event["event_type"] in lease_event_types and event.get("attempt") == 2:
+            correction_parent_groups[str(event["correction_parent_lease_id"])].append(event)
+    for parent_id, group in correction_parent_groups.items():
+        children = {str(event["lease_id"]) for event in group}
+        if len(children) > 1:
+            errors.append(
+                f"correction parent {parent_id!r} has multiple correction children"
+            )
+            quarantined_ids.update(str(event["event_id"]) for event in group)
+
+    semantic_agent_groups: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for event in semantic_events:
+        if event.get("agent_id") is not None:
+            semantic_agent_groups[str(event["agent_id"])].append(event)
+    for agent_id in sorted(set(semantic_agent_groups) & set(lifecycle_agent_groups)):
+        semantic_roles = {
+            str(event["agent_type"])
+            for event in semantic_agent_groups[agent_id]
+            if event["event_type"] in {"lease_started", "lease_completed"}
+        }
+        lifecycle_roles = {
+            str(event["agent_type"]) for event in lifecycle_agent_groups[agent_id]
+        }
+        if semantic_roles and semantic_roles != lifecycle_roles:
+            errors.append(
+                f"agent {agent_id!r} has conflicting lifecycle/semantic role identity"
+            )
+            quarantined_ids.update(
+                str(event["event_id"])
+                for event in (
+                    *semantic_agent_groups[agent_id],
+                    *lifecycle_agent_groups[agent_id],
+                )
+            )
 
     retained = [
         event for event in events if str(event["event_id"]) not in quarantined_ids
@@ -680,6 +769,7 @@ def _transition_errors(
                 "task_id",
                 "cycle_id",
                 "lease_id",
+                "correction_parent_lease_id",
                 "phase",
                 "attempt",
                 "agent_id",
@@ -719,11 +809,15 @@ def _transition_errors(
                 errors.append(f"{label} {key!r} completes before it starts")
                 quarantined_ids.update((str(start["event_id"]), str(stop["event_id"])))
 
-    lifecycle_groups: dict[tuple[str, str], dict[str, dict[str, Any]]] = defaultdict(dict)
+    lifecycle_groups: dict[tuple[str, str, str], dict[str, dict[str, Any]]] = defaultdict(dict)
     for event in events:
         if event["event_type"] not in {"agent_started", "agent_stopped"}:
             continue
-        key = (str(event["session_id"]), str(event["agent_id"]))
+        key = (
+            str(event["session_id"]),
+            str(event["turn_id"]),
+            str(event["agent_id"]),
+        )
         lifecycle_groups[key][str(event["event_type"])] = event
     for key, pair in lifecycle_groups.items():
         start = pair.get("agent_started")
@@ -798,8 +892,14 @@ def _pair_events(
     completed_count = 0
     for key in sorted(grouped):
         keyed = grouped[key]
-        starts = [event for event in keyed if event["event_type"] == start_type]
-        stops = [event for event in keyed if event["event_type"] == stop_type]
+        starts = sorted(
+            (event for event in keyed if event["event_type"] == start_type),
+            key=_event_time,
+        )
+        stops = sorted(
+            (event for event in keyed if event["event_type"] == stop_type),
+            key=_event_time,
+        )
         started_count += len(starts)
         completed_count += len(stops)
         key_pairs = list(zip(starts, stops))
@@ -830,6 +930,86 @@ def _pair_events(
 
     pair_count = sum(item["pair_count"] for item in items)
     durations = [item["duration_ms"] for item in items if item["duration_ms"] is not None]
+    return {
+        "started_count": started_count,
+        "completed_count": completed_count,
+        "pair_count": pair_count,
+        "unmatched_started": unmatched_started,
+        "unmatched_completed": unmatched_completed,
+        "complete": bool(items) and unmatched_started == 0 and unmatched_completed == 0,
+        "total_duration_ms": sum(durations) if durations else None,
+        "items": items,
+    }
+
+
+def _pair_agent_lifecycle_events(
+    events: Iterable[Mapping[str, Any]],
+) -> dict[str, Any]:
+    """Pair lifecycle events by turn, then aggregate complete and incomplete turns by agent."""
+
+    turn_groups: dict[tuple[str, str, str], list[Mapping[str, Any]]] = defaultdict(list)
+    for event in events:
+        if event.get("event_type") not in {"agent_started", "agent_stopped"}:
+            continue
+        key = (
+            str(event["session_id"]),
+            str(event["turn_id"]),
+            str(event["agent_id"]),
+        )
+        turn_groups[key].append(event)
+
+    started_count = 0
+    completed_count = 0
+    unmatched_started = 0
+    unmatched_completed = 0
+    agent_items: dict[str, dict[str, Any]] = {}
+    for key in sorted(turn_groups):
+        grouped = turn_groups[key]
+        starts = [event for event in grouped if event["event_type"] == "agent_started"]
+        stops = [event for event in grouped if event["event_type"] == "agent_stopped"]
+        started_count += len(starts)
+        completed_count += len(stops)
+        agent_id = key[2]
+        exemplar = starts[0] if starts else stops[0]
+        item = agent_items.setdefault(
+            agent_id,
+            {
+                "agent_id": agent_id,
+                "agent_type": exemplar["agent_type"],
+                "pair_count": 0,
+                "duration_ms": 0,
+                "duration_known": False,
+                "unmatched_started": 0,
+                "unmatched_completed": 0,
+            },
+        )
+        if starts and stops:
+            duration = round(
+                (_event_time(stops[0]) - _event_time(starts[0])).total_seconds() * 1000
+            )
+            if duration < 0:
+                raise ValueError(f"Unvalidated negative lifecycle duration for turn={key!r}")
+            item["pair_count"] += 1
+            item["duration_ms"] += duration
+            item["duration_known"] = True
+        elif starts:
+            item["unmatched_started"] += 1
+            unmatched_started += 1
+        else:
+            item["unmatched_completed"] += 1
+            unmatched_completed += 1
+
+    items: list[dict[str, Any]] = []
+    for agent_id in sorted(agent_items):
+        item = agent_items[agent_id]
+        if not item.pop("duration_known"):
+            item["duration_ms"] = None
+        item["complete"] = (
+            item["unmatched_started"] == 0 and item["unmatched_completed"] == 0
+        )
+        items.append(item)
+    durations = [item["duration_ms"] for item in items if item["duration_ms"] is not None]
+    pair_count = sum(item["pair_count"] for item in items)
     return {
         "started_count": started_count,
         "completed_count": completed_count,
@@ -962,7 +1142,7 @@ def _summary(
     lease_pairs = _pair_events(
         semantic_events, "lease_id", "lease_started", "lease_completed"
     )
-    agent_pairs = _pair_events(hook_events, "agent_id", "agent_started", "agent_stopped")
+    agent_pairs = _pair_agent_lifecycle_events(hook_events)
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -1245,8 +1425,8 @@ def _run_self_test() -> tuple[bool, dict[str, Any]]:
                 _controlled_event("codex_hook", "agent_started", start + timedelta(seconds=8), session_id="session-1", turn_id="turn-2", agent_id="agent-b", agent_type="code_worker"),
                 _controlled_event("coordinator", "red_accepted", start + timedelta(seconds=7), workflow_id="wf-test", cycle_id="cycle-1", attempt=1),
                 _controlled_event("coordinator", "red_rejected", start + timedelta(seconds=4), workflow_id="wf-test", cycle_id="cycle-0", attempt=1, reason_code="wrong_failure"),
-                _controlled_event("coordinator", "correction_requested", start + timedelta(seconds=5), workflow_id="wf-test", cycle_id="cycle-0", lease_id="lease-correction-a", phase="red", attempt=2, agent_id="agent-a", agent_type="test_worker", reason_code="wrong_failure"),
-                _controlled_event("coordinator", "correction_requested", start + timedelta(seconds=13), workflow_id="wf-test", cycle_id="cycle-1", lease_id="lease-correction-b", phase="green", attempt=2, agent_id="agent-b", agent_type="code_worker", reason_code="review_finding"),
+                _controlled_event("coordinator", "correction_requested", start + timedelta(seconds=5), workflow_id="wf-test", cycle_id="cycle-0", lease_id="lease-correction-a", correction_parent_lease_id="lease-a", phase="red", attempt=2, agent_id="agent-a", agent_type="test_worker", reason_code="wrong_failure"),
+                _controlled_event("coordinator", "correction_requested", start + timedelta(seconds=13), workflow_id="wf-test", cycle_id="cycle-1", lease_id="lease-correction-b", correction_parent_lease_id="lease-b", phase="green", attempt=2, agent_id="agent-b", agent_type="code_worker", reason_code="review_finding"),
                 _controlled_event("coordinator", "regression_confirmed", start + timedelta(seconds=15), workflow_id="wf-test", cycle_id="cycle-1", check_id="check-build", reason_code="current_change"),
                 _controlled_event("coordinator", "token_usage_reported", start + timedelta(seconds=7), workflow_id="wf-test", agent_id="agent-a", agent_type="test_worker", token_usage={"input_tokens": 100, "cached_input_tokens": None, "output_tokens": 20, "reasoning_tokens": None}),
                 _controlled_event("coordinator", "token_usage_reported", start + timedelta(seconds=18), workflow_id="wf-test", agent_id="primary", agent_type="primary", token_usage={"input_tokens": 50, "cached_input_tokens": None, "output_tokens": 10, "reasoning_tokens": None}),
@@ -1288,6 +1468,7 @@ def _run_self_test() -> tuple[bool, dict[str, Any]]:
                 task_id="TASK-TEST",
                 cycle_id="cycle-1",
                 lease_id="lease-correction-2",
+                correction_parent_lease_id="lease-parent-1",
                 phase="red",
                 attempt=2,
                 agent_id="agent-a",
@@ -1421,9 +1602,7 @@ def _run_self_test() -> tuple[bool, dict[str, Any]]:
             )
             orphan_events, orphan_errors, orphan_replays = _load_event_files(orphan_dir)
             assert not orphan_errors
-            orphan_pairs = _pair_events(
-                orphan_events, "agent_id", "agent_started", "agent_stopped"
-            )
+            orphan_pairs = _pair_agent_lifecycle_events(orphan_events)
             assert orphan_replays == 0
             assert orphan_pairs["unmatched_started"] == 1
 
@@ -1435,6 +1614,7 @@ def _run_self_test() -> tuple[bool, dict[str, Any]]:
                 task_id="TASK-TEST",
                 cycle_id="cycle-1",
                 lease_id="lease-invalid",
+                correction_parent_lease_id="lease-parent",
                 phase="red",
                 attempt=3,
                 agent_id="agent-a",
@@ -1443,6 +1623,22 @@ def _run_self_test() -> tuple[bool, dict[str, Any]]:
             )
             assert any(
                 "attempt 2" in error for error in _validate_event(invalid_correction)
+            )
+            missing_parent_correction = dict(invalid_correction)
+            missing_parent_correction["attempt"] = 2
+            missing_parent_correction.pop("correction_parent_lease_id")
+            assert any(
+                "correction_parent_lease_id" in error
+                for error in _validate_event(missing_parent_correction)
+            )
+            self_parent_correction = dict(invalid_correction)
+            self_parent_correction["attempt"] = 2
+            self_parent_correction["correction_parent_lease_id"] = self_parent_correction[
+                "lease_id"
+            ]
+            assert any(
+                "parent lease must differ" in error
+                for error in _validate_event(self_parent_correction)
             )
             invalid_regression = _controlled_event(
                 "coordinator",
@@ -1512,6 +1708,7 @@ def _run_self_test() -> tuple[bool, dict[str, Any]]:
                     task_id="TASK-003",
                     cycle_id="cycle-a",
                     lease_id="lease-x",
+                    correction_parent_lease_id="lease-parent-x",
                     phase="red",
                     attempt=2,
                     agent_id="agent-a",
@@ -1550,6 +1747,63 @@ def _run_self_test() -> tuple[bool, dict[str, Any]]:
             corrected_events, corrected_errors, _ = _load_event_files(correction_lease_dir)
             assert any("conflicting assignment identities" in error for error in corrected_errors)
             assert not corrected_events
+
+            duplicate_parent_dir = root / "duplicate-correction-parent"
+            for index in (1, 2):
+                _write_event(
+                    _controlled_event(
+                        "coordinator",
+                        "correction_requested",
+                        start + timedelta(seconds=index),
+                        workflow_id="wf-parent-budget",
+                        task_id="TASK-003",
+                        cycle_id="cycle-parent-budget",
+                        lease_id=f"lease-child-{index}",
+                        correction_parent_lease_id="lease-parent-budget",
+                        phase="green",
+                        attempt=2,
+                        agent_id="agent-parent-budget",
+                        agent_type="code_worker",
+                        reason_code="review_finding",
+                    ),
+                    duplicate_parent_dir,
+                )
+            duplicate_parent_events, duplicate_parent_errors, _ = _load_event_files(
+                duplicate_parent_dir
+            )
+            assert any(
+                "multiple correction children" in error
+                for error in duplicate_parent_errors
+            )
+            assert not duplicate_parent_events
+
+            duplicate_parent_lease_dir = root / "duplicate-correction-parent-leases"
+            for index in (1, 2):
+                _write_event(
+                    _controlled_event(
+                        "coordinator",
+                        "lease_started",
+                        start + timedelta(seconds=index),
+                        workflow_id="wf-parent-lease-budget",
+                        task_id="TASK-003",
+                        cycle_id="cycle-parent-lease-budget",
+                        lease_id=f"lease-start-child-{index}",
+                        correction_parent_lease_id="lease-start-parent-budget",
+                        phase="green",
+                        attempt=2,
+                        agent_id="agent-parent-lease-budget",
+                        agent_type="code_worker",
+                    ),
+                    duplicate_parent_lease_dir,
+                )
+            duplicate_parent_lease_events, duplicate_parent_lease_errors, _ = (
+                _load_event_files(duplicate_parent_lease_dir)
+            )
+            assert any(
+                "multiple correction children" in error
+                for error in duplicate_parent_lease_errors
+            )
+            assert not duplicate_parent_lease_events
 
             linked_token_dir = root / "linked-token-conflict"
             linked_token_events = [
@@ -1642,9 +1896,9 @@ def _run_self_test() -> tuple[bool, dict[str, Any]]:
             assert regression_summary["confirmed_regressions"]["count"] == 0
 
             lifecycle_identity_dir = root / "lifecycle-identity-conflict"
-            for event_type, turn_id in (
-                ("agent_started", "turn-a"),
-                ("agent_stopped", "turn-b"),
+            for event_type, agent_type in (
+                ("agent_started", "test_worker"),
+                ("agent_stopped", "code_worker"),
             ):
                 _write_event(
                     _controlled_event(
@@ -1652,17 +1906,143 @@ def _run_self_test() -> tuple[bool, dict[str, Any]]:
                         event_type,
                         start,
                         session_id="session-lifecycle",
-                        turn_id=turn_id,
+                        turn_id="turn-lifecycle",
                         agent_id="agent-lifecycle",
-                        agent_type="test_worker",
+                        agent_type=agent_type,
                     ),
                     lifecycle_identity_dir,
                 )
             lifecycle_events, lifecycle_errors, _ = _load_event_files(
                 lifecycle_identity_dir
             )
-            assert any("conflicting lifecycle identity" in error for error in lifecycle_errors)
+            assert any("conflicting role identity" in error for error in lifecycle_errors)
             assert not lifecycle_events
+
+            persistent_agent_dir = root / "persistent-agent-turns"
+            _write_event(
+                _controlled_event(
+                    "codex_hook",
+                    "agent_stopped",
+                    start + timedelta(seconds=1),
+                    session_id="session-persistent",
+                    turn_id="turn-orphan-stop",
+                    agent_id="agent-persistent",
+                    agent_type="test_worker",
+                ),
+                persistent_agent_dir,
+            )
+            for turn_index in (1, 2):
+                for event_type, offset in (("agent_started", 0), ("agent_stopped", 1)):
+                    _write_event(
+                        _controlled_event(
+                            "codex_hook",
+                            event_type,
+                            start + timedelta(seconds=(turn_index * 3) + offset),
+                            session_id="session-persistent",
+                            turn_id=f"turn-{turn_index}",
+                            agent_id="agent-persistent",
+                            agent_type="test_worker",
+                        ),
+                        persistent_agent_dir,
+                    )
+            persistent_events, persistent_errors, persistent_replays = _load_event_files(
+                persistent_agent_dir
+            )
+            assert not persistent_errors and persistent_replays == 0
+            persistent_pairs = _pair_agent_lifecycle_events(persistent_events)
+            assert persistent_pairs["pair_count"] == 2
+            assert persistent_pairs["total_duration_ms"] == 2_000
+            assert persistent_pairs["unmatched_completed"] == 1
+            assert not persistent_pairs["complete"]
+
+            lifecycle_role_dir = root / "lifecycle-semantic-role-conflict"
+            lifecycle_role_events = [
+                _controlled_event(
+                    "codex_hook",
+                    "agent_started",
+                    start,
+                    session_id="session-role",
+                    turn_id="turn-role",
+                    agent_id="agent-role",
+                    agent_type="test_worker",
+                ),
+                _controlled_event(
+                    "codex_hook",
+                    "agent_stopped",
+                    start + timedelta(seconds=3),
+                    session_id="session-role",
+                    turn_id="turn-role",
+                    agent_id="agent-role",
+                    agent_type="test_worker",
+                ),
+                _controlled_event(
+                    "coordinator",
+                    "lease_started",
+                    start + timedelta(seconds=1),
+                    workflow_id="wf-role",
+                    task_id="TASK-003",
+                    cycle_id="cycle-role",
+                    lease_id="lease-role",
+                    phase="green",
+                    attempt=1,
+                    agent_id="agent-role",
+                    agent_type="code_worker",
+                ),
+                _controlled_event(
+                    "coordinator",
+                    "lease_completed",
+                    start + timedelta(seconds=2),
+                    workflow_id="wf-role",
+                    task_id="TASK-003",
+                    cycle_id="cycle-role",
+                    lease_id="lease-role",
+                    phase="green",
+                    attempt=1,
+                    agent_id="agent-role",
+                    agent_type="code_worker",
+                ),
+            ]
+            for event in lifecycle_role_events:
+                _write_event(event, lifecycle_role_dir)
+            lifecycle_role_loaded, lifecycle_role_errors, _ = _load_event_files(
+                lifecycle_role_dir
+            )
+            assert any(
+                "conflicting lifecycle/semantic role identity" in error
+                for error in lifecycle_role_errors
+            )
+            assert not lifecycle_role_loaded
+
+            attempt_two_pair_dir = root / "attempt-two-parent-conflict"
+            for event_type, parent_id, offset in (
+                ("lease_started", "lease-parent-a", 1),
+                ("lease_completed", "lease-parent-b", 2),
+            ):
+                _write_event(
+                    _controlled_event(
+                        "coordinator",
+                        event_type,
+                        start + timedelta(seconds=offset),
+                        workflow_id="wf-attempt-two",
+                        task_id="TASK-003",
+                        cycle_id="cycle-attempt-two",
+                        lease_id="lease-attempt-two",
+                        correction_parent_lease_id=parent_id,
+                        phase="green",
+                        attempt=2,
+                        agent_id="agent-attempt-two",
+                        agent_type="code_worker",
+                    ),
+                    attempt_two_pair_dir,
+                )
+            attempt_two_pair_events, attempt_two_pair_errors, _ = _load_event_files(
+                attempt_two_pair_dir
+            )
+            assert any(
+                "conflicting assignment identities" in error
+                for error in attempt_two_pair_errors
+            )
+            assert not attempt_two_pair_events
 
             incomplete_lease = _controlled_event(
                 "coordinator",
@@ -1678,6 +2058,38 @@ def _run_self_test() -> tuple[bool, dict[str, Any]]:
             incomplete_errors = _validate_event(incomplete_lease)
             assert any("requires cycle_id" in error for error in incomplete_errors)
             assert any("requires attempt" in error for error in incomplete_errors)
+            missing_attempt_two_parent = _controlled_event(
+                "coordinator",
+                "lease_started",
+                start,
+                workflow_id="wf-lineage-validation",
+                task_id="TASK-003",
+                cycle_id="cycle-lineage-validation",
+                lease_id="lease-lineage-validation",
+                phase="green",
+                attempt=2,
+                agent_id="agent-lineage-validation",
+                agent_type="code_worker",
+            )
+            assert any(
+                "attempt 2 requires correction_parent_lease_id" in error
+                for error in _validate_event(missing_attempt_two_parent)
+            )
+            self_parent_attempt_two = dict(missing_attempt_two_parent)
+            self_parent_attempt_two["correction_parent_lease_id"] = self_parent_attempt_two[
+                "lease_id"
+            ]
+            assert any(
+                "parent lease must differ" in error
+                for error in _validate_event(self_parent_attempt_two)
+            )
+            parent_on_attempt_one = dict(missing_attempt_two_parent)
+            parent_on_attempt_one["attempt"] = 1
+            parent_on_attempt_one["correction_parent_lease_id"] = "lease-parent"
+            assert any(
+                "attempt 1 cannot name a correction parent" in error
+                for error in _validate_event(parent_on_attempt_one)
+            )
             checks.append(
                 "cross-event workflow, lease, token, regression, and lifecycle identity"
             )
@@ -1721,7 +2133,7 @@ def _add_events_dir(parser: argparse.ArgumentParser) -> None:
         "--events-dir",
         type=Path,
         default=_default_events_dir(),
-        help="Event directory (default: repository logs/agent-flow-metrics/v1/events).",
+        help="Event directory (default: repository logs/agent-flow-metrics/v2/events).",
     )
 
 
@@ -1737,6 +2149,7 @@ def _build_parser() -> argparse.ArgumentParser:
     record.add_argument("--task-id", type=_identifier)
     record.add_argument("--cycle-id", type=_identifier)
     record.add_argument("--lease-id", type=_identifier)
+    record.add_argument("--correction-parent-lease-id", type=_identifier)
     record.add_argument("--phase", type=_identifier)
     record.add_argument("--attempt", type=_positive_integer)
     record.add_argument("--agent-id", type=_identifier)

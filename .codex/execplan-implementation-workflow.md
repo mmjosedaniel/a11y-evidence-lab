@@ -58,7 +58,8 @@ Identity
 - Assignment ID:
 - Lease ID: None for preflight
 - Phase: preflight | evidence | setup | red | green
-- Attempt: 1 | 2
+- Attempt: 1 for preflight; 1 | 2 for write turns
+- Correction parent lease ID: None for preflight and attempt 1; required for attempt 2
 - Worker role: test_worker | code_worker | frontend_code_worker
 - Lease owner:
 - Guard contract digest: None for preflight; inserted after guard start for writes
@@ -145,6 +146,7 @@ Before each write turn, the coordinator passes these packet fields unchanged to 
 | Lease ID | `--lease-id` |
 | Phase | `--phase` |
 | Attempt | `--attempt` |
+| Correction parent lease ID | `--correction-parent-lease-id`; omit only for preflight or attempt 1 |
 | Lease owner | `--owner` |
 | Worker role | `--agent-type` |
 | Allowed files | repeated `--allow-file` |
@@ -230,7 +232,7 @@ A separately planned `setup` assignment may occur before a dependent work slice.
 
 A worker never continues writing after its lease is terminal. Guard violations, ambiguous concurrent changes, stale evidence, exhausted budgets, pre-existing failures, wrong Red failures, blocked dependencies, rejected handoffs, and review findings all take the same immediate action: stop writes and return control to the coordinator. Never repair them by reverting user or peer work automatically.
 
-After triage, the coordinator may send the same persistent role one correction follow-up only when the work-slice contract, objective, authority, dependency, expected outcome, and scope remain unchanged. It uses attempt 2, a fresh complete packet, reconciled tree, baseline, lease ID, and digest. A second unsuccessful correction, a repeated identical decisive failure, two no-diff write handoffs in the slice, or any binding-field change stops automatic continuation and requires rescoping, a fresh instance, owner direction, or task stop. Permission to fix one named finding never resets this budget.
+After triage, the coordinator may send the same persistent role one correction follow-up only when the work-slice contract, objective, authority, dependency, expected outcome, and scope remain unchanged. It uses attempt 2, a fresh complete packet, reconciled tree, baseline, lease ID, digest, and the terminal attempt-1 lease ID as its correction parent. The guard requires matching workflow, task, work slice, phase, worker role, and path scope, and rejects a second attempt-2 child for that parent. The coordinator still verifies the semantic fields that the guard cannot represent, including whether a replacement agent instance remains authorized under the same role contract. A second unsuccessful correction, a repeated identical decisive failure, two no-diff write handoffs in the slice, or any binding-field change stops automatic continuation and requires rescoping, a fresh instance, owner direction, or task stop. Permission to fix one named finding never resets this budget.
 
 Default work-slice budgets are one preflight, one coherent Red or characterization, one Green, at most one correction per role, and one review correction loop. A slice may define stricter limits. More than three TDD cycles inside one slice indicates that its contract should be split or re-evaluated; do not silently continue microcycling.
 
@@ -268,7 +270,7 @@ The reviewer never edits the repository and no agent report can change authorita
 
 ## Flow metrics
 
-The [agent-flow metrics](./agent-flow-metrics.md) are an optional, best-effort sidecar. Use them when the operational learning is worth the recording overhead. Missing hooks, events, durations, or token counters never block a lease, TDD barrier, review, or task closure. Record token usage only from exact runtime counters.
+The [agent-flow metrics](./agent-flow-metrics.md) are an optional, best-effort sidecar retained only for the policy's bounded first-implementation pilot. Keep them only if that pilot answers its named coordination-cost or lifecycle-coverage questions; otherwise disable the hooks and defer the CLI instead of expanding telemetry. Missing hooks, events, durations, or token counters never block a lease, TDD barrier, review, or task closure. Record token usage only from exact runtime counters.
 
 ## Copy-paste prompt example
 
@@ -306,7 +308,8 @@ command, working directory, relevant-tree fingerprint, environment fingerprint, 
 no-drift state still match; otherwise reproduce it. Make minimum Green and run a second
 focused check only after an actual Refactor.
 
-Allow at most one same-contract correction per role under a fresh lease. Stop after the
+Allow at most one same-contract correction per role under a fresh attempt-2 lease that
+names its terminal attempt-1 parent. Stop after the
 same decisive failure twice, two no-diff write handoffs, exhausted budgets, or any
 binding-field change. Never continue under a closed lease, reset a correction budget,
 or silently turn one work slice into a stream of microcycles.

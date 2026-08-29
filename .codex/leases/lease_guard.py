@@ -18,8 +18,8 @@ from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any, Iterable, NoReturn
 
 
-VERSION = 1
-STATE_RELATIVE_ROOT = "logs/agent-flow-leases/v1"
+VERSION = 2
+STATE_RELATIVE_ROOT = "logs/agent-flow-leases/v2"
 CONTRACT_FILE = "contract.json"
 RECEIPT_FILE = "receipt.json"
 ACTIVE_FILE = "active.json"
@@ -674,7 +674,8 @@ def _validate_contract(payload: dict[str, Any], lease_id: str) -> None:
     required = {
         "schema_version", "repository_identity", "repository_head", "repository_head_ref",
         "repository_ignore_case", "workflow_id", "task_id",
-        "cycle_id", "lease_id", "phase", "attempt", "owner", "agent_type", "scopes",
+        "cycle_id", "lease_id", "phase", "attempt", "correction_parent_lease_id",
+        "owner", "agent_type", "scopes",
         "baseline", "index_digest", "ignore_control_digest", "digest",
     }
     if set(payload) != required or payload.get("schema_version") != VERSION:
@@ -701,6 +702,16 @@ def _validate_contract(payload: dict[str, Any], lease_id: str) -> None:
     _validate_assignment_identity(
         payload["phase"], payload["attempt"], payload["agent_type"], GuardError
     )
+    correction_parent = payload["correction_parent_lease_id"]
+    if payload["attempt"] == 1:
+        if correction_parent is not None:
+            raise GuardError("Attempt 1 cannot name a correction parent lease.")
+    elif (
+        not isinstance(correction_parent, str)
+        or not IDENTIFIER.fullmatch(correction_parent)
+        or correction_parent == lease_id
+    ):
+        raise GuardError("Attempt 2 requires a valid, distinct correction parent lease ID.")
     if not isinstance(payload.get("baseline"), dict):
         raise GuardError("Contract baseline is malformed.")
     for field in ("index_digest", "ignore_control_digest"):
@@ -794,6 +805,72 @@ def _load_contract(repository: Repository, lease_id: str) -> tuple[Path, dict[st
     if contract["repository_identity"] != repository.identity:
         raise GuardError("Lease contract belongs to a different repository.")
     return directory, contract
+
+
+def _validate_correction_lineage(
+    repository: Repository,
+    identities: dict[str, str],
+    attempt: int,
+    correction_parent_lease_id: str | None,
+    scopes: dict[str, list[str]],
+) -> str | None:
+    """Validate the guard-enforceable portion of one same-contract correction."""
+
+    if attempt == 1:
+        if correction_parent_lease_id is not None:
+            raise UsageError("Attempt 1 cannot name a correction parent lease.")
+        return None
+    if correction_parent_lease_id is None:
+        raise UsageError("Attempt 2 requires --correction-parent-lease-id.")
+    parent_id = _validate_identifier(
+        "correction-parent-lease-id", correction_parent_lease_id
+    )
+    if parent_id == identities["lease_id"]:
+        raise UsageError("A correction lease cannot name itself as its parent.")
+
+    parent_directory, parent = _load_contract(repository, parent_id)
+    parent_receipt = _validate_existing_receipt(repository, parent_directory, parent)
+    if parent_receipt is None:
+        raise GuardError("A correction parent lease must have a terminal receipt.")
+    if parent["attempt"] != 1 or parent["correction_parent_lease_id"] is not None:
+        raise GuardError("A correction parent must be an attempt-1 lease.")
+
+    matching_fields = (
+        "workflow_id",
+        "task_id",
+        "cycle_id",
+        "phase",
+        "agent_type",
+    )
+    mismatches = [
+        field for field in matching_fields if parent[field] != identities[field]
+    ]
+    if mismatches:
+        raise UsageError(
+            "Correction parent assignment does not match: " + ", ".join(mismatches) + "."
+        )
+    if parent["scopes"] != scopes:
+        raise UsageError("Correction parent path scope does not match the new lease.")
+
+    state_root = _state_root(repository)
+    for candidate_directory in sorted(state_root.iterdir(), key=lambda path: path.name):
+        candidate_metadata = candidate_directory.lstat()
+        if _is_link_or_reparse(candidate_metadata):
+            raise GuardError("Correction-lineage state contains a link or reparse point.")
+        if candidate_directory.name == parent_id or not stat.S_ISDIR(candidate_metadata.st_mode):
+            continue
+        candidate_path = candidate_directory / CONTRACT_FILE
+        if not os.path.lexists(candidate_path):
+            continue
+        candidate = _read_json(candidate_path, "Correction-child contract")
+        _validate_contract(candidate, candidate_directory.name)
+        if candidate["repository_identity"] != repository.identity:
+            raise GuardError("Correction-child contract belongs to a different repository.")
+        if candidate["correction_parent_lease_id"] == parent_id:
+            raise UsageError(
+                f"Correction parent {parent_id!r} already has an attempt-2 child."
+            )
+    return parent_id
 
 
 def _require_contract_pin(contract: dict[str, Any], supplied: str) -> None:
@@ -938,6 +1015,13 @@ def _start(arguments: argparse.Namespace) -> tuple[int, dict[str, Any]]:
     _validate_scope_observability(repository, scopes)
     state_root = _state_root(repository)
     state_root.mkdir(parents=True, exist_ok=True)
+    correction_parent_lease_id = _validate_correction_lineage(
+        repository,
+        identities,
+        arguments.attempt,
+        arguments.correction_parent_lease_id,
+        scopes,
+    )
     directory = state_root / identities["lease_id"]
     try:
         directory.mkdir(mode=0o700)
@@ -951,6 +1035,16 @@ def _start(arguments: argparse.Namespace) -> tuple[int, dict[str, Any]]:
         if os.environ.get("LEASE_GUARD_INTERNAL_FAIL_START_AFTER_CLAIM") == "1":
             raise GuardError("Injected post-claim start failure.")
         repository = _discover_repository(repository.root)
+        if arguments.attempt == 2:
+            revalidated_parent = _validate_correction_lineage(
+                repository,
+                identities,
+                arguments.attempt,
+                correction_parent_lease_id,
+                scopes,
+            )
+            if revalidated_parent != correction_parent_lease_id:
+                raise GuardError("Correction lineage changed while the lease was starting.")
         if repository.ignore_case != scope_ignore_case:
             raise GuardError("Git path case mode changed while the lease was starting.")
         _validate_scope_topology(repository, scopes)
@@ -972,6 +1066,7 @@ def _start(arguments: argparse.Namespace) -> tuple[int, dict[str, Any]]:
             "ignore_control_digest": repository.ignore_control_digest,
             **identities,
             "attempt": arguments.attempt,
+            "correction_parent_lease_id": correction_parent_lease_id,
             "scopes": scopes,
             "baseline": baseline,
         }
@@ -1139,6 +1234,7 @@ def _build_parser() -> ArgumentParser:
     for option in ("workflow-id", "task-id", "cycle-id", "lease-id", "phase", "owner", "agent-type"):
         start.add_argument(f"--{option}", required=True)
     start.add_argument("--attempt", required=True, type=int)
+    start.add_argument("--correction-parent-lease-id")
     for option in ("allow-file", "allow-dir-root", "forbid-file", "forbid-dir-root"):
         start.add_argument(f"--{option}", action="append", default=[])
     for command in ("verify", "close", "status"):
@@ -1202,12 +1298,16 @@ def _self_test() -> tuple[int, dict[str, Any]]:
         phase: str = "green",
         attempt: int = 1,
         agent_type: str = "code_worker",
+        correction_parent_lease_id: str | None = None,
     ) -> tuple[str, ...]:
-        return (
+        command = (
             "start", "--workflow-id", "wf-test", "--task-id", "TASK-TEST", "--cycle-id", "cycle-1",
             "--lease-id", lease, "--phase", phase, "--attempt", str(attempt), "--owner", "coordinator",
             "--agent-type", agent_type, *scopes,
         )
+        if correction_parent_lease_id is not None:
+            command += ("--correction-parent-lease-id", correction_parent_lease_id)
+        return command
 
     def make_directory_link(link: Path, destination: Path) -> bool:
         try:
@@ -1258,9 +1358,9 @@ def _self_test() -> tuple[int, dict[str, Any]]:
             assert code == 2 and expected_message in payload["message"], payload
         valid_assignments = (
             ("test-red", "red", 1, "test_worker"),
-            ("test-evidence", "evidence", 2, "test_worker"),
+            ("test-evidence", "evidence", 1, "test_worker"),
             ("code-setup", "setup", 1, "code_worker"),
-            ("code-green", "green", 2, "code_worker"),
+            ("code-green", "green", 1, "code_worker"),
             ("frontend-green", "green", 1, "frontend_code_worker"),
         )
         for lease, phase, attempt, agent_type in valid_assignments:
@@ -1295,6 +1395,102 @@ def _self_test() -> tuple[int, dict[str, Any]]:
         code, payload = invoke(target, "verify", "--lease-id", "stored-invalid")
         assert code == 3 and "attempt must be 1 or 2" in payload["message"], payload
         checks.append("attempt and worker phase identity")
+
+        target = repo(root, "correction-lineage")
+        code, payload = invoke(
+            target,
+            *start_args(
+                "missing-parent", "--allow-file", "tracked.txt", attempt=2
+            ),
+        )
+        assert code == 2 and "requires --correction-parent-lease-id" in payload["message"], payload
+        code, payload = invoke(
+            target,
+            *start_args(
+                "unknown-child",
+                "--allow-file",
+                "tracked.txt",
+                attempt=2,
+                correction_parent_lease_id="unknown-parent",
+            ),
+        )
+        assert code == 3 and "missing or malformed" in payload["message"], payload
+        code, payload = invoke(
+            target,
+            *start_args("lineage-parent", "--allow-file", "tracked.txt"),
+        )
+        assert code == 0, payload
+        code, payload = invoke(
+            target,
+            *start_args(
+                "nonterminal-child",
+                "--allow-file",
+                "tracked.txt",
+                attempt=2,
+                correction_parent_lease_id="lineage-parent",
+            ),
+        )
+        assert code == 3 and "terminal receipt" in payload["message"], payload
+        code, payload = invoke(target, "close", "--lease-id", "lineage-parent")
+        assert code == 0, payload
+        code, payload = invoke(
+            target,
+            *start_args(
+                "parent-on-attempt-one",
+                "--allow-file",
+                "tracked.txt",
+                correction_parent_lease_id="lineage-parent",
+            ),
+        )
+        assert code == 2 and "Attempt 1 cannot" in payload["message"], payload
+        code, payload = invoke(
+            target,
+            *start_args(
+                "wrong-phase-child",
+                "--allow-file",
+                "tracked.txt",
+                phase="setup",
+                attempt=2,
+                correction_parent_lease_id="lineage-parent",
+            ),
+        )
+        assert code == 2 and "does not match" in payload["message"], payload
+        code, payload = invoke(
+            target,
+            *start_args(
+                "wrong-scope-child",
+                "--allow-file",
+                "delete.txt",
+                attempt=2,
+                correction_parent_lease_id="lineage-parent",
+            ),
+        )
+        assert code == 2 and "path scope does not match" in payload["message"], payload
+        code, payload = invoke(
+            target,
+            *start_args(
+                "lineage-child",
+                "--allow-file",
+                "tracked.txt",
+                attempt=2,
+                correction_parent_lease_id="lineage-parent",
+            ),
+        )
+        assert code == 0, payload
+        code, payload = invoke(target, "close", "--lease-id", "lineage-child")
+        assert code == 0, payload
+        code, payload = invoke(
+            target,
+            *start_args(
+                "duplicate-child",
+                "--allow-file",
+                "tracked.txt",
+                attempt=2,
+                correction_parent_lease_id="lineage-parent",
+            ),
+        )
+        assert code == 2 and "already has an attempt-2 child" in payload["message"], payload
+        checks.append("terminal correction lineage and single-child budget")
 
         target = repo(root, "allowed")
         code, _ = invoke(target, *start_args("allowed", "--allow-dir-root", "work", "--allow-file", "tracked.txt", "--allow-file", "delete.txt"))
