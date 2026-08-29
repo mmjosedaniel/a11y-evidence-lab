@@ -155,7 +155,7 @@ Before each write turn, the coordinator passes these packet fields unchanged to 
 | Forbidden files | repeated `--forbid-file` |
 | Forbidden directory roots | repeated `--forbid-dir-root` |
 
-For a write turn, the coordinator drafts the packet, starts the guard, inserts the returned digest, confirms that the projection matches, and only then authorizes the persistent or newly spawned worker to write. Preflight has no guard because it is read-only. The guard proves path and repository-control compliance; it does not prove that the classification, test, code, command result, evidence identity, or design is correct.
+For a write turn, the coordinator drafts the packet, starts the guard, inserts the returned digest, confirms that the projection matches, and only then authorizes the persistent or newly spawned worker to write. Preflight has no guard because it is read-only. The guard proves path compliance and no drift in its explicitly sealed Git-state invariants; it does not cover every Git write operation or metadata mutation or prove that the classification, test, code, command result, evidence identity, or design is correct.
 
 For a Green lease, every file in the accepted test boundary must be outside the allowed scope or listed explicitly in `Forbidden files` or `Forbidden directory roots`. The guard already gives forbidden scope precedence over allowed scope. This restriction applies to the implementation worker's Green turn only: the test worker may edit test-owned files under an initial or attempt-2 `red` or `evidence` lease, and the primary may make an exceptional direct test correction between leases. Either correction invalidates the prior Red or characterization evidence; the revised test and fresh result must be accepted before that evidence is reused or Green resumes.
 
@@ -343,8 +343,10 @@ closure; PASS WITH FOLLOW-UPS requires explicit disposition; REVISE, BLOCKED, or
 escalation stops advancement and returns control to coordinator triage.
 
 Keep roadmap-task status, approvals, evidence acceptance, and final closure with the
-primary coordinator. Do not stage, commit, push,
-or claim implementation evidence without the corresponding repository and runtime proof.
+primary coordinator. Workers may use Git only for read-only inspection: do not stage,
+commit, push, create or change tags, refs, or branches, stash, alter worktrees,
+remotes, repository configuration, hooks, or otherwise mutate .git state. Do not claim
+implementation evidence without the corresponding repository and runtime proof.
 ```
 
 ## Related authorities

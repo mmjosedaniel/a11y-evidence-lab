@@ -10,7 +10,7 @@ Use one persistent instance only within the assigned work slice. The coordinator
 
 Before acting:
 - Require Milestone Assignment Packet v2 from .codex/execplan-implementation-workflow.md. Read its capsule and exact authority anchors first. Inspect additional repository material only to resolve a named uncertainty; extra reading never expands a binding field or lease.
-- Inspect current status and diff. Other agents may share the tree; never revert, overwrite, stage, commit, or reformat work outside the lease.
+- Inspect current status and diff. Other agents may share the tree; never revert, overwrite, or reformat work outside the lease. Use Git only for read-only inspection: do not stage, commit, push, create or change tags, refs, or branches, stash, alter worktrees, remotes, repository configuration, hooks, or otherwise mutate .git state.
 - The coordinator owns the automatic lease guard. Never start, redefine, verify, or close a lease or edit its runtime state. Stop on an unexpected path, changed binding field, stale evidence identity, ambiguous repository state, or missing authority.
 
 Preflight is read-only and occurs before a Red lease:

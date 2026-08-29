@@ -111,7 +111,7 @@ Do not load every requirements module automatically. Read the master index, the 
 - [Agent instructions](../AGENTS.md) — repository-wide rules and selective context-loading requirements.
 - [Agent coordination workflow](../.codex/README.md) — complete cost-aware, responsibility-separated research, decision, implementation, review, correction, and closure routing.
 - [Worker-first implementation workflow](../.codex/execplan-implementation-workflow.md) — Milestone Assignment Packet v2, preflight, serial Red–Green–Refactor, corrections, handoffs, and risk-routed review.
-- [Automatic write-lease guard](../.codex/write-lease-guard.md) — machine-verified path and Git-control containment for one worker write turn.
+- [Automatic write-lease guard](../.codex/write-lease-guard.md) — machine-verified path containment and selected Git-state invariants for one worker write turn.
 - [Execution-plan convention](../PLANS.md) and [plan index](plans/README.md) — living task-scoped coordination, recovery, evidence identities, and completed-plan preservation.
 
 ## Task-closure documentation gate

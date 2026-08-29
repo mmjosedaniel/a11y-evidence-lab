@@ -1839,11 +1839,11 @@ def _self_test() -> tuple[int, dict[str, Any]]:
             )
             assert code == 1 and payload["ignore_controls_changed"], payload
             checks.append(
-                "symbolic-link scope, runtime-root, lease-state, and Git-control rejection"
+                "symbolic-link scope, runtime-root, lease-state, and linked Git-info ignore-control topology rejection"
             )
         else:
             checks.append(
-                "symbolic-link scope, runtime-root, lease-state, and Git-control rejection explicitly unsupported by host"
+                "symbolic-link scope, runtime-root, lease-state, and linked Git-info ignore-control topology rejection explicitly unsupported by host"
             )
 
         target = repo(root, "tamper")

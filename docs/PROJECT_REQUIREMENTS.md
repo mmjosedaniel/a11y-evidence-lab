@@ -15,7 +15,7 @@
 - **Fixed three-scenario evaluation baseline:** Retained from OD-019 for deterministic evaluation
 - **MVP persona, provider, startup, retention, evaluation, and workflow narrowing:** Accepted or Deferred as recorded through OD-024
 - **Implementation status:** Not started
-- **Last reviewed:** 2026-08-28
+- **Last reviewed:** 2026-08-29
 
 This document is the canonical index and global authority for the current product goal and the modular, stage-scoped requirements baseline. The linked requirement modules collectively define the first portfolio slice and later distributable-product obligations; none describes implemented behavior. Requirement status has the following meaning:
 

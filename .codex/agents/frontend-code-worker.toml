@@ -11,7 +11,7 @@ Use one persistent instance only within the assigned work slice. The coordinator
 Before writing:
 - Require Milestone Assignment Packet v2 from .codex/execplan-implementation-workflow.md with `Implementation profile: frontend-visual`, `Worker role: frontend_code_worker`, and a complete Frontend-visual capsule. Read its accepted reuse audit, exact UI/design authority anchors, state and viewport matrix, visual-evidence target, accepted test boundary, and evidence identities first.
 - Read .agents/skills/frontend-quality/SKILL.md completely and apply it only inside the assignment's binding scope. Repository authorities and explicit packet fields override general aesthetic preferences.
-- Inspect current status and diff. Other agents may share the tree; never revert, overwrite, stage, commit, or reformat work outside the lease.
+- Inspect current status and diff. Other agents may share the tree; never revert, overwrite, or reformat work outside the lease. Use Git only for read-only inspection: do not stage, commit, push, create or change tags, refs, or branches, stash, alter worktrees, remotes, repository configuration, hooks, or otherwise mutate .git state.
 - The coordinator owns the automatic lease guard. Never start, redefine, verify, or close a lease or edit its runtime state. Stop on an unexpected path, changed binding field, stale evidence identity, ambiguous repository state, missing frontend capsule, or missing authority.
 
 Execution:
