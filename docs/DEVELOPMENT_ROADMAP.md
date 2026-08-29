@@ -518,7 +518,7 @@ No production-path temporary mock is planned. The controlled fixtures are real, 
 
 Permanent test doubles may later be used only inside focused automated tests for deterministic boundary and failure behavior. They must preserve the real contract and must never be persisted or displayed as a real run. They may verify adapter validation and bounded error mapping, including failures that would be brittle or costly to provoke against a real provider, but they cannot be the sole evidence that Playwright, axe-core, EmbeddingGemma, Ollama/Qwen, Groq, filesystem persistence, or the browser UI actually integrates and works.
 
-If a future execution plan proposes a temporary substitute, it must add a named replacement task before use and record the real dependency, reason, preserved contract, demonstrable behavior, excluded claims, replacement acceptance criteria, and removal point. This roadmap currently contains no such substitute.
+If future work requires a temporary substitute, the coordinator must first add the named replacement task to this roadmap and obtain the required project-owner authorization before the substitute is used. The applicable task-scoped ExecPlan may then record and execute only that already-authorized roadmap work, including the real dependency, reason, preserved contract, demonstrable behavior, excluded claims, replacement acceptance criteria, and removal point; it cannot create or authorize the task. This roadmap currently contains no such substitute.
 
 ## Scope that must remain separated
 
