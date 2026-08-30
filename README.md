@@ -52,7 +52,7 @@ Public comparison always starts from a baseline Finding. For binary `image-alt` 
 
 ## Project status
 
-Development ready. The accepted planning baseline and [development roadmap](docs/DEVELOPMENT_ROADMAP.md) define the first portfolio slice and its implementation order. [RD-002](docs/plans/completed/rd-002-minimum-development-toolchain-literals.md) is Complete: the pinned development toolchain passed clean-restore, strict compiler, native-package, disposable focused-harness, and independent review checks. [RD-003](docs/plans/completed/rd-003-scan-evaluation-boundary.md) is Complete after verified LF checkout preservation, clean-start acquisition, strict typechecking, independent reviews, and final cleanup. The previous network-permission denial remains recorded. The original six native outcomes remain accepted. Corrected states have explicit native same-target positive evidence. Six controlled HTML fixtures and one scan-only manifest now exist; no application source, retained product test, or product behavior exists yet.
+Development ready. The accepted planning baseline and [development roadmap](docs/DEVELOPMENT_ROADMAP.md) define the first portfolio slice and its implementation order. [RD-002](docs/plans/completed/rd-002-minimum-development-toolchain-literals.md) is Complete: the pinned development toolchain passed clean-restore, strict compiler, native-package, disposable focused-harness, and independent review checks. [RD-003](docs/plans/completed/rd-003-scan-evaluation-boundary.md) is Complete after verified LF checkout preservation, clean-start acquisition, strict typechecking, independent reviews, and final cleanup. The previous network-permission denial remains recorded. The original six native outcomes remain accepted. Corrected states have explicit native same-target positive evidence. Six controlled HTML fixtures and one scan-only manifest now exist. [M1-01 planning](docs/plans/m1-01-run-and-scan-contracts.md) is In progress following the owner's exact-task request; execution awaits a separate instruction. No application source, retained product test, or product behavior exists yet.
 
 ## Development toolchain
 
@@ -84,7 +84,7 @@ For RD-003 reproduction after task-local cleanup, use the reviewed [current clea
 
 ## Current scope
 
-This repository currently contains the accepted product and architecture baseline, feasibility analysis, derived specifications, the tracked development roadmap, the completed RD-002 and RD-003 execution/evidence records, the RD-003 scan-only manifest and six controlled fixture states, and the minimal package/strict compiler/build configuration. No runnable application or application behavior has been created.
+This repository currently contains the accepted product and architecture baseline, feasibility analysis, derived specifications, the tracked development roadmap, the completed RD-002 and RD-003 execution/evidence records, the active M1-01 contract ExecPlan, the RD-003 scan-only manifest and six controlled fixture states, and the minimal package/strict compiler/build configuration. No runnable application or application behavior has been created.
 
 ## Documentation
 

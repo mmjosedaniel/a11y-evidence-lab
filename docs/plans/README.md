@@ -4,7 +4,7 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-None.
+- [M1-01 — Define the minimum run and scan contracts](m1-01-run-and-scan-contracts.md) — **In progress (planning only)**. Dependency-ready after completed RD-003; execution awaits a separate owner instruction, public-run literal freeze, and guarded worker preflight/TDD.
 
 ## Completed plans
 
