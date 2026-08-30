@@ -4,11 +4,13 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-None. Create a plan only after the project owner selects its existing roadmap task and the activation conditions in `PLANS.md` apply.
+None. RD-003 is dependency-ready but has not been selected; no plan is created for it.
 
 ## Completed plans
 
-None. Move a plan to `completed/` only after its owning roadmap task is `Complete` and the task-closure documentation gate passes. Create that directory with the first completed plan; do not add an empty archive.
+- [RD-002 — Select the minimum development toolchain literals](completed/rd-002-minimum-development-toolchain-literals.md) — **Complete** on 2026-08-30 (UTC). Preserves its R2 selection, guarded non-TDD setup, independent reviews, and verification/closure evidence.
+
+Move a plan to `completed/` only after its owning roadmap task is `Complete` and the task-closure documentation gate passes. Do not create an empty archive for a future task.
 
 ## Naming and maintenance
 

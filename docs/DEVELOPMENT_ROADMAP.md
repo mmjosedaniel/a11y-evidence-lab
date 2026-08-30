@@ -4,8 +4,8 @@
 
 - **Repository stage:** Development ready
 - **Roadmap status:** Accepted implementation sequence on 2026-08-28 through OD-025
-- **Implementation status:** Not started
-- **Current task in progress:** None
+- **Implementation status:** RD-002 toolchain baseline Complete; application implementation has not started
+- **Current task in progress:** None; RD-003 is Ready but requires separate owner selection
 - **Scope:** The accepted local portfolio MVP only
 
 This roadmap turns the accepted planning baseline into an implementation order. It owns milestone order, task dependencies, integration checkpoints, and progress status. It does not create or override a product requirement, architecture decision, behavioral contract, evaluation result, or release claim. If this roadmap conflicts with an identified requirement or Accepted ADR, the requirement or ADR controls and the roadmap must be corrected.
@@ -21,9 +21,9 @@ Progress labels in this document mean:
 - **Not started:** no implementation claim is made.
 - **Blocked:** an identified prerequisite or governing decision prevents work.
 
-Only `RD-001` is Complete. Every implementation task is Not started.
+`RD-001` and `RD-002` are Complete. `RD-003` is Not started and Ready. Every application implementation task is Not started.
 
-For dependency readiness, only `RD-002` is **Ready** because RD-001 is Complete. Every other Not started task is **Blocked** by the dependencies named in its task entry and becomes Ready only when all of them are Complete. Each task entry also states whether it is on the mandatory dependency spine or belongs to a named safe parallel group.
+RD-002 entered **In progress** through owner selection on 2026-08-29 and completed on 2026-08-30 (UTC) after its Verification and documentation gate passed. RD-003 is now the only Ready task; it has not been selected or started. Every other Not started task remains **Blocked** by the dependencies named in its task entry and becomes Ready only when all of them are Complete. Each task entry also states whether it is on the mandatory dependency spine or belongs to a named safe parallel group.
 
 ## Implementation strategy
 
@@ -84,7 +84,7 @@ Every task's **Authorities** field uses stable identifiers from the owning sourc
 
 ### RD-002 — Select the minimum development toolchain literals
 
-- **Parent milestone / role / status:** Walking-skeleton entry / enabling / **Not started**.
+- **Parent milestone / role / status:** Walking-skeleton entry / enabling / **Complete**.
 - **Objective:** Select only the JavaScript runtime, package manager, build arrangement, local-service host, focused test harness, and exact dependency versions required by M1.
 - **Inputs, dependencies, and scheduling:** Ready after completed RD-001. It is on the critical dependency path and must complete before scaffolding. A durable architecture consequence requires an ADR; ordinary implementation literals do not.
 - **Expected output:** One small, reproducible development baseline compatible with the recorded TypeScript, React, localhost-service, Playwright, and axe-core decisions at their existing statuses, including a pinned TypeScript compiler, strict compiler configuration, independently executable type-check command, and the smallest focused test harness and command needed for M1's milestone-slice TDD workflow.
@@ -93,10 +93,12 @@ Every task's **Authorities** field uses stable identifiers from the owning sourc
 - **Verification:** Every selected tool is needed by M1 and its material versions are pinned; the strict TypeScript compiler check executes successfully on its own rather than being inferred from transpilation, a build, a test runner, or editor diagnostics; one focused test command executes independently and can demonstrate a genuine failing and passing behavior slice without requiring the complete future suite; and no installer, desktop wrapper, database, hosted service, generalized testing platform, or speculative framework enters scope.
 - **Likely surfaces:** Future package metadata, TypeScript/build configuration, local-service and UI entry points, and development instructions.
 - **Out of scope:** Package upgrades unrelated to M1, production deployment, distribution, component inventories, release locks, and framework selection for hypothetical later needs.
+- **Completion evidence (2026-08-30 UTC):** [RD-002 verification and closure](plans/completed/rd-002-minimum-development-toolchain-literals.md#closure-candidate-and-verification-mapping) records exact pins, clean frozen restore, independent strict checking, focused assertion failure/pass and removal, compliant worker ownership, two passing independent reviews, bounded cleanup, and documentation validation. No product behavior is claimed.
 
 ### RD-003 — Freeze the walking-skeleton evaluation boundary
 
 - **Parent milestone / role / status:** Walking-skeleton entry / validation / **Not started**.
+- **Readiness:** Ready after RD-002 completion; not selected or authorized by RD-002 closure.
 - **Objective:** Fix the smallest M1 literals needed to implement and verify exact-three-rule scanning without prematurely freezing generation details.
 - **Inputs, dependencies, and scheduling:** Depends on completed RD-002 because the expected native results and browser/scanner profile are version-sensitive. It is on the critical dependency path before M1-01.
 - **Expected output:** Controlled failing/corrected fixture content, expected native outcomes, stable target keys, pinned browser/rule profile, readiness condition, finite timeout, locator representation, and rule-specific minimized evidence allowlists.
@@ -534,7 +536,8 @@ Later placement does not make these capabilities optional. Their Accepted requir
 
 ### Proposed or open implementation choices
 
-- JavaScript runtime, package manager, build tool, focused test runner, local-service framework, exact package versions, exact aggregate fields, UI layout/copy, and small verification-tool choices remain implementation literals until the applicable task selects them.
+- RD-002 has selected the minimum runtime, package manager, build arrangement, focused runner, local-service host, and exact M1 dependency versions; its [ExecPlan](plans/completed/rd-002-minimum-development-toolchain-literals.md#accepted-synthesis-and-ordinary-literal-freeze) records the literals and setup evidence. These selections do not change any requirement or ADR status or establish scan-profile compatibility.
+- Exact aggregate fields, UI layout/copy, and later task-specific package and verification-tool choices remain implementation literals until the applicable task selects them.
 - Proposed candidate architecture and Voxleaf-derived patterns may inform a focused task only when an immediate Accepted requirement needs them. They are not implementation authority.
 - A significant durable mechanism not already covered by an ADR requires a new decision before implementation.
 

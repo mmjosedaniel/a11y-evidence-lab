@@ -1,3 +1,5 @@
 temp/
 logs/
 .codex/leases/__pycache__/
+/node_modules/
+/dist/client/

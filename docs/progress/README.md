@@ -22,12 +22,13 @@ Do not create empty files for future tasks. Create a record only after an existi
 
 ## Progress index
 
-No task progress records exist yet. Implementation has not started; [RD-002 is the next Ready task](../DEVELOPMENT_ROADMAP.md#rd-002--select-the-minimum-development-toolchain-literals), but it has not been selected or started.
+RD-002 is the first task recorded under this convention and is Complete. Toolchain checks, independent reviews, cleanup, and documentation closure passed. RD-003 is Ready but unselected; application implementation has not started.
 
 Add each new task record to this table in the same change that creates the file:
 
 | Roadmap task | Progress record | ExecPlan | Mirrored roadmap status | Updated |
 | --- | --- | --- | --- | --- |
+| [RD-002](../DEVELOPMENT_ROADMAP.md#rd-002--select-the-minimum-development-toolchain-literals) | [Minimum development toolchain literals](rd-002-minimum-development-toolchain-literals.md) | [Task plan](../plans/completed/rd-002-minimum-development-toolchain-literals.md) | Complete | 2026-08-30 |
 
 The mirrored status is a convenience snapshot only. The roadmap controls when a task is `Not started`, `In progress`, `Blocked`, or `Complete`.
 

@@ -52,11 +52,37 @@ Public comparison always starts from a baseline Finding. For binary `image-alt` 
 
 ## Project status
 
-Development ready. The accepted planning baseline and [development roadmap](docs/DEVELOPMENT_ROADMAP.md) now define the first portfolio slice and its implementation order. Implementation, dependencies, tests, fixtures, and technical setup have not started.
+Development ready. The accepted planning baseline and [development roadmap](docs/DEVELOPMENT_ROADMAP.md) define the first portfolio slice and its implementation order. [RD-002](docs/plans/completed/rd-002-minimum-development-toolchain-literals.md) is Complete: the pinned development toolchain passed clean-restore, strict compiler, native-package, disposable focused-harness, and independent review checks. RD-003 is dependency-ready but has not been selected or started. No application source, controlled fixture, retained product test, or product behavior exists yet.
+
+## Development toolchain
+
+Use exactly [Node.js 24.20.0 with its bundled npm 11.19.0](https://nodejs.org/en/download/archive/v24.20.0). Provision these developer prerequisites yourself; the project has no runtime installer. RD-002 used a temporary official Windows x64 distribution for verification and removed it and its task-specific cache after review; the machine's global runtime was not changed. The exact package pins live in [package.json](package.json), and [package-lock.json](package-lock.json) is the only authoritative dependency lock.
+
+From the repository root in PowerShell, check the prerequisites and restore the lock with dependency lifecycle scripts disabled:
+
+```powershell
+if ((node --version) -ne 'v24.20.0') { throw 'Node 24.20.0 is required.' }
+if ((npm.cmd --version) -ne '11.19.0') { throw 'npm 11.19.0 is required.' }
+$toolchainOptions = @('--global=false', '--prefix', (Get-Location).Path, '--cache', (Join-Path (Get-Location).Path 'temp/rd002-npm-cache'), '--ignore-scripts=true', '--audit=false', '--fund=false', '--update-notifier=false', '--logs-max=0', '--registry=https://registry.npmjs.org/', '--strict-ssl=true', '--package-lock=true', '--include=dev', '--include=optional')
+npm.cmd @toolchainOptions ci
+npm.cmd @toolchainOptions run typecheck
+```
+
+Retain optional dependencies: they supply the platform-specific compiler and build binaries. Do not enable install scripts to work around a failure, regenerate the lock during a restore, or introduce another package manager. The independent `typecheck` runs strict `tsc` with no emitted JavaScript; native Node TypeScript execution does not replace it.
+
+The focused runner is Node's built-in test runner. When an authorized roadmap task creates a test, pass its exact file (replace this example path):
+
+```powershell
+npm.cmd @toolchainOptions run test:focused -- tests/your-selected-slice.test.ts
+```
+
+No test is retained solely to make the runner pass: RD-002 proved an intentional assertion failure and corrected pass, then removed its disposable probe. Future service/tests use erasable TypeScript and explicit `.ts` imports; `.tsx` is client-bundled code, not native Node input.
+
+Vite 8 builds the React client without a React plugin and will emit only the client bundle to `dist/client`. The `build` script (`vite build`) and `start` script (`node src/server/main.ts`) are future M1 boundaries, not runnable application commands yet: the HTML/client and service entries do not exist. There is no Vite dev-server topology or application service implemented. Browser installation, launch, and the exact scanning profile remain later-task work; the installed Playwright browser catalog is metadata, not an available or verified browser.
 
 ## Current scope
 
-This repository currently contains the accepted product and architecture baseline, feasibility analysis, derived specifications, and the tracked development roadmap. No runnable application or implementation has been created.
+This repository currently contains the accepted product and architecture baseline, feasibility analysis, derived specifications, the tracked development roadmap, the completed RD-002 ExecPlan, and the minimal package/strict compiler/build configuration. No runnable application or application behavior has been created.
 
 ## Documentation
 

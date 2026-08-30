@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "noEmit": true,
+    "target": "esnext",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "erasableSyntaxOnly": true,
+    "allowImportingTsExtensions": true,
+    "jsx": "react-jsx",
+    "types": [
+      "node",
+      "react",
+      "react-dom"
+    ]
+  },
+  "include": [
+    "vite.config.ts",
+    "src/client/**/*.ts",
+    "src/client/**/*.tsx",
+    "src/server/**/*.ts",
+    "tests/**/*.ts"
+  ]
+}
