@@ -11,7 +11,7 @@
 
 ## Context
 
-A11y Evidence Lab is development ready, but application implementation has not started. Its roadmap contains behavior-bearing slices with deterministic scanner, persistence, retrieval, provider, review, comparison, and accessible-interface boundaries. The repository also uses role-separated Codex agents. Without an explicit implementation method, one worker could define a test after seeing its own implementation, divide one behavior into excessive assertion-sized handoffs, or report a passing command without an independently accepted behavioral boundary.
+At this decision's acceptance on 2026-08-28, A11y Evidence Lab was development ready, and application implementation had not started. Its roadmap contains behavior-bearing slices with deterministic scanner, persistence, retrieval, provider, review, comparison, and accessible-interface boundaries. The repository also uses role-separated Codex agents. Without an explicit implementation method, one worker could define a test after seeing its own implementation, divide one behavior into excessive assertion-sized handoffs, or report a passing command without an independently accepted behavioral boundary.
 
 The project needs a method that demonstrates disciplined implementation without turning this portfolio MVP into a testing platform or workflow engine. Documentation, dependency setup, manual model-capacity screens, corpus preparation, and external evaluation observations do not always have a meaningful failing executable test. The method therefore must apply TDD where production behavior is automatable and use proportional non-TDD evidence elsewhere.
 
