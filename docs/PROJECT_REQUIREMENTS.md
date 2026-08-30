@@ -14,7 +14,7 @@
 - **Closed corpus and Local-mode data boundaries:** Accepted on 2026-08-27 through ADR-0022 and ADR-0023
 - **Fixed three-scenario evaluation baseline:** Retained from OD-019 for deterministic evaluation
 - **MVP persona, provider, startup, retention, evaluation, and workflow narrowing:** Accepted or Deferred as recorded through OD-024
-- **Implementation status:** RD-002 toolchain baseline Complete; RD-003 scan evaluation freeze Complete, including verified reproducibility corrections; M1-01 planning In progress under its [ExecPlan](plans/m1-01-run-and-scan-contracts.md); application implementation has not started
+- **Implementation status:** RD-002 toolchain baseline Complete; RD-003 scan evaluation freeze Complete, including verified reproducibility corrections; M1-01 execution authorized but Blocked under its [ExecPlan](plans/m1-01-run-and-scan-contracts.md) on URL retention reconciliation, with literal-research and runtime prerequisites still open; the first-module Red rule is authorized in ADR-0024; application implementation has not started
 - **Last reviewed:** 2026-08-30
 
 This document is the canonical index and global authority for the current product goal and the modular, stage-scoped requirements baseline. The linked requirement modules collectively define the first portfolio slice and later distributable-product obligations; none describes implemented behavior. Requirement status has the following meaning:

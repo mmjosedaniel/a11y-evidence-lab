@@ -4,7 +4,7 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-- [M1-01 — Define the minimum run and scan contracts](m1-01-run-and-scan-contracts.md) — **In progress (planning only)**. Dependency-ready after completed RD-003; execution awaits a separate owner instruction, public-run literal freeze, and guarded worker preflight/TDD.
+- [M1-01 — Define the minimum run and scan contracts](m1-01-run-and-scan-contracts.md) — **Blocked** after execution authorization. The first-module Red rule is authorized in ADR-0024, but URL retention still needs owner reconciliation; the public-run literal freeze, pinned-runtime readiness, and guarded worker preflight/TDD remain required. The plan stays active and unarchived.
 
 ## Completed plans
 

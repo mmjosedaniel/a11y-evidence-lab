@@ -8,7 +8,7 @@ A11y Evidence Lab.
 
 **Document status:** Product-intent and planning-context summary, reviewed on 2026-08-30. This document is not acceptance authority; individual directions are Accepted, Proposed, Deferred, or Superseded only where the canonical requirements baseline or an ADR records that status.
 
-**Repository stage:** Development ready through OD-025 on 2026-08-28. Implementation follows the derived [development roadmap](DEVELOPMENT_ROADMAP.md). RD-002 is Complete. RD-003 is Complete, including verified LF checkout and clean-start corrections, independent reviews, and final cleanup. Its original native observations remain accepted. M1-01 is In progress for owner-requested [contract planning](plans/m1-01-run-and-scan-contracts.md); execution awaits a separate owner instruction. No application implementation has started.
+**Repository stage:** Development ready through OD-025 on 2026-08-28. Implementation follows the derived [development roadmap](DEVELOPMENT_ROADMAP.md). RD-002 is Complete. RD-003 is Complete, including verified LF checkout and clean-start corrections, independent reviews, and final cleanup. Its original native observations remain accepted. M1-01 [contract execution](plans/m1-01-run-and-scan-contracts.md) is authorized but Blocked on URL retention reconciliation, with literal research and pinned-runtime readiness still open. The first-module Red rule is authorized in ADR-0024. No application implementation has started.
 
 ## Concept
 
