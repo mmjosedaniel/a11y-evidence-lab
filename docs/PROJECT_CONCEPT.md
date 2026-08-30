@@ -10,6 +10,8 @@ A11y Evidence Lab.
 
 **Repository stage:** Development ready through OD-025 on 2026-08-28. Implementation follows the derived [development roadmap](DEVELOPMENT_ROADMAP.md). RD-002 is Complete. RD-003 is Complete, including verified LF checkout and clean-start corrections, independent reviews, and final cleanup. Its original native observations remain accepted. M1-01 [contract execution](plans/completed/m1-01-run-and-scan-contracts.md) is Complete after both R3 checkpoints, guarded TDD, corrected S3 review, integrated review and documentation closure. The pure run/scan validators and 58 focused tests pass strict verification; integrated review and documentation closure passed. No service, real scanning, persistence, provider call, or UI is implemented.
 
+[M1-02](plans/m1-02-local-service-and-aggregate.md) is now In progress for planning only after verified M1-01 completion. No service or persistence behavior is added by the plan; implementation and other tasks remain unstarted.
+
 ## Concept
 
 Build a web accessibility evidence explorer for engineering teams. The product would combine deterministic browser analysis with an AI workflow that retrieves relevant accessibility guidance, explains findings with citations, proposes remediation, presents proposals for user review when judgment is required, and compares results after a page is changed.

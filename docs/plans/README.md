@@ -4,7 +4,7 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-None.
+- [M1-02 — Establish the loopback service and single-file aggregate](m1-02-local-service-and-aggregate.md) — **In progress, planning only**. M1-01 is verified Complete. The plan bounds safe storage and the local service; exact persistence/lifecycle literals, commands, and side effects must pass the future R3 gate before guarded implementation. No service or persistence exists yet.
 
 ## Completed plans
 
