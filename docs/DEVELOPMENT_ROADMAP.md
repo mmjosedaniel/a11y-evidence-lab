@@ -4,8 +4,8 @@
 
 - **Repository stage:** Development ready
 - **Roadmap status:** Accepted implementation sequence on 2026-08-28 through OD-025
-- **Implementation status:** RD-002 toolchain baseline Complete; application implementation has not started
-- **Current task in progress:** None; RD-003 is Ready but requires separate owner selection
+- **Implementation status:** RD-002 toolchain baseline Complete; RD-003 scan evaluation freeze Complete; application implementation has not started
+- **Current selected task:** None. M1-01 is dependency-ready but unselected.
 - **Scope:** The accepted local portfolio MVP only
 
 This roadmap turns the accepted planning baseline into an implementation order. It owns milestone order, task dependencies, integration checkpoints, and progress status. It does not create or override a product requirement, architecture decision, behavioral contract, evaluation result, or release claim. If this roadmap conflicts with an identified requirement or Accepted ADR, the requirement or ADR controls and the roadmap must be corrected.
@@ -21,9 +21,9 @@ Progress labels in this document mean:
 - **Not started:** no implementation claim is made.
 - **Blocked:** an identified prerequisite or governing decision prevents work.
 
-`RD-001` and `RD-002` are Complete. `RD-003` is Not started and Ready. Every application implementation task is Not started.
+`RD-001`, `RD-002`, and `RD-003` are Complete. Every application implementation task is Not started. M1-01 is dependency-ready but unselected; its own selection and entry checks are still required.
 
-RD-002 entered **In progress** through owner selection on 2026-08-29 and completed on 2026-08-30 (UTC) after its Verification and documentation gate passed. RD-003 is now the only Ready task; it has not been selected or started. Every other Not started task remains **Blocked** by the dependencies named in its task entry and becomes Ready only when all of them are Complete. Each task entry also states whether it is on the mandatory dependency spine or belongs to a named safe parallel group.
+RD-002 entered **In progress** through owner selection on 2026-08-29 and completed on 2026-08-30 (UTC) after its Verification and documentation gate passed. The owner separately selected RD-003, accepted its planning handoff, and explicitly authorized execution on 2026-08-30 (UTC). Bounded research and the sole analyst correction identified a cleanup-visibility acceptance gap and stopped. The owner then authorized one additional correction and analyst recheck, which returned DRAFT READY. The fresh pre-draft checkpoint passed; the primary-authored manifest passed separate final research review. The first guarded bootstrap downloaded the pinned runtime/browser, then failed at an unexported package metadata subpath before fixtures or scanning. Its lease closed compliantly. The owner authorized the bounded command correction and preserved prerequisite reuse; fresh complete-artifact review passed with no findings. The rescoped setup passed, and primary observed all six frozen native states once with required same-target positives and normal browser closes. S3 and different fresh integrated reviews passed, both documentation follow-ups were resolved, task-local generated files were removed, and final Verification/documentation checks passed. RD-003 completed on 2026-08-30 (UTC). M1-01 is dependency-ready but unselected. Every other Not started task remains **Blocked** by the dependencies named in its task entry and becomes dependency-ready only when all of them are Complete. Each task entry also states whether it is on the mandatory dependency spine or belongs to a named safe parallel group.
 
 ## Implementation strategy
 
@@ -97,8 +97,8 @@ Every task's **Authorities** field uses stable identifiers from the owning sourc
 
 ### RD-003 — Freeze the walking-skeleton evaluation boundary
 
-- **Parent milestone / role / status:** Walking-skeleton entry / validation / **Not started**.
-- **Readiness:** Ready after RD-002 completion; not selected or authorized by RD-002 closure.
+- **Parent milestone / role / status:** Walking-skeleton entry / validation / **Complete**.
+- **Readiness:** Completed RD-002 and applicable Accepted entry gates confirmed. The owner explicitly authorized execution of the [task ExecPlan](plans/completed/rd-003-scan-evaluation-boundary.md) on 2026-08-30 (UTC). After `OWNER DIRECTION` for cleanup visibility exhausted the original analyst allowance, the owner authorized one additional correction and analyst recheck. The recheck returned DRAFT READY, the fresh pre-draft review passed, and the primary-authored manifest passed its separate final research review. The first guarded bootstrap failed at its frozen dependency-inspection command after task-local runtime/browser acquisition; no fixture or native observation ran. Its lease is closed-compliant. The owner authorized procedure correction and reuse of existing prerequisites. Fresh correction review and the rescoped setup passed. Primary closed the lease compliantly, inspected the six actual fixtures, and verified all six native outcomes, including required corrected positives. S3 and different fresh integrated reviews passed, all follow-ups were resolved, and task-local cleanup plus final documentation validation passed. M1-01 is unselected.
 - **Objective:** Fix the smallest M1 literals needed to implement and verify exact-three-rule scanning without prematurely freezing generation details.
 - **Inputs, dependencies, and scheduling:** Depends on completed RD-002 because the expected native results and browser/scanner profile are version-sensitive. It is on the critical dependency path before M1-01.
 - **Expected output:** Controlled failing/corrected fixture content, expected native outcomes, stable target keys, pinned browser/rule profile, readiness condition, finite timeout, locator representation, and rule-specific minimized evidence allowlists.
@@ -107,6 +107,7 @@ Every task's **Authorities** field uses stable identifiers from the owning sourc
 - **Verification:** One versioned manifest freezes each controlled profile's failing and corrected content, expected native rule result, stable target key, fixture revision/state role, viewport/browser profile, and scanner/rule profile; any change to those frozen values creates a new manifest version rather than rewriting the evaluated case. Generation packages, model outputs, and release claims remain outside this freeze.
 - **Likely surfaces:** Future controlled fixtures, compact evaluation manifest, scanner configuration, evidence contracts, and implementation notes.
 - **Out of scope:** A crawler fixture, broad WCAG coverage, adversarial-page corpus, exact prompt/output contract, statistical rubric, or provider comparison.
+- **Completion evidence (2026-08-30 UTC):** [RD-003 verification and closure](plans/completed/rd-003-scan-evaluation-boundary.md#final-cleanup-and-closure-validation) records the frozen manifest, six exact fixtures, all six first native observations, explicit corrected same-target passes, terminal leases, S3/integrated reviews with resolved documentation follow-ups, bounded cleanup, and documentation validation. No application or release behavior is claimed.
 
 ## Dependency graph
 

@@ -45,6 +45,8 @@ The manifest is deliberately limited to the evidence needed to demonstrate one e
 
 This section constrains later evaluation but does not authorize implementation.
 
+RD-003 now supplies the [scan-only literal manifest](../../../evaluation/rd003-scan-v1.json) and six referenced static fixture states. Its [execution record](../../plans/completed/rd-003-scan-evaluation-boundary.md#accepted-setup-and-native-observations--rd003-observations-001) preserves the frozen procedure and first native failing/corrected observations, including same-target positive evidence. RD-003 is Complete after S3 and integrated reviews, bounded cleanup, and documentation closure. This remains a scan-only evaluation, not application verification. It implements no application, generation, retrieval, comparison, or release behavior and does not change the requirement rows below or above.
+
 ### Controlled profiles
 
 | Profile | Rule and primary mapping | Expected controlled transition |

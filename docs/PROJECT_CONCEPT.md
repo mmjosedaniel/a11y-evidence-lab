@@ -8,7 +8,7 @@ A11y Evidence Lab.
 
 **Document status:** Product-intent and planning-context summary, reviewed on 2026-08-30. This document is not acceptance authority; individual directions are Accepted, Proposed, Deferred, or Superseded only where the canonical requirements baseline or an ADR records that status.
 
-**Repository stage:** Development ready through OD-025 on 2026-08-28. Implementation follows the derived [development roadmap](DEVELOPMENT_ROADMAP.md). RD-002 toolchain baseline is Complete; RD-003 is Ready but unselected, and no application implementation has started.
+**Repository stage:** Development ready through OD-025 on 2026-08-28. Implementation follows the derived [development roadmap](DEVELOPMENT_ROADMAP.md). RD-002 toolchain baseline and RD-003 scan evaluation freeze are Complete. M1-01 is dependency-ready but unselected, and no application implementation has started.
 
 ## Concept
 
@@ -92,7 +92,7 @@ The provider boundary, global immutable Local/Groq analysis choice, no-fallback 
 ## Deferred implementation and distribution questions
 
 - Which exact `qwen3.5:4b` and `embeddinggemma` digests, runtime parameters, and capacity observations should be frozen after the reference-PC gate is measured?
-- [RD-002](plans/completed/rd-002-minimum-development-toolchain-literals.md#accepted-synthesis-and-ordinary-literal-freeze) selects the minimum M1 package versions and local-service host; browser/scan evaluation and application behavior still belong to later tasks and imply no release qualification.
+- [RD-002](plans/completed/rd-002-minimum-development-toolchain-literals.md#accepted-synthesis-and-ordinary-literal-freeze) selects the minimum M1 package versions and local-service host. [RD-003](plans/completed/rd-003-scan-evaluation-boundary.md#accepted-setup-and-native-observations--rd003-observations-001) supplies the frozen scan-only profile and six native fixture observations; application and public-page behavior remain later-task work, with no release qualification.
 - Whether production use ever justifies hostile-target isolation, connection-level destination controls, exhaustive resource ceilings, and below/exact/over-limit qualification remains deferred until a demonstrated product need.
 - Whether a desktop container, installer, formal support matrix, hosted tracing, or release-qualification process is ever needed remains deferred until demonstrated product or distribution need.
 
