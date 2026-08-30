@@ -2,7 +2,7 @@
 
 ## Authority and use
 
-This document is part of the authoritative requirements baseline indexed by [Project requirements](../PROJECT_REQUIREMENTS.md). The index defines status vocabulary, priority semantics, ID stability, and precedence. This file describes planned behavior, not implemented behavior.
+This document is part of the authoritative requirements baseline indexed by [Project requirements](../PROJECT_REQUIREMENTS.md). The index defines status vocabulary, priority semantics, ID stability, and precedence. This file describes the Accepted MVP target; the roadmap owns which portions are implemented.
 
 ## Decision scope and history
 
@@ -13,6 +13,8 @@ This document is part of the authoritative requirements baseline indexed by [Pro
 OD-018's simple `running -> completed / failed` parent operation, no-overwrite rule, and deferral of queues, cancellation, resume, workers, and workflow engines remain current where they do not conflict with OD-020 or ADR-0021. Starting Analyze again after a failure creates another independent run and never overwrites the failed aggregate; the MVP requires no retry-specific identity or lineage. OD-003 and OD-019 remain controlled evaluation-fixture history.
 
 The aggregate sections below are conceptual responsibilities, not separate files, database tables, schemas, or services. Diagnostics remain local and content-safe but are not another canonical run-record type. LangSmith, hosted tracing, telemetry, and analytics remain outside the MVP.
+
+M1-01 now implements only the immediate run/scan record types and pure runtime validators in [run-contract.ts](../../src/server/domain/run-contract.ts), with [focused contract tests](../../tests/run-contract.test.ts). Its [literal contract and evidence](../plans/completed/m1-01-run-and-scan-contracts.md#authored-literal-contract--m101-literals-001-l1) define the exact fields. A validated completed snapshot does not prove browser execution or disk durability; persistence and later Finding lifecycle updates remain their owning tasks. No later sections below are implied by this implementation.
 
 ## Accepted minimal information model
 

@@ -52,7 +52,7 @@ Public comparison always starts from a baseline Finding. For binary `image-alt` 
 
 ## Project status
 
-Development ready. The accepted planning baseline and [development roadmap](docs/DEVELOPMENT_ROADMAP.md) define the first portfolio slice and its implementation order. [RD-002](docs/plans/completed/rd-002-minimum-development-toolchain-literals.md) is Complete: the pinned development toolchain passed clean-restore, strict compiler, native-package, disposable focused-harness, and independent review checks. [RD-003](docs/plans/completed/rd-003-scan-evaluation-boundary.md) is Complete after verified LF checkout preservation, clean-start acquisition, strict typechecking, independent reviews, and final cleanup. The previous network-permission denial remains recorded. The original six native outcomes remain accepted. Corrected states have explicit native same-target positive evidence. Six controlled HTML fixtures and one scan-only manifest now exist. [M1-01](docs/plans/m1-01-run-and-scan-contracts.md) is Blocked after the owner's execution instruction: the first-module Red rule is authorized in ADR-0024; URL retention still needs owner reconciliation, and literal research and pinned-runtime readiness remain open. No application source, retained product test, or product behavior exists yet.
+Development ready. The accepted planning baseline and [development roadmap](docs/DEVELOPMENT_ROADMAP.md) define the first portfolio slice and its implementation order. [RD-002](docs/plans/completed/rd-002-minimum-development-toolchain-literals.md) is Complete: the pinned development toolchain passed clean-restore, strict compiler, native-package, disposable focused-harness, and independent review checks. [RD-003](docs/plans/completed/rd-003-scan-evaluation-boundary.md) is Complete after verified LF checkout preservation, clean-start acquisition, strict typechecking, independent reviews, and final cleanup. The previous network-permission denial remains recorded. The original six native outcomes remain accepted. Corrected states have explicit native same-target positive evidence. Six controlled HTML fixtures and one scan-only manifest now exist. [M1-01](docs/plans/completed/m1-01-run-and-scan-contracts.md) is Complete after its literal freeze, guarded TDD, independent reviews and documentation closure. The [run/scan contract](src/server/domain/run-contract.ts) now validates closed records and returns detached, deeply frozen values. All 58 [focused tests](tests/run-contract.test.ts) and strict typechecking pass. The separate integrated review and documentation closure passed; no runnable service, scanner, or UI exists yet.
 
 ## Development toolchain
 
@@ -70,13 +70,14 @@ npm.cmd @toolchainOptions run typecheck
 
 Retain optional dependencies: they supply the platform-specific compiler and build binaries. Do not enable install scripts to work around a failure, regenerate the lock during a restore, or introduce another package manager. The independent `typecheck` runs strict `tsc` with no emitted JavaScript; native Node TypeScript execution does not replace it.
 
-The focused runner is Node's built-in test runner. When an authorized roadmap task creates a test, pass its exact file (replace this example path):
+The focused runner is Node's built-in test runner. The complete current product suite is the minimum run/scan contract test; from the repository root with the options above, run it once and run the independent strict typecheck:
 
 ```powershell
-npm.cmd @toolchainOptions run test:focused -- tests/your-selected-slice.test.ts
+npm.cmd @toolchainOptions run test:focused -- tests/run-contract.test.ts
+npm.cmd @toolchainOptions run typecheck
 ```
 
-No test is retained solely to make the runner pass: RD-002 proved an intentional assertion failure and corrected pass, then removed its disposable probe. Future service/tests use erasable TypeScript and explicit `.ts` imports; `.tsx` is client-bundled code, not native Node input.
+No test is retained solely to make the runner pass: RD-002 proved an intentional assertion failure and corrected pass, then removed its disposable probe. Server modules and tests use erasable TypeScript and explicit `.ts` imports; `.tsx` is client-bundled code, not native Node input.
 
 Vite 8 builds the React client without a React plugin and will emit only the client bundle to `dist/client`. The `build` script (`vite build`) and `start` script (`node src/server/main.ts`) are future M1 boundaries, not runnable application commands yet: the HTML/client and service entries do not exist. There is no Vite dev-server topology or application service implemented. RD-003 has verified full Playwright-managed Chromium revision 1234 / version 151.0.7922.34 against the [scan-only manifest](evaluation/rd003-scan-v1.json). Its [evaluation procedure and native evidence](docs/plans/completed/rd-003-scan-evaluation-boundary.md#accepted-setup-and-native-observations--rd003-observations-001) use the pinned Node/npm and libraries directly over six authored static states; there is no permanent probe or application scanner. The original task-local runtime/browser was removed after its review and verified cleanup; global installations and shared browser caches remain unchanged. This is an evaluation result, not a support claim. Later M1 work must exercise these inputs through its real application modules.
 
@@ -84,7 +85,7 @@ For RD-003 reproduction after task-local cleanup, use the reviewed [current clea
 
 ## Current scope
 
-This repository currently contains the accepted product and architecture baseline, feasibility analysis, derived specifications, the tracked development roadmap, the completed RD-002 and RD-003 execution/evidence records, the active M1-01 contract ExecPlan, the RD-003 scan-only manifest and six controlled fixture states, and the minimal package/strict compiler/build configuration. No runnable application or application behavior has been created.
+This repository contains the accepted product and architecture baseline, feasibility analysis, derived specifications, roadmap and task evidence, the RD-003 scan-only manifest and six controlled fixtures, the minimal pinned toolchain, and the M1-01 runtime run/scan contract and focused tests. The completed M1-01 plan preserves the frozen literals and accepted execution/review evidence. The validators export application-owned types plus `validateRun(unknown)` and `validateScan(unknown)`; they do not scan, persist, call providers, or render UI. Build/start still await their owning tasks.
 
 ## Documentation
 
