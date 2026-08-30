@@ -80,8 +80,8 @@ Do not load every requirements module automatically. Read the master index, the 
 ### Development planning
 
 - [Development roadmap](DEVELOPMENT_ROADMAP.md) — accepted derived milestone sequence, task dependency graph, integration checkpoints, critical path, scope guards, and implementation progress for the first portfolio slice.
-- [Execution-plan index](plans/README.md) — active and completed task-scoped ExecPlans; RD-002 is the current active plan.
-- [Project and agent-workflow progress](progress/README.md) — concise manual task summaries; RD-002 is the current recorded task, while application implementation remains unstarted.
+- [Execution-plan index](plans/README.md) — active and completed task-scoped ExecPlans; RD-002 is completed and archived, with no active plan.
+- [Project and agent-workflow progress](progress/README.md) — concise manual task summaries; RD-002 is Complete, RD-003 is Ready but unselected, and application implementation remains unstarted.
 
 ### UI planning
 

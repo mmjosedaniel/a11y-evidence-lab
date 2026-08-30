@@ -22,7 +22,7 @@ The user opens the React interface from the local service's loopback address in 
 
 ## Technology profile
 
-Exact versions are dated research seeds. They must be refreshed, pinned, and evaluated after development is authorized.
+The table below preserves the assessment's dated research seeds, not the current installed baseline. On 2026-08-30 (UTC), [RD-002](../../../plans/completed/rd-002-minimum-development-toolchain-literals.md#accepted-synthesis-and-ordinary-literal-freeze) selected the development literals and verified locked package restoration, module loading, and strict type checking. The [developer instructions](../../../../README.md#development-toolchain) identify the current runtime and commands; the manifest and lockfile pin packages. This later setup does not promote the assessment or qualify the browser/rule profile, which remains RD-003 work. No browser was installed or launched.
 
 | Concern | Minimal candidate | Status and boundary |
 | --- | --- | --- |
