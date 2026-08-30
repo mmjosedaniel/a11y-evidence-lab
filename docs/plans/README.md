@@ -4,9 +4,11 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-- [RD-003 — Freeze the walking-skeleton evaluation boundary](rd-003-scan-evaluation-boundary.md) — **Blocked**, after LF checkout verification passed and clean-start acquisition met a network-permission denial. A bounded retry allowance is required. Original native outcomes and failure history are preserved.
+None.
 
 ## Completed plans
+
+- [RD-003 — Freeze the walking-skeleton evaluation boundary](completed/rd-003-scan-evaluation-boundary.md) — **Complete** on 2026-08-30 (UTC), including verified LF checkout and clean-start corrections, independent reviews, cleanup, and preserved original evidence/failure history.
 
 - [RD-002 — Select the minimum development toolchain literals](completed/rd-002-minimum-development-toolchain-literals.md) — **Complete** on 2026-08-30 (UTC). Preserves its R2 selection, guarded non-TDD setup, independent reviews, and verification/closure evidence.
 

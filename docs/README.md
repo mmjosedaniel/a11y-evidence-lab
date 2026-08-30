@@ -82,8 +82,8 @@ Do not load every requirements module automatically. Read the master index, the 
 
 - [Development toolchain](../README.md#development-toolchain) — developer-managed prerequisites, script-suppressed locked restore, independent strict type checking, focused tests, and the explicitly future-only build/start commands. Use the existing instructions rather than historical assessment seeds for setup.
 - [Development roadmap](DEVELOPMENT_ROADMAP.md) — accepted derived milestone sequence, task dependency graph, integration checkpoints, critical path, scope guards, and implementation progress for the first portfolio slice.
-- [Execution-plan index](plans/README.md) — active and completed task-scoped ExecPlans; RD-002 is Complete and archived; RD-003 is Blocked at clean-start network acquisition after successful LF checkout verification, preserving six native observations and earlier review/cleanup evidence.
-- [Project and agent-workflow progress](progress/README.md) — concise manual task summaries; RD-002 is Complete, RD-003 is Blocked during checkout and clean-start corrections, and application implementation remains unstarted.
+- [Execution-plan index](plans/README.md) — active and completed task-scoped ExecPlans; RD-002 and RD-003 are Complete and archived; RD-003 includes verified LF checkout and clean-start instructions, completed reviews/cleanup, and preserved native observations and failure history.
+- [Project and agent-workflow progress](progress/README.md) — concise manual task summaries; RD-002 and RD-003 are Complete, including RD-003's verified reproducibility corrections; application implementation remains unstarted.
 
 ### UI planning
 

@@ -4,8 +4,8 @@
 
 - **Repository stage:** Development ready
 - **Roadmap status:** Accepted implementation sequence on 2026-08-28 through OD-025
-- **Implementation status:** RD-002 toolchain baseline Complete; RD-003 reproducibility correction Blocked on permitted clean-start acquisition; application implementation has not started
-- **Current selected task:** RD-003 — bounded reproducibility corrections. M1-01 remains unselected.
+- **Implementation status:** RD-002 toolchain baseline Complete; RD-003 scan evaluation freeze Complete, including verified reproducibility corrections; application implementation has not started
+- **Current selected task:** None. M1-01 is dependency-ready but remains unselected.
 - **Scope:** The accepted local portfolio MVP only
 
 This roadmap turns the accepted planning baseline into an implementation order. It owns milestone order, task dependencies, integration checkpoints, and progress status. It does not create or override a product requirement, architecture decision, behavioral contract, evaluation result, or release claim. If this roadmap conflicts with an identified requirement or Accepted ADR, the requirement or ADR controls and the roadmap must be corrected.
@@ -21,9 +21,9 @@ Progress labels in this document mean:
 - **Not started:** no implementation claim is made.
 - **Blocked:** an identified prerequisite or governing decision prevents work.
 
-`RD-001` and `RD-002` are Complete. RD-003 is Blocked during two verified reproducibility corrections: checkout verification passed, but clean-start acquisition stopped at a network-permission denial. Every application implementation task is Not started; M1-01 remains unselected and blocked on RD-003 closure.
+`RD-001`, `RD-002`, and `RD-003` are Complete. RD-003's checkout and clean-start corrections passed execution, independent reviews, final cleanup, and renewed documentation closure. Every application implementation task is Not started; M1-01 is dependency-ready but unselected.
 
-RD-002 completed on 2026-08-30 (UTC). RD-003's original execution recorded six accepted native outcomes and completed its original reviews and cleanup, but a later independent review at f34cc5d identified two reproducibility gaps: checkout line-ending conversion and no usable clean-start procedure after cleanup. Primary verified both read-only, and the owner explicitly requested their correction. The LF policy passes all 21 checkout-filter comparisons. The clean-start command stopped on its first Node download because socket access was denied; its lease closed compliantly and two empty task directories are preserved. RD-003 is Blocked pending network permission and a bounded retry allowance, preserving original evidence and failure history. Every application task remains Not started; dependencies must be Complete and the exact task separately selected before implementation.
+RD-002 completed on 2026-08-30 (UTC). RD-003's original execution recorded six accepted native outcomes and completed its original reviews and cleanup, but a later independent review at f34cc5d identified two reproducibility gaps: checkout line-ending conversion and no usable clean-start procedure after cleanup. Primary verified both read-only, and the owner explicitly requested their correction. The LF policy passes all 21 checkout-filter comparisons. The clean-start command stopped on its first Node download because socket access was denied; its lease closed compliantly and two empty task directories were preserved at that stop. The owner subsequently authorized exactly one network-enabled retry and verified empty-directory cleanup. That retry passed pinned acquisition, strict typechecking, and structural validation under a compliant terminal lease. Fresh S3 and different integrated reviews, final bounded cleanup, and renewed documentation closure passed. RD-003 is Complete again, preserving original evidence and failure history. Every application task remains Not started; dependencies must be Complete and the exact task separately selected before implementation.
 
 ## Implementation strategy
 
@@ -97,8 +97,8 @@ Every task's **Authorities** field uses stable identifiers from the owning sourc
 
 ### RD-003 — Freeze the walking-skeleton evaluation boundary
 
-- **Parent milestone / role / status:** Walking-skeleton entry / validation / **Blocked**.
-- **Readiness:** Completed RD-002, Accepted applicable requirements/decisions, and the unchanged six-state manifest are confirmed. The owner selected the bounded reproducibility correction after independent REVISE findings and primary verification. Existing native outcomes remain accepted and checkout-filtered byte equality passes. Clean-start acquisition, required implementation reviews, cleanup, and renewed closure remain pending after a network-permission denial; the one-turn worker allowance is consumed. M1-01 is unselected.
+- **Parent milestone / role / status:** Walking-skeleton entry / validation / **Complete**.
+- **Readiness:** Completed RD-002, Accepted applicable requirements/decisions, and the unchanged six-state manifest are confirmed. The owner selected the bounded reproducibility correction after independent REVISE findings and primary verification. Existing native outcomes remain accepted and checkout-filtered byte equality passes. The owner-authorized retry passed clean-start acquisition and strict typechecking after the preserved network-permission denial; both worker allowances are consumed. Required independent implementation reviews, final cleanup, and renewed closure passed. M1-01 is unselected.
 - **Objective:** Fix the smallest M1 literals needed to implement and verify exact-three-rule scanning without prematurely freezing generation details.
 - **Inputs, dependencies, and scheduling:** Depends on completed RD-002 because the expected native results and browser/scanner profile are version-sensitive. It is on the critical dependency path before M1-01.
 - **Expected output:** Controlled failing/corrected fixture content, expected native outcomes, stable target keys, pinned browser/rule profile, readiness condition, finite timeout, locator representation, and rule-specific minimized evidence allowlists.
@@ -107,7 +107,9 @@ Every task's **Authorities** field uses stable identifiers from the owning sourc
 - **Verification:** One versioned manifest freezes each controlled profile's failing and corrected content, expected native rule result, stable target key, fixture revision/state role, viewport/browser profile, and scanner/rule profile; any change to those frozen values creates a new manifest version rather than rewriting the evaluated case. Generation packages, model outputs, and release claims remain outside this freeze.
 - **Likely surfaces:** Future controlled fixtures, compact evaluation manifest, scanner configuration, evidence contracts, and implementation notes.
 - **Out of scope:** A crawler fixture, broad WCAG coverage, adversarial-page corpus, exact prompt/output contract, statistical rubric, or provider comparison.
-- **Original execution evidence (reproducibility closure reopened):** [RD-003 verification and closure](plans/rd-003-scan-evaluation-boundary.md#final-cleanup-and-closure-validation) records the frozen manifest, six exact fixtures, all six first native observations, explicit corrected same-target passes, terminal leases, S3/integrated reviews with resolved documentation follow-ups, bounded cleanup, and documentation validation. No application or release behavior is claimed.
+- **Original execution evidence (preserved):** [RD-003 verification and closure](plans/completed/rd-003-scan-evaluation-boundary.md#final-cleanup-and-closure-validation) records the frozen manifest, six exact fixtures, all six first native observations, explicit corrected same-target passes, terminal leases, S3/integrated reviews with resolved documentation follow-ups, bounded cleanup, and documentation validation. No application or release behavior is claimed.
+
+- **Reproducibility completion evidence (2026-08-30 UTC):** [Current reproduction and renewed closure](plans/completed/rd-003-scan-evaluation-boundary.md#reproducibility-cleanup-and-renewed-closure) records 21 passing checkout-filter comparisons, the successful permitted clean-start acquisition/typecheck, compliant correction leases, fresh S3/integrated reviews, verified acquired-output removal, and preserved native evidence.
 
 ## Dependency graph
 
