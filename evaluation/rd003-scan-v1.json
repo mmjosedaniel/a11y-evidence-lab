@@ -1,0 +1,318 @@
+{
+  "version": "rd003-scan-v1",
+  "status": "frozen-scan-only-evaluation",
+  "runtime": {
+    "node": "24.20.0",
+    "npm": "11.19.0",
+    "playwright": "1.62.1",
+    "integration": "@axe-core/playwright@4.13.0",
+    "axeCore": "4.13.0"
+  },
+  "browser": {
+    "name": "Playwright-managed Chromium",
+    "revision": "1234",
+    "version": "151.0.7922.34",
+    "launch": {
+      "headless": true,
+      "channel": "chromium",
+      "timeout": 10000,
+      "additionalArguments": [],
+      "defaultArguments": "Pinned Playwright defaults unchanged"
+    },
+    "context": {
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "locale": "en-US",
+      "timezoneId": "UTC",
+      "colorScheme": "light",
+      "forcedColors": "none",
+      "reducedMotion": "no-preference",
+      "deviceScaleFactor": 1,
+      "acceptDownloads": false,
+      "offline": true,
+      "serviceWorkers": "block",
+      "permissions": []
+    }
+  },
+  "loading": {
+    "method": "page.setContent",
+    "waitUntil": "load",
+    "readiness": "document complete; exactly one data-rd003-ready=true marker and intended target; every image complete with positive naturalWidth",
+    "navigationAndReadinessTimeoutMs": 10000,
+    "network": "All routed requests abort; any request fails the case. Data image embedded; no server or external assets.",
+    "caseProcessDeadlineMs": 45000,
+    "pipeWaitMs": 5000,
+    "terminationWaitMs": 10000,
+    "failure": "One supervised Node process per state. Only timely exited output may be accepted; forced stop suppresses late output, records failed/cleanup-unverified, and stops remaining states. Graceful closes occur before output; no async timeout race. Any forced/uncertain cleanup remains unverified and stops; a process inventory is diagnostic only and can never clear that status. Recovery requires separately scoped inspection and owner direction."
+  },
+  "scanner": {
+    "excludedSelectors": [
+      "iframe",
+      "frame"
+    ],
+    "options": {
+      "runOnly": {
+        "type": "rule",
+        "values": [
+          "image-alt",
+          "label",
+          "color-contrast"
+        ]
+      },
+      "reporter": "v1",
+      "resultTypes": [
+        "violations",
+        "incomplete",
+        "passes",
+        "inapplicable"
+      ],
+      "selectors": true,
+      "ancestry": false,
+      "xpath": false,
+      "absolutePaths": false,
+      "elementRef": false,
+      "iframes": false
+    },
+    "coverage": "Validate all four transient arrays and each rule's occurrence in at least one bucket. A rule may occur in several. Unknown rules, duplicate rule per bucket, rule error or malformed rule/node collection are fatal. Missing/malformed individual check groups/IDs remain unavailable facts on the existing observation.",
+    "frequency": "Once per frozen state, provider-independent; no repeatability claim."
+  },
+  "evidencePolicy": {
+    "version": "rd003-evidence-v1",
+    "scope": "Only these controlled authored fixtures. Public-runtime field/locator implementation belongs to M1.",
+    "provenance": "Manifest/scenario/revision/state/stable target key are evaluation metadata, not native page identity. Browser and engine versions are verified at execution. Locator is supporting evidence only and excluded from retrieval/provider payloads.",
+    "retention": "Declared failing-rule nodes, every native incomplete node, and exactly one corrected same-target pass. Other passes/inapplicable remain transient; coverage retains only rule/bucket node counts.",
+    "sharedFields": {
+      "rule": "native rule.id; exact three-rule membership",
+      "nativeBucket": "containing native array, never derived from absence or ratio",
+      "checks": "native node.any/all/none[*].id; exact per-rule/group membership, no duplicates; no invented per-check booleans; absent/null group missing, malformed/unknown/duplicate IDs invalid; preserve the item",
+      "locator": "native node.target exactly one unchanged string equal to case selector, <=64 characters, unique top-level match of expected element kind; otherwise missing/invalid/withheld/ambiguous; absent/null missing, other malformed shape invalid, non-allowlisted/oversized string withheld, non-unique match ambiguous; invalid element kind remains invalid",
+      "targetMatch": "DOM resolution of native selector, never fixture-key substitution"
+    },
+    "unavailability": "Individual unavailable facts are nested {unavailable: missing|invalid|withheld|ambiguous}; preserve their item. Required missing facts fail this case's evidence expectation. Missing locator does not itself establish generation insufficiency; no product generation policy is implemented.",
+    "domFields": {
+      "elementKind": "Unique native-target element tag, closed to case kind",
+      "altState": "getAttribute('alt'): absent|empty|whitespace-only|nonempty; no text",
+      "inputType": "input.type must be email; no value",
+      "namingAttributes": "aria-label, aria-labelledby, title, placeholder -> absent|empty|whitespace-only|nonempty; attribute presence only, not resolved name",
+      "roleState": "getAttribute('role') -> absent|none|presentation|other",
+      "explicitAssociation": "input.labels whose for matches input id and label.control===input -> none|one|multiple; no IDs or label text retained",
+      "implicitAssociation": "input.labels without for, containing input with label.control===input -> none|one|multiple",
+      "bounds": "Attribute strings >256 characters withheld, not truncated; image source/form values/text/HTML never returned"
+    },
+    "nativeExplicitNameState": "label node.any[id=explicit-label].data.explicitLabel -> empty|nonempty; missing/null missing, non-string invalid, >256 withheld. Optional for failing state; corrected explicit-label case requires nonempty. No raw name retained.",
+    "contrastFields": {
+      "fgColor": "any[id=color-contrast].data.fgColor; ^#[0-9a-fA-F]{6}$ -> lowercase",
+      "bgColor": "same data.bgColor; same validation/transformation",
+      "contrastRatio": "same data.contrastRatio; finite number 1..21, unchanged; no recomputation",
+      "expectedContrastRatio": "same data.expectedContrastRatio; exact 3:1|4.5:1; controlled normal text requires 4.5:1",
+      "fontSize": "same data.fontSize; <=48 characters, positive finite numeric pt (px) grammar, each component <=4096; unchanged; string length >48 withheld, malformed grammar/numeric bounds invalid",
+      "fontWeight": "same data.fontWeight; normal|bold unchanged"
+    },
+    "nativeReason": "Contrast check data.messageKey only from reasonValues; unknown string withheld; absent/null missing; other type invalid. For other-rule incomplete, missing reason is explicit. Bucket remains authoritative.",
+    "reasonValues": [
+      "hidden",
+      "nonBmp",
+      "pseudoContent",
+      "complexTextShadows",
+      "colorParse",
+      "imgNode",
+      "bgGradient",
+      "bgImage",
+      "elmPartiallyObscuring",
+      "outsideViewport",
+      "bgOverlap",
+      "elmPartiallyObscured",
+      "equalRatio",
+      "shortTextContent",
+      "fgOnShadowColor",
+      "shadowOnBgColor"
+    ],
+    "excluded": "Raw scanner payload/HTML, screenshots/traces, DOM/accessibility snapshots, arbitrary text or hidden content, URLs, source attributes, input values, raw name strings, messages/failureSummary, relatedNodes, credentials, general pass/inapplicable archives, independent child identities."
+  },
+  "profiles": [
+    {
+      "id": "informative-image-alt",
+      "rule": "image-alt",
+      "successCriterion": "1.1.1",
+      "targetKey": "rd3-image",
+      "selector": "#rd3-image",
+      "elementKind": "img",
+      "manualBoundary": "Image purpose and appropriate wording are author gold/manual judgment; corrected alternative is Blue square."
+    },
+    {
+      "id": "form-input-label",
+      "rule": "label",
+      "successCriterion": "4.1.2",
+      "targetKey": "rd3-email",
+      "selector": "#rd3-email",
+      "elementKind": "input",
+      "manualBoundary": "Explicit visible Email address label association; no SC 1.3.1/3.3.2 claim; wording/instructions need human judgment."
+    },
+    {
+      "id": "text-contrast",
+      "rule": "color-contrast",
+      "successCriterion": "1.4.3",
+      "targetKey": "rd3-text",
+      "selector": "#rd3-text",
+      "elementKind": "p",
+      "manualBoundary": "Normal 16px weight 400 text; classification, exceptions, and context need human judgment; native bucket controls."
+    }
+  ],
+  "checkIds": {
+    "image-alt": {
+      "any": [
+        "has-alt",
+        "aria-label",
+        "aria-labelledby",
+        "non-empty-title",
+        "presentational-role"
+      ],
+      "all": [],
+      "none": [
+        "alt-space-value"
+      ]
+    },
+    "label": {
+      "any": [
+        "implicit-label",
+        "explicit-label",
+        "aria-label",
+        "aria-labelledby",
+        "non-empty-title",
+        "non-empty-placeholder",
+        "presentational-role"
+      ],
+      "all": [],
+      "none": [
+        "hidden-explicit-label"
+      ]
+    },
+    "color-contrast": {
+      "any": [
+        "color-contrast"
+      ],
+      "all": [],
+      "none": []
+    }
+  },
+  "cases": [
+    {
+      "profile": "informative-image-alt",
+      "rule": "image-alt",
+      "successCriterion": "1.1.1",
+      "revision": "informative-image-alt-v1-failing",
+      "stateRole": "failing",
+      "targetKey": "rd3-image",
+      "selector": "#rd3-image",
+      "elementKind": "img",
+      "path": "fixtures/rd003/informative-image-alt/failing.html",
+      "content": "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"><title>RD-003 controlled fixture</title><style>body{margin:24px;font:16px Arial,sans-serif;color:#111111;background:#ffffff}h1{font-size:24px}input{font:inherit}</style></head><body><main data-rd003-ready=\"true\"><h1>Shape guide</h1><p>Identify the shape shown below.</p><img id=\"rd3-image\" width=\"64\" height=\"64\" src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect width='64' height='64' fill='%230000ff'/%3E%3C/svg%3E\"></main></body></html>\n",
+      "expected": {
+        "nativeBucket": "violations",
+        "intendedTargetCount": 1,
+        "incompleteCount": 0,
+        "otherViolationCount": 0
+      }
+    },
+    {
+      "profile": "informative-image-alt",
+      "rule": "image-alt",
+      "successCriterion": "1.1.1",
+      "revision": "informative-image-alt-v1-corrected",
+      "stateRole": "corrected",
+      "targetKey": "rd3-image",
+      "selector": "#rd3-image",
+      "elementKind": "img",
+      "path": "fixtures/rd003/informative-image-alt/corrected.html",
+      "content": "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"><title>RD-003 controlled fixture</title><style>body{margin:24px;font:16px Arial,sans-serif;color:#111111;background:#ffffff}h1{font-size:24px}input{font:inherit}</style></head><body><main data-rd003-ready=\"true\"><h1>Shape guide</h1><p>Identify the shape shown below.</p><img id=\"rd3-image\" width=\"64\" height=\"64\" src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect width='64' height='64' fill='%230000ff'/%3E%3C/svg%3E\" alt=\"Blue square\"></main></body></html>\n",
+      "expected": {
+        "nativeBucket": "passes",
+        "intendedTargetCount": 1,
+        "incompleteCount": 0,
+        "otherViolationCount": 0
+      }
+    },
+    {
+      "profile": "form-input-label",
+      "rule": "label",
+      "successCriterion": "4.1.2",
+      "revision": "form-input-label-v1-failing",
+      "stateRole": "failing",
+      "targetKey": "rd3-email",
+      "selector": "#rd3-email",
+      "elementKind": "input",
+      "path": "fixtures/rd003/form-input-label/failing.html",
+      "content": "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"><title>RD-003 controlled fixture</title><style>body{margin:24px;font:16px Arial,sans-serif;color:#111111;background:#ffffff}h1{font-size:24px}input{font:inherit}</style></head><body><main data-rd003-ready=\"true\"><h1>Contact form</h1><div><span>Email address</span> <input id=\"rd3-email\" type=\"email\"></div></main></body></html>\n",
+      "expected": {
+        "nativeBucket": "violations",
+        "intendedTargetCount": 1,
+        "incompleteCount": 0,
+        "otherViolationCount": 0
+      }
+    },
+    {
+      "profile": "form-input-label",
+      "rule": "label",
+      "successCriterion": "4.1.2",
+      "revision": "form-input-label-v1-corrected",
+      "stateRole": "corrected",
+      "targetKey": "rd3-email",
+      "selector": "#rd3-email",
+      "elementKind": "input",
+      "path": "fixtures/rd003/form-input-label/corrected.html",
+      "content": "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"><title>RD-003 controlled fixture</title><style>body{margin:24px;font:16px Arial,sans-serif;color:#111111;background:#ffffff}h1{font-size:24px}input{font:inherit}</style></head><body><main data-rd003-ready=\"true\"><h1>Contact form</h1><div><label for=\"rd3-email\">Email address</label> <input id=\"rd3-email\" type=\"email\"></div></main></body></html>\n",
+      "expected": {
+        "nativeBucket": "passes",
+        "intendedTargetCount": 1,
+        "incompleteCount": 0,
+        "otherViolationCount": 0
+      }
+    },
+    {
+      "profile": "text-contrast",
+      "rule": "color-contrast",
+      "successCriterion": "1.4.3",
+      "revision": "text-contrast-v1-failing",
+      "stateRole": "failing",
+      "targetKey": "rd3-text",
+      "selector": "#rd3-text",
+      "elementKind": "p",
+      "path": "fixtures/rd003/text-contrast/failing.html",
+      "content": "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"><title>RD-003 controlled fixture</title><style>body{margin:24px;font:16px Arial,sans-serif;color:#111111;background:#ffffff}h1{font-size:24px}input{font:inherit}</style></head><body><main data-rd003-ready=\"true\"><h1>Reading sample</h1><p id=\"rd3-text\" style=\"color:#888888;background:#ffffff;font-size:16px;font-weight:400\">This is the controlled reading sample.</p></main></body></html>\n",
+      "expected": {
+        "nativeBucket": "violations",
+        "intendedTargetCount": 1,
+        "incompleteCount": 0,
+        "otherViolationCount": 0
+      }
+    },
+    {
+      "profile": "text-contrast",
+      "rule": "color-contrast",
+      "successCriterion": "1.4.3",
+      "revision": "text-contrast-v1-corrected",
+      "stateRole": "corrected",
+      "targetKey": "rd3-text",
+      "selector": "#rd3-text",
+      "elementKind": "p",
+      "path": "fixtures/rd003/text-contrast/corrected.html",
+      "content": "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"><title>RD-003 controlled fixture</title><style>body{margin:24px;font:16px Arial,sans-serif;color:#111111;background:#ffffff}h1{font-size:24px}input{font:inherit}</style></head><body><main data-rd003-ready=\"true\"><h1>Reading sample</h1><p id=\"rd3-text\" style=\"color:#222222;background:#ffffff;font-size:16px;font-weight:400\">This is the controlled reading sample.</p></main></body></html>\n",
+      "expected": {
+        "nativeBucket": "passes",
+        "intendedTargetCount": 1,
+        "incompleteCount": 0,
+        "otherViolationCount": 0
+      }
+    }
+  ],
+  "changeRule": "Any change to frozen content, expectations, profile or policy creates a new version and affected-case evidence, preserving prior inputs/results. Never change an expectation to fit an observation.",
+  "limitations": [
+    "Scan-only evaluation, not application implementation.",
+    "Exactly three profiles/six states; no extra fixtures or routine repeated batches.",
+    "No product/public-URL behavior, providers/models/corpus/generation packages, statistical quality, accessibility conformance, hostile-page safety, support qualification, or release claim.",
+    "Native incomplete observations are retained distinctly if encountered; none is manufactured.",
+    "Comparison-only vector stays with its existing authority for M5; no added browser execution."
+  ]
+}

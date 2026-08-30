@@ -1,0 +1,8 @@
+# Preserve the exact RD-003 evaluation bytes on every checkout.
+/evaluation/rd003-scan-v1.json text eol=lf
+/fixtures/rd003/informative-image-alt/failing.html text eol=lf
+/fixtures/rd003/informative-image-alt/corrected.html text eol=lf
+/fixtures/rd003/form-input-label/failing.html text eol=lf
+/fixtures/rd003/form-input-label/corrected.html text eol=lf
+/fixtures/rd003/text-contrast/failing.html text eol=lf
+/fixtures/rd003/text-contrast/corrected.html text eol=lf
