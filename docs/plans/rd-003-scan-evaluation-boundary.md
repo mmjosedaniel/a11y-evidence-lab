@@ -2,10 +2,10 @@
 
 This ExecPlan is a living document. Maintain `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` as work proceeds. This document must be maintained in accordance with `PLANS.md`.
 
-- **Owning task:** [RD-003 — Freeze the walking-skeleton evaluation boundary](../../DEVELOPMENT_ROADMAP.md#rd-003--freeze-the-walking-skeleton-evaluation-boundary).
-- **Canonical status:** Complete on 2026-08-30 (UTC). The roadmap, not this plan, owns status.
+- **Owning task:** [RD-003 — Freeze the walking-skeleton evaluation boundary](../DEVELOPMENT_ROADMAP.md#rd-003--freeze-the-walking-skeleton-evaluation-boundary).
+- **Canonical status:** Blocked during the owner-requested reproducibility corrections after network acquisition was denied. The roadmap, not this plan, owns status.
 - **Authorization:** The project owner explicitly authorized execution of RD-003 on 2026-08-30 (UTC), including its bounded research, guarded setup, observation, review, and closure stages. M1 remains unselected.
-- **Current barrier:** None. Research, guarded setup, six native observations, independent reviews, cleanup, roadmap Verification, and the documentation gate passed. M1-01 remains unselected.
+- **Current barrier:** Checkout verification passed, but the single guarded clean-start attempt stopped on socket-access denial before downloading Node. The lease is closed compliantly; the two empty task directories are preserved. Network permission and a bounded retry/empty-directory cleanup allowance are required before another attempt. Setup acceptance, implementation reviews, cleanup, and renewed closure remain pending; M1-01 remains unselected.
 
 ## Progress
 
@@ -24,9 +24,14 @@ This ExecPlan is a living document. Maintain `Progress`, `Surprises & Discoverie
 - [x] (2026-08-30) Accepted S3 slice review PASS WITH FOLLOW-UPS; clarified historical snapshots and added the material revision note. No fixture, manifest, or native evidence correction.
 - [x] (2026-08-30 05:04Z) Accepted integrated review and resolved its documentation-only follow-up; completed exact task-local cleanup, roadmap Verification, and the documentation gate. RD-003 is Complete; this same plan is archived and M1-01 remains unselected.
 
+- [x] (2026-08-30 14:05Z) Accepted and reproduced the two external reproducibility findings; owner selected their bounded correction and RD-003 was reopened. Original native evidence is preserved.
+- [x] (2026-08-30) Accepted complete procedure-003 artifact review PASS WITH FOLLOW-UPS and resolved both Minor wording findings without changing any command or binding contract.
+- [x] (2026-08-30 14:23Z) Accepted the exact LF policy and passing checkout verification, then recorded the clean-start network-permission failure. Terminal lease closure and primary structural/source/inventory inspection passed; no acquisition or setup success is claimed.
+- [ ] Receive a bounded network-enabled retry/empty-directory cleanup allowance, verify clean-start acquisition, and complete slice/integrated reviews, cleanup, and renewed documentation closure.
+
 ## Surprises & Discoveries
 
-- RD-002 is no longer merely planned. Commit `f16c6f0` establishes its toolchain, and its [completed plan](rd-002-minimum-development-toolchain-literals.md#closure-candidate-and-verification-mapping) preserves accepted restoration, strict-checking, harness, and review evidence. The older no-manifest baseline must not be reused.
+- RD-002 is no longer merely planned. Commit `f16c6f0` establishes its toolchain, and its [completed plan](completed/rd-002-minimum-development-toolchain-literals.md#closure-candidate-and-verification-mapping) preserves accepted restoration, strict-checking, harness, and review evidence. The older no-manifest baseline must not be reused.
 - The current host reports Node `24.18.0` and npm `11.16.0`, while `package.json` requires Node `24.20.0` and npm `11.19.0`. RD-002's temporary verification distribution was removed. This is an execution prerequisite, not a reason to undo its completion or block plan creation.
 - Installed Playwright/axe metadata agrees with the lock. The Playwright browser catalog names Chromium revision `1234`, browser version `151.0.7922.34`; this proves only catalog identity, not an installed executable, successful launch, or fixture compatibility. Exact executable/profile selection and observation remain RD-003 work.
 - No `src`, `tests`, `fixtures`, or `evaluation` directory exists at activation. There is no application scan module to reuse yet. The Proposed assessment's eventual shared-module harness cannot be implemented here by silently pulling M1-01 or M1-03 forward.
@@ -34,6 +39,8 @@ This ExecPlan is a living document. Maintain `Progress`, `Surprises & Discoverie
 - A successful Windows process query need not expose every executable path. The proposed cleanup filter drops unavailable paths, which cannot clear forced-stop cleanup uncertainty. `RD003-SYNTHESIS-002` identified this remaining static defect after the analyst correction allowance was exhausted; no process leak or runtime failure was observed.
 
 - The frozen bootstrap tried to load `@axe-core/playwright/package.json` through Node package exports. Installed `@axe-core/playwright` exports only its root entry, so Node returned `ERR_PACKAGE_PATH_NOT_EXPORTED` after successful acquisition. Static syntax and source review had not established that exact command compatibility. At that historical bootstrap stop, the primary read-only filesystem-metadata substitution passed but was not yet an accepted replacement command. The later owner-authorized procedure 002, fresh review, and accepted resumed setup below supersede that barrier.
+
+- Read-only Git checkout filters at f34cc5d change all six frozen fixture files and the manifest from LF to CRLF despite matching current contents. The removed task directory also makes CMD-RESUME unusable; the original acquisition command retains its known export error. These are reproducibility defects missed by the original closure checks, not evidence that the six recorded native outcomes were false.
 
 ## Decision Log
 
@@ -62,7 +69,13 @@ This ExecPlan is a living document. Maintain `Progress`, `Surprises & Discoverie
   Rationale: Filesystem metadata reads fix the observed export error; preserved acquisition can be reverified without another install. Fresh full R3 artifact review and a fresh rescoped worker preserve the changed-command barrier.
   Date/Author: 2026-08-30 / primary coordinator.
 
+- Decision: Reopen the same RD-003 plan for only the owner-requested checkout policy and clean-start corrections; preserve original results and budgets.
+  Rationale: Standard LF attributes and the already supported filesystem metadata read repair verified reproduction gaps without changing scan inputs, evidence semantics, or M1 scope. The revised literal artifact receives fresh full review before guarded setup.
+  Date/Author: 2026-08-30 / primary coordinator.
+
 ## Outcomes & Retrospective
+
+Current correction status: RD-003 is Blocked. Procedure 003 below owns the current reproduction entry point. Its exact LF policy passed all 21 checkout-filter comparisons, but the clean-start attempt stopped at the first Node download because socket access was denied. The single worker turn is consumed; no acquisition/typecheck success, implementation review, cleanup, or renewed closure is claimed. Two empty task directories are preserved. The following original execution history and all native evidence remain preserved.
 
 Planning is complete and independently reviewed. Owner-authorized execution re-established readiness and completed the bounded research plus the analyst's one correction pass. The analyst returned `OWNER DIRECTION`: the proposed post-termination process check can mistake unavailable executable paths for absence of owned processes. This is a static acceptance-contract defect, not an observed leak. The owner subsequently authorized one additional cleanup-contract correction and analyst recheck, preserving every other budget and checkpoint. Outline 003 makes the process inventory diagnostic and never promotes forced-stop cleanup from unverified. The analyst recheck returned `DRAFT READY`; the fresh pre-draft reviewer then returned `PASS WITH FOLLOW-UPS` for one stale summary sentence, corrected here. The primary authored the versioned manifest from that conclusion; the separate final literal-artifact review passed with no findings. The first guarded bootstrap acquired the pinned runtime/browser but failed at its package-metadata inspection expression. Primary closed the lease compliantly, inspected unchanged non-ignored endpoints and generated files, and confirmed the narrow diagnostic correction without editing the frozen command. The owner has now authorized that bounded correction and reuse. Procedure 002 corrects metadata inspection and accounts for the existing npm compile cache; fresh complete-artifact review precedes one rescoped setup turn. The resumed setup then passed the selected-runtime strict compiler check, exact fixture authoring, and structural validation. Primary closed its lease compliantly, inspected actual files, and observed all six native states once: every intended failing violation and corrected same-target pass met the frozen contract, with no incomplete and normal browser closes. S3 review passed with one documentation follow-up, now resolved. The different fresh integrated review also passed with a documentation-only follow-up, now resolved. Exact task-local cleanup and final Verification/documentation checks passed. RD-003 is Complete and this plan is archived; M1-01 is dependency-ready but unselected. No application behavior or release qualification is claimed.
 
@@ -74,7 +87,7 @@ This is a bounded evaluation baseline. It proves neither product behavior, gener
 
 ## Context and Orientation
 
-Start from [the authority map](../../README.md), [roadmap](../../DEVELOPMENT_ROADMAP.md), [requirements index](../../PROJECT_REQUIREMENTS.md), [agent workflow](../../../.codex/README.md), [worker workflow](../../../.codex/execplan-implementation-workflow.md), and [lease guard](../../../.codex/write-lease-guard.md). They control this plan's interpretation and execution.
+Start from [the authority map](../README.md), [roadmap](../DEVELOPMENT_ROADMAP.md), [requirements index](../PROJECT_REQUIREMENTS.md), [agent workflow](../../.codex/README.md), [worker workflow](../../.codex/execplan-implementation-workflow.md), and [lease guard](../../.codex/write-lease-guard.md). They control this plan's interpretation and execution.
 
 ### Current project state
 
@@ -86,19 +99,19 @@ The existing `typecheck` script independently invokes the strict compiler; `test
 
 | Authority | RD-003 obligation |
 | --- | --- |
-| [Roadmap RD-003](../../DEVELOPMENT_ROADMAP.md#rd-003--freeze-the-walking-skeleton-evaluation-boundary) | Completed RD-002 is the only task dependency; freeze scan/evidence literals before M1-01, not application behavior. |
-| [OD-003, OD-009, OD-021, OD-024](../../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#resolved-decisions-for-the-first-portfolio-slice) | Exactly three failing/corrected pairs; compact non-promotable evaluation; trusted-input runtime boundary remains separate; accepted minimization and positive-observation semantics. All directly applicable portions are Accepted. |
-| [REQ-SCAN-002, REQ-SCAN-004, REQ-SCAN-005](../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#target-authorization-and-scanning) | Freeze versioned inputs/profiles; retain only required native controlled evidence; allowlist and sanitize before persistence; preserve items with missing/invalid/withheld fact reasons. |
-| [REQ-EVID-002, REQ-EVID-008–REQ-EVID-011](../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#evidence-and-provenance) | Controlled scenario, rule, revision/state role, stable target key, native category, minimized facts and provenance; no raw archives, general pass collections, or extra product identities. Locator is supporting evidence, not identity. |
-| [REQ-EVAL-004, REQ-EVAL-005 and freeze boundary](../../requirements/evaluation-and-release/EVALUATION_AND_ACCEPTANCE.md#freeze-boundary) | Bind observations to exact applicable configuration; changes produce new versions/evidence. Exact literals are resolved inside RD-003, not missing entry approvals. |
-| [Accepted controlled profiles](../../requirements/PRODUCT_SCOPE_AND_GLOSSARY.md#scope) | Image alternative, explicit email-input label association, and normal-text contrast retain their exact accepted rule/SC mapping and manual-judgment limitations. |
-| [ADR-0008](../../architecture/decisions/ADR-0008-playwright-as-initial-browser-automation.md), [ADR-0009](../../architecture/decisions/ADR-0009-axe-core-as-initial-accessibility-scanner.md), [ADR-0018](../../architecture/decisions/ADR-0018-trusted-operator-url-boundary.md) | Matching managed Chromium, fresh non-persistent context, finite readiness/navigation bounds and cleanup; exactly three rules over the top-level rendered document with frames excluded; one observation per frozen state, not formal repetitions. |
-| [REQ-SEC-002, REQ-SEC-007](../../requirements/quality-security-and-operations/PRIVACY_AND_SECURITY.md#privacy-and-security) | No secrets or form values in evidence/diagnostics; only authored synthetic or separately approved minimized material is publishable. |
-| [ADR-0024](../../architecture/decisions/ADR-0024-milestone-slice-tdd-with-independent-ownership.md) | Explicit non-TDD route, bounded worker ownership and automatic leases, proportional evidence and reviews. |
+| [Roadmap RD-003](../DEVELOPMENT_ROADMAP.md#rd-003--freeze-the-walking-skeleton-evaluation-boundary) | Completed RD-002 is the only task dependency; freeze scan/evidence literals before M1-01, not application behavior. |
+| [OD-003, OD-009, OD-021, OD-024](../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#resolved-decisions-for-the-first-portfolio-slice) | Exactly three failing/corrected pairs; compact non-promotable evaluation; trusted-input runtime boundary remains separate; accepted minimization and positive-observation semantics. All directly applicable portions are Accepted. |
+| [REQ-SCAN-002, REQ-SCAN-004, REQ-SCAN-005](../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#target-authorization-and-scanning) | Freeze versioned inputs/profiles; retain only required native controlled evidence; allowlist and sanitize before persistence; preserve items with missing/invalid/withheld fact reasons. |
+| [REQ-EVID-002, REQ-EVID-008–REQ-EVID-011](../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#evidence-and-provenance) | Controlled scenario, rule, revision/state role, stable target key, native category, minimized facts and provenance; no raw archives, general pass collections, or extra product identities. Locator is supporting evidence, not identity. |
+| [REQ-EVAL-004, REQ-EVAL-005 and freeze boundary](../requirements/evaluation-and-release/EVALUATION_AND_ACCEPTANCE.md#freeze-boundary) | Bind observations to exact applicable configuration; changes produce new versions/evidence. Exact literals are resolved inside RD-003, not missing entry approvals. |
+| [Accepted controlled profiles](../requirements/PRODUCT_SCOPE_AND_GLOSSARY.md#scope) | Image alternative, explicit email-input label association, and normal-text contrast retain their exact accepted rule/SC mapping and manual-judgment limitations. |
+| [ADR-0008](../architecture/decisions/ADR-0008-playwright-as-initial-browser-automation.md), [ADR-0009](../architecture/decisions/ADR-0009-axe-core-as-initial-accessibility-scanner.md), [ADR-0018](../architecture/decisions/ADR-0018-trusted-operator-url-boundary.md) | Matching managed Chromium, fresh non-persistent context, finite readiness/navigation bounds and cleanup; exactly three rules over the top-level rendered document with frames excluded; one observation per frozen state, not formal repetitions. |
+| [REQ-SEC-002, REQ-SEC-007](../requirements/quality-security-and-operations/PRIVACY_AND_SECURITY.md#privacy-and-security) | No secrets or form values in evidence/diagnostics; only authored synthetic or separately approved minimized material is publishable. |
+| [ADR-0024](../architecture/decisions/ADR-0024-milestone-slice-tdd-with-independent-ownership.md) | Explicit non-TDD route, bounded worker ownership and automatic leases, proportional evidence and reviews. |
 
-The [controlled-fixture assessment](../../architecture/candidates/authorized-scan/CONTROLLED_FIXTURE_EXECUTION_AND_SECURITY.md) and [evidence-capture assessment](../../architecture/candidates/ACCESSIBILITY_FINDING_EVIDENCE_CAPTURE_ASSESSMENT.md) are Proposed inputs only. Their candidate layout, viewport, values, field spellings, and eventual shared-module implementation are not accepted by association. [Local feasibility](../../LOCAL_MVP_FEASIBILITY.md) supplies the reference-machine context, not a proven application-capacity result.
+The [controlled-fixture assessment](../architecture/candidates/authorized-scan/CONTROLLED_FIXTURE_EXECUTION_AND_SECURITY.md) and [evidence-capture assessment](../architecture/candidates/ACCESSIBILITY_FINDING_EVIDENCE_CAPTURE_ASSESSMENT.md) are Proposed inputs only. Their candidate layout, viewport, values, field spellings, and eventual shared-module implementation are not accepted by association. [Local feasibility](../LOCAL_MVP_FEASIBILITY.md) supplies the reference-machine context, not a proven application-capacity result.
 
-[BHV-01](../../requirements/evaluation-and-release/EVALUATION_AND_ACCEPTANCE.md#derived-behavioral-scope), `SPEC-001`, `HS-001`, `HS-004`, and `HS-006` explain downstream scan/evidence boundaries in the [derived specifications](../../specs/README.md). RD-003 supports those later tasks; it does not execute their public-URL, persistence, interface, or all-node runtime scenarios or change their specified/not-executed status.
+[BHV-01](../requirements/evaluation-and-release/EVALUATION_AND_ACCEPTANCE.md#derived-behavioral-scope), `SPEC-001`, `HS-001`, `HS-004`, and `HS-006` explain downstream scan/evidence boundaries in the [derived specifications](../specs/README.md). RD-003 supports those later tasks; it does not execute their public-URL, persistence, interface, or all-node runtime scenarios or change their specified/not-executed status.
 
 ### Required six-state contract
 
@@ -108,7 +121,7 @@ The [controlled-fixture assessment](../../architecture/candidates/authorized-sca
 | `form-input-label` / `label` / SC 4.1.2 | Visible “Email address” text beside one stable email input without association or another accessible-name source. | Visible explicit `label` associated by matching `for` and unchanged input `id`; native same-target non-failing observation. Never retain the input value or claim SC 1.3.1/3.3.2 coverage. |
 | `text-contrast` / `color-contrast` / SC 1.4.3 | One normal-text target fails the native contrast check. | Same target with corrected contrast and native non-failing observation. Preserve emitted foreground/background, measured/expected ratio, font size and weight when present and valid; never recompute a pass or substitute fixture expectations for scanner measurements. |
 
-There are six logical states, not six applications. Each scan uses all three rules; its expected assertion names the intended rule and target. Coverage facts may summarize all three rules without retaining page-wide pass/inapplicable node collections. Keep actual native `incomplete` observations distinct; do not manufacture one by adding a seventh fixture. The existing [comparison-only contrast vector](../../requirements/evaluation-and-release/EVALUATION_AND_ACCEPTANCE.md#comparison-only-contrast-policy-vector) remains non-scanner policy input for M5, not a third contrast scan or new RD-003 behavior.
+There are six logical states, not six applications. Each scan uses all three rules; its expected assertion names the intended rule and target. Coverage facts may summarize all three rules without retaining page-wide pass/inapplicable node collections. Keep actual native `incomplete` observations distinct; do not manufacture one by adding a seventh fixture. The existing [comparison-only contrast vector](../requirements/evaluation-and-release/EVALUATION_AND_ACCEPTANCE.md#comparison-only-contrast-policy-vector) remains non-scanner policy input for M5, not a third contrast scan or new RD-003 behavior.
 
 ## Scope and Non-Goals
 
@@ -142,7 +155,7 @@ Risk is S3 for the native-to-persisted evidence boundary. Use a fresh `critical_
 
 The setup worker runs CMD-BOOTSTRAP, CMD-FIXTURE, and CMD-VALIDATE only. After its terminal compliant lease and primary diff inspection, the primary runs the unchanged CMD-SCAN directly once per state, inspects its minimized stdout, and records evidence. This is one setup slice and one native batch; no worker-owned evidence file or repeat scan is introduced.
 
-Before dispatch, issue a complete [Milestone Assignment Packet v2](../../../.codex/execplan-implementation-workflow.md#milestone-assignment-packet-v2), with every binding field and the exact commands below resolved. Primary opens the guard, inserts and verifies its digest, then authorizes writing. Close terminally after the worker stops; require fresh `closed-compliant` and no post-close drift at acceptance before primary documentation edits.
+Before dispatch, issue a complete [Milestone Assignment Packet v2](../../.codex/execplan-implementation-workflow.md#milestone-assignment-packet-v2), with every binding field and the exact commands below resolved. Primary opens the guard, inserts and verifies its digest, then authorizes writing. Close terminally after the worker stops; require fresh `closed-compliant` and no post-close drift at acceptance before primary documentation edits.
 
 Path ownership is deliberately narrow:
 
@@ -173,7 +186,7 @@ Update only materially affected authorities/developer instructions and navigatio
 
 **Evidence classes:** controlling repository requirements/ADRs; exact installed/locked package source and type/API definitions; current official Playwright/axe primary sources for unresolved mechanics; and later bounded native observations. Sources establish supported semantics, not actual runtime success. Types are not runtime validation. Gold fixture values, calculations, guessed check IDs, and reconstructed native results cannot substitute for emitted evidence. Keep exact versions/source locations and freshness dates beside claims.
 
-**Research assignments and budget:** One `critical_researcher` covers the critical native-field/locator-to-safe-evidence mapping for the three rules, including positive/incomplete results and absence/invalidity handling. Add at most one `technology_researcher` only for an unresolved browser/content-loading/profile dimension that can run independently. Each receives [Research Assignment Capsule v1](../../../.codex/README.md#research-assignment-capsule-v1), exact anchors, frozen alternatives, expected output, read-only permission, synchronization barrier, and at most one bounded follow-up in the same research run. Do not instantiate a separate researcher per rule or use a drafter for this compact artifact.
+**Research assignments and budget:** One `critical_researcher` covers the critical native-field/locator-to-safe-evidence mapping for the three rules, including positive/incomplete results and absence/invalidity handling. Add at most one `technology_researcher` only for an unresolved browser/content-loading/profile dimension that can run independently. Each receives [Research Assignment Capsule v1](../../.codex/README.md#research-assignment-capsule-v1), exact anchors, frozen alternatives, expected output, read-only permission, synchronization barrier, and at most one bounded follow-up in the same research run. Do not instantiate a separate researcher per rule or use a drafter for this compact artifact.
 
 One `decision_analyst` is required for R3 synthesis, with at most one bounded correction. It returns exactly `DRAFT READY`, `RETURN FOR RESEARCH`, or `OWNER DIRECTION`; the primary accepts or rejects its support. `DRAFT READY` requires complete decide-now semantics and exact command/path/side-effect slots, followed by the fresh `critical_research_reviewer` pre-draft checkpoint. That checkpoint permits one supported outline correction; failure then returns to the remaining evidence budget or owner. A different fresh `critical_research_reviewer` reviews the primary-written artifact. These requirements follow the named R3 trigger; they are not an unconditional rule imposed on R2 work. If evidence later disproves that trigger, record the reclassification and use the source workflow's conditional R2 checkpoints without silently carrying extra reviews forward.
 
@@ -802,7 +815,7 @@ Primary disposition: accept this decisive contract finding and stop. A correctio
 
 `RD003-PREDRAFT-001` (2026-08-30): a fresh `critical_research_reviewer` returned `PASS WITH FOLLOW-UPS` after reviewing the complete contract and all nine invariants at plan SHA-256 `188ffc3134603f58b7b100f2c9367bb34fb3e1e3a2ec070e78752ffc624c5427`, independently confirmed by the primary. There were no Blockers or Majors. Minor `RD003-PRE-F01` identified a stale current-summary sentence claiming the analyst recheck was pending; primary corrected it to the actual `DRAFT READY` result without changing the execution contract. The reviewer reproduced all six prerequisite/source hashes, relevant installed-source mechanics, seven PowerShell and the complete inline JavaScript parse, and 21 isolated projection cases; it reused the 27-check guard result and prior official Node checksum observation. No native case ran. Primary accepts the pre-draft gate and the clarified observation ownership: worker fixture/provisioning validation, then primary direct native observation after lease closure. The different fresh final literal-artifact review remains mandatory before setup.
 
-`RD003-MANIFEST-001` (2026-08-30): primary authored [the scan-only manifest](../../../evaluation/rd003-scan-v1.json), SHA-256 `13c9722be9ea2e3b0aaf020ea91f429a701180a83814fe7ab21baf2ddad57459`, outside any worker lease. It contains three profiles, six exact content definitions and future fixture references, native expectations, stable paired targets/revisions, literal browser/scanner/readiness/deadline settings, evidence-policy mappings, unavailable categories, and limitations. Primary readback verified equality with the reviewed browser/scanner objects and all six HTML blocks, JSON shape/counts and version, final newline, and absence of fixture/runtime/lease state. Its freeze status describes fixed evaluation inputs, not successful native execution. The final literal-artifact checkpoint is pending; no worker may select or edit this artifact.
+`RD003-MANIFEST-001` (2026-08-30): primary authored [the scan-only manifest](../../evaluation/rd003-scan-v1.json), SHA-256 `13c9722be9ea2e3b0aaf020ea91f429a701180a83814fe7ab21baf2ddad57459`, outside any worker lease. It contains three profiles, six exact content definitions and future fixture references, native expectations, stable paired targets/revisions, literal browser/scanner/readiness/deadline settings, evidence-policy mappings, unavailable categories, and limitations. Primary readback verified equality with the reviewed browser/scanner objects and all six HTML blocks, JSON shape/counts and version, final newline, and absence of fixture/runtime/lease state. Its freeze status describes fixed evaluation inputs, not successful native execution. The final literal-artifact checkpoint is pending; no worker may select or edit this artifact.
 
 `RD003-LITERAL-REVIEW-001` (2026-08-30): a different fresh `critical_research_reviewer` returned `PASS`, with no Blocker, Major, or Minor findings, on manifest SHA-256 `13c9722be9ea2e3b0aaf020ea91f429a701180a83814fe7ab21baf2ddad57459` and plan SHA-256 `7bc6218ae245ad5e7b58ccebe34481c6d845b800a8aa6bf98b53e631f3b8b119`. Primary independently verified both identities before result-only recording and accepts every invariant's contract-stage result. The reviewer reproduced artifact/source identities, exact content/options, JSON/resource/target checks, PowerShell/JavaScript syntax, 21 field-projection cases, and documentation checks; it reused prior guard/browser and official checksum evidence. No source evidence was invalidated, no research-artifact correction cycle was needed, and no native execution is implied. Existing developer/evaluation-owner documentation updates remain closure obligations after actual observations.
 
@@ -1313,8 +1326,167 @@ Roadmap Verification is satisfied by the actual versioned manifest, six exact co
 
 RD003-CLOSURE-VALIDATION-002: final archive readback passed 535 relative links and 124 anchors, all 15 required plan sections/nine invariants, JSON/content/whitespace checks, exact nineteen-path inventory, and the six unchanged native-result records. All eight frozen PowerShell command blocks and other fenced evidence/content blocks were preserved during the contained archive move. RD-003 is Complete; this archived plan exists, the former active path and incoming active-plan links are absent, M1-01 is dependency-ready but unselected, all 25 application tasks remain Not started, and HEAD/branch/index, dependency pins, source/configuration hashes, global tools, and absence of task outputs/active lease remain verified. Primary inspected the actual final diff and resolved both reviews' documentation-only findings. No further runtime observation, native repeat, application suite, commit, or push occurred. Documentation impact is complete across the twelve named documents; requirement/OD/ADR statuses and downstream specifications remain unchanged.
 
+### Current reproduction — RD003-PROCEDURE-003
+
+**Status:** Artifact accepted after RD003-REPRO-CONTRACT-REVIEW-001 and primary disposition of its two wording follow-ups. Checkout execution passed; clean-start acquisition is Blocked by socket permissions after one attempted run. This remains the current reproduction entry point, but its absent-directory precondition no longer holds until separately authorized cleanup of the preserved empty task directory. The original CMD-BOOTSTRAP and preserved-state CMD-RESUME remain historical and are not clean-start instructions. No automatic retry is authorized.
+
+RD003-REPRO-001 (2026-08-30): the owner supplied an independent REVISE review at f34cc5d and explicitly requested these two fixes after primary read-only verification. Current files and committed blobs match the manifest, but core.autocrlf=true checkout filtering changes all six fixtures to CRLF and changes the manifest hash. The original metadata expression reproduces ERR_PACKAGE_PATH_NOT_EXPORTED; its filesystem-read correction passes, but CMD-RESUME requires the task directory removed at closure. These findings invalidate the clean-checkout/clean-start closure claim, not RD003-OBSERVATIONS-001 or the unchanged scan profile. RD-003 is reopened; M1-01 remains unselected.
+
+The correction uses ordinary Git attributes and the already supported metadata read; no unresolved evidence-selection dimension or new subsystem is introduced. Repository-local investigation is R0. The original R3 evidence/locator conclusion, synthesis, and pre-draft checkpoint remain applicable. Because the literal execution artifact changes, a fresh critical_research_reviewer must review the complete revised artifact and all RD3-I1–I9 before setup. This is the next recorded artifact correction checkpoint, not a reset of earlier budgets. The owner authorizes only these named fixes. A new Major outside them, a changed binding contract, repeated decisive failure, unexpected overlap, or exhausted allowance stops for owner direction.
+
+One bounded follow-up slice, RD003-REPRO-01, repairs reproducibility of existing RD-003 inputs. TDD: Not applicable; declarative checkout policy and developer acquisition have no new application behavior. One fresh code_worker receives one setup turn with zero further correction turns, a complete packet, and a fresh primary-managed lease. Allowed file: .gitattributes only. Allowed directory roots: None. All other non-ignored paths are forbidden, including fixtures, manifest, documentation, source/tests, package/lock/compiler/Vite files, .codex, .agents, .gitignore, AGENTS.md and PLANS.md. The primary owns every instruction/evidence/status write between leases. The worker creates the exact attributes below, runs CMD-CHECKOUT, CMD-BOOTSTRAP-CLEAN once, then unchanged CMD-VALIDATE. Primary terminally closes the lease and inspects actual results before acceptance. Use S3 for the deterministic-byte/critical reproducibility finding, with a fresh critical_reviewer for this slice and a different fresh integrated critical_reviewer. Neither repeats the native batch merely for independence.
+
+The [Git attributes manual](https://git-scm.com/docs/gitattributes) defines text/eol checkout conversion and versioned per-path attributes. The [cat-file manual](https://git-scm.com/docs/git-cat-file) defines --filters as checkout-filtered blob output. These standard semantics support the seven exact entries; this adds no custom serialization or global Git configuration. The committed fixture/manifest blobs already use LF, so no renormalization, staging, checkout, or source rewrite is required.
+
+#### Exact checkout policy
+
+Write .gitattributes as UTF-8 with a final newline and precisely this content. Only these seven frozen artifacts receive the LF policy; unrelated files and dependency pins retain their existing treatment.
+
+```gitattributes
+# Preserve the exact RD-003 evaluation bytes on every checkout.
+/evaluation/rd003-scan-v1.json text eol=lf
+/fixtures/rd003/informative-image-alt/failing.html text eol=lf
+/fixtures/rd003/informative-image-alt/corrected.html text eol=lf
+/fixtures/rd003/form-input-label/failing.html text eol=lf
+/fixtures/rd003/form-input-label/corrected.html text eol=lf
+/fixtures/rd003/text-contrast/failing.html text eol=lf
+/fixtures/rd003/text-contrast/corrected.html text eol=lf
+```
+
+#### CMD-CHECKOUT — current and checkout-filtered byte verification
+
+Run from C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab. Python 3.12.10 and Git 2.53.0.windows.1 are the verified developer tools. This is read-only and writes no index/configuration or checkout files. All 21 checkout-filter comparisons and six manifest-content comparisons must pass.
+
+```powershell
+@'
+from pathlib import Path
+import hashlib,json,subprocess
+root=Path.cwd()
+m=json.loads((root/'evaluation/rd003-scan-v1.json').read_text(encoding='utf-8'))
+paths=['evaluation/rd003-scan-v1.json']+[c['path'] for c in m['cases']]
+expected_attributes='# Preserve the exact RD-003 evaluation bytes on every checkout.\n'+''.join('/'+p+' text eol=lf\n' for p in paths)
+assert (root/'.gitattributes').read_text(encoding='utf-8')==expected_attributes
+assert len(m['profiles'])==3 and len(m['cases'])==6
+assert hashlib.sha256((root/paths[0]).read_bytes()).hexdigest()=='13c9722be9ea2e3b0aaf020ea91f429a701180a83814fe7ab21baf2ddad57459'
+for path in paths:
+    expected=(root/path).read_bytes()
+    assert b'\r' not in expected and expected.endswith(b'\n'),path
+    assert subprocess.check_output(['git','cat-file','blob','HEAD:'+path])==expected,path
+    for autocrlf in ['true','false','input']:
+        filtered=subprocess.check_output(['git','-c','core.autocrlf='+autocrlf,'cat-file','--filters','HEAD:'+path])
+        assert filtered==expected,(path,autocrlf)
+for c in m['cases']:
+    assert (root/c['path']).read_bytes()==c['content'].encode('utf-8'),c['path']
+print('PASS: seven frozen artifacts match committed and checkout-filtered bytes under autocrlf true/false/input; all six fixture contents match the manifest.')
+'@ | python -B -
+if ($LASTEXITCODE -ne 0) { throw 'Checkout byte validation failed.' }
+git diff --check
+if ($LASTEXITCODE -ne 0) { throw 'Whitespace validation failed.' }
+```
+
+#### CMD-BOOTSTRAP-CLEAN — acquire missing task-local prerequisites
+
+Clean start means the completed source tree with the RD-002 locked node_modules retained/restored, and no temp/rd003-evaluation directory. A fresh clone must first follow README's Development toolchain instructions to restore the pinned dependencies with scripts disabled; this command does not replace that separate prerequisite or modify the dependency tree. Package/lock/compiler/Vite/scanner hashes below must match before creating outputs. Run CMD-CHECKOUT first. Existing fixtures are inputs and must never be recreated by CMD-FIXTURE during reproduction.
+
+Run this complete block once from the same repository root. It uses the corrected filesystem metadata read, reacquires exactly Node 24.20.0/npm 11.19.0 and full managed Chromium 1234, verifies acquired binary hashes, and executes the existing strict no-emit typecheck. Global Node/npm, installed packages, and shared browser caches are not changed. Expected exit 0 and the final clean-start success message. This command starts the Playwright installer, not a browser scan; CMD-SCAN remains unchanged and is not run for this correction.
+
+```powershell
+$ErrorActionPreference = 'Stop'
+$rd003Repo = 'C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab'
+if ($PWD.Path -ne $rd003Repo) { throw 'Unexpected working directory.' }
+$rd003Temp = Join-Path $rd003Repo 'temp\rd003-evaluation'
+if (Test-Path -LiteralPath $rd003Temp) { throw 'Preserve and inspect unexpected existing task directory.' }
+foreach ($rd003Parent in @($rd003Repo,(Join-Path $rd003Repo 'temp'))) {
+  if ((Test-Path -LiteralPath $rd003Parent) -and ((Get-Item -LiteralPath $rd003Parent).Attributes -band [IO.FileAttributes]::ReparsePoint)) { throw 'Reparse point.' }
+}
+git check-ignore -q -- temp/rd003-evaluation
+if ($LASTEXITCODE -ne 0) { throw 'Task outputs must be ignored.' }
+$rd003Sources = @{
+  'package.json'='c2c8718fa44813288abba5792facb3d39400446912ec73de2a8c93e2a6d92c98'
+  'package-lock.json'='ece19cd10739d5c4139e4700b5a712b89fefe1f898be29c4fbf18dd54682c553'
+  'tsconfig.json'='3957f80af41b23dc4ccefaa6b24823c367e6984980420b596275b8692df5abde'
+  'vite.config.ts'='8d75b9863c86a8eca2267c74d8875be46061c288f5eaef6bea93c427d3dacd07'
+  'node_modules/axe-core/axe.js'='138a93a4ce7b7c6c08ed84144e45dcd8cc36d2d4ff8ed673619faf0406906d88'
+  'node_modules/@axe-core/playwright/dist/index.js'='9a4f63fad34eb93fe99dc3dde41dc21d0614e5956d524f288b029634cbd6b39d'
+}
+foreach ($rd003Entry in $rd003Sources.GetEnumerator()) {
+  if ((Get-FileHash -LiteralPath (Join-Path $rd003Repo $rd003Entry.Key) -Algorithm SHA256).Hash.ToLowerInvariant() -ne $rd003Entry.Value) { throw "Prerequisite identity mismatch: $($rd003Entry.Key)" }
+}
+New-Item -ItemType Directory -Path $rd003Temp | Out-Null
+New-Item -ItemType Directory -Path (Join-Path $rd003Temp 'os-temp'),(Join-Path $rd003Temp 'npm-cache') | Out-Null
+$rd003EnvNames = @('PLAYWRIGHT_BROWSERS_PATH','PLAYWRIGHT_DOWNLOAD_CONNECTION_TIMEOUT','TMPDIR','TMP','TEMP','PATH')
+$rd003OldEnv = @{}
+foreach ($rd003Name in $rd003EnvNames) { $rd003OldEnv[$rd003Name] = [Environment]::GetEnvironmentVariable($rd003Name,'Process') }
+try {
+  $env:PLAYWRIGHT_BROWSERS_PATH = Join-Path $rd003Temp 'playwright-browsers'
+  $env:PLAYWRIGHT_DOWNLOAD_CONNECTION_TIMEOUT = '120000'
+  $env:TMPDIR = Join-Path $rd003Temp 'os-temp'
+  $env:TMP = $env:TMPDIR
+  $env:TEMP = $env:TMPDIR
+  $rd003Zip = Join-Path $rd003Temp 'node-v24.20.0-win-x64.zip'
+  Invoke-WebRequest -Uri 'https://nodejs.org/dist/v24.20.0/node-v24.20.0-win-x64.zip' -OutFile $rd003Zip -TimeoutSec 300
+  if ((Get-FileHash -LiteralPath $rd003Zip -Algorithm SHA256).Hash.ToLowerInvariant() -ne '6cac9ffbca8f6a47091e4b5c772e0606049c3871cb67d900c0cedde630e545ba') { throw 'Node archive identity mismatch.' }
+  Expand-Archive -LiteralPath $rd003Zip -DestinationPath $rd003Temp
+  $rd003Runtime = Join-Path $rd003Temp 'node-v24.20.0-win-x64'
+  $rd003Node = Join-Path $rd003Runtime 'node.exe'
+  $env:PATH = $rd003Runtime + ';' + $env:PATH
+  if ((& $rd003Node --version) -ne 'v24.20.0' -or $LASTEXITCODE -ne 0) { throw 'Node mismatch.' }
+  if ((& $rd003Node (Join-Path $rd003Runtime 'node_modules\npm\bin\npm-cli.js') --version) -ne '11.19.0' -or $LASTEXITCODE -ne 0) { throw 'npm mismatch.' }
+  $rd003Installer = Start-Process -FilePath $rd003Node -ArgumentList @((Join-Path $rd003Repo 'node_modules\playwright\cli.js'),'install','chromium','--no-shell') -WorkingDirectory $rd003Repo -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $rd003Temp 'browser-install.stdout') -RedirectStandardError (Join-Path $rd003Temp 'browser-install.stderr')
+  if (-not $rd003Installer.WaitForExit(600000)) {
+    if (-not $rd003Installer.HasExited) { & "$env:SystemRoot\System32\taskkill.exe" /PID $rd003Installer.Id /T /F | Out-Null }
+    throw 'Owned browser installer timed out; inspect task-local outputs before any retry.'
+  }
+  $rd003Installer.Refresh()
+  Get-Content -LiteralPath (Join-Path $rd003Temp 'browser-install.stdout'),(Join-Path $rd003Temp 'browser-install.stderr')
+  if ($rd003Installer.ExitCode -ne 0) { throw 'Browser installation failed.' }
+  $rd003Acquired = @{
+    'node-v24.20.0-win-x64/node.exe'='5c976096e04e5c2c1f091938926234cc9fbebfe9787ddd149351b3b0ecc707b5'
+    'playwright-browsers/chromium-1234/chrome-win64/chrome.exe'='409805a16d6416087e6b2f778df1cf8f7bbb267d6b99f6b5bb0a618eace234f2'
+  }
+  foreach ($rd003Entry in $rd003Acquired.GetEnumerator()) {
+    if ((Get-FileHash -LiteralPath (Join-Path $rd003Temp $rd003Entry.Key) -Algorithm SHA256).Hash.ToLowerInvariant() -ne $rd003Entry.Value) { throw "Acquired identity mismatch: $($rd003Entry.Key)" }
+  }
+  & $rd003Node --input-type=module -e "import fs from 'node:fs';import assert from 'node:assert/strict';import {createRequire}from'node:module';const r=createRequire(import.meta.url);const lock=JSON.parse(fs.readFileSync('package-lock.json'));for(const p of ['playwright','playwright-core','@axe-core/playwright','axe-core','typescript'])assert.equal(JSON.parse(fs.readFileSync('node_modules/'+p+'/package.json')).version,lock.packages['node_modules/'+p].version);assert.equal(r('axe-core').version,'4.13.0');console.log('Selected runtime and installed scanner dependency identities verified.');"
+  if ($LASTEXITCODE -ne 0) { throw 'Dependency identity mismatch.' }
+  & $rd003Node (Join-Path $rd003Runtime 'node_modules\npm\bin\npm-cli.js') --global=false --prefix $rd003Repo --cache (Join-Path $rd003Temp 'npm-cache') --ignore-scripts=true --audit=false --fund=false --update-notifier=false --logs-max=0 run typecheck
+  if ($LASTEXITCODE -ne 0) { throw 'Strict typecheck failed.' }
+  'Clean-start acquisition and selected-runtime strict typecheck passed; no browser scan ran.'
+} finally {
+  foreach ($rd003Name in $rd003EnvNames) { [Environment]::SetEnvironmentVariable($rd003Name,$rd003OldEnv[$rd003Name],'Process') }
+}
+```
+
+Permitted ignored/generated effects are confined to temp/rd003-evaluation: the named Node ZIP and extracted distribution; playwright-browsers with .links, chromium-1234, ffmpeg-1011, and winldd-1007; browser-install.stdout/stderr; npm-cache with the command's logs disabled; and os-temp including npm's node-compile-cache/v24.20.0-x64-964aae3f ordinary eight-hex files. These are outside guard proof. Node/CDN acquisition uses only the pinned developer toolchain; no provider, model, corpus, page request, browser profile, trace, screenshot, or raw scanner payload is acquired. Temporary PATH/TMP/TEMP/TMPDIR/Playwright values are restored by finally. Any unexpected path, failed acquisition, forced installer termination, or uncertain process exit stops; preserve outputs and never clear uncertainty using process visibility.
+
+#### Reproduction sequence and cleanup
+
+For a later independently requested reproduction: satisfy RD-002 restoration, run CMD-CHECKOUT, run CMD-BOOTSTRAP-CLEAN from an absent task directory, run unchanged CMD-VALIDATE, and only then run unchanged CMD-SCAN once for the six states if new observations are actually requested. It is not necessary to re-author fixtures or satisfy the obsolete CMD-RESUME cache precondition. Existing CMD-VALIDATE, CMD-SCAN, diagnostic, and CMD-CLEANUP are identified by their original headings and retain their exact contents. Validation and diagnostic inspection are read-only; scanning launches processes, and cleanup deletes the bounded task directory. No new persistent probe is added.
+
+For this correction's acquisition-only validation, do not run CMD-SCAN. After both implementation reviews pass, the primary verifies normal successful installer and synchronous Node/npm/compiler exits, that no browser was launched in this acquisition run, no forced/uncertain cleanup, expected ordinary generated topology, and a fresh unchanged diagnostic with no visible owned process. The diagnostic may report unavailable executable paths and cannot prove global process absence. Then run unchanged CMD-CLEANUP once with its exact absolute containment and reparse checks and verify absence. Historical six normal-close records remain preserved, not relabeled as new process evidence. A later scan reproduction additionally requires that run's successful normal closes under the unchanged native command. No failure or uncertainty is cleared by directory removal.
+
+Acceptance requires the actual .gitattributes diff and compliant lease, exact checkout-filtered/current/blob equality including the manifest hash, successful current clean-start acquisition/typecheck, unchanged six fixture/native evidence identities, bounded generated inventory and cleanup, both implementation reviews, and final documentation/link/status reconciliation. Reuse the prior six native outcomes; the correction changes no contents, expected outcome, browser/profile, evidence field, or manifest version. The final correction diff consists of .gitattributes plus the existing twelve documentation owners (the plan returns to its completed path only after closure); no application or fixture file changes. Record correction evidence below without deleting the original failures, allowances, commands, or closure history.
+
+#### Reproduction checkpoint and execution evidence
+
+RD003-REPRO-CONTRACT-REVIEW-001 (2026-08-30): the fresh critical_research_reviewer returned PASS WITH FOLLOW-UPS on plan SHA-256 11327a629c86206a3d1f9d4e3c136335dc658dda9e06584e52ec00d0110bf067 and unchanged manifest SHA-256 13c9722be9ea2e3b0aaf020ea91f429a701180a83814fe7ab21baf2ddad57459; primary verified the reviewed plan identity before editing. All RD3-I1–I9 pass for artifact readiness, with no Blocker or Major. Primary resolved F01 by qualifying historical acceptance and F02 by distinguishing read-only validation/diagnostic inspection from scan and cleanup effects. These edits change no command, prerequisite, expected outcome, permission, or budget. The reviewer independently reproduced seven current/blob identities, the checkout defect, six source hashes, all ten PowerShell parses, unchanged structural validation, and the corrected metadata read under global Node. Original eight commands and six native records are unchanged. This checkpoint is accepted; the single fresh guarded setup turn remains necessary to establish checkout/clean-start execution, followed by S3 and different integrated reviews and cleanup. No research follow-up or new native batch was used.
+
+RD003-REPRO-SETUP-RESULT-001 (2026-08-30 14:23Z): one fresh code_worker executed the complete Milestone Assignment Packet v2 for workflow RD003-REPRO-20260830-01, slice RD003-REPRO-01, setup attempt 1, lease RD003-REPRO-01-setup-01, owner rd003-repro-worker-01, and contract digest 6feec180cebadb0884a625d1ac5ac27375b94225ddedaaafbe0df1fe3b680f6b. Its frozen plan identity was 6d94ea3ce6b16efe18a60ca989125b049c6c42837ff7e9e3eb49457da19a5e8b. The only allowed file was .gitattributes, with no allowed roots; primary documentation and every other non-ignored endpoint remained outside scope. TDD was Not applicable. The one turn and zero correction/retry allowance are consumed.
+
+The worker created only the exact 465-byte UTF-8 LF .gitattributes, SHA-256 65c86ab981c434adc150dd489ea953ef78327bd36faa51d219d7270b9c675d4e. CMD-CHECKOUT ran once, exit 0: all seven current/HEAD files and all 21 checkout-filter comparisons matched, and six fixture contents equal the unchanged manifest. CMD-BOOTSTRAP-CLEAN ran once, exit 1 at its first Invoke-WebRequest to the frozen official Node ZIP URL because socket access was denied by access permissions. Acquisition stopped before an archive, runtime, browser, installer, logs, or compile cache existed. No installer/browser was launched or force-terminated; the command's finally restored its process environment. The worker correctly did not run its next CMD-VALIDATE or retry. This is an environment-permission failure, not evidence that the corrected package-metadata read failed.
+
+Primary terminally closed the lease with fresh closed-compliant exit 0 and receipt digest a80a932e8e7cb91d0149d1fb671d10037ec4152eb1d45a3b47903d2b86d97f23. Pinned status before documentation edits confirmed post_close_drift=false and unchanged HEAD/ref/index/ignore controls. Primary inspected the actual attribute contents/hash and receipt: one allowed creation, no modified, deleted, forbidden, or unleased endpoints. Ignored outputs were separately inspected: temp/rd003-evaluation contains exactly two ordinary empty directories, npm-cache and os-temp, with zero files/bytes and no reparse topology. No active lease remains. The directories are preserved; neither frozen cleanup nor a network-enabled retry has run.
+
+RD003-REPRO-TRIAGE-001: after lease closure, primary ran unchanged read-only CMD-VALIDATE once, exit 0, as failure triage rather than acceptance of the incomplete worker setup. All six exact fixture contents, marker/target uniqueness, resource exclusions, inventory, manifest, and six source/configuration fingerprints pass. The global Node/npm remain 24.18.0/11.16.0; global node.exe SHA-256 remains 9a4eb5f1c29c6a2e93852ead46b999e284a6a5ca8bab4d4e241d587d025a52de. Original eight commands and six native observations remain unchanged. No native batch ran. The required S3 slice and different integrated reviewer are not invoked at this failed setup barrier, and no historical successful runtime/typecheck result substitutes for the missing clean-start result.
+
+Primary disposition: preserve partial checkout success and all failure history, mark RD-003 Blocked, and request only a bounded allowance to remove the verified empty task directory and rerun the unchanged clean-start command with network permission. No command, expected outcome, source/fixture/manifest byte, dependency pin, or original budget is silently changed. Successful acquisition must still precede setup acceptance, both implementation reviews, bounded cleanup, and renewed documentation closure; M1-01 remains unselected.
+
+RD003-REPRO-BLOCKED-VALIDATION-001: proportional blocked-handoff checks pass: 539 relative links and 128 anchors across twelve affected documents; all ten PowerShell command blocks and unchanged inline scanner JavaScript parse; the original eight command blocks and six native records match HEAD; the manifest, six fixture contents, and dependency/configuration fingerprints remain unchanged. HEAD remains f34cc5daafb0ac2b2c6ce743fa32048ebc643fe9, the Git index is empty, all 25 application tasks remain Not started, no active lease exists, and git diff --check passes. The only non-documentation change is the exact .gitattributes addition. This is validation of the blocked handoff, not renewed roadmap Verification or clean-start success.
+
+Documentation impact: the existing README, documentation index, roadmap, requirements/product status summaries, delivery/evaluation notes, plan/progress indexes, progress record, and this same active plan now distinguish the passing LF correction from unverified clean-start acquisition. README links directly to the current procedure and states its present permission/precondition barrier. No requirement row, Accepted decision, manifest version, native evidence, dependency pin, or application contract changes. The plan remains unarchived until the owning task and documentation closure pass. No commit or push occurred.
+
 ## Validation and Acceptance
-Historical planning acceptance was limited to the complete plan, valid task activation/status/navigation, unchanged implementation/configuration, and its fresh planning review. Task completion requires the separate execution acceptance below; those gates are now satisfied by the recorded evidence.
+Historical planning acceptance was limited to the complete plan, valid task activation/status/navigation, unchanged implementation/configuration, and its fresh planning review. The original execution met the separate acceptance gates below, as recorded in its preserved closure evidence. The reopened correction must also satisfy procedure 003's checkout, clean-start, review, cleanup, and documentation gates before RD-003 is Complete again.
 
 Execution acceptance requires:
 
@@ -1355,7 +1527,7 @@ Documentation impact: the roadmap, root/project indexes, requirements/delivery c
 
 Historical snapshot at `RD003-SYNTHESIS-002` (superseded by the accepted setup/native observations above): execution stopped at that earlier barrier. The versioned manifest was not authored; its path/version, six contents, and mappings remain proposed in outline 002. No worker packet or write lease was issued, no task-local runtime/browser was provisioned, and no native case ran. There are no task-created evaluation processes or runtime files to clean up. Required fresh research checkpoints, S3 slice review, integrated review, roadmap Verification, and completion/archive remain unperformed. The unused critical-researcher follow-up does not authorize bypassing the exhausted analyst barrier.
 
-Historical documentation impact at that synthesis stop: this plan preserves accepted source/static evidence and the rejected cleanup condition; the roadmap records Blocked, and root/documentation/requirements/delivery/plan/progress status summaries are reconciled. No requirement row, ADR, evaluation authority, application/developer command, dependency pin, or global installation changes because no scan literal passed its acceptance barrier and no native execution occurred. Historical planning and RD-002 completion evidence remain unchanged. Keep the [progress record](../../progress/rd-003-scan-evaluation-boundary.md) a summary of accepted material checkpoints.
+Historical documentation impact at that synthesis stop: this plan preserves accepted source/static evidence and the rejected cleanup condition; the roadmap records Blocked, and root/documentation/requirements/delivery/plan/progress status summaries are reconciled. No requirement row, ADR, evaluation authority, application/developer command, dependency pin, or global installation changes because no scan literal passed its acceptance barrier and no native execution occurred. Historical planning and RD-002 completion evidence remain unchanged. Keep the [progress record](../progress/rd-003-scan-evaluation-boundary.md) a summary of accepted material checkpoints.
 
 `RD003-BLOCKED-HANDOFF-001` (2026-08-30): primary validation passed 470 relative links and 100 anchors across the nine changed/new documents, all 15 plan sections and nine invariants, JSON configuration parsing, final-newline/trailing-whitespace checks, and `git diff --check`. Readback confirms RD-003 Blocked, all 25 application tasks Not started, M1-01 unselected, unchanged toolchain files and global Node/npm 24.18.0/11.16.0, empty Git index, HEAD `f16c6f0`, and no source/test/fixture/evaluation directory, task-local provisioning directory, or active lease. The primary inspected the actual tracked diff and authored plan/progress changes. This validates the blocked handoff, not roadmap Verification or task completion; the plan remains unarchived. No commit or push occurred.
 
@@ -1388,3 +1560,7 @@ The task's downstream interface is data: exact fixture content, expected native 
 2026-08-30: Accepted the different fresh integrated review and resolved its documentation-only Minor in the concept/context and delivery summaries. Expanded closure inventory to twelve documents, one unchanged manifest, and six fixtures; original commands/evidence/budgets remain intact.
 
 2026-08-30: Completed the unchanged contained cleanup and post-cleanup validation, reconciled all twelve affected documentation owners, marked only RD-003 Complete, and archived this same plan with repaired links. The manifest, six fixtures, eight frozen commands, and six accepted observations are unchanged. M1-01 remains unselected; no commit or push occurred.
+
+2026-08-30: Reopened RD-003 for two independently verified reproducibility findings after owner direction. Added proposed procedure 003 and exact seven-artifact LF policy, preserving historical commands/native outcomes and budgets. Fresh full-artifact review precedes one guarded follow-up setup; no source or fixture bytes have changed.
+
+2026-08-30: Accepted fresh full-artifact review and resolved its two wording Minors. The guarded worker added only .gitattributes and passed checkout verification, then stopped at the first clean-start download on socket-permission denial. Primary closed the lease compliantly, inspected exact files and empty generated directories, passed read-only structural/source checks, preserved the failed attempt, and reconciled Blocked status without retry, cleanup, further reviewer, or budget reset.
