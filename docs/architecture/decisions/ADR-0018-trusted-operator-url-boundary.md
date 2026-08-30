@@ -2,6 +2,7 @@
 
 - **Status:** Accepted
 - **Decision date:** 2026-08-27
+- **Clarified:** 2026-08-30 — the owner reaffirmed the developer-operated portfolio boundary for URL choice and run provenance; no URL approval, classification, or component-withholding subsystem is required.
 - **Supersedes for the MVP:** [ADR-0017](ADR-0017-authorized-public-page-scan-boundary.md)
 
 ## Context
@@ -29,6 +30,7 @@ Accept option 3 for the portfolio MVP. This record supersedes ADR-0017 as the cu
 ### Trusted operator input
 
 - One `PageAnalysisRun` accepts exactly one operator-entered public HTTPS URL. Authorization, public reachability, and trust are operator responsibilities and supported-use assumptions, not an application admission workflow.
+- For this supported developer-operated use, the operator chooses a non-sensitive URL suitable for retention in the local run record, including the ordinary redirect destination. Retain the standards-normalized requested and actually observed final URL, including path, query, and fragment, only as run provenance. The application performs basic HTTPS/credential validation; it does not certify every URL component as non-sensitive, request another confirmation, classify destinations, or add a component-withholding/equality mechanism. This is an explicit supported-use assumption, not a guarantee against an operator supplying sensitive or private URLs. It does not permit retaining credentials or move URL identity into Finding evidence or provider payloads. An unobserved final URL is not replaced by the requested URL, and an invalid or credential-bearing final URL cannot be retained as valid completed provenance.
 - The application shows the limitation beside target entry and again where results are interpreted: only pages the operator is authorized to analyze and trusts are supported. It does not require a separate attestation or confirmation control, independently prove ownership, classify destination addresses, or claim that the target is harmless.
 - The MVP supports no credentials, authenticated browser state, client certificates, custom authorization headers, personal browser profile, private-page workflow, uploaded HTML, or local-file target.
 - Hostile or untrusted pages and production-scale arbitrary-URL scanning are unsupported. Documentation and the future interface must state that limitation without presenting it as technical isolation.

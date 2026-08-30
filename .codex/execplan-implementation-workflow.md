@@ -233,6 +233,16 @@ For each work slice whose preflight result is `MISSING` or `REGRESSION`:
 
 This is still one observable Red-Green-Refactor cycle at a time. “Coherent” changes the handoff granularity, not the order: production code never precedes an accepted Red when behavior is missing or regressed.
 
+### First-module Red
+
+Apply [ADR-0024's first-module exception](../docs/architecture/decisions/ADR-0024-milestone-slice-tdd-with-independent-ownership.md#first-module-red-exception) when preflight confirms that the agreed production module/export does not yet exist. Verify the required toolchain and focused runner independently first; reuse only fresh evidence. Freeze the intended import path/callable in the existing packet's acceptance contract and expected-result fields. No new packet field, worker phase, or setup route is required.
+
+The test worker writes all behavioral tests for the bounded slice without production code or fallback behavior. The coordinator may accept the precise expected missing-module/export failure as **initial Red — missing production callable**, recording that the blocked behavioral assertions have not executed. An existence-only test suite, wrong path, broken dependency/runtime, syntax error, unrelated failure, or deliberately skipped/conditional assertions remains invalid. A production stub is neither needed nor authorized.
+
+After the normal test-lease closure and acceptance, the separate Green worker must make every unchanged behavioral test execute and pass and pass the independent strict typecheck. Import success alone is insufficient. Ordinary behavior-based Red applies once the callable exists; all other readiness, ownership, lease, evidence-reuse, correction, and review rules remain in force.
+
+### Non-behavioral setup
+
 A separately planned `setup` assignment may occur before a dependent behavior-bearing work slice. The coordinator records `TDD: Not applicable`, the reason no meaningful executable Red exists, and the structural, semantic, manual, or negative evidence that replaces it. `code_worker` receives a normal guarded `setup` packet and lease directly; no test-worker preflight or Green phase is created. Setup must not smuggle production behavior into configuration work and must have its own observable structural, build, or runtime check followed by the ordinary proportional review route.
 
 ## Corrections and exceptions
@@ -303,6 +313,10 @@ EXISTING_AND_COVERED, EXISTING_BUT_UNCOVERED, MISSING, REGRESSION, PARTIAL,
 CONFLICTING, or UNKNOWN. Existing covered behavior needs no write. Existing uncovered
 behavior receives a guarded evidence lease for a passing characterization. Missing or
 regressed behavior receives one coherent guarded Red, followed sequentially by Green.
+For a genuinely absent first module/export, apply this guide's First-module Red
+conditions: verify the environment, write the complete slice tests, and identify the
+expected missing-callable failure honestly; Green must execute every behavioral test
+unchanged and pass the independent strict typecheck. Do not add a production stub.
 PARTIAL routes only its coordinator-confirmed explicit gap through Red and Green;
 CONFLICTING or UNKNOWN stops for coordinator triage.
 

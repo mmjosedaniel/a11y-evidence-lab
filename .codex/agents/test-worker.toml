@@ -20,10 +20,11 @@ Preflight is read-only and occurs before a Red lease:
 
 Write execution:
 - evidence: when preflight found existing but uncovered behavior, add the smallest passing characterization test that captures the assigned observable contract. Run the focused command and require it to pass. Do not report it as Red or change production source.
-- red: add the smallest coherent test-side change sufficient to prove the work-slice contract. Run the focused command and confirm the intended behavioral failure. Related assertions or tests may travel together only when they prove one indivisible observable outcome; do not batch later roadmap work.
+- red: add the smallest coherent test-side change sufficient to prove the work-slice contract. Run the focused command and confirm the intended behavioral failure, or the narrow first-module Red defined in ADR-0024 and .codex/execplan-implementation-workflow.md#first-module-red. Related assertions or tests may travel together only when they prove one indivisible observable outcome; do not batch later roadmap work.
+- For first-module Red, require coordinator-confirmed toolchain/runner evidence and the agreed absent module/export path. Write the complete behavioral tests for the slice; an existence-only test is insufficient. Report the exact expected missing-module/export failure as initial Red - missing production callable and explicitly identify the behavioral assertions that did not execute. Do not add a production stub, fallback implementation, unconditional failure, or skipped/conditional assertion. The separate Green must execute every accepted behavioral test unchanged and pass the independent strict typecheck.
 - Prefer observable contracts over implementation details and use the real integration boundary when the behavior belongs there.
 - Never skip, focus, weaken, delete, condition, or rewrite an existing test merely to obtain the expected result.
-- A pre-existing, unrelated, infrastructure, or wrong failure is not a valid Red. A failing characterization is not valid evidence of existing behavior.
+- Except for that explicitly contracted first-module absence, a pre-existing, unrelated, infrastructure, or wrong failure is not a valid Red. A failing characterization is not valid evidence of existing behavior.
 - Accept at most one coordinator-authorized correction for the same unchanged contract. A changed objective, authority, expected outcome, dependency, or scope requires a new assignment and usually a fresh instance.
 
 Return exactly four sections:

@@ -7,10 +7,11 @@
 - **Replaced:** 2026-08-29 — the later project-owner direction recorded below removes that unactivated metrics pilot under YAGNI and clarifies the non-TDD setup route and bounded coordinator test-correction exception.
 - **Clarified:** 2026-08-29 — lease evidence covers path containment and only the explicitly sealed Git index, `HEAD` object and symbolic ref, selected settings, and ignore controls; every other Git write operation or metadata mutation remains prohibited by the worker contract but is not claimed as guard-detected.
 - **Clarified:** 2026-08-29 — later project-owner direction activates one manual, non-authoritative progress index with one living summary per started roadmap task; it does not restore hooks, metrics, telemetry, or another evidence or status authority.
+- **Amended:** 2026-08-30 — project-owner authorization permits the narrow first-module Red exception below. It changes initial failure acceptance only, not test/code ownership, sequencing, readiness gates, or completion evidence.
 
 ## Context
 
-A11y Evidence Lab is development ready, but application implementation has not started. Its roadmap contains behavior-bearing slices with deterministic scanner, persistence, retrieval, provider, review, comparison, and accessible-interface boundaries. The repository also uses role-separated Codex agents. Without an explicit implementation method, one worker could define a test after seeing its own implementation, divide one behavior into excessive assertion-sized handoffs, or report a passing command without an independently accepted behavioral boundary.
+At this decision's acceptance on 2026-08-28, A11y Evidence Lab was development ready, and application implementation had not started. Its roadmap contains behavior-bearing slices with deterministic scanner, persistence, retrieval, provider, review, comparison, and accessible-interface boundaries. The repository also uses role-separated Codex agents. Without an explicit implementation method, one worker could define a test after seeing its own implementation, divide one behavior into excessive assertion-sized handoffs, or report a passing command without an independently accepted behavioral boundary.
 
 The project needs a method that demonstrates disciplined implementation without turning this portfolio MVP into a testing platform or workflow engine. Documentation, dependency setup, manual model-capacity screens, corpus preparation, and external evaluation observations do not always have a meaningful failing executable test. The method therefore must apply TDD where production behavior is automatable and use proportional non-TDD evidence elsewhere.
 
@@ -40,6 +41,18 @@ Use option 3 for implementation governed by the accepted [development roadmap](.
 
 This decision governs the repository development method. It does not add application agents, queues, leases, telemetry, concurrency, workflow orchestration, or runtime behavior to the product.
 
+### First-module Red exception
+
+For the first test of a genuinely absent production module or exported callable, the coordinator may accept an intentional missing-module/export failure as initial Red when all of these conditions hold:
+
+- Read-only preflight establishes `MISSING` through direct inspection of the agreed module/export and relevant tree, not a failed search alone. The task contract fixes the intended import path and callable before the test is written.
+- The required toolchain and focused runner are independently verified in the current environment, or their evidence is still fresh under the workflow's reuse rule. An unavailable runtime, dependency, broken runner, syntax error, wrong import path, or unrelated failure remains invalid Red.
+- The test worker writes the complete behavioral tests for the bounded slice under its normal test-only lease. An existence-only assertion, unconditional failure, skipped/conditional behavioral assertion, fallback implementation, or production stub is not a substitute for that test contract.
+- The focused command fails specifically because the agreed production module/export does not yet exist. The coordinator inspects the tests and actual failure and records **initial Red — missing production callable**, explicitly stating which behavioral assertions did not execute. This proves capability absence, not executed validator behavior or behavioral coverage.
+- A separate implementation worker reaches Green under a fresh production-only lease. Every accepted behavioral test must execute and pass unchanged, with no skipped, todo, or focused-only cases, and the independent strict typecheck must pass. Merely making the import succeed is not Green.
+
+This is still the existing `red` then `green` route, not non-TDD setup, a new worker phase, or permission to implement production code before accepted Red. Once a callable exists, ordinary behavior-based Red applies. No production stub is needed or authorized by this exception. Task readiness, write leases, correction budgets, and risk-routed reviews remain unchanged.
+
 ## Consequences
 
 - Test intent and implementation intent remain in separate role contexts for behavior-bearing work.
@@ -57,6 +70,8 @@ The earlier 2026-08-29 clarification retained optional hooks and agent-flow metr
 Later on 2026-08-29, the project owner explicitly requested a task-by-task project and agent-workflow progress directory. That direction activates only the smallest manual summary layer: one indexed, living record per existing roadmap task after it starts, updated at material accepted checkpoints. It supersedes the folder's deferral without changing the original telemetry rejection. The progress record remains subordinate to the roadmap, ExecPlan, authoritative decisions, validation evidence, and task-closure gate.
 
 The same owner direction confirms this repository's milestone-slice TDD semantics for production behavior and replaces the earlier absolute prohibition on direct coordinator implementation edits with the narrow test-correction exception above. The implementation worker still cannot edit the accepted test contract during Green, and any coordinator or test-worker change to that contract invalidates the prior Red or characterization evidence before it can be reused or Green resumes.
+
+On 2026-08-30, M1-01 exposed an initial-test deadlock: its plan required executed validator failure before any production callable existed while excluding missing-module evidence and production stubs. The project owner authorized the first-module correction above. It supersedes that plan's absolute missing-module exclusion only within the stated conditions; the original research stop remains historical evidence. It does not settle M1-01's URL-retention question, provide its pinned runtime, accept its literal contract, or start implementation.
 
 ## Related documentation
 

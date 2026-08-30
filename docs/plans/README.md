@@ -8,6 +8,8 @@ None.
 
 ## Completed plans
 
+- [M1-01 — Define the minimum run and scan contracts](completed/m1-01-run-and-scan-contracts.md) — **Complete** on 2026-08-30 (UTC). Pure runtime validators, 58 passing tests, strict typechecking, both R3 checkpoints, corrected S3 and different integrated reviews, and documentation closure. Original stops and corrections are preserved.
+
 - [RD-003 — Freeze the walking-skeleton evaluation boundary](completed/rd-003-scan-evaluation-boundary.md) — **Complete** on 2026-08-30 (UTC), including verified LF checkout and clean-start corrections, independent reviews, cleanup, and preserved original evidence/failure history.
 
 - [RD-002 — Select the minimum development toolchain literals](completed/rd-002-minimum-development-toolchain-literals.md) — **Complete** on 2026-08-30 (UTC). Preserves its R2 selection, guarded non-TDD setup, independent reviews, and verification/closure evidence.

@@ -8,7 +8,7 @@ A11y Evidence Lab.
 
 **Document status:** Product-intent and planning-context summary, reviewed on 2026-08-30. This document is not acceptance authority; individual directions are Accepted, Proposed, Deferred, or Superseded only where the canonical requirements baseline or an ADR records that status.
 
-**Repository stage:** Development ready through OD-025 on 2026-08-28. Implementation follows the derived [development roadmap](DEVELOPMENT_ROADMAP.md). RD-002 is Complete. RD-003 is Complete, including verified LF checkout and clean-start corrections, independent reviews, and final cleanup. Its original native observations remain accepted. M1-01 is dependency-ready but unselected. No application implementation has started.
+**Repository stage:** Development ready through OD-025 on 2026-08-28. Implementation follows the derived [development roadmap](DEVELOPMENT_ROADMAP.md). RD-002 is Complete. RD-003 is Complete, including verified LF checkout and clean-start corrections, independent reviews, and final cleanup. Its original native observations remain accepted. M1-01 [contract execution](plans/completed/m1-01-run-and-scan-contracts.md) is Complete after both R3 checkpoints, guarded TDD, corrected S3 review, integrated review and documentation closure. The pure run/scan validators and 58 focused tests pass strict verification; integrated review and documentation closure passed. No service, real scanning, persistence, provider call, or UI is implemented.
 
 ## Concept
 

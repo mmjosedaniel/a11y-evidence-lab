@@ -33,6 +33,8 @@ Candidate technologies and architecture options not covered by these records rem
 
 ## Partial amendments to current decisions
 
+ADR-0024's [2026-08-30 first-module Red amendment](ADR-0024-milestone-slice-tdd-with-independent-ownership.md#first-module-red-exception) permits an intentional missing production module/export as initial Red under a verified environment and complete bounded behavioral tests. It preserves separate Green, strict typechecking, write ownership, and all other readiness gates; it adds no production stub or workflow phase.
+
 ADR-0020 narrows ADR-0005, ADR-0006, ADR-0014, and ADR-0015 only for MVP setup and attempt-time availability: the developer installs Ollama and pulls `embeddinggemma` before retrieval in either mode, additionally pulls `qwen3.5:4b` only for Local generation, and configures the Groq credential only for Groq generation. A11y Evidence Lab does not manage those artifacts or run separate provider preflights. The earlier records otherwise remain current within their stated evaluation scope.
 
 ADR-0023 supersedes only ADR-0005's requirement to disable or isolate unrelated runtime networking and its system-wide zero-egress release gate, plus ADR-0012's requirement that all Local-mode operations show no unapproved non-loopback egress and its description of Groq as the only external operation. ADR-0005 and ADR-0012 otherwise remain current. Groq remains the only external generation path; trusted-page navigation and developer-managed model acquisition are separate network operations.
