@@ -4,7 +4,7 @@
 
 - **Repository stage:** Development ready
 - **Roadmap status:** Accepted implementation sequence on 2026-08-28 through OD-025
-- **Implementation status:** RD-001, RD-002, RD-003, M1-01 and M1-02 Complete; 182 product tests and strict typechecking pass. Internal real scanning and minimization now pass implementation verification; UI and HTTP integration remain unimplemented.
+- **Implementation status:** RD-001, RD-002, RD-003, M1-01, M1-02 and M1-03 Complete. The accepted M1-03 integrated run passed 290 tests and independent strict typechecking. UI and HTTP scan integration remain unimplemented.
 - **Latest completed task:** [M1-03](plans/completed/m1-03-real-scan-and-evidence.md) is Complete after owner-authorized execution and verified closure. Both scanner slices and their S3 reviews are accepted. All 290 integrated tests and independent strict typechecking pass, including the failed-launch residue regression. The different final integrated critical review, exact task-owned runtime cleanup and documentation closure passed. M1-04 and M1-05 remain unselected.
 - **Scope:** The accepted local portfolio MVP only
 
@@ -191,7 +191,7 @@ M5 is semantically dependent only on completed scan evidence from M1. It is sequ
 ### M1-03 — Implement the real exact-three-rule scan and minimized evidence
 
 - **Parent milestone / role / status:** M1 / service and validation / **Complete**.
-- **Readiness:** Owner-authorized exact-task execution follows completed M1-01/RD-003 dependencies, Accepted or explicitly Deferred applicable authorities and unchanged six-state inputs. The R3 literal/command barrier, separately guarded normalization and scan TDD, managed-browser prerequisite and both S3 reviews are accepted. Both scanner slices and their S3 reviews are accepted. All 290 integrated tests and independent strict typechecking pass, including the failed-launch residue regression. The different final integrated critical review, exact task-owned runtime cleanup and documentation closure passed. M1-04 and M1-05 remain unselected.
+- **Readiness:** Owner-authorized exact-task execution follows completed M1-01/RD-003 dependencies, Accepted or explicitly Deferred applicable authorities and unchanged six-state inputs. The R3 literal/command barrier, separately guarded normalization and scan TDD, managed-browser prerequisite and both S3 reviews are accepted. All 290 integrated tests and independent strict typechecking pass, including the failed-launch residue regression. The different final integrated critical review, exact task-owned runtime cleanup and documentation closure passed. M1-04 and M1-05 remain unselected.
 - **Execution plan:** [M1-03 — Real scan and evidence](plans/completed/m1-03-real-scan-and-evidence.md); concise [progress summary](progress/m1-03-real-scan-and-evidence.md).
 - **Objective:** Execute the accepted Playwright/axe path and normalize the complete result into the M1 contract.
 - **Inputs, dependencies, and scheduling:** Depends on M1-01 and the RD-003 literals. Safely parallelizable with M1-02 and M1-04 against the frozen contract; joins at M1-05.
