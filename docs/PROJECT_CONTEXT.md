@@ -64,7 +64,7 @@ The owner-authorized [M1-02 execution](plans/completed/m1-02-local-service-and-a
 
 The owner-selected task [M1-03 — Real scan and evidence](plans/completed/m1-03-real-scan-and-evidence.md) is Complete after owner-authorized execution and verified closure. Both scanner slices and their S3 reviews are accepted. All 290 integrated tests and independent strict typechecking pass, including the failed-launch residue regression. The different final integrated critical review, exact task-owned runtime cleanup and documentation closure passed. At M1-03 closure, M1-04 and M1-05 were unselected.
 
-[M1-04 — Target and results UI](plans/m1-04-target-and-results-ui.md) is In progress for owner-requested planning only, with M1-01 Complete as its sole declared dependency. UI implementation, exact client literals and browser verification remain future execution work. M1-05 remains unselected.
+[M1-04 — Target and results UI](plans/m1-04-target-and-results-ui.md) is Blocked on actual Narrator and browser-menu zoom evidence. All 35 UI tests, strict typechecking and build pass; fresh S3 review found no supported implementation defect. Full regression, final integrated review and closure remain pending; M1-05 is unselected.
 
 ## Documentation navigation
 

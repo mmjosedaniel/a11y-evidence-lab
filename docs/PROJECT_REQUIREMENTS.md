@@ -17,7 +17,7 @@
 - **Implementation status:** RD-002 toolchain, RD-003 evaluation freeze, M1-01 runtime contracts, M1-02 service/storage and M1-03 real scanning/minimized evidence are Complete. All 290 integrated tests, strict typechecking, required reviews and documentation closure pass. HTTP scan integration and UI remain unimplemented.
 - **Last reviewed:** 2026-08-31 (UTC)
 - **Latest completed task:** [M1-03](plans/completed/m1-03-real-scan-and-evidence.md) is Complete after owner-authorized execution and verified closure. Both scanner slices and their S3 reviews are accepted. All 290 integrated tests and independent strict typechecking pass, including the failed-launch residue regression. The different final integrated critical review, exact task-owned runtime cleanup and documentation closure passed. At M1-03 closure, M1-04 and M1-05 were unselected.
-- **Current task:** [M1-04](plans/m1-04-target-and-results-ui.md) is In progress for planning only. The Accepted UI requirements and M1-01 contract remain unchanged; no UI behavior is implemented by this activation. M1-05 remains unselected.
+- **Current task:** [M1-04](plans/m1-04-target-and-results-ui.md) is Blocked on actual Narrator and browser-menu zoom evidence. All 35 UI tests, strict typechecking and build pass; fresh S3 review found no supported implementation defect. Full regression, final integrated review and closure remain pending; M1-05 is unselected.
 
 This document is the canonical index and global authority for the current product goal and the modular, stage-scoped requirements baseline. The linked requirement modules collectively define the first portfolio slice and later distributable-product obligations; none describes implemented behavior. Requirement status has the following meaning:
 

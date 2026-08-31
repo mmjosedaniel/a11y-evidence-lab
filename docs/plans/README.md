@@ -4,7 +4,7 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-- [M1-04 — Target and results UI](m1-04-target-and-results-ui.md) — **In progress, planning only** on 2026-08-31 (UTC). The exact owner request activates plan preparation over the completed M1-01 contract. Literal/command review, conditional browser readiness and guarded frontend-visual TDD remain future execution work; M1-05 is unselected.
+- [M1-04 — Target and results UI](m1-04-target-and-results-ui.md) is Blocked on actual Narrator and browser-menu zoom evidence. All 35 UI tests, strict typechecking and build pass; fresh S3 review found no supported implementation defect. Full regression, final integrated review and closure remain pending; M1-05 is unselected.
 
 ## Completed plans
 

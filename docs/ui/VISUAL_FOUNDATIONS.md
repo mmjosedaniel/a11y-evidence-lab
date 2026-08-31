@@ -1,7 +1,7 @@
 # UI visual foundations
 
-- **Status:** Defined reversible design intent; not implemented
-- **Last reviewed:** 2026-08-29
+- **Status:** Reversible design intent; M1-04 candidate implementation under verification
+- **Last reviewed:** 2026-08-31
 - **UI documentation index:** [UI design documentation](README.md)
 
 ## Document role

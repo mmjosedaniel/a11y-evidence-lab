@@ -2,18 +2,29 @@
 
 This ExecPlan is a living document. Maintain `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` as work proceeds. This document must be maintained in accordance with `PLANS.md`.
 
-This plan owns only [M1-04 — Present accessible target entry and complete results](../DEVELOPMENT_ROADMAP.md#m1-04--present-accessible-target-entry-and-complete-results). The owner selected repository review and plan creation, not implementation. The roadmap records `In progress` for planning; no UI, browser acquisition, worker write, or M1-05 integration is authorized by this document. Obtain an explicit instruction to execute M1-04 before entering the future literal and implementation sequence.
+This plan owns only [M1-04 — Present accessible target entry and complete results](../DEVELOPMENT_ROADMAP.md#m1-04--present-accessible-target-entry-and-complete-results). The original request selected planning only. On 2026-08-31 the owner explicitly authorized execution, bounded research, necessary setup, implementation, verification, documentation and task-owned cleanup, subject to all existing gates. The task is now `Blocked` on actual heard Narrator and browser-menu zoom observations. The five-file frontend Green is accepted after all 35 unchanged browser tests, independent strict typechecking and the production build passed; fresh S3 review found no supported implementation defect but cannot accept the missing manual evidence. Full sequential regression, different final integrated review and closure remain pending. Earlier failures and consumed budgets remain recorded; M1-05, commits and pushes remain unauthorized. The execution record supplements rather than replaces the accepted planning and execution history.
 
 ## Progress
 
 - [x] (2026-08-31 16:20Z) Reviewed the current repository, M1-04's routed authorities, dependency readiness, agent workflow, and frontend-quality overlay. Recorded `M104-BASELINE-001` below.
 - [x] (2026-08-31 16:20Z) Primary planning synthesis: `DRAFT READY` for this plan's structure and boundaries only. No decision-critical client mechanics or future commands are selected; the pending `M104-LITERALS-001` barrier remains explicit.
 - [x] (2026-08-31 16:26Z) Fresh R2 final planning review returned `PASS` with no findings; primary documentation/preservation validation passed and the planning checkpoint/progress summary were accepted. See `M104-PLAN-001` below.
-- [ ] Obtain owner authorization to execute this exact task; recheck the tree, permissions, dependencies, runtime, and no active lease.
-- [ ] Freeze `M104-LITERALS-001` through its R3 research, synthesis, and separate pre-draft/final checkpoints; accept the reuse and UI evidence capsules.
-- [ ] If needed, complete bounded managed-browser/readiness setup under a guarded non-TDD assignment and accept its evidence.
+- [x] (2026-08-31) Received explicit exact-task execution authorization. Fresh HEAD `6d0361d1b7126ee409eb25000027c58bb97f78b3`, branch `codex/m1-04-target-and-results-ui`, clean initial worktree/index; Node 24.20.0 and Python 3.12.10 confirmed. No active lease, client, build output or task browser/scratch roots exist.
+- [x] (2026-08-31) Accepted `M104-ENTRY-002`: current routed authorities/dependency and evaluation freeze confirmed; all nine installed direct pins and six fixture byte sequences match. Fresh nonbrowser suite passed 202 tests with no failures/skips/cancellations; independent strict typecheck exited 0. Matching Chromium remains absent.
+- [x] (2026-08-31) Accepted `M104-LITERALS-001`, `M104-REUSE-001` and `M104-VISUAL-001` after mandatory R3 synthesis, separate fresh pre-draft/final PASS and primary preservation/document validation. One pre-draft correction and one of two final-artifact correction cycles were consumed. Setup is next.
+- [x] (2026-08-31) Accepted M104-SETUP-01 after the sole corrected generic probe passed, primary inventory/preservation/teardown checks and fresh S1 review PASS with no findings. Both setup leases closed compliantly; browser retained for UI verification, all three scratch roots empty. Both research-artifact correction cycles and the setup correction are consumed.
 - [ ] Complete `M104-UI-01` through read-only preflight, independent test ownership, minimum frontend Green, real-browser evidence, and S3 review.
 - [ ] Complete different fresh integrated review, exact owned-artifact cleanup, all task verification and documentation closure; only then mark M1-04 Complete and archive this plan.
+- [x] (2026-08-31) Reconciled the exhausted test-correction allowance: the owner authorized one additional bounded missing-module/axe-import correction, with no automatic further correction. At that checkpoint, both earlier guarded test attempts were RED INVALID, all 35 tests were behaviorally unexecuted, and strict typechecking exposed the axe import issue described in M104-UI-RED-ATTEMPT-2. No production UI or accepted Red existed.
+
+- [x] (2026-08-31) Verified the owner-authorized diagnostic/import correction and compliant lease closure; precise missing-App failure and only expected missing-App strict error remain.
+- [x] (2026-08-31) Received owner authorization for the separately reproduced null-envelope test setup-ordering correction, preserving all 35 tests and assertions. Fresh guarded correction and Red acceptance remain required.
+
+- [x] (2026-08-31) Accepted M104-UI-RED-ACCEPTED after the authorized ordering correction, precise missing-callable result, complete test inspection and compliant closure. All 35 UI assertions remain unexecuted; separate Green is next.
+
+- [x] (2026-08-31) Accepted M104-UI-GREEN-ACCEPTED after the sole ordinary frontend correction added only the installed Vite CSS declarations reference. All 35 unchanged browser tests, strict typecheck and first production build passed. Primary reproduced hashes/inventories and verified compliant terminal lease closure. No ordinary frontend correction remains.
+- [x] (2026-08-31) Accepted the bounded manual-session scratch recovery after exact ownership reconciliation and compliant closure; all three scratch roots were empty before the same-command visible-desktop retry.
+- [ ] Obtain actual heard Narrator and browser-menu 200% observations. Fresh S3 review found no supported implementation defect but returned BLOCKED for this evidence. Computer Use cannot bind the visible test browser after its supported recovery attempt; the owner has been asked to observe the bounded manual session.
 
 ## Surprises & Discoveries
 
@@ -49,9 +60,9 @@ This plan owns only [M1-04 — Present accessible target entry and complete resu
 
 ## Outcomes & Retrospective
 
-Planning is complete after fresh independent review returned `PASS` with no findings and primary documentation/preservation validation passed. Current evidence establishes a stable backend/domain baseline and an absent client, not M1-04 behavior. The smallest intended outcome is an accessible React projection that can be integrated at M1-05 without changing the stored run contract. No production source, tests, dependency, configuration, fixture, browser runtime, or service behavior changed. M1-04 remains In progress for planning only; exact-task execution authorization is the next boundary.
+Planning, R3 literals/reuse/visual, setup/S1, initial Red and separate frontend Green are accepted. The five-file frontend executes and passes all 35 unchanged browser tests, including axe, keyboard/focus and narrow reflow; independent strict typechecking and the production build pass. Primary inspected the actual source and both screenshots and reproduced source, test and generated-output identities. Fresh S3 review found no supported implementation defect and independently checked source/test/build/screenshot identities, but returned BLOCKED because actual heard Narrator and browser-menu 200% observations are absent. The sole ordinary frontend correction and earlier test/research/setup allowances are consumed; no source correction is requested by this review. Full sequential regression, different final integrated review and task cleanup/closure remain pending behind the manual evidence gate.
 
-The main planning constraints are an honest pre-integration entry, complete untruncated evidence presentation, safe transient UI ownership, and reproducible browser proof. Exact mechanics and proof commands remain unresolved rather than being delegated for a worker to invent. Keep later checkpoint entries concise and outcome-based.
+The main constraints are an honest pre-integration entry, complete untruncated evidence presentation, safe transient UI ownership, and reproducible browser proof. R3 synthesis and the fresh pre-draft review now passed after one supported outline correction. The primary-authored literal block below resolves the mechanics and commands; the different fresh final research review now passed and the primary accepted the literal barrier before setup. Keep later checkpoint entries concise and outcome-based.
 
 ## Purpose / Big Picture
 
@@ -160,7 +171,9 @@ The approval boundary is existing Accepted authorities and exact-task execution 
 
 ### Discovery, criteria and outputs
 
-The candidate set is `UNRESOLVED`. After execution authorization, one bounded non-ranking discovery pass may identify credible minimal client seams and test-transport mechanisms against the installed code and primary documentation where needed. It must not rank them. Freeze the candidate set, critical evidence dimensions, hard gates, and invariant packet before comparative research; do not require three alternatives or one agent per candidate.
+The one permitted non-ranking discovery pass is complete (2026-08-31). Repository inspection found no client; the pure `validateRun` boundary returns copied, deeply frozen records; service reads and internal scan outcomes are distinct envelopes; only health/read HTTP routes exist. Installed React/Vite/Playwright permit two bounded candidate compositions: **C1**, an App with injected Analyze/reopen asynchronous collaborators and App-owned transient operation/selection state; **C2**, a controlled App with a parent-owned admitted run and operation state plus intent callbacks. Both require an unavailable production bootstrap until M1-05 and actual production-component browser tests. Discovery makes no recommendation.
+
+The comparative candidate set C1/C2, criteria below, L4.1–L4.6 evidence dimensions and I4.1–I4.9 invariants are frozen before research. Hard gates are unchanged M1 records/privileged boundaries, truthful absent integration, one operation owner and immutable admission/identity, complete evidence and accessibility semantics, existing dependencies only, and bounded reproducible commands/effects. A gate failure disqualifies a candidate unless new evidence removes that exact failure. R3 remains the route. The single critical researcher owns admission/identity/async comparison. One optional technology researcher is now justified by the distinct unresolved Vite-to-browser transport and manual screen-reader/zoom evidence prerequisites; it cannot select application identity semantics. Primary supplies local runtime/environment facts. No worker writes or setup may precede synthesis and both fresh research checkpoints.
 
 Compare requirement completeness, trust-boundary preservation, unchanged aggregate semantics, truthful M1-04/M1-05 separation, testability in the existing stack, browser evidence, recoverability of generated effects, and the smallest maintenance burden. A hard-gate failure disqualifies a candidate; record the evidence and reversal condition without unnecessary candidate-local expansion. Do not introduce numeric scoring without a real decision need.
 
@@ -179,7 +192,7 @@ Required artifact-local outputs are the selected literals with direct evidence/p
 
 ### Cumulative invariants
 
-All invariants are pending for the literal decision. Planning review checks that they are present and correctly deferred; literal pre-draft/final `critical_research_reviewer` instances check the whole packet, and implementation `critical_reviewer` checks the corresponding actual proof. Re-run the complete applicable packet after every material revision and every R3 correction.
+All invariants passed at the literal pre-draft contract checkpoint after its single supported outline correction. The different fresh final `critical_research_reviewer` must check the whole authored packet; implementation `critical_reviewer` checks the corresponding actual proof. The table's pending evidence remains runtime or final-artifact proof, not unresolved semantics. Re-run the complete applicable packet after every material revision and every R3 correction.
 
 | ID | Trigger / case | Required result | Evidence / responsible checkpoint |
 | --- | --- | --- | --- |
@@ -223,7 +236,7 @@ npm.cmd @toolchainOptions run typecheck
 
 These are transcripts of commands run inside the reviewed nonbrowser wrapper, not bare-shell instructions. The wrapper's frozen options use the repository prefix and `temp/rd002-npm-cache`, disabled lifecycle scripts/audit/funding/notifier/log retention, HTTPS registry with strict TLS, lockfile use, and included development/optional packages. Both commands exited 0; 202 tests passed with no skips/cancellations.
 
-The following are deliberately unresolved future command slots, not executable examples. Before the relevant worker lease, L4.6 must contain exact working directory, shell, command/arguments, permitted inputs/metadata mutations, environment, generated locations, external effects, expected exits, timeout/stop behavior and cleanup for every used slot. A reviewed skeleton alone is not permission to improvise:
+The following planning-time command-slot inventory is now instantiated by L4.6 in the authored literal block. L4.6 controls exact commands/effects after final research acceptance; the inventory is not separate executable permission. Every used slot has working directory, shell, command/arguments, input/mutation permissions, environment, generated locations, effects, expected exit, stop and cleanup rules:
 
 | Slot | Required freeze |
 | --- | --- |
@@ -249,7 +262,7 @@ TDD is not applicable to this documentation-only request. The primary must inspe
 
 ### Reuse audit — M104-REUSE-001
 
-This inventory is provisional until refreshed and accepted before preflight. A disposition is about an existing owner, not permission to invent a shared abstraction.
+This inventory is refreshed by M104-ENTRY-002 and resolved by L4.1/L4.4, with final research acceptance recorded below. A disposition is about an existing owner, not permission to invent a shared abstraction.
 
 | Element | Disposition / concrete owner |
 | --- | --- |
@@ -257,7 +270,7 @@ This inventory is provisional until refreshed and accepted before preflight. A d
 | React/DOM, Vite build and strict TSX configuration | `REUSE_AS_IS` from package/configuration files. No new UI/test dependency, plugin or dev-server topology. |
 | Visual language | `REUSE_AS_IS` as guidance from `docs/ui/VISUAL_FOUNDATIONS.md`. Implement only needed light surfaces, semantic colors, readable type, spacing and focus rules. |
 | Page/form/status/disclosure | `CREATE` in the minimal App/entry paths because no client component exists. Native elements first. |
-| Complete grouped results and one evidence detail | `CREATE` in App or one cohesive `RunResults.tsx` when justified. Do not extract reusable card, badge, modal, routing or state libraries for hypothetical consumers. |
+| Complete grouped results and one evidence detail | `CREATE` in `src/client/RunResults.tsx`, the cohesive full evidence projection, separate from App's form/operation owner. Do not extract reusable card, badge, modal, routing or state libraries for hypothetical consumers. |
 | Styles | `CREATE` in one small `styles.css`; no global design-system package, theme engine, font/image acquisition, decorative motion or future-state tokens. |
 | Synthetic M1 records | `REUSE_AS_IS` from `tests/helpers/m102-run-fixture.ts` in Node-side tests where its populated/zero/incomplete/unavailable/running/failed cases fit. Its metadata is synthetic, not a native current-browser observation. Additional cases remain test-owned. |
 | Browser-test transport | `CREATE` only the minimal transport needed to exercise the real production components with the installed tools. No fixture showcase, standalone mock UI, new gold manifest or persistent probe. |
@@ -268,7 +281,7 @@ Use `EXTEND` or `EXTRACT_LOCAL` only if execution discovers a real existing owne
 
 The visual target is the restrained Evidence Light language: run context first, then coverage/status, complete grouped items, and one selected detail. Use native semantics, system fonts, readable contrast, visible focus, explicit source/state text and wrapping long URLs/locators. No decorative dashboard or AI/proposal controls. Width changes must not hide evidence or reorder keyboard meaning.
 
-Freeze representative desktop (proposed 1280×800) and narrow (proposed 320 CSS-pixel width) samples plus an actual zoom/reflow procedure. A narrow screenshot alone is not proof of browser zoom. These are review samples, not a platform-support matrix. Avoid a Cartesian product of every provider, state and viewport.
+The authored literals select desktop 1280×800 and narrow 320 CSS-pixel width samples plus the exact actual 200% browser-menu zoom/reflow procedure in L4.6. A narrow screenshot alone is not proof of browser zoom. These are review samples, not a platform-support matrix. Avoid a Cartesian product of every provider, state and viewport.
 
 | Case | Required behavior and evidence |
 | --- | --- |
@@ -297,7 +310,535 @@ Only the primary opens/closes leases. No documentation/authority edits occur dur
 
 If command, source/test fingerprint, environment, literal semantics or authority changes, invalidate the affected evidence explicitly. Do not substitute a fresh download, looser assertion, extra correction turn or changed test contract to conceal a failure. Preserve useful failure/residue evidence, then request only the missing owner/permission decision. A reviewer report and a compliant receipt are inputs to primary inspection, not self-validating proof.
 
+
+### Authored literal contract — M104-LITERALS-001
+
+Status: accepted after R3 synthesis, separate fresh pre-draft/final PASS and primary validation, including complete M104-RF-C2 re-review of the bounded transport correction. Both final-artifact correction cycles are consumed. The sole guarded setup correction may proceed; UI preflight still requires successful setup and S1 review. These are M1-04 implementation literals, subordinate to the authorities above, not a new architecture or proof of implemented behavior.
+
+The selected candidate is **C1**, one App-owned operation/admission boundary and a separate cohesive results projection. C1 and C2 both meet the common requirement, immutable-record, unprivileged-renderer, evidence and accessibility gates when they obey the same contract. C2 additionally requires a real production parent owner and tests of that owner; a test-only replacement controller cannot prove it. No present responsibility justifies that extra owner. C1 has the smaller maintenance burden; extraction remains reversible if actual M1-05 integration demonstrates a need.
+
+Evidence: `M104-ENTRY-002`; critical researcher `M104-LITERALS-001-CR1` and its sole follow-up; distinct transport researcher `M104-LITERALS-001-TR1` and its sole follow-up; mandatory analyst `M104-LITERALS-001-A1` returned `DRAFT READY`. Fresh pre-draft reviewer `M104-LITERALS-001-PRE` initially found two Majors: incomplete protection for retained noncompleted identities and Vite's default configuration-loader output in `node_modules/.vite-temp`. The single supported outline correction `M104-PRE-C1` resolved both; complete re-review returned `PASS`, no remaining findings, with all I4.1–I4.9 passing at contract level. Researcher follow-ups and the pre-draft outline correction are consumed; the two-cycle final-artifact correction ceiling remains fixed; cycle 1 resolved cleanup consistency and cycle 2 now addresses the setup-proven transport gap. Forwarding unchanged evidence to a reviewer adds no research pass.
+
+#### L4.1 Client interface and entry
+
+Create exactly `index.html`, `src/client/main.tsx`, `src/client/App.tsx`, `src/client/RunResults.tsx` and `src/client/styles.css`. App owns forms, admission and transient operation/selection state; RunResults owns the cohesive full evidence projection. The only public client integration seam is:
+
+```typescript
+import type { ReactElement } from 'react';
+import type { ProviderContext } from '../server/domain/run-contract.ts';
+
+export interface AnalyzeIntent {
+  readonly requestedUrl: string;
+  readonly providerContext: ProviderContext;
+}
+export interface AppProps {
+  readonly analyze?: (intent: AnalyzeIntent) => Promise<unknown>;
+  readonly reopen?: (runId: string) => Promise<unknown>;
+}
+export function App(props: AppProps): ReactElement;
+```
+
+The real entry mounts `<App />` without collaborators. It has no fixture, demo, request, auto-reopen, service/scanner wiring or provider behavior. Each absent capability disables its action and associates a visible explanation; with both absent use the exact combined capability text in L4.4. A partial injected capability may enable only its matching action. No router, URL history or browser persistence is introduced.
+
+Target normalization uses `new URL(raw)`, rejecting parse failure, non-HTTPS protocol, empty hostname or embedded username/password; the accepted intent is `url.href`, retaining query and fragment. This matches the narrow standards parser boundary, not DNS/IP admission, target safety, authorization or sensitive-content detection. Never import the privileged scanner preparation helper. Mode initially has no selection; explicit Local maps to `local / ollama / qwen3.5:4b`, and Groq to `groq / groq / openai/gpt-oss-20b`. Snapshot normalized URL and a fresh immutable provider triple before invoking a collaborator; collaborator mutation cannot retarget the comparison. Reopen accepts only whole-string ASCII `[A-Za-z0-9][A-Za-z0-9_-]{0,63}` through an explicit form.
+
+The [URL Standard API](https://url.spec.whatwg.org/#api) supports parsing, not the excluded trust claims. M1-05 alone supplies actual collaborators and proves the service/scanner/storage join.
+
+#### L4.2 Admission, identity and operation ownership
+
+All callback resolutions begin as `unknown`. Snapshot the envelope once using reflection: only ordinary/null prototypes, exact own string keys, enumerable data descriptors, no symbols/accessors/undefined values and exact primitive types. Catch reflection failure. Never read a raw property, spread/stringify a raw result, invoke its getter or display its exception. After capturing the raw run descriptor value, use only `validateRun` and its detached deeply frozen `value`; do not reproduce its aggregate parser.
+
+| Operation | Accepted envelope |
+| --- | --- |
+| Analyze success | Exactly `{ok:true, run}`; validated run must be completed. |
+| Analyze failure | Exactly `{ok:false,error,run,persisted,cleanupFailed}`; error is one of `invalid-request, busy, stopping, create-failed, scan-failed, result-validation, initial-persistence, shutdown`; run is null or a validated failed record; flags are booleans; a null run cannot be persisted. When a nonnull run has `scanContext.cleanup === 'failed'`, require `cleanupFailed === true`. The converse is deliberately not required: storage/persistence cleanup can be uncertain with a null run or a run whose scan cleanup is closed. |
+| Reopen success | Exactly `{ok:true,run,interrupted}`; validated run ID equals the captured requested ID, and interrupted equals whether status is running. |
+| Reopen failure | Exactly `{ok:false,error}`; error is one of `invalid-id, busy, stopping, not-found, invalid-run, stored-run-unavailable, read-failed`. |
+
+These reuse [existing service envelopes](../../src/server/service.ts) without a runtime service import. Every nonnull Analyze run, including failure, must match the captured normalized requested URL and all provider fields. Capture both currently retained canonical IDs before changing transient state; Analyze must reject reuse of either the held completed ID or latest noncompleted ID. Do not build a historical ID registry.
+
+Use one synchronous ref reservation shared by Analyze and reopen, set before invoking the captured callback or reaching an await. Presentation state alone is not the guard. Capture the callback, intent, current known snapshots and operation token. Synchronous reentry or overlapping submission invokes no second callback and exposes the busy explanation. Form or prop changes do not retarget in-flight results. Only the owning token may publish a result or release the reservation; unmount invalidates ownership. This is stale-publication protection, not cancellation, timeout, queue, retry or resume.
+
+Keep the last admitted completed snapshot and selection separately from the latest noncompleted snapshot and content-safe transient error. Pending Analyze is transient loading, never a fabricated canonical running record. A reopened running record is interrupted history, not current busy. Invalid, rejected, not-found, failed or interrupted outcomes never erase the earlier completed evidence. Each displayed snapshot has its own run/provider context. A newly admitted completed result clears the latest noncompleted presentation; a different completed ID also clears selection.
+
+Before publishing a reopened record whose ID matches **either** retained canonical snapshot, compare `formatVersion, runId, createdAt, applicationRevision, requestedUrl` and each provider field. Then apply:
+
+| Retained status | Same-ID read rule |
+| --- | --- |
+| completed | Require completed status. After full validation/common-identity checking, discard the incoming snapshot and retain the exact held evidence, selection and DOM, even when the new otherwise-valid evidence differs. This is idempotent presentation, not equality, refresh or storage-integrity verification. |
+| failed | Require failed status. Discard the incoming snapshot and retain the exact held failed snapshot. No terminal rewrite, refresh or equality claim. |
+| running | For any matching read require unchanged scannerVersion, evidencePolicyVersion, ordered rules, scope, readiness, viewport width/height, locale, timeoutMs, freshContext, importedState, interaction, crawling, iframes and contrastProfile. A running response is discarded after these checks and the exact interrupted snapshot retained. A failed/completed response may publish only if each previously available finalUrl/scannedAt/browserVersion remains available with the same value, and true readinessReached never becomes false. Validated status/cleanup constraints still apply. Retire the superseded interrupted presentation; a failed result replaces the latest noncompleted snapshot, and completed publishes as results and clears it. |
+
+These bounded comparisons follow the [existing transition boundary](../../src/server/persistence/run-repository.ts) and immutable [lifecycle](../requirements/INFORMATION_AND_WORKFLOW_LIFECYCLE.md). They do not import privileged code or resume a run. Contradictions preserve both earlier snapshots and selection.
+
+Synchronous throws and rejected promises use fixed stage plus `request-failed`; invalid envelopes/runs/identity use fixed stage plus `invalid-result`. No raw exception, result serialization, URL-bearing diagnostic or console log is added. React [refs](https://react.dev/reference/react/useRef) and [effect cleanup](https://react.dev/reference/react/useEffect) support the direct ownership pattern. Injected collaborators are trusted code: reflection can run Proxy traps and promise assimilation can execute thenables. This is data-admission hardening, not a JavaScript sandbox.
+
+#### L4.3 Complete evidence projection
+
+The following typed fields must be inspectable without a hidden cap, default filter, pagination, truncation or inferred replacement. Native details disclosure may collapse an observation but cannot omit it. External strings remain ordinary text, never href targets, selectors, HTML, CSS, scripts or previews.
+
+| Projection | Required fields / semantics |
+| --- | --- |
+| Every run | formatVersion, runId, createdAt, applicationRevision, requestedUrl, providerContext mode/provider/model, status; finishedAt when present; failed category when present. |
+| Scan context | finalUrl, scannedAt, browserVersion with each unavailable reason; scannerVersion, evidencePolicyVersion, rules, scope, readiness, readinessReached, viewport width/height, locale, timeoutMs, freshContext, importedState, interaction, crawling, iframes, cleanup, contrastProfile. Use completed scan.context or the noncompleted scanContext as recorded. |
+| Coverage | Each of image-alt, label, color-contrast; violations, incomplete, passes and inapplicable. Null is “Not reported”, never zero. Show the total Findings and separate observation count. A completed zero label requires a validated completed record. |
+| Each Finding | findingId, ruleId, nativeResult violation, state unprocessed, locator value or exact unavailable reason; checks any/all/none or reason; all rule evidence below. Duplicate locators remain separate Findings. |
+| Image evidence | elementKind, altState. |
+| Label evidence | elementKind, inputType; nameSources explicitLabel, implicitLabel, ariaLabel, ariaLabelledby, title, placeholder, presentationalRole. Preserve not-applicable and other reasons. |
+| Contrast evidence | foregroundColor, backgroundColor, shadowColor, contrastRatio, expectedContrastRatio, fontSize, fontWeight, measurementSource, messageKey. Native values are neither recomputed nor interpreted as target-page safety. |
+| Each ScannerReviewObservation | Stable accessible label from its retained global 1-based array index and rule; nativeResult incomplete, incompleteReason, locator, checks and the same complete rule-evidence projection. No Finding ID, workflow state, selection or processing eligibility is assigned. |
+
+Group Findings under the exact three rules in that order, including empty groups. One selected detail exposes all allowed evidence with “Scanner evidence” provenance and exact run/provider/no-call context. Selection is keyed by run ID and Finding ID, not locator; list and siblings remain intact. The only Finding workflow state remains unprocessed. Ordinary empty check arrays say “None”; false facts remain false, not absent. Never substitute requested URL for an unavailable observed final URL.
+
+#### L4.4 Accessible presentation and fixed copy
+
+Accept `M104-REUSE-001` with the exact owners in L4.1; `RunResults.tsx` and the shared test helper below are mandatory, not worker options. Accept `M104-VISUAL-001` with desktop 1280×800 and narrow 320 CSS-pixel width. Use the existing Evidence Light palette, system fonts, one stylesheet, native elements, wrapping values, visible focus and a stacked narrow layout. No new design system, font/image dependency, animation, future-state control or decorative metric.
+
+Use native main/section/headings/forms/labels/fieldset/legend. Associate limitations, capability explanations and field errors with their controls. There is one preexisting `role="status" aria-atomic="true"` region shared by start, outcome, error, busy and selection announcements. Persistent errors remain near their action. The [ARIA22 technique](https://www.w3.org/WAI/WCAG22/Techniques/aria/ARIA22) supports this pattern; only heard observations prove actual announcements.
+
+Every Finding has a keyboard-operable detail button named with ID, rule and locator summary, `aria-pressed` selection and `aria-controls` detail relationship. Explicit selection focuses the labelled detail heading with tabindex -1. “Back to finding” returns to its button. Native observation details are separate and never participate in Finding selection.
+
+A results heading remains mounted across result replacements. Immediately before publishing a different completed run, record whether focus is inside outgoing results/detail content being removed. Focus the persistent heading after replacement only in that case; otherwise preserve focus. Same-ID retention, failed/invalid/noncompleted results and ordinary completion with focus in the form preserve focus. Verify both delayed replacement paths. Selection changes announce only the selected Finding, not sibling state changes.
+
+| Place | Fixed text |
+| --- | --- |
+| Both capabilities absent | Analyze and reopen are unavailable in this build; service integration is pending. |
+| One capability absent | Analyze is unavailable in this build; service integration is pending. / Reopen is unavailable in this build; service integration is pending. |
+| Target limitation | Choose a non-sensitive public HTTPS page you are permitted to analyze and willing to trust. Hostile, private and authenticated targets are unsupported. The application does not prove authorization, public reachability or safety. |
+| Results limitation | This automated scan covers only image-alt, label and color-contrast in the current rendered top-level document. Iframes, inactive states and other rules are excluded. Findings and counts do not establish accessibility, conformance, certification or legal compliance. |
+| Local disclosure | Local (recommended) — Ollama · qwen3.5:4b. Generation prompts and responses use the approved loopback Ollama endpoint and a locally present model, not hosted inference. The public-page scan still uses external HTTPS; this is not offline or system-wide zero-egress operation. |
+| Groq disclosure | Groq — openai/gpt-oss-20b. A later explicit Generate action for one eligible Finding may send minimized rule-specific evidence and required curated-guidance passages to Groq for remote processing. Target URLs, locators, sibling Findings and credentials are excluded from that content. Selecting a mode or scanning makes no provider call. |
+| Busy | An operation is in progress. Wait before analyzing or reopening another run. |
+| Analyze pending | Analyzing the requested page. No provider call was attempted. |
+| Reopen pending | Reopening the requested run. No provider call was attempted. |
+| URL error | Enter a valid HTTPS URL without embedded credentials. |
+| Mode error | Choose Local or Groq. |
+| ID error | Enter a run ID using 1–64 letters, numbers, underscores or hyphens, starting with a letter or number. |
+| Operation error | Analyze failed: [closed code]. / Reopen failed: [closed code]. |
+| Unsaved failure / cleanup | This failed run was not saved. / Resource cleanup is uncertain. |
+| Interrupted history | Interrupted stored run; not currently executing. It will not resume automatically. |
+| Valid zero | Completed scan: 0 Findings. |
+| Same completed ID | Run [ID] is already open. Existing evidence and selection retained. |
+| Same failed ID | Run [ID] is already open. Existing failed snapshot retained. |
+| Same running ID | Run [ID] is already open. Existing interrupted snapshot retained. |
+| Selection announcement | Selected Finding [ID], [rule], unprocessed. [mode], [provider], [model]. No provider call was attempted. |
+| Observation label | Scanner-review observation [1-based index] — [rule] — incomplete |
+
+Bracketed values denote only captured/validated field text or the closed codes above, never raw errors. Other necessary labels use the exact domain field meaning in plain English. No Generate control is rendered.
+
+#### L4.5 Test, browser and build transport
+
+The test worker owns exactly `tests/target-results-ui.test.ts` and `tests/helpers/m104-ui-harness.ts`. Reuse `tests/helpers/m102-run-fixture.ts` only in Node: it imports Node assertions and is not a browser dependency. Generate only owned ignored `temp/m104-ui/m104-test-entry.html` and `m104-test-entry.tsx`. That TSX imports the real App and stylesheet through normalized absolute /@fs paths, with React/createRoot from installed packages. No substitute controller or production fixture entry is allowed.
+
+The shared helper starts Vite through [its JavaScript API](https://vite.dev/guide/api-javascript.html), using this exact configuration shape; repo and scratch are the verified absolute roots. Setup's generic probe uses the same shape with scratch=temp/m104-setup. These are test transport parameters, not production configuration:
+
+```typescript
+createServer({
+  configFile: false, root: scratch, publicDir: false,
+  cacheDir: path.join(scratch, 'vite-cache'), appType: 'mpa',
+  logLevel: 'error', clearScreen: false,
+  optimizeDeps: {
+    noDiscovery: true,
+    include: ['react', 'react-dom/client', 'react/jsx-runtime', 'react/jsx-dev-runtime'],
+  },
+  server: {
+    host: '127.0.0.1', port: 0, strictPort: true,
+    hmr: false, ws: false, watch: null,
+    fs: {
+      strict: true,
+      allow: [scratch, path.join(repo, 'src/client'),
+        path.join(repo, 'src/server/domain'), path.join(repo, 'node_modules')],
+      deny: ['.env', '.env.*', '*.{crt,pem}', '**/.git/**'],
+    },
+  },
+});
+```
+
+Await listen, determine the owned loopback origin from the server address, and navigate the exact generated entry. Launch full managed Chromium with `chromium.launch({channel:'chromium',headless:true,timeout:10000})`; fresh nonpersistent context uses viewport 1280×800, `acceptDownloads:false`, `serviceWorkers:'block'`. Browser actions/assertions have 5000 ms limits and navigation 10000 ms. No persistent profile, shared browser, headless-shell download or product server is needed. Record actual browser.version and request origins. Route every page request: allow only the exact owned origin, record and abort any external request, and fail the check on such an attempt. Vite modules remain loopback; no target, scanner, provider or credential request is made.
+
+The explicit dependency list includes both existing React JSX runtime subpaths because pinned Vite's development TSX transform selects the development runtime, and `noDiscovery:true` does not optimize an omitted CommonJS subpath. This is a correction to the selected transport, not a new package or a changed product contract. The first generic probe exposed a rendering failure; the source-backed correction still requires actual successful probe evidence before UI preflight. Probe failure diagnostics may record its actual browser version, owned-origin response paths/statuses and synthetic-page JavaScript errors before teardown; they must not report environment values or unrelated content.
+
+Ordinary valid fixture values cross a Playwright serialization bridge. Browser-realm adversarial descriptors, Proxies, functions, sync reentry, deferred callbacks, rerender and unmount controls must be authored in the generated test-only entry or page.evaluate; JSON cannot preserve those properties. The bridge is not imported by the production entry. Test complete behavior, not private component implementation or an existence-only gate.
+
+Always settle owned operations, close context then browser, close Vite, verify its listener closed, and remove only generated entry/cache children owned by that invocation. Each suite leaves its scratch root empty. Cleanup uncertainty is a failed result, not a discarded warning. Scanner and UI suites never overlap process TEMP/TMP ownership.
+
+Required tests cover all visual-capsule states, both modes/no implicit selection, normalization/rejection, absent/partial capabilities, canonical states, all evidence fields/counts/duplicates/reasons, identity rules for both retained snapshots, repeat-read retention, running-to-terminal guards, same-turn reentry, delay/rejection, captured intent/callback, stale/unmount completion, invalid/accessor/Proxy envelopes, input immutability, inert markup canaries, keyboard detail/return and conditional replacement focus. Envelope tests reject a cleanup-failed record paired with `cleanupFailed:false`, and accept `cleanupFailed:true` with a closed or null run to preserve storage-cleanup uncertainty. Run an unrestricted default axe check of the UI, not the scanner's three-rule filter. No only/skip/todo may conceal an unproved case.
+
+The initial Red exception is permitted only after setup's generic TSX proof passes. Its decisive failure must be Vite's exact missing `src/client/App.tsx` import with complete tests present; missing browser, broken transport, invalid test syntax or missing dependency is not Red. Record behavioral assertions as unexecuted until Green.
+
+#### L4.6 Exact commands, environment and effects
+
+All commands use PowerShell at `C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab`, Node `C:/nvm4w/nodejs/node.exe`, npm.cmd beside it and Python `C:/Users/mmjos/AppData/Local/Programs/Python/Python312/python.exe`. Versions remain 24.20.0 / 11.19.0 / 3.12.10. Bootstrap, dependency restore, package selection, manifest/lock/configuration mutation and new dependencies: **None**.
+
+The following command preparation is task-local shell text, not a repository helper to implement. Use it in each command process; do not persist another executable workflow file. It instantiates the previously reviewed L3.8 controls:
+
+```powershell
+$ErrorActionPreference = 'Stop'
+$m104Repo = [IO.Path]::GetFullPath('C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab')
+if ((Resolve-Path -LiteralPath '.').Path -ine $m104Repo) { throw 'Wrong M1-04 working directory' }
+$m104Node = 'C:/nvm4w/nodejs/node.exe'
+$m104Npm = 'C:/nvm4w/nodejs/npm.cmd'
+$m104Runtime = Join-Path $m104Repo 'm104-browser-runtime'
+$m104Browsers = Join-Path $m104Runtime 'browsers'
+$m104SetupTemp = Join-Path $m104Repo 'temp/m104-setup'
+$m104UiTemp = Join-Path $m104Repo 'temp/m104-ui'
+$m104ScanTemp = Join-Path $m104Repo 'temp/m103-scan'
+$m104Evidence = Join-Path $m104Repo 'logs/m104-ui-evidence'
+$m104Build = Join-Path $m104Repo 'dist/client'
+$toolchainOptions = @('--global=false','--prefix',$m104Repo,'--cache',
+  (Join-Path $m104Repo 'temp/rd002-npm-cache'),'--ignore-scripts=true',
+  '--audit=false','--fund=false','--update-notifier=false','--logs-max=0',
+  '--registry=https://registry.npmjs.org/','--strict-ssl=true',
+  '--package-lock=true','--include=dev','--include=optional')
+$m104FixedReject = @('NODE_OPTIONS','NODE_DEBUG','NODE_DEBUG_NATIVE',
+  'NODE_COMPILE_CACHE','NODE_V8_COVERAGE','NODE_REDIRECT_WARNINGS',
+  'DEBUG','DEBUG_FILE','PWDEBUG','PWDEBUGIMPL','SELENIUM_REMOTE_URL',
+  'SELENIUM_REMOTE_CAPABILITIES','SELENIUM_REMOTE_HEADERS')
+$m104Controlled = @('PLAYWRIGHT_BROWSERS_PATH','PLAYWRIGHT_SKIP_BROWSER_GC',
+  'PLAYWRIGHT_DOWNLOAD_CONNECTION_TIMEOUT')
+$m104Rejected = @(Get-ChildItem Env: | Where-Object {
+  $m104Name = $_.Name
+  $m104Alias = $m104Name -match '^(?i:npm_config_|npm_package_config_)'
+  $m104Base = $m104Name -replace '^(?i:npm_config_|npm_package_config_)',''
+  ($m104FixedReject -contains $m104Base) -or
+    (($m104Base -match '^(?i:PLAYWRIGHT_|PWTEST_|PW_)') -and
+      ($m104Alias -or $m104Controlled -notcontains $m104Base))
+} | Select-Object -ExpandProperty Name)
+if ($m104Rejected.Count) { throw ('Unsupported environment names: ' + ($m104Rejected -join ', ')) }
+
+function Invoke-M104Command([scriptblock]$Command, [string]$Scratch = '') {
+  $m104Names = @('NODE_DISABLE_COMPILE_CACHE')
+  if ($Scratch) {
+    if (@($m104SetupTemp,$m104UiTemp,$m104ScanTemp) -notcontains $Scratch) { throw 'Unknown command scratch' }
+    $m104Names += @('PLAYWRIGHT_BROWSERS_PATH','PLAYWRIGHT_SKIP_BROWSER_GC',
+      'PLAYWRIGHT_DOWNLOAD_CONNECTION_TIMEOUT','TEMP','TMP')
+  }
+  $m104Saved = @{}
+  foreach ($m104Name in $m104Names) {
+    $m104Saved[$m104Name] = [Environment]::GetEnvironmentVariable($m104Name,'Process')
+  }
+  try {
+    [Environment]::SetEnvironmentVariable('NODE_DISABLE_COMPILE_CACHE','1','Process')
+    if ($Scratch) {
+      [Environment]::SetEnvironmentVariable('PLAYWRIGHT_BROWSERS_PATH',$m104Browsers,'Process')
+      [Environment]::SetEnvironmentVariable('PLAYWRIGHT_SKIP_BROWSER_GC','1','Process')
+      [Environment]::SetEnvironmentVariable('PLAYWRIGHT_DOWNLOAD_CONNECTION_TIMEOUT','30000','Process')
+      [Environment]::SetEnvironmentVariable('TEMP',$Scratch,'Process')
+      [Environment]::SetEnvironmentVariable('TMP',$Scratch,'Process')
+    }
+    & $Command
+  } finally {
+    foreach ($m104Name in $m104Names) {
+      if ($null -eq $m104Saved[$m104Name]) {
+        [Environment]::SetEnvironmentVariable($m104Name,[NullString]::Value,'Process')
+      } else {
+        [Environment]::SetEnvironmentVariable($m104Name,$m104Saved[$m104Name],'Process')
+      }
+    }
+    foreach ($m104Name in $m104Names) {
+      if ([Environment]::GetEnvironmentVariable($m104Name,'Process') -cne $m104Saved[$m104Name]) {
+        throw ('Environment restore mismatch: ' + $m104Name)
+      }
+    }
+  }
+}
+```
+
+Every Node/npm invocation below uses this wrapper, including version, syntax, diagnostic, build and typecheck commands. Omitted Scratch means nonbrowser: only compile-cache disabling changes. Browser/setup commands isolate all six variables before Node starts. No value is printed, and originally absent, empty and nonempty states are restored exactly.
+
+**M104-CMD-ENTRY.** Repeat `git status --short`, `git rev-parse HEAD`, `git branch --show-current`, `git diff --check` and the name-only screen. Check no active lease before primary writes. Read package.json, installed package manifests and playwright-core/browsers.json; require all nine direct pins and Chromium 1234 / 151.0.7922.34, ffmpeg 1011 and winldd 1007. Fingerprint the six existing production files, six existing tests/helpers, four package/config files, manifest and all six fixtures against `M104-ENTRY-002`. Confirm each fixture raw byte sequence equals its manifest UTF-8 content. Inspect exact roots and `node_modules/.vite-temp`; no acquisition or import side effect is allowed at entry.
+
+```powershell
+Invoke-M104Command {
+  & $m104Node --version
+  if ($LASTEXITCODE -ne 0) { throw 'Node version failed' }
+  & $m104Npm @toolchainOptions --version
+  if ($LASTEXITCODE -ne 0) { throw 'npm version failed' }
+  & $m104Node --input-type=module --eval "import { constants, enableCompileCache, getCompileCacheDir } from 'node:module'; if(process.env.NODE_DISABLE_COMPILE_CACHE!=='1')throw Error('Disabling prerequisite missing'); if(enableCompileCache().status!==constants.compileCacheStatus.DISABLED || getCompileCacheDir()!==undefined)throw Error('Compile cache enabled'); console.log('Compile cache disabled');"
+  if ($LASTEXITCODE -ne 0) { throw 'Compile-cache diagnostic failed' }
+}
+```
+
+The protected identity command is:
+
+```powershell
+Invoke-M104Command {
+  & $m104Node --input-type=module --eval "import fs from 'node:fs'; import crypto from 'node:crypto'; const p=JSON.parse(fs.readFileSync('package.json','utf8')); for(const [name,version] of Object.entries({...p.dependencies,...p.devDependencies})){if(JSON.parse(fs.readFileSync('node_modules/'+name+'/package.json','utf8')).version!==version)throw Error('Pin mismatch');} const m=JSON.parse(fs.readFileSync('evaluation/rd003-scan-v1.json','utf8')); if(m.cases.length!==6||!m.cases.every(c=>fs.readFileSync(c.path).equals(Buffer.from(c.content,'utf8'))))throw Error('Frozen fixture mismatch'); const paths=['src/server/domain/run-contract.ts','src/server/persistence/run-repository.ts','src/server/service.ts','src/server/main.ts','src/server/scan/normalize-scan.ts','src/server/scan/scan-page.ts','tests/run-contract.test.ts','tests/run-repository.test.ts','tests/local-service.test.ts','tests/scan-normalization.test.ts','tests/scan-page.test.ts','tests/helpers/m102-run-fixture.ts','package.json','package-lock.json','tsconfig.json','vite.config.ts','evaluation/rd003-scan-v1.json']; console.log(JSON.stringify({pins:p,browsers:JSON.parse(fs.readFileSync('node_modules/playwright-core/browsers.json','utf8')).browsers.filter(b=>['chromium','ffmpeg','winldd'].includes(b.name)),hashes:Object.fromEntries([...paths,...m.cases.map(c=>c.path)].map(p=>[p,crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex')]))}));"
+  if ($LASTEXITCODE -ne 0) { throw 'Protected identity check failed' }
+}
+```
+
+**M104-CMD-CLEAN-STATE.** The exact ordinary-path and breadth-first, reparse-rejecting inventory procedures `Assert-M103OwnedPath` / `Get-M103Inventory` in [L3.8](completed/m1-03-real-scan-and-evidence.md#l38-exact-commands-environment-and-effects) apply byte-for-byte with every identifier prefix `m103/M103` replaced by `m104/M104`; `m104Repo` is the exact root above. Do not replace the explicit scan scratch path `temp/m103-scan`. They require full absolute containment, ordinary ancestors, exact resolved paths and no reparse traversal. This reference fixes the algorithm; it is not worker discretion to design another cleanup helper.
+
+Initially require absent runtime, setup/UI/scanner scratch, evidence and build roots. A preexisting root requires ownership reconciliation; never delete it to make an absence check pass. Setup alone creates runtime/browsers and the three empty scratch roots. The first screenshot producer creates evidence only after its fresh absence/ancestor proof. The first build may create dist/client only after its absence proof; before each later Vite build require its full inventory equals the last owned inventory. Preserve anything unexpected. Do not delete a preexisting dist parent. After every browser invocation compare full runtime file/path/length/SHA-256 inventory to accepted setup and require each scratch root empty.
+
+**M104-CMD-SETUP.** Setup is required at current entry. `M104-SETUP-01`: code_worker, standard profile, `TDD: Not applicable`, allowed directory root `m104-browser-runtime`; all tracked files forbidden; ignored effects only `temp/m104-setup`, `temp/m104-ui`, `temp/m103-scan`. The primary opens/verifies/closes its fresh lease. After clean-state proofs:
+
+```powershell
+New-Item -ItemType Directory -Path $m104Runtime | Out-Null
+New-Item -ItemType Directory -Path $m104Browsers,$m104SetupTemp,$m104UiTemp,$m104ScanTemp | Out-Null
+Invoke-M104Command {
+  & $m104Node node_modules/playwright/cli.js install chromium --no-shell --dry-run
+  if ($LASTEXITCODE -ne 0) { throw 'Managed-browser dry-run failed' }
+} $m104SetupTemp
+```
+
+Inspect the dry-run before one acquisition invocation. Use normal network escalation before acquisition when required, preserving these exact destinations/effects. Then:
+
+```powershell
+Invoke-M104Command {
+  & $m104Node node_modules/playwright/cli.js install chromium --no-shell --no-progress
+  if ($LASTEXITCODE -ne 0) { throw 'Managed-browser acquisition failed' }
+} $m104SetupTemp
+```
+
+Official installer endpoints: `https://cdn.playwright.dev/builds/cft/151.0.7922.34/win64/chrome-win64.zip`, `https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-win64.zip`, `https://cdn.playwright.dev/dbazure/download/playwright/builds/winldd/1007/winldd-win64.zip`; ordinary official CDN redirects and installed fallback prefixes `https://playwright.download.prss.microsoft.com/dbazure/download/playwright/` and `https://cdn.playwright.dev/builds/`. This states expected traffic, not an enforced destination allowlist. No custom host, global cache or GC deletion. Installer artifacts include .links/locks/install/dependency markers and transient archives under setup scratch. Connection timeout 30000 ms; five installer-internal attempts; no total supervisor timeout or additional acquisition retry outside the one same-contract setup correction. Poll at most 60 seconds apart. Uncertain child settlement preserves roots and blocks dependent work.
+
+Setup **must** create and run the disposable generic `temp/m104-setup/transport-probe.mjs` using the above Vite configuration with setup scratch. It writes exactly `transport-probe.html` (English document with title “M1-04 transport probe”, root div and module script) and `transport-probe.tsx` (imports React and createRoot, mounts only `<p>TSX transport ready</p>`). It imports no App, server or fixture. Await Vite/listen, launch the exact L4.5 full browser, restrict requests to its origin, navigate the generated HTML, assert that exact visible paragraph, record browser.version, then close context/browser/server in finally and remove only those probe files plus its vite-cache. Verify listener closure and all scratch emptiness. Script creation is ignored setup output; it is deleted after successful settled execution, never retained as a new tool.
+
+```powershell
+Invoke-M104Command {
+  & $m104Node temp/m104-setup/transport-probe.mjs
+  if ($LASTEXITCODE -ne 0) { throw 'Generic TSX transport probe failed' }
+} $m104SetupTemp
+```
+
+Require exact chrome.exe, manifest identities and full runtime inventory. Require `m104-browser-runtime/browsers/chromium-1234/DEPENDENCIES_VALIDATED` exists with UTC mtime within the preceding 30 days and not future-dated. Use the L3.8 executable/marker/inventory commands with the same prefix substitution and all three scratch roots. Record inventory digest, executable hash, marker hash/mtime and actual browser.version. Before/after each subsequent browser run require the accepted runtime content inventory and marker unchanged; missing/stale marker returns to setup, never incidental acquisition during tests. Obtain the S1 milestone review before test preflight.
+
+For the one setup correction after `M104-SETUP-ATTEMPT-1`, acquisition/dry-run/root creation are **None**: reuse only the verified unchanged runtime. Under a fresh attempt-2 lease with the same path scope and terminal parent, require runtime inventory digest `E3FCE03453B560FCB9F45FC9325DC086F71579DFF21FA906142D2EFE4F1D2D28` and setup-scratch inventory digest `3A53256961FF30A60B1C4A9287544477C18635E79AE44D0C21C3311E250696D2`, using the fixed inventory algorithm. The latter records the three exact probe files and vite-cache from the settled first attempt. After full containment/ordinary-path checks and matching that inventory, native PowerShell may remove only these four owned children, then recreate the corrected disposable probe. The exact command remains `Invoke-M104Command { & $m104Node temp/m104-setup/transport-probe.mjs; if ($LASTEXITCODE -ne 0) { throw 'Generic TSX transport probe failed' } } $m104SetupTemp`. After success, settled teardown and only known-generated-child cleanup must leave all three scratch roots empty and the runtime/marker unchanged. No download, timeout extension, fallback transport or additional attempt is authorized. The correction remains blocked until complete final research re-review accepts the adjusted literal.
+
+**M104-CMD-UI / TYPECHECK / BUILD.** Test syntax checks and the focused browser command are exact:
+
+```powershell
+Invoke-M104Command {
+  & $m104Node --check tests/target-results-ui.test.ts
+  if ($LASTEXITCODE -ne 0) { throw 'UI test syntax failed' }
+  & $m104Node --check tests/helpers/m104-ui-harness.ts
+  if ($LASTEXITCODE -ne 0) { throw 'UI helper syntax failed' }
+}
+Invoke-M104Command {
+  & $m104Npm @toolchainOptions run test:focused -- --test-timeout=120000 tests/target-results-ui.test.ts
+  if ($LASTEXITCODE -ne 0) { throw 'UI focused tests failed' }
+} $m104UiTemp
+Invoke-M104Command {
+  & $m104Npm @toolchainOptions run typecheck
+  if ($LASTEXITCODE -ne 0) { throw 'Independent strict typecheck failed' }
+}
+Invoke-M104Command {
+  & $m104Npm @toolchainOptions run build -- --configLoader native
+  if ($LASTEXITCODE -ne 0) { throw 'Production build failed' }
+}
+```
+
+The test timeout is 120000 ms per Node test with bounded 5-second assertions and 10-second browser/navigation starts; do not repeatedly retry the same decisive failure. Typecheck/build are independent after Green, not substitutes for behavioral tests. The native loader directly imports the unchanged config and avoids the default .vite-temp effect, as verified in pinned Vite and [official configuration documentation](https://vite.dev/config/). Require `node_modules/.vite-temp` stays absent. Build inputs are only root index/client files, React and the pure domain module; inspect source import graph and built HTML/JS/CSS for test harness/fixture, privileged Node/service/scanner/storage and provider/network imports or references. Output is only known-owned dist/client. No source maps, screenshots or bundles are published.
+
+**M104-CMD-BROWSER.** Automated tests use actual App, controlled fixtures, keyboard focus traces, default axe and the two fixed viewport samples. Record source/test hashes, exact browser version, origin/request log summary and state identity. Create exactly `logs/m104-ui-evidence/desktop-results.png` for populated selected detail at 1280×800 and `narrow-detail.png` for the same representative long evidence at 320 CSS pixels. These ignored review samples are not goldens.
+
+Manual command after Green:
+
+```powershell
+Invoke-M104Command {
+  & $m104Node tests/helpers/m104-ui-harness.ts --manual
+  if ($LASTEXITCODE -ne 0) { throw 'Manual UI harness failed' }
+} $m104UiTemp
+```
+
+The shared helper's manual mode uses the same real App/transport, but launches headed, fresh nonpersistent Chromium with 1500 ms delayed synthetic collaborators. Generate a valid run matching the captured target/provider with ID `m104-manual-01`; reopen that ID through the same synthetic collaborator. Identify synthetic input outside App to the observer. No demo switch/content is shipped in production.
+
+Use Windows Narrator, present at `C:/Windows/System32/Narrator.exe`; the observer toggles Win+Ctrl+Enter if needed and documents what was actually heard for labelled target/mode and error, Analyze start/busy/completion, results summary, selected Finding/provider/no-call context, return location and reopen. A DOM/tree/status-text trace is not heard proof. [Narrator commands](https://support.microsoft.com/en-us/windows/appendix-b-narrator-keyboard-commands-and-touch-gestures-8bdab3f4-b3e9-4554-7f28-8b15bd37410a) describe the control; binary presence alone does not pass it.
+
+The observer uses the actual Chrome menu to set zoom to 200%, confirms wrapping and keyboard reachability without omitted content, then resets 100%. Save a cropped human OS-window capture of the controlled browser and its displayed 200% menu setting to `logs/m104-ui-evidence/zoom-menu-200.png`; do not capture unrelated desktop/private content. A page-only screenshot, device scale, CSS zoom, viewport reduction or Playwright shortcut does not establish browser-menu zoom. [Chrome zoom guidance](https://support.google.com/chrome/answer/96810) supports the procedure. If no observer/tool can supply actual observations, stop closure for that concrete evidence, not for another implementation choice.
+
+Manual session ceiling is 15 minutes; terminate by closing the owned page or SIGINT, with finally teardown, listener closure and empty scratch required. No persistent profile or background product service remains. Automated screenshot/axe/keyboard evidence and actual manual observations have separate provenance.
+
+**M104-CMD-FULL.** Run sequentially, with no concurrently globbed browser tests:
+
+```powershell
+Invoke-M104Command {
+  & $m104Npm @toolchainOptions run test:focused -- tests/run-contract.test.ts tests/run-repository.test.ts tests/local-service.test.ts tests/scan-normalization.test.ts tests/scan-page.test.ts
+  if ($LASTEXITCODE -ne 0) { throw 'Existing five-file suite failed' }
+} $m104ScanTemp
+Invoke-M104Command {
+  & $m104Npm @toolchainOptions run test:focused -- --test-timeout=120000 tests/target-results-ui.test.ts
+  if ($LASTEXITCODE -ne 0) { throw 'UI suite partition failed' }
+} $m104UiTemp
+Invoke-M104Command {
+  & $m104Npm @toolchainOptions run typecheck
+  if ($LASTEXITCODE -ne 0) { throw 'Final strict typecheck failed' }
+  & $m104Npm @toolchainOptions run build -- --configLoader native
+  if ($LASTEXITCODE -ne 0) { throw 'Final production build failed' }
+}
+```
+
+Existing M1-02 synthetic test roots/listeners and M1-03 scanner scratch semantics remain unchanged. Recheck accepted runtime inventory and empty scratch after each partition, protected files and fixture bytes after the full run. Historical 290 remains historical until this partition actually passes.
+
+**M104-CMD-CLEANUP.** After reviews and process settlement, primary issues a fresh code_worker setup lease allowed only nonignored `m104-browser-runtime`; all tracked paths forbidden. Separately declared ignored effects are removal of only the owned setup/UI/scanner scratch, evidence and dist/client roots. Reconcile each full inventory against recorded ownership immediately before deletion, use the fixed ordinary-path helper and never traverse links. If any unexpected file/process/listener appears, preserve it and stop. For each exact checked root use native PowerShell `Remove-Item -LiteralPath $m104Target -Recurse -Force -ErrorAction Stop`; the finite root list is runtime, setupTemp, uiTemp, scanTemp, evidence, build as defined above, no parent directory. Verify each absent, all owned processes/listeners closed and process environment restored. No node_modules, npm cache, shared browser cache, data/runs, unrelated temp or existing parent deletion. Terminal guard closure alone is not cleanup proof.
+
+#### Literal checkpoint and downstream invariant packet
+
+The pre-draft result is a contract-level `PASS`, not runtime acceptance. The first final-artifact pass found `M104-RF-F1`, one Major cleanup-flag implication gap; the first supported final correction adds the one-way service-consistency rule and both transport cases above. Fresh complete final re-review must rerun all I4.1–I4.9 against this exact corrected artifact and actual diff. Decided now: every interface, envelope, identity/transition rule, projection, accessible interaction, command, path and effect above. Prove later: setup/probe/marker/inventory, complete Red/Green, strict build/import/network checks, focus and accessibility observations, both suite partitions, S1/S3/different final reviews and exact cleanup. No semantic unknown is delegated as runtime proof.
+
+Retained limitations: trusted collaborators are not sandboxed; the renderer does not establish hostile-page safety, storage integrity, provider readiness, offline operation, durable integration or full-MVP accessibility qualification. Revisit the contract only if pinned transport fails, actual authority changes or a genuine integration responsibility changes; do not invent dependencies or reset exhausted budgets.
+
 ## Artifacts and Notes
+
+### M104-UI-S3-REVIEW-001 — source audit clean, manual evidence blocked
+
+A fresh `critical_reviewer` at the configured Sol/max route completed the S3 frontend-visual review of L4.1–L4.6, I4.1–I4.9, routed requirements/ADRs and SPEC/HS cases, reuse, all five production files, both accepted test files, both screenshots, build boundaries and receipt lineage. It independently matched all source/test/screenshot/build hashes, nine pins and six fixture byte sequences, found no protected tracked-surface diff, and passed `git diff --check`. It found no supported Blocker, Major or Minor implementation defect. The 35-test browser/axe/focus/reflow result, strict typecheck and build were reused under unchanged identities; the reviewer ran no browser or generated-output command.
+
+Verdict: **BLOCKED**, solely for missing actual heard Narrator and actual browser-menu 200% zoom/reflow proof. This is an evidence gap, not an application failure, permission to weaken the test contract or an additional implementation correction. Primary accepts the read-only review findings and retains the slice acceptance gate. The different integrated final review has not run, and historical M1-03 290-test evidence has not been relabeled as a fresh M1-04 full regression.
+
+### M104-MANUAL-ATTEMPT-2 — visible desktop, binding unavailable
+
+After accepted scratch recovery, normal sandbox escalation ran the same exact wrapped manual command, with PTY enabled, at 2026-08-31 19:43 UTC. The helper again reported Chromium 151.0.7922.34, the accepted source/test hashes, synthetic `m104-manual-01` and owned `http://127.0.0.1:5173`. Computer Use now returned exactly the expected “M1-04 UI contract” test window, but binding/state capture failed with “window id … no longer belongs to Chrome; current owner is Chrome.” A fresh returned-window selection and the one supported recovery attempt failed identically. Windows input stopped; no guessed handles, alternate UI automation or private-window capture was used.
+
+The owner was asked to supply the actual heard Narrator path and the cropped controlled-browser capture showing its real 200% menu setting, then reset 100% and close the page. No observations or zoom capture have yet been received. At the 19:46 UTC checkpoint the isolated session remained available on its existing 15-minute ceiling; this is an active human-evidence session, not settled teardown or a passing manual result. Page closure or the helper ceiling must be followed by process/listener/scratch/runtime reconciliation before another browser command. Final runtime/build/screenshot cleanup is deliberately pending so the evidence and owned runtime remain available for acceptance/continuation. No second browser suite or integration review was advanced across the unresolved slice gate.
+
+### M104-MANUAL-ATTEMPT-1 — desktop visibility and interruption residue
+
+Recovery accepted: the bounded scratch-only worker matched the full inventory immediately before native removal/recreation, independently checked no owned browser/listener, and left all three scratch roots empty with the runtime and seven source/test hashes unchanged. Its CIM listener query was unavailable; read-only .NET active TCP listener enumeration supplied the same explicit port-absence check. Lease `M1-04-20260831-01-manual-scratch-recovery-01`, digest `b3c0cce852a0781798bfab07a6f1e1c4cd001db3b1361a1e8a1120f38674665a`, closed compliantly with receipt `106425816377bd389ee234479ebc4d475ec2ab5f1d07b7dad769df52c15a2e41`; primary reproduced the canonical runtime digest and empty scratch after closure. No nonignored net change was expected or observed for this successful ignored-output cleanup. A single same-command manual retry may request normal sandbox escalation for desktop visibility; no source, test, command semantics or browser settings change is authorized.
+
+The primary ran the exact wrapped `tests/helpers/m104-ui-harness.ts --manual` command after accepted Green and canonical runtime/empty-scratch checks. It reported actual App, Chromium 151.0.7922.34, owned `http://127.0.0.1:5173`, the accepted source/test hashes and synthetic run `m104-manual-01`. Computer Use could not discover its owned window through returned windows/apps, although read-only OS process inspection identified the task-runtime browser with the expected title. No Windows input was sent; no Narrator speech or menu-zoom evidence was obtained.
+
+Tool-delivered Ctrl+C ended the command with exit 1 and no harness-finally receipt. Fresh inspection found no task-runtime browser process or owned 5173 listener, but UI scratch retained exactly the generated HTML/TSX, `vite-cache`, `playwright-artifacts-rVWJuq` and `playwright_chromiumdev_profile-9VBl4o`. This is an interrupted verification session, not an application Red, a Green regression or successful cleanup. Its complete canonical inventory is 222 entries, 166 files, 9742834 bytes, digest `1100DF73C0D7C42464E34C69040A196D5CD3594C51110993D760B25B4237F82D`. All 23 protected files, nine pins and six fixture byte sequences remain unchanged.
+
+The existing owner authorization includes task-owned cleanup. Primary routes a single bounded non-TDD recovery cleanup to a fresh code_worker lease, using the already frozen ordinary-path/inventory/deletion algorithm only on this reconciled UI scratch root, then recreating that same empty scratch directory. All tracked and new source/test paths are forbidden; the nonignored guard projection is the already owned runtime root, which must remain unchanged. This early scratch-only use of the cleanup procedure restores the required clean-state prerequisite; it does not consume or reset an implementation correction, reacquire a browser, change transport code, or perform final task cleanup. Stop on any inventory/process mismatch. Only after successful primary verification may remaining verification use the existing commands. Manual evidence remains unverified and closure remains pending.
+
+### M104-UI-GREEN-ACCEPTED — browser, strict and build proof
+
+The separate frontend worker's second and final ordinary Green attempt added only `/// <reference types="vite/client" />` to `src/client/main.tsx`, using the installed Vite declarations for the CSS side-effect import. No runtime semantics, dependency, configuration, accepted test or other production file changed. Fresh focused UI verification passed all 35 tests with no failures, cancellations, skips or todo; independent strict typechecking exited 0; the first `build -- --configLoader native` exited 0 with 18 modules. Browser version, owned origin, 12 successful owned requests, zero external requests/page errors, default axe at both viewports, focus and reflow evidence are unchanged from the initial candidate.
+
+Lease `M1-04-20260831-01-ui-green-02`, assignment `M104-UI-GREEN-02`, attempt 2, parent `M1-04-20260831-01-ui-green-01`, digest `446f6a502a2a9acecdc133471c03ca1451c98f886e22f4ddd05ccfbf562346a2`, closed `closed-compliant`; receipt `e376b4f561f59b05db24c41b58cbabbc362c00560b91bc6d6fdb122128170d62`. Primary fresh verification and closure observed exactly one allowed modified path, no unleased/forbidden changes or Git mutation. Main SHA-256 is `2896D6050B8754D20D100BADA4D2A6CD8E4CD2843EF37D2DAEEE028B14ED0980`; the other four production files and both accepted tests retain their prior recorded hashes.
+
+Primary independently reproduced the canonical runtime digest `E3FCE03453B560FCB9F45FC9325DC086F71579DFF21FA906142D2EFE4F1D2D28`, three empty scratch roots and absent `.vite-temp`. Both full screenshot inventories were reconciled before overwrite and reproduced byte-identically: desktop 248767 bytes, SHA-256 `14B48E1EC345E5CD8C81DE3A9910E5664E6927EE7EAD4318BBE8948FD208B020`; narrow 245780 bytes, SHA-256 `85A271363C445BD5FBB0821A03DE58B5C640AF8DC390A14483810C444C84A315`. Browser/context/listener teardown and environment restoration passed.
+
+The complete first build inventory under `dist/client` is one `assets` directory plus `index.html` (402 bytes, SHA-256 `5261A51D2F888699F908BF13C87FCF091C38D4F6E15B2E0FEC8E88DB7AB52692`), `assets/index-CWGBkEBP.css` (3812 bytes, `2DA9A36097ECD5290BE4033008E21870792611F651B5A17CAEEDD0A6BD216B15`) and `assets/index-E2EMqB_s.js` (221278 bytes, `B82380401480950D5D1ECB7DDD74A6E3E2553990CF1F349E8106F9EDFDA991B9`). The source graph is client, React and the pure validator; main mounts App with empty props. No fixture, scanner/service or provider integration is shipped. The generated bundle's sole `fetch` is Vite's asset module-preload polyfill, not an application request. Retained screenshots/build/runtime are owned review artifacts, not committed deliverables. Manual heard Narrator, actual browser-menu zoom, critical reviews, full sequential regression, cleanup and documentation closure remain required.
+
+### M104-UI-GREEN-ATTEMPT-1 — browser pass and strict type gap
+
+The separate frontend worker created only the five L4.1 source files. Primary inspected all actual files before execution, including the post-admission ownership check that preserves L4.2 when reflection triggers unmounting. The exact focused command passed 35 tests with zero failures/cancellations/skips/todos. All tests executed unchanged; default axe returned zero violations at 1280x800 and 320 CSS pixels, and the keyboard/focus/long-evidence/overflow cases passed. Twelve owned-origin requests returned HTTP200; zero external requests/page errors. Context/browser/Vite and listener teardown, environment restoration, runtime/marker preservation and three empty scratch roots passed.
+
+The independent strict command exited 1 only on TS2882 at src/client/main.tsx:3 for the CSS side-effect import. Build did not run and no Green acceptance is claimed. Primary verified node_modules/vite/client.d.ts:43 already declares CSS modules; the sole ordinary frontend correction may add a type reference to vite/client in the allowed main.tsx. This selects no package, changes no config, adds no runtime import and leaves all tests unchanged. Use a fresh attempt-2 child with exactly the same guard scope and terminal parent; no automatic further production correction is granted.
+
+Lease M1-04-20260831-01-ui-green-01 digest bd8afe40699ab68b8562e3ad729ebf5d7e5945cfde6bf380fae2ade87bd855b5 freshly closed compliantly; receipt bfeed3e8e8675a9a3a490dace7207a56e646b09d08cdc7653f3ba949f67c456d. The guard reports the expected five created paths only (Windows canonical comparison lowercases path keys); actual source names remain App.tsx and RunResults.tsx. Primary verified the actual test hashes and full runtime/empty scratch state. No active lease or build exists.
+
+Primary inspected the real-browser samples and reproduced their complete two-file owned inventory: desktop-results.png 248767 bytes SHA14B48E1EC345E5CD8C81DE3A9910E5664E6927EE7EAD4318BBE8948FD208B020 (1280x3804 full page), narrow-detail.png 245780 bytes SHA85A271363C445BD5FBB0821A03DE58B5C640AF8DC390A14483810C444C84A315 (320x7701 full page). Both retain complete evidence, clear source/state labels and the prescribed wide columns/narrow stack; the automated overflow assertion establishes no horizontal document scroll. These are synthetic actual-component snapshots, not native scanner or heard screen-reader proof.
+
+Source SHA-256: index.html D8E5B1BACD6ED0D4F75F7DAC4845CE427FDB56C8DA91743592D9946F8E02870A; main.tsx 923A494CAA111158FE08060988D0278A4D9A48AB0BED6F2712E1A5B94C0920BE; App.tsx DB831F6852EE70FE97D52CA01815012CA8FF84E0976D2FAEEF999C2E27930026; RunResults.tsx 36169BA7D149936896A2EBC4C3F2EF628CFD3FCCB890664288C6B4CD570DFCD9; styles.css 08884A4AC5A63ECA7398C5DBB82C56792CEB5F3C85CA9AEB34A11426F376DB2B.
+
+The correction's first focused rerun may overwrite only the two named PNGs after matching this complete inventory. Build remains absent and may be created only after focused/strict pass and ordinary-ancestor/absence checks. Retain runtime/evidence/build for reviews, without deleting parents or shared resources. Documentation impact: record real candidate behavior, the strict gap and correction basis; reconcile obsolete no-client statements while preserving pending build/manual/review/closure limits.
+
+### M104-UI-RED-ACCEPTED — test boundary and Green handoff
+
+Primary accepted the initial Red under ADR-0024's first-module exception on 2026-08-31. The fourth, explicitly authorized test turn moved only the consumed-key selection to untouched base.ok before adversarial mutation. Primary independently reconstructed the previous test hash by reversing that exact edit in memory, confirmed the helper byte-identical, inspected all 35 unconditional tests and the actual-App harness, and retained every behavioral assertion. The read-only construction check and both syntax checks passed. One exact L4.6 focused invocation exited 1 on the actual missing App import HTTP404, not a harness timeout; the separate strict invocation exited 1 with only TS2307 for the absent App type import. Every behavioral test is still cancelled/unexecuted, not passing.
+
+Accepted test SHA-256: 0DB6189B83972EDD26686911708972385B56A491189F03EEC755E18A1EF50B32. Accepted helper SHA-256: 93BB2312EB0A62569075F7CCAF3A617EEF6C5B5DB7902EC8994DC76ACD160DB8. Lease M1-04-20260831-01-ui-red-null-01 digest ed3679d0dc99e0c2a7b4e2cea7b33e23b9b85dbee45b2b430bd52976af2eb670 freshly closed compliantly; receipt 02e5ce75d326436242d6d03508a184f3da7cb4268c32ffbc92b7e14f8e5aa3e2. No forbidden or unleased changes occurred.
+
+Ten requests were owned-origin at 127.0.0.1:5173, zero external requests/page errors; context/browser/Vite/listener closure and environment restoration passed. Primary reproduced the unchanged runtime inventory and three empty scratch roots; 23 protected hashes, pins, fixture bytes and marker remain unchanged. No client, build or screenshots exist.
+
+Only separate frontend Green may now create the five L4.1 production files. Both accepted test files and every existing server/configuration/evaluation surface stay forbidden. Use one fresh frontend_code_worker lease, accepted M104-REUSE-001/M104-VISUAL-001 and L4.1–L4.6, exact focused/strict/build commands and declared owned screenshot/build effects. One initial Green and its one ordinary same-contract correction remain available; no test or research/setup budget is reset. If a later screenshot/build root exists, primary must reconcile its complete prior owned inventory before another overwrite. This checkpoint establishes neither executed UI behavior nor manual/review/task completion.
+
+Documentation impact: synchronize accepted Red and the next Green boundary while preserving original and additional correction history.
+
+### M104-UI-NULL-CORRECTION-01 — authorized setup ordering
+
+The owner explicitly authorized the proposed null-envelope setup-ordering correction on 2026-08-31, retaining every test and assertion. Choose the consumed key from the untouched base before replacing the adversarial value; no other test, harness, production, command, literal, or dependency change is authorized in this turn. This is the fourth test write in the same M104-UI-01 slice, not a new task or reset of prior budgets.
+
+Fresh primary re-entry verifies the prior stopped test/helper hashes F65534726118228346D92172D4AF083A337D02C37580B0DB764CAA6DD61D566C / 93BB2312EB0A62569075F7CCAF3A617EEF6C5B5DB7902EC8994DC76ACD160DB8, all 23 protected hashes, nine package pins, six fixture bytes, unchanged 332-entry runtime digest and three empty scratch roots. HEAD and selected task/readiness/evaluation freeze are unchanged. No active lease exists.
+
+Use fresh lease M1-04-20260831-01-ui-red-null-01, guard attempt 1 with no parent, same workflow/task/slice/role/owner. The guard has no attempt 3/4; this separately authorized grant is recorded explicitly and has no automatic child-correction allowance. Its only allowed file is tests/target-results-ui.test.ts; the helper is frozen. The previous owner correction receipt remains immutable. Budget: one write turn, no further correction, one exact focused invocation after syntax and read-only construction checks; separate strict typecheck may have only the absent-App type import failure. Preserve all prior failure history.
+
+Documentation impact: synchronize In progress and the explicit allowance. No test acceptance, Green, browser/manual evidence or implementation review is implied.
+
+### M104-UI-OWNER-CORRECTION-01 — explicit additional allowance
+
+On 2026-08-31 the owner authorized the requested extra correction: detect the pinned Vite missing-App import failure before the bridge wait and use the pinned named AxeBuilder import. Keep all 35 behavioral assertions unchanged. This is the third test write turn in the existing M104-UI-01 slice, not a new task, slice, research run or reset of the exhausted ordinary allowance. Exactly one write turn and one focused invocation are allowed; no automatic further correction is granted.
+
+Fresh primary re-entry verified all 23 protected byte hashes, nine package pins, six fixture bytes, both stopped test hashes, and the 332-entry runtime inventory digest E3FCE03453B560FCB9F45FC9325DC086F71579DFF21FA906142D2EFE4F1D2D28. All three scratch roots are empty; no active lease, production App, visual evidence, build or node_modules/.vite-temp exists. Readiness and the evaluation freeze remain unchanged.
+
+The guard supports attempts 1/2 and one child per attempt-1 lease. The explicit extra owner allowance therefore receives fresh lease M1-04-20260831-01-ui-red-owner-01 with guard attempt 1 and no correction parent, under the same workflow, task, slice, owner, phase and two-file scope. This administrative projection records the exception openly; prior terminal leases and receipts remain immutable, no guard control is changed, and this grant has no child-correction budget. The complete semantic packet must retain prior lineage and the owner-authorized limit.
+
+Documentation impact: return the existing task and current-status summaries to In progress and preserve the historical blocker. Green, manual accessibility/browser evidence, S3 slice and different integrated reviews, cleanup and closure remain gated.
+
+The additional turn completed under digest `7c030f68b5f9b2dcc35a8fb16afe183e2195df4e074a46095281629c415ae224`. It changed only the named AxeBuilder import and the harness's actual App response capture, registered before navigation with handled concurrent response/rejection timing. Both syntax checks exited 0. The exact focused command ran once and exited 1 on `App import HTTP 404 at http://127.0.0.1:5173/@id/C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab/src/client/App.tsx`, consistent with Vite's missing-module diagnostic and without a bridge timeout. All 35 tests remained cancelled/unexecuted, zero skips/todos. The independent strict command ran once and exited 1 with only TS2307 at harness line 14 for the absent App type import; the axe errors are resolved.
+
+Final test SHA-256 is `F65534726118228346D92172D4AF083A337D02C37580B0DB764CAA6DD61D566C`; helper SHA-256 is `93BB2312EB0A62569075F7CCAF3A617EEF6C5B5DB7902EC8994DC76ACD160DB8`. Primary inspected the actual helper changes and proved the test bytes return to the prior hash by reversing only its named import in memory. Primary verified and freshly closed the lease compliantly, receipt `58ae347c4f8e0d0c0bb3ad8c96fd0fb243aa2b352f7f56275148a93a96f1f159`, with only those two allowed modifications. No active lease remains. Ten requests were owned-origin; zero external requests/page errors, context/browser/Vite/listener teardown and exact environment restoration passed. Primary reproduced all 23 protected hashes/pins/fixture bytes, the unchanged runtime digest and three empty scratch roots. No production UI, root entry, screenshot, build or .vite-temp exists.
+
+Primary did not accept the test contract or authorize Green. Read-only inspection found `tests/target-results-ui.test.ts:255-259` sets `value = null` then reads `value.ok` when choosing the consumed envelope key. Primary extracted that existing construction fragment without writing a file and executed it with the pinned Node/nonbrowser wrapper: both success and failure bases throw `Cannot read properties of null (reading 'ok')`. This is a test setup failure before the collaborator can receive the adversary, not an application failure. The worker's precise missing-callable result therefore does not override the known invalid test construction.
+
+The proposed additional correction is only to choose the consumed key from the untouched base before replacing the test value. Keep both stages, all envelope cases, all 35 tests/assertions, commands and product contract unchanged. This defect is outside the two changes covered by the consumed owner allowance. The primary asked for separate authorization and left it untouched. M1-04 is Blocked pending that direction. No budget reset, production write, final review, cleanup-root deletion, commit or push occurred.
+
+Documentation impact: record the completed authorized correction and independently reproduced remaining defect; synchronize Blocked status, preserve the earlier failures and all pending gates. Handoff validation passed 585 relative links and 122 fragments across eleven changed documents, all eleven embedded PowerShell blocks, whitespace checks and current-status reconciliation. These checks validate the documented stop, not UI behavior or task completion.
+
+### M104-UI-RED-ATTEMPT-2 — exhausted test correction and stop
+
+The sole correction used lease `M1-04-20260831-01-ui-red-02`, parent `M1-04-20260831-01-ui-red-01`, digest `be4e0e77f9fe3f5b70dc58d8686b67193752f9648268298c35a75b921f21f707`. Its only change was `if (current === repo) break;` in the supplemental Node ancestor loop. The complete behavioral file remains SHA-256 `0C5DD1A105B51A6A118E9075894A183E8A62AF83CBBE35C9A4095F80C1721A6E`; corrected harness is `497D0372478372333AFD2C2C968AE0C8B9F64691C6A9639D737819093B5EBE3D`. Both syntax checks exited 0. The exact focused command ran once and exited 1; there was no further edit or retry.
+
+The ancestor failure was resolved. Actual generated HTML and TSX returned HTTP 200, while the absent App.tsx and styles.css imports returned HTTP 404 under Vite's resolved `/@id/C:/...` paths. Vite printed `Failed to load url C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab/src/client/App.tsx ... Does the file exist?`, but the harness's generated-entry HTTP500 branch did not capture that failure. Its decisive thrown failure was `page.waitForFunction: Timeout 5000ms exceeded` at the bridge wait. This is RED INVALID; it cannot be reclassified as valid missing-callable Red after the fact. All 35 behavioral tests were cancelled/unexecuted, with zero skips/todos. Setup readiness does not validate this later harness assumption.
+
+Context/browser/Vite teardown and listener-closed verification passed at owned origin `http://127.0.0.1:5173`; ten requests were owned-origin, with zero external requests or page errors. Primary verified and freshly closed the lease compliantly with only the allowed harness change, receipt `f62ecb4aca2f76582c33fe56ce2363e3d72e1e49ddec5c3668b258ad6873aeae`. No active lease or owned browser/listener remains. Primary independently reproduced the unchanged 332-entry / 451193922-byte runtime inventory, digest `E3FCE03453B560FCB9F45FC9325DC086F71579DFF21FA906142D2EFE4F1D2D28`, empty three scratch roots, exact test hashes and unchanged 23 protected hashes/pins/fixture bytes. Environment restoration passed. No client, root entry, screenshots, build or .vite-temp exists. The task-local runtime and empty scratch roots are retained for a possible authorized continuation; the final post-review root-deletion gate has not run. Shared resources remain untouched.
+
+Primary's final independent strict typecheck used the unchanged L4.6 nonbrowser wrapper and command and exited 1. TS2307 for the harness's type-only App import reflects the genuinely absent production callable. Separately, TS2351 at both `new AxeBuilder` expressions and associated TS7031 callback errors expose an invalid default-import shape in the new test. Pinned package declarations export named `AxeBuilder`, already used by the unchanged scanner. This additional test-side issue is not hidden behind the expected first-module absence; no strict-pass claim is made for the current tree.
+
+Further writing is stopped by the explicit owner instruction and worker workflow's exhausted correction rule. A proposed owner-authorized additional bounded correction would (1) capture the actual failed App module response and its precise diagnostic rather than a bridge timeout, and (2) use the pinned named axe export, leaving the 35 behavioral assertions, product contract, source scope, packages and frozen commands unchanged. This proposal is not another lease or automatic budget reset. Its exact response handling must be reconciled before any authorized write; a new guarded assignment and fresh valid Red acceptance would still precede separate frontend Green. Both R3 final-artifact corrections and the setup correction also remain consumed. Documentation impact: mark only M1-04 Blocked, synchronize current summaries, preserve the live plan and failure history, and keep every implementation/review/manual/cleanup gate pending.
+
+Stop-handoff documentation validation passed: 584 relative links and 121 fragments across the eleven changed documents, all eleven embedded PowerShell blocks, whitespace validation and current-status reconciliation. No protected implementation/configuration/fixture/workflow diff exists, and no active lease pointer remains. These checks validate the documented stop, not M1-04 completion or the failing current test tree. No commit, push, plan archive or final runtime deletion occurred.
+
+### M104-UI-RED-ATTEMPT-1 — invalid harness failure
+
+The test worker authored 35 unconditional behavioral tests and the mandatory actual-App/manual harness under lease `M1-04-20260831-01-ui-red-01`, digest `a33e47827d3bcf617f38a42388405ec77ae73c9ea0180d8f74fe1d41b263b825`. Primary inspected both actual files during the authoring turn. Invalid synthetic fixtures and an implementation-specific newline-input test were corrected before any execution; no accepted test evidence was invalidated or weakened. The reachable input tests retain whole-string invalid cases; single-line native input strips newline before the component receives it. Whole-string parser implementation remains a source-review obligation. The canonical PowerShell inventory remains the outer ownership proof; Node-local checks are supplemental. Later screenshot producers require primary comparison to the last owned evidence inventory before writing only the two exact assigned PNGs, matching L4.6's preexisting-root reconciliation rule.
+
+Both exact Node syntax checks exited 0. The one frozen focused command exited 1 on `EPERM: operation not permitted, realpath 'C:\Users\mmjos'`, in the supplemental harness ancestor loop, before creating generated entries or acquiring Vite, Chromium or a listener. All 35 tests were cancelled with behavioral assertions unexecuted; this is RED INVALID, not missing-callable Red. Test SHA-256 is `0C5DD1A105B51A6A118E9075894A183E8A62AF83CBBE35C9A4095F80C1721A6E`; harness SHA-256 is `D8F7BE41BA9DD3864661CD8CDAB54D0DECC803D11DE3256F1246CBF49A2B2C95`. Both were unchanged across execution.
+
+Primary verified and freshly closed the lease compliantly with exactly the two allowed created files and no forbidden/unleased changes; receipt `e85b6c0aaaf0a919a3d2736c8280d769b2fe5efbb3d2248929469d644535c38c`. Primary reproduced the unchanged runtime inventory and all 23 protected hashes/pins/fixture bytes; all three scratch roots are empty. No client, root entry, screenshots, build output or .vite-temp exists. Process environment restored; no browser/listener was acquired.
+
+Read-only Node diagnosis inside the existing nonbrowser wrapper verified native realpath and ordinary topology for the repository root, UI scratch, runtime and validation marker. The specific failure is unnecessary Node inspection above the workspace. The sole same-contract test correction may stop that supplemental loop after checking the exact repository root; it must retain the canonical outer PowerShell checks of all ancestors and leave the behavioral test file byte-identical. No permission boundary, test contract, Vite configuration, command, dependency or research literal changes. Require a fresh attempt-2 child lease and one exact focused invocation; another unsuccessful correction stops automatic continuation. No Red has been accepted and Green remains gated.
+
+### M104-UI-PREFLIGHT-01 — missing production callable
+
+Primary accepted the test worker's read-only MISSING classification against plan hash `0F1E47DCC338F3CCD5B38F231DB8E1BDF6552D1ACB2C8E62E85ACB40CD00D247`. Direct directory/file inspection confirms six server-only production modules, no client/root entry and no assigned UI test files; existing tests cover only the completed domain/service/scanner owners. No files or mutable runtime state changed during preflight. M104-SETUP-ACCEPTED supplies current generic TSX/browser readiness, not UI behavior.
+
+The exact missing callable is `App` from `src/client/App.tsx`. The next guarded test assignment must write the complete L4.1–L4.6 behavioral contract before the initial Red. One suite setup will navigate the actual generated entry and surface its HTTP 500 / Vite missing-App import diagnostic before a generic bridge timeout. No separate transformRequest path, stub, conditional assertion or repeated missing-callable browser launch is used. Behavioral assertions remain unexecuted until separate Green passes them unchanged. Test ownership is exactly `tests/target-results-ui.test.ts` and `tests/helpers/m104-ui-harness.ts`; all production and existing tests remain protected. UI correction budgets are untouched.
+
+### M104-SETUP-ATTEMPT-2 — successful transport proof
+
+Acceptance checkpoint `M104-SETUP-ACCEPTED`: fresh S1 milestone review returned PASS with no findings against plan hash `F8EAF6D499FB37DD22EBA4045E74D94E4C9733CD2B7AB0187891426E399FC150`. The reviewer independently reproduced the runtime inventory, executable/marker identities, empty scratch, protected-path diff and absence of client changes, while reusing the recorded disposable probe and teardown evidence. Primary accepted setup after inspecting the actual worktree and terminal receipts. All 582 relative links / 119 fragments and eleven embedded PowerShell blocks passed; whitespace validation passed. This opens only the UI test worker's read-only preflight, not Green or task closure.
+
+The sole setup correction ran under lease `M1-04-20260831-01-setup-02`, parent `M1-04-20260831-01-setup-01`, digest `8de778dde3e2cc49c209f375a0b6564b295c2d7f7dcb177f0dc2a06de9d430e1`. No acquisition or dependency change occurred. Primary inspected the complete corrected disposable probe before its single execution; probe SHA-256 was `64A3A8A5D5B17A4BC045B131FFE4BDDEE22033609F3BF8C08612591632E0D2EC`, and the frozen plan hash during the lease was `E9ECA326641A58A5E652C0EBC3AD19563D0CB47E53E2F1E472FC3CE7AA84F0CE`. The exact L4.6 probe command exited 0: Chromium reported `151.0.7922.34`, the visible text was `TSX transport ready`, and the title was `M1-04 transport probe`. All eight observed requests were to the owned origin and returned HTTP 200; no external requests or page errors were observed.
+
+The actual origin was `http://127.0.0.1:5173`. Pinned Vite's `startServer` (`node_modules/vite/dist/node/chunks/node.js`, lines 26496–26508) maps configured port 0 to its default 5173. The literal configuration remains unchanged; evidence claims only a temporary owned loopback listener, not an OS-assigned random port. Strict-port binding, deriving the actual origin, owned-origin routing and connection-refused teardown still apply. Context, browser and Vite closure passed, and the probe process exited. Global process enumeration is not used as proof.
+
+Primary independently reproduced the unchanged 332-entry / 318-file / 451193922-byte runtime inventory and digest `E3FCE03453B560FCB9F45FC9325DC086F71579DFF21FA906142D2EFE4F1D2D28`; runtime executable and validation marker are unchanged. All 23 protected raw-byte hashes, nine package pins and six frozen fixture byte sequences match entry. The three scratch roots now exist and are empty after inventory-matched removal of the first probe and settled cleanup of the corrected probe. All six process environment values were restored exactly; no client, root entry, build, visual evidence or node_modules/.vite-temp exists.
+
+Primary verified and freshly closed the correction lease compliantly with zero forbidden or unleased endpoint changes, receipt `dbb55cf244a14c3d4b03d5b3d95f7c513a9559478e49d0035763d0979f065a39`. No active lease remains. TDD is Not applicable: this proves only the pinned browser and generic TSX prerequisite. S1 setup review is pending; application tests and UI writes remain gated. Setup correction and both research-artifact correction budgets are consumed. Documentation impact: record actual setup evidence and limitations without claiming application Red, UI behavior, manual accessibility results or roadmap completion.
+
+### M104-SETUP-ATTEMPT-1 — acquisition and failed transport proof
+
+Subsequent correction acceptance: complete final re-review `M104-RF-C2` returned PASS with all I4.1–I4.9 passing and no findings at draft hash `d5229ed1a93e94a1cfa93ae9c72a4457f621662b12ac889bf18d0b50f41f1144`. The reviewer independently reproduced both inventories, runtime/marker identity, terminal receipt, exact scratch children, empty other scratch and pinned-source diagnosis. Primary accepted this supported correction after actual source/inventory inspection; both final-artifact correction cycles are consumed. This permits only the already bounded setup attempt 2, not an acquisition, UI preflight or a further correction budget. The failed-attempt history below remains unchanged.
+
+Setup assignment M104-SETUP-01-A1 ran under lease `M1-04-20260831-01-setup-01`, digest `1c2273ce164524e3815d765a7f3194a24129dd91ee9d00a86525ef70aed51c75`. Dry-run and the one authorized acquisition exited 0. The generic TSX probe exited 1 when the expected visible paragraph timed out at 5000 ms. No UI existed and this is not application Red. The worker stopped without retry, proved context/browser/Vite closure and listener connection refusal, and preserved probe scratch. Global OS process enumeration was denied; no claim relies on it. API closure and process-exit evidence is retained separately from that unavailable diagnostic.
+
+Primary verified and freshly closed the lease compliantly, receipt digest `cf0d2cdee14e5a4bf30bab169c0a7d5be0bbe4c52f7fec0d823259d578301a20`; no active pointer remains. Actual runtime inventory matches the worker: 332 entries, 318 files, 14 directories, 451193922 bytes, digest `E3FCE03453B560FCB9F45FC9325DC086F71579DFF21FA906142D2EFE4F1D2D28`. Chrome executable hash is `409805A16D6416087E6B2F778DF1CF8F7BBB267D6B99F6B5BB0A618EACE234F2`; the empty validation-marker hash is `E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855`, mtime `2026-08-31T17:33:21.7453018Z`, unchanged after the probe. Actual browser.version output was not reached and is not claimed. UI/scanner scratch is empty; setup scratch has 14 known entries / 2501351 bytes, digest `3A53256961FF30A60B1C4A9287544477C18635E79AE44D0C21C3311E250696D2`. All 23 protected hashes and exact environment restoration passed.
+
+Primary read-only diagnosis found pinned Vite's development JSX selection (`node_modules/vite/dist/node/chunks/node.js`, development transform), React's CommonJS `jsx-dev-runtime.js`, `noDiscovery` skipping unlisted optimization, and the preserved optimizer metadata lacking that subpath. Together they support a missing explicit prebundle entry as the likely rendering cause; no captured browser error established it yet. The selected candidate, critical semantics, dependencies, roots, commands and expected behavior do not change. This is the second supported final-artifact correction within the existing R3 contract, not another research run or reset budget: add the already-installed runtime subpath, retain all invariants, and require complete final re-review before the sole setup correction. Setup and S1 acceptance remain pending; no test preflight or production change is authorized until they pass.
+
+### M104-LITERALS-ACCEPTED — research and primary acceptance
+
+Accepted on 2026-08-31. Mandatory A1 synthesis returned DRAFT READY. Fresh pre-draft critical research review passed after its one supported outline correction; the different fresh final critical research review passed after final correction cycle 1 of 2 resolved M104-RF-F1. The final reviewed draft SHA-256 was `c609344b582903fc17ebec8da8ae4f5b8cacfd534ef1b06e873fbccf4ba13df3`; this identifies that draft, not this later evidence-only append. All I4.1–I4.9 passed at contract level with no remaining Blocker, Major or Minor. No role accepted an ADR, requirement, runtime proof or roadmap completion.
+
+Primary reconciled the actual literal/diff with the accepted authorities, all 23 entry protected raw-byte hashes and absence of client/runtime/scratch/build/lease outputs. Eleven embedded PowerShell blocks parsed with zero errors; 580 relative links and 117 fragments in the eleven changed documents passed; `git diff --check` passed. These are deterministic documentation/preservation checks, not UI verification. The entry's 202 nonbrowser tests remain fresh evidence; historical 290 remains historical. The accepted reuse and visual capsules use the exact source/test owners, samples and manual-evidence boundary in L4.1–L4.6.
+
+Next: workflow `M1-04-20260831-01`, bounded setup slice `M104-SETUP-01`, TDD Not applicable because it only acquires a pinned prerequisite and proves generic TSX transport. Primary-managed setup lease and S1 review are required; no production or test module exists yet. Documentation impact: record the ordinary task-owned literals, correction provenance and accepted research checkpoint without changing canonical requirements, ADRs, dependencies, evaluation inputs or M1-04's In progress status.
+
+### M104-ENTRY-002 — execution authorization and readiness
+
+The owner explicitly selected execution of only M1-04 on 2026-08-31. Starting HEAD was `6d0361d1b7126ee409eb25000027c58bb97f78b3` on `codex/m1-04-target-and-results-ui`, with a clean worktree and index. No historical baseline was restored. M1-01 remains Complete, and the routed UI/provider/security/accessibility requirements retain their Accepted or explicitly Deferred dispositions. The RD-003 manifest and all six embedded fixture byte comparisons pass unchanged.
+
+Current Node 24.20.0, npm 11.19.0, Python 3.12.10 and all nine direct installed package versions match the baseline. The exact four-file nonbrowser invocation already recorded in Concrete Steps freshly passed 202 tests, zero failures/cancellations/skips/todo (4.37 seconds); independent strict typechecking separately exited 0. Both ran inside the reviewed nonbrowser wrapper with exact environment restoration. Protected source/test/configuration/fixture fingerprints were captured; representative identities in `M104-BASELINE-001` remain unchanged. Scanner source raw CRLF hashes are retained separately from historical LF-normalized identities.
+
+No active lease, `src/client`, root `index.html`, `dist/client`, `m104-browser-runtime`, `temp/m104-ui`, `temp/m104-setup` or `temp/m103-scan` exists. The selected default Chromium 1234 executable is absent; its parent shared cache exists and is not disposable. `m104-browser-runtime` is nonignored, while UI scratch/build and run data remain ignored. Windows Narrator is present; actual speech and zoom observations remain future human evidence, not facts established by binary presence. No runtime acquisition, browser launch, provider call or product listener was performed by this checkpoint.
+
+The one non-ranking discovery pass is consumed. Critical admission/identity/ownership research and the separately justified Vite/manual-evidence research have entered the recorded R3 synchronization route. Their recommendations do not freeze literals or authorize workers. Documentation impact: synchronize execution authorization/current boundary while preserving accepted planning history, requirement/ADR status, task graph and implementation limitations.
 
 ### M104-BASELINE-001 — current-state review
 
@@ -335,11 +876,20 @@ Add only future accepted material results: the literal block and research/checkp
 
 The durable interface remains `PageAnalysisRun` / `ScanResult` and their validators; run status remains `running | failed | completed` and a current Finding remains `unprocessed`. Provider contexts remain exactly Local/Ollama/`qwen3.5:4b` and Groq/Groq/`openai/gpt-oss-20b`. The frontend must neither amend those records nor reinterpret native `incomplete` as a Finding.
 
-The future client callable and entry are unresolved L4.1/L4.2 ordinary implementation literals, constrained by these immutable contracts and M1-05's ownership. Transport details, exact function/export names, transient view-state representation, test harness and focus procedure must be frozen before tests depend on them. An unresolved significant cross-module decision instead follows the ADR/owner route.
+The primary-authored L4.1/L4.2 literals specify the client callable, unavailable entry, admission and transient ownership. L4.3–L4.6 specify projection, focus, harness, paths and commands. Their different fresh final research review passed; setup and test preflight remain separate guarded/runtime barriers. An unresolved significant cross-module decision still follows the ADR/owner route.
 
 No additional dependency is selected. Use the existing React/Vite/Node test/Playwright/axe stack. The six evaluation fixtures and manifest remain external read-only references, not browser-hosted production content. The frontend-quality overlay affects visible implementation and evidence only; it does not authorize a new task, design system, provider behavior, scanner change or requirement.
 
 ## Revision note
+
+2026-08-31: Recorded the owner-authorized extra diagnostic/import correction, precise missing-callable result, resolved axe errors and compliant closure. Preserved the independently reproduced null-case setup defect unchanged pending separate authority; task returns to Blocked before test acceptance or Green.
+
+
+2026-08-31: Recorded completed literal and setup/S1 barriers, accepted MISSING preflight, both invalid test attempts and compliant closures, current strict-check failures and the exhausted-correction stop. Synchronized M1-04 Blocked and preserved the owned runtime for possible authorized continuation. No production UI, valid Red, implementation-review acceptance or task completion is claimed.
+
+2026-08-31: Authored M104-LITERALS-001 after mandatory R3 synthesis and fresh pre-draft PASS. Incorporated the sole supported outline correction for retained noncompleted identity/transition rules and native Vite configuration loading. All concrete slots are specified; different fresh final research review and all implementation/runtime evidence remain pending.
+
+2026-08-31: Recorded the subsequent exact-task execution authorization and fresh clean checkout without resetting planning history. Completed the single non-ranking discovery pass and froze the candidate/evidence/gate/invariant contract for the required R3 literal research. No literal selection or implementation is claimed.
 
 2026-08-31: Created the primary-authored M1-04 planning draft after current-state review and fresh nonbrowser verification. Recorded the conditional runtime prerequisite, one frontend-visual TDD slice, immutable M1 boundaries, explicit future literal/command gates, sequential browser-suite isolation and planning-only activation. No implementation or tool selection was performed.
 
