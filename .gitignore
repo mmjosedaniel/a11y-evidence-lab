@@ -3,3 +3,4 @@ logs/
 .codex/leases/__pycache__/
 /node_modules/
 /dist/client/
+/data/runs/

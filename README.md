@@ -52,7 +52,9 @@ Public comparison always starts from a baseline Finding. For binary `image-alt` 
 
 ## Project status
 
-Development ready. The accepted planning baseline and [development roadmap](docs/DEVELOPMENT_ROADMAP.md) define the first portfolio slice and its implementation order. [RD-002](docs/plans/completed/rd-002-minimum-development-toolchain-literals.md) is Complete: the pinned development toolchain passed clean-restore, strict compiler, native-package, disposable focused-harness, and independent review checks. [RD-003](docs/plans/completed/rd-003-scan-evaluation-boundary.md) is Complete after verified LF checkout preservation, clean-start acquisition, strict typechecking, independent reviews, and final cleanup. The previous network-permission denial remains recorded. The original six native outcomes remain accepted. Corrected states have explicit native same-target positive evidence. Six controlled HTML fixtures and one scan-only manifest now exist. [M1-01](docs/plans/completed/m1-01-run-and-scan-contracts.md) is Complete after its literal freeze, guarded TDD, independent reviews and documentation closure. The [run/scan contract](src/server/domain/run-contract.ts) now validates closed records and returns detached, deeply frozen values. All 58 [focused tests](tests/run-contract.test.ts) and strict typechecking pass. The separate integrated review and documentation closure passed; no runnable service, scanner, or UI exists yet.
+Development ready. The [development roadmap](docs/DEVELOPMENT_ROADMAP.md) owns implementation order and status. [RD-002](docs/plans/completed/rd-002-minimum-development-toolchain-literals.md) completed the pinned toolchain, and [RD-003](docs/plans/completed/rd-003-scan-evaluation-boundary.md) completed the six controlled fixtures and scan-only evaluation manifest, including reviewed reproducibility and cleanup corrections. [M1-01](docs/plans/completed/m1-01-run-and-scan-contracts.md) completed the pure run/scan validators and 58 contract tests.
+
+[M1-02 — Local service and aggregate](docs/plans/completed/m1-02-local-service-and-aggregate.md) is Complete. All 182 product tests, independent strict typechecking, actual startup/reopen/stop and exact synthetic-run deletion passed. Both slice S3 reviews and the different final integrated critical review passed; documentation closure is accepted. The service is runnable with the instructions below. Scanning, UI, retrieval, generation, provider calls and later workflows are not implemented. No other task is selected.
 
 ## Development toolchain
 
@@ -70,22 +72,53 @@ npm.cmd @toolchainOptions run typecheck
 
 Retain optional dependencies: they supply the platform-specific compiler and build binaries. Do not enable install scripts to work around a failure, regenerate the lock during a restore, or introduce another package manager. The independent `typecheck` runs strict `tsc` with no emitted JavaScript; native Node TypeScript execution does not replace it.
 
-The focused runner is Node's built-in test runner. The complete current product suite is the minimum run/scan contract test; from the repository root with the options above, run it once and run the independent strict typecheck:
+The focused runner is Node's built-in test runner. The current product suite contains the domain, repository, and service tests. From the repository root with the options above, run all three files and the independent strict typecheck:
 
 ```powershell
-npm.cmd @toolchainOptions run test:focused -- tests/run-contract.test.ts
+npm.cmd @toolchainOptions run test:focused -- tests/run-contract.test.ts tests/run-repository.test.ts tests/local-service.test.ts
 npm.cmd @toolchainOptions run typecheck
 ```
 
 No test is retained solely to make the runner pass: RD-002 proved an intentional assertion failure and corrected pass, then removed its disposable probe. Server modules and tests use erasable TypeScript and explicit `.ts` imports; `.tsx` is client-bundled code, not native Node input.
 
-Vite 8 builds the React client without a React plugin and will emit only the client bundle to `dist/client`. The `build` script (`vite build`) and `start` script (`node src/server/main.ts`) are future M1 boundaries, not runnable application commands yet: the HTML/client and service entries do not exist. There is no Vite dev-server topology or application service implemented. RD-003 has verified full Playwright-managed Chromium revision 1234 / version 151.0.7922.34 against the [scan-only manifest](evaluation/rd003-scan-v1.json). Its [evaluation procedure and native evidence](docs/plans/completed/rd-003-scan-evaluation-boundary.md#accepted-setup-and-native-observations--rd003-observations-001) use the pinned Node/npm and libraries directly over six authored static states; there is no permanent probe or application scanner. The original task-local runtime/browser was removed after its review and verified cleanup; global installations and shared browser caches remain unchanged. This is an evaluation result, not a support claim. Later M1 work must exercise these inputs through its real application modules.
+Vite 8 builds the React client without a React plugin and will emit only the client bundle to `dist/client`. The `build` script (`vite build`) remains a future client boundary because the HTML/client entries do not exist. The `start` script (`node src/server/main.ts`) now runs the local service described below. There is no Vite dev-server topology or rendered UI. RD-003 has verified full Playwright-managed Chromium revision 1234 / version 151.0.7922.34 against the [scan-only manifest](evaluation/rd003-scan-v1.json). Its [evaluation procedure and native evidence](docs/plans/completed/rd-003-scan-evaluation-boundary.md#accepted-setup-and-native-observations--rd003-observations-001) use the pinned Node/npm and libraries directly over six authored static states; there is no permanent probe or application scanner. The original task-local runtime/browser was removed after its review and verified cleanup; global installations and shared browser caches remain unchanged. This is an evaluation result, not a support claim. Later M1 work must exercise these inputs through its real application modules.
 
 For RD-003 reproduction after task-local cleanup, use the reviewed [current clean-start procedure](docs/plans/completed/rd-003-scan-evaluation-boundary.md#current-reproduction--rd003-procedure-003), after restoring the RD-002 dependencies above. The scoped [.gitattributes](.gitattributes) preserves the seven frozen artifacts' LF bytes; all 21 checkout-filter comparisons pass. The single owner-authorized network-enabled retry passed acquisition, binary/package identity checks, and strict typechecking. The independently reviewed task-local files were removed after verified cleanup; the first attempt's socket-permission failure is preserved. The original failed bootstrap and preserved-cache resume command remain historical.
 
+## Run the local service
+
+After the prerequisite checks and locked restore above, start from the repository root in PowerShell:
+
+```powershell
+$env:A11Y_APPLICATION_REVISION = (git rev-parse HEAD).Trim()
+npm.cmd @toolchainOptions run start
+```
+
+The revision must be exactly 40 lowercase hexadecimal characters. Optional `A11Y_PORT` accepts decimal 0 through 65535 without spaces, signs, or leading zeroes; absent or zero asks Windows for an available port. The entry point reads no provider credentials, model settings, or arbitrary data-root setting. It needs no browser or model setup. Run only one service instance against this working copy: separate processes are not coordinated.
+
+A successful start prints one JSON `service-ready` event containing the actual `http://127.0.0.1:<port>` URL. Use that URL for `GET /api/health` or `GET /api/runs/<run-id>`. Health reports service readiness, current reservation, and capabilities `readRuns: true`, `scan: false`. Run reads validate the retained aggregate and mark historical `running` records as `interrupted: true`; they do not resume work. There is no Analyze, aggregate-upload, configuration, shutdown, static-file, or UI route. The internal `runScan` collaborator handoff is reserved for later scanner integration and is exercised only with synthetic collaborators in these tests.
+
+Type exactly `stop` and press Enter in the service terminal, then wait for `service-stopped` and exit 0. The entry also handles stdin EOF, SIGINT, and SIGBREAK. Tests exercise LF/CRLF stop and EOF; forced Windows process termination is not evidence of a clean stop. Startup errors emit only `service-startup-failed` with a closed error code and exit 1. A failed stop emits `service-stop-failed` and exits 1; do not interpret that process exit as proof of resource cleanup.
+
+The service refuses overlapping operations without a queue. Cleanup uncertainty closes admission, and a stop deadline permanently forbids late publication. Publication writes the complete validated JSON to an exclusive same-directory staging file, flushes and closes it, then renames it to `run.json`. A failed update preserves prior canonical bytes. This is verified on the local Windows filesystem for the specified single-writer boundary; it is not a universal power-loss, OS-crash, filesystem-filter, malicious-race, or hard OS-call deadline guarantee.
+
+## Retained runs and deletion
+
+Run data stays in the ignored `data/runs/<run-id>/run.json` tree. Reads never repair invalid records, promote staging residue, or automatically resume interrupted work. A completed or failed record is terminal in the current schema; downstream Finding updates remain later tasks. No backup, hidden copy, sweep, or synchronization mechanism is added.
+
+For manual deletion, first stop the service and confirm its normal exit. Verify the resolved absolute target is the exact, correctly spelled direct run-directory child of this checkout's `data/runs`, all ancestors and the target are ordinary directories rather than links or junctions, and its inventory contains only the expected ordinary single-link `run.json`. If any check fails, preserve the directory for inspection. Remove only that verified directory using PowerShell's `Remove-Item` with `-LiteralPath` and `-Recurse`; never use a wildcard or target `data/runs`, its parents, another run, or a corpus directory. Local deletion does not remove any provider-side records.
+
+The repeatable synthetic demonstration creates exactly two exclusive `m102-demo-<UUID>` runs, starts and cleanly stops the actual entry twice, reopens a retained run, then deletes one exact run while checking the other run, a test-owned corpus marker, and pre-existing directory names. It removes its second run and temporary marker afterward; an empty `data/runs` may remain:
+
+```powershell
+npm.cmd @toolchainOptions run test:focused -- --test-name-pattern='M102 entry-point reopen and exact deletion' tests/local-service.test.ts
+```
+
+This filtered demonstration does not replace the full three-file suite. Tests use only project-owned synthetic records, isolated `temp/m102-*` roots, and bounded owned child processes; they never acquire or delete a real corpus or user run.
+
 ## Current scope
 
-This repository contains the accepted product and architecture baseline, feasibility analysis, derived specifications, roadmap and task evidence, the RD-003 scan-only manifest and six controlled fixtures, the minimal pinned toolchain, and the M1-01 runtime run/scan contract and focused tests. The completed M1-01 plan preserves the frozen literals and accepted execution/review evidence. The validators export application-owned types plus `validateRun(unknown)` and `validateScan(unknown)`; they do not scan, persist, call providers, or render UI. Build/start still await their owning tasks.
+This repository contains the Accepted planning baseline, frozen scan evaluation inputs, pinned toolchain, pure run/scan validators, concrete run repository, loopback service, entry point, and focused tests. The current [M1-02 plan](docs/plans/completed/m1-02-local-service-and-aggregate.md) records ordinary literals, implementation evidence, review state and limitations. The [domain contract](src/server/domain/run-contract.ts) still owns record validation; [storage](src/server/persistence/run-repository.ts) and the [service](src/server/service.ts) reuse it without adding later workflow fields. Real scanning, rendering, retrieval, generation, review, comparison, and client build remain their separately selected roadmap tasks.
 
 ## Documentation
 
