@@ -54,27 +54,27 @@ Public comparison always starts from a baseline Finding. For binary `image-alt` 
 
 Development ready. The [development roadmap](docs/DEVELOPMENT_ROADMAP.md) owns implementation order and status. [RD-002](docs/plans/completed/rd-002-minimum-development-toolchain-literals.md) completed the pinned toolchain, and [RD-003](docs/plans/completed/rd-003-scan-evaluation-boundary.md) completed the six controlled fixtures and scan-only evaluation manifest, including reviewed reproducibility and cleanup corrections. [M1-01](docs/plans/completed/m1-01-run-and-scan-contracts.md) completed the pure run/scan validators and 58 contract tests.
 
-[M1-02 — Local service and aggregate](docs/plans/completed/m1-02-local-service-and-aggregate.md) is Complete. All 182 product tests, independent strict typechecking, actual startup/reopen/stop and exact synthetic-run deletion passed. Both slice S3 reviews and the different final integrated critical review passed; documentation closure is accepted. The service is runnable with the instructions below. Scanning, UI, retrieval, generation, provider calls and later workflows are not implemented.
+[M1-02 — Local service and aggregate](docs/plans/completed/m1-02-local-service-and-aggregate.md) is Complete. All 182 product tests, independent strict typechecking, actual startup/reopen/stop and exact synthetic-run deletion passed. Both slice S3 reviews and the different final integrated critical review passed; documentation closure is accepted. The service is runnable with the instructions below. HTTP scanning, UI, retrieval, generation, provider calls and later workflows are not implemented; the internal M1-03 scanner is Complete as described below.
 
-[M1-03 — Real scan and evidence](docs/plans/m1-03-real-scan-and-evidence.md) is In progress for owner-requested planning only. Its dependencies and frozen inputs are ready; the existing 182-test suite and strict typecheck pass. Execution still needs an exact-task instruction, reviewed execution literals and commands, and a verified matching managed browser. No scanner implementation or browser acquisition has started; M1-04 and M1-05 remain unselected.
+[M1-03 — Real scan and evidence](docs/plans/completed/m1-03-real-scan-and-evidence.md) is Complete after owner-authorized execution and verified closure. Both scanner slices and their S3 reviews are accepted. All 290 integrated tests and independent strict typechecking pass, including the failed-launch residue regression. The different final integrated critical review, exact task-owned runtime cleanup and documentation closure passed. M1-04 and M1-05 remain unselected.
 
 ## Development toolchain
 
 Use exactly [Node.js 24.20.0 with its bundled npm 11.19.0](https://nodejs.org/en/download/archive/v24.20.0). Provision these developer prerequisites yourself; the project has no runtime installer. RD-002 used a temporary official Windows x64 distribution for verification and removed it and its task-specific cache after review; the machine's global runtime was not changed. The exact package pins live in [package.json](package.json), and [package-lock.json](package-lock.json) is the only authoritative dependency lock.
 
-From the repository root in PowerShell, check the prerequisites and restore the lock with dependency lifecycle scripts disabled:
+From the repository root in PowerShell, use the reviewed [M1-03 command wrappers](docs/plans/completed/m1-03-real-scan-and-evidence.md#l38-exact-commands-environment-and-effects). Every npm invocation below is an inner command: apply the nonbrowser wrapper, including to npm version, restore, typecheck, service start and nonbrowser tests. It disables Node compilation caching for that invocation and restores the prior value exactly. The full browser suite uses the separate six-variable browser wrapper. Do not run these npm snippets bare. Check the prerequisites and restore the lock with dependency lifecycle scripts disabled:
 
 ```powershell
 if ((node --version) -ne 'v24.20.0') { throw 'Node 24.20.0 is required.' }
-if ((npm.cmd --version) -ne '11.19.0') { throw 'npm 11.19.0 is required.' }
 $toolchainOptions = @('--global=false', '--prefix', (Get-Location).Path, '--cache', (Join-Path (Get-Location).Path 'temp/rd002-npm-cache'), '--ignore-scripts=true', '--audit=false', '--fund=false', '--update-notifier=false', '--logs-max=0', '--registry=https://registry.npmjs.org/', '--strict-ssl=true', '--package-lock=true', '--include=dev', '--include=optional')
+if ((npm.cmd @toolchainOptions --version) -ne '11.19.0') { throw 'npm 11.19.0 is required.' }
 npm.cmd @toolchainOptions ci
 npm.cmd @toolchainOptions run typecheck
 ```
 
 Retain optional dependencies: they supply the platform-specific compiler and build binaries. Do not enable install scripts to work around a failure, regenerate the lock during a restore, or introduce another package manager. The independent `typecheck` runs strict `tsc` with no emitted JavaScript; native Node TypeScript execution does not replace it.
 
-The focused runner is Node's built-in test runner. The current product suite contains the domain, repository, and service tests. From the repository root with the options above, run all three files and the independent strict typecheck:
+The focused runner is Node's built-in test runner. The browser-free core subset contains the domain, repository and service tests. Run these three files and the independent strict typecheck inside the nonbrowser wrapper; the complete five-file suite is described below:
 
 ```powershell
 npm.cmd @toolchainOptions run test:focused -- tests/run-contract.test.ts tests/run-repository.test.ts tests/local-service.test.ts
@@ -83,9 +83,23 @@ npm.cmd @toolchainOptions run typecheck
 
 No test is retained solely to make the runner pass: RD-002 proved an intentional assertion failure and corrected pass, then removed its disposable probe. Server modules and tests use erasable TypeScript and explicit `.ts` imports; `.tsx` is client-bundled code, not native Node input.
 
-Vite 8 builds the React client without a React plugin and will emit only the client bundle to `dist/client`. The `build` script (`vite build`) remains a future client boundary because the HTML/client entries do not exist. The `start` script (`node src/server/main.ts`) now runs the local service described below. There is no Vite dev-server topology or rendered UI. RD-003 has verified full Playwright-managed Chromium revision 1234 / version 151.0.7922.34 against the [scan-only manifest](evaluation/rd003-scan-v1.json). Its [evaluation procedure and native evidence](docs/plans/completed/rd-003-scan-evaluation-boundary.md#accepted-setup-and-native-observations--rd003-observations-001) use the pinned Node/npm and libraries directly over six authored static states; there is no permanent probe or application scanner. The original task-local runtime/browser was removed after its review and verified cleanup; global installations and shared browser caches remain unchanged. This is an evaluation result, not a support claim. Later M1 work must exercise these inputs through its real application modules.
+Vite 8 builds the React client without a React plugin and will emit only the client bundle to `dist/client`. The `build` script (`vite build`) remains a future client boundary because the HTML/client entries do not exist. The `start` script (`node src/server/main.ts`) now runs the local service described below. There is no Vite dev-server topology or rendered UI. RD-003 has verified full Playwright-managed Chromium revision 1234 / version 151.0.7922.34 against the [scan-only manifest](evaluation/rd003-scan-v1.json). Its [evaluation procedure and native evidence](docs/plans/completed/rd-003-scan-evaluation-boundary.md#accepted-setup-and-native-observations--rd003-observations-001) use the pinned Node/npm and libraries directly over six authored static states; that evaluation created no permanent probe or application scanner. The original task-local runtime/browser was removed after its review and verified cleanup; global installations and shared browser caches remain unchanged. This is an evaluation result, not a support claim. M1-03 now exercises these same inputs through its application capture/normalization modules; its distinct native capture profile and task status are recorded above.
 
 For RD-003 reproduction after task-local cleanup, use the reviewed [current clean-start procedure](docs/plans/completed/rd-003-scan-evaluation-boundary.md#current-reproduction--rd003-procedure-003), after restoring the RD-002 dependencies above. The scoped [.gitattributes](.gitattributes) preserves the seven frozen artifacts' LF bytes; all 21 checkout-filter comparisons pass. The single owner-authorized network-enabled retry passed acquisition, binary/package identity checks, and strict typechecking. The independently reviewed task-local files were removed after verified cleanup; the first attempt's socket-permission failure is preserved. The original failed bootstrap and preserved-cache resume command remain historical.
+
+## Verify the real scanner
+
+M1-03 adds an internal backend capability. It does not add an Analyze route, UI, provider call or scan-to-disk wiring. The production entry still needs no browser because it exposes only the existing service capabilities.
+
+The M1-03 task-local runtime and both scratch directories were removed after accepted review. To reproduce browser verification, provision the pinned Playwright-managed Chromium again and use exclusive ownership of the exact task scratch roots. Follow [L3.8 setup, environment and cleanup](docs/plans/completed/m1-03-real-scan-and-evidence.md#l38-exact-commands-environment-and-effects) from this checkout: provision the task-local cache, verify its inventory and dependency marker, and create ordinary empty setup/scan scratch directories. Set both TEMP and TMP to the exact scan scratch path **before starting Node**, using the reviewed browser wrapper; per-run application code neither changes the environment nor installs a browser. M1-05 must preserve this process-start prerequisite when wiring the callback.
+
+Inside that browser wrapper, the complete suite command is:
+
+```powershell
+npm.cmd @toolchainOptions run test:focused -- tests/run-contract.test.ts tests/run-repository.test.ts tests/local-service.test.ts tests/scan-normalization.test.ts tests/scan-page.test.ts
+```
+
+Run the independent typecheck separately inside the nonbrowser wrapper. The accepted run passes 290 tests and strict typechecking. Tests load all six unchanged gold states offline with truthful about:blank identity and use intercepted project-owned HTTPS responses for navigation. They do not qualify public DNS, TLS, redirects, arbitrary hostile pages or other platforms. The application capture profile m103-native-dom-v1 is distinct from RD-003's scan-only reporter profile. Work/cleanup deadlines are cooperative, not an OS process-kill guarantee.
 
 ## Run the local service
 
@@ -116,11 +130,11 @@ The repeatable synthetic demonstration creates exactly two exclusive `m102-demo-
 npm.cmd @toolchainOptions run test:focused -- --test-name-pattern='M102 entry-point reopen and exact deletion' tests/local-service.test.ts
 ```
 
-This filtered demonstration does not replace the full three-file suite. Tests use only project-owned synthetic records, isolated `temp/m102-*` roots, and bounded owned child processes; they never acquire or delete a real corpus or user run.
+This filtered demonstration does not replace either the core subset or the complete five-file suite. Tests use only project-owned synthetic records, isolated `temp/m102-*` roots, and bounded owned child processes; they never acquire or delete a real corpus or user run.
 
 ## Current scope
 
-This repository contains the Accepted planning baseline, frozen scan evaluation inputs, pinned toolchain, pure run/scan validators, concrete run repository, loopback service, entry point, and focused tests. The current [M1-02 plan](docs/plans/completed/m1-02-local-service-and-aggregate.md) records ordinary literals, implementation evidence, review state and limitations. The [domain contract](src/server/domain/run-contract.ts) still owns record validation; [storage](src/server/persistence/run-repository.ts) and the [service](src/server/service.ts) reuse it without adding later workflow fields. Real scanning, rendering, retrieval, generation, review, comparison, and client build remain their separately selected roadmap tasks.
+This repository contains the Accepted planning baseline, frozen scan evaluation inputs, pinned toolchain, pure run/scan validators, concrete run repository, loopback service, entry point, and focused tests. The current [M1-02 plan](docs/plans/completed/m1-02-local-service-and-aggregate.md) records ordinary literals, implementation evidence, review state and limitations. The [domain contract](src/server/domain/run-contract.ts) still owns record validation; [storage](src/server/persistence/run-repository.ts) and the [service](src/server/service.ts) reuse it without adding later workflow fields. [Real scanning](src/server/scan/scan-page.ts) and [minimization](src/server/scan/normalize-scan.ts) pass 88 scan tests, 20 normalization tests and both S3 reviews. Final integrated review and documentation closure passed. HTTP integration, rendering, retrieval, generation, review, comparison and client build remain their separately selected roadmap tasks.
 
 ## Documentation
 
