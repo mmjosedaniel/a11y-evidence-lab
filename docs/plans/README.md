@@ -4,7 +4,7 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-No active plans.
+- [M1-03 — Real scan and evidence](m1-03-real-scan-and-evidence.md) — **In progress, planning only**. Owner-selected on 2026-08-31 (UTC), with completed prerequisites and freshly verified existing code/frozen inputs. Plans two guarded TDD slices and a conditional browser prerequisite; execution authorization and reviewed exact literals/commands are still required. No scanner implementation has begun.
 
 ## Completed plans
 

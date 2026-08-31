@@ -54,7 +54,9 @@ Public comparison always starts from a baseline Finding. For binary `image-alt` 
 
 Development ready. The [development roadmap](docs/DEVELOPMENT_ROADMAP.md) owns implementation order and status. [RD-002](docs/plans/completed/rd-002-minimum-development-toolchain-literals.md) completed the pinned toolchain, and [RD-003](docs/plans/completed/rd-003-scan-evaluation-boundary.md) completed the six controlled fixtures and scan-only evaluation manifest, including reviewed reproducibility and cleanup corrections. [M1-01](docs/plans/completed/m1-01-run-and-scan-contracts.md) completed the pure run/scan validators and 58 contract tests.
 
-[M1-02 — Local service and aggregate](docs/plans/completed/m1-02-local-service-and-aggregate.md) is Complete. All 182 product tests, independent strict typechecking, actual startup/reopen/stop and exact synthetic-run deletion passed. Both slice S3 reviews and the different final integrated critical review passed; documentation closure is accepted. The service is runnable with the instructions below. Scanning, UI, retrieval, generation, provider calls and later workflows are not implemented. No other task is selected.
+[M1-02 — Local service and aggregate](docs/plans/completed/m1-02-local-service-and-aggregate.md) is Complete. All 182 product tests, independent strict typechecking, actual startup/reopen/stop and exact synthetic-run deletion passed. Both slice S3 reviews and the different final integrated critical review passed; documentation closure is accepted. The service is runnable with the instructions below. Scanning, UI, retrieval, generation, provider calls and later workflows are not implemented.
+
+[M1-03 — Real scan and evidence](docs/plans/m1-03-real-scan-and-evidence.md) is In progress for owner-requested planning only. Its dependencies and frozen inputs are ready; the existing 182-test suite and strict typecheck pass. Execution still needs an exact-task instruction, reviewed execution literals and commands, and a verified matching managed browser. No scanner implementation or browser acquisition has started; M1-04 and M1-05 remain unselected.
 
 ## Development toolchain
 

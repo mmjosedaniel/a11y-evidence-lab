@@ -6,11 +6,11 @@ A11y Evidence Lab.
 
 ## Status
 
-**Document status:** Product-intent and planning-context summary, reviewed on 2026-08-30. This document is not acceptance authority; individual directions are Accepted, Proposed, Deferred, or Superseded only where the canonical requirements baseline or an ADR records that status.
+**Document status:** Product-intent and planning-context summary, reviewed on 2026-08-31 (UTC). This document is not acceptance authority; individual directions are Accepted, Proposed, Deferred, or Superseded only where the canonical requirements baseline or an ADR records that status.
 
 **Repository stage:** Development ready through OD-025 on 2026-08-28. Implementation follows the derived [development roadmap](DEVELOPMENT_ROADMAP.md). RD-002 is Complete. RD-003 is Complete, including verified LF checkout and clean-start corrections, independent reviews, and final cleanup. Its original native observations remain accepted. M1-01 [contract execution](plans/completed/m1-01-run-and-scan-contracts.md) is Complete after both R3 checkpoints, guarded TDD, corrected S3 review, integrated review and documentation closure. The pure run/scan validators and 58 focused tests pass strict verification; integrated review and documentation closure passed. M1-02 service/storage is Complete after 182 product tests, strict typechecking, independent reviews and documentation closure. Real scanning, provider calls, and UI are not implemented.
 
-[M1-02](plans/completed/m1-02-local-service-and-aggregate.md) is Complete. All 182 product tests, independent strict typechecking, actual startup/reopen/stop and exact synthetic-run deletion passed. Both slice S3 reviews and the different final integrated critical review passed; documentation closure is accepted. Other tasks remain unselected.
+[M1-02](plans/completed/m1-02-local-service-and-aggregate.md) is Complete. All 182 product tests, independent strict typechecking, actual startup/reopen/stop and exact synthetic-run deletion passed. Both slice S3 reviews and the different final integrated critical review passed; documentation closure is accepted. [M1-03 — Real scan and evidence](plans/m1-03-real-scan-and-evidence.md) is now selected for planning only. Execution authorization, reviewed execution literals/commands and verified managed-browser readiness remain future gates; no scanner implementation has begun. M1-04 and M1-05 remain unselected.
 
 ## Concept
 

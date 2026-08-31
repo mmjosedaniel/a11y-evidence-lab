@@ -15,8 +15,8 @@
 - **Fixed three-scenario evaluation baseline:** Retained from OD-019 for deterministic evaluation
 - **MVP persona, provider, startup, retention, evaluation, and workflow narrowing:** Accepted or Deferred as recorded through OD-024
 - **Implementation status:** RD-002 toolchain, RD-003 evaluation freeze, M1-01 runtime contracts and M1-02 service/storage are Complete. All 182 product tests, strict typechecking, required reviews and documentation closure pass; no scanner or UI exists.
-- **Last reviewed:** 2026-08-30
-- **Current selected task:** None. [M1-02](plans/completed/m1-02-local-service-and-aggregate.md) is Complete after verified guarded implementation and closure. M1-03 and M1-04 remain unselected.
+- **Last reviewed:** 2026-08-31 (UTC)
+- **Current selected task:** [M1-03](plans/m1-03-real-scan-and-evidence.md), In progress for planning only. M1-01/RD-003 prerequisites are Complete and frozen inputs remain unchanged. Execution authorization and reviewed literals/commands precede implementation; browser readiness precedes browser-dependent work. M1-04 and M1-05 remain unselected. No requirement or ADR status changes.
 
 This document is the canonical index and global authority for the current product goal and the modular, stage-scoped requirements baseline. The linked requirement modules collectively define the first portfolio slice and later distributable-product obligations; none describes implemented behavior. Requirement status has the following meaning:
 

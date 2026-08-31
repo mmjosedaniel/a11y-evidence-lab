@@ -5,7 +5,7 @@
 - **Repository stage:** Development ready
 - **Roadmap status:** Accepted implementation sequence on 2026-08-28 through OD-025
 - **Implementation status:** RD-001, RD-002, RD-003, M1-01 and M1-02 Complete; 182 product tests and strict typechecking pass. Real scanning and UI remain unimplemented.
-- **Current selected task:** None. [M1-02](plans/completed/m1-02-local-service-and-aggregate.md) is Complete after guarded implementation, verification, independent reviews, cleanup and documentation closure. M1-03 and M1-04 remain dependency-ready but unselected.
+- **Current selected task:** [M1-03](plans/m1-03-real-scan-and-evidence.md), In progress for owner-requested planning only. Its M1-01/RD-003 dependencies are Complete; exact-task execution authorization, reviewed execution literals/commands and browser readiness remain future gates. M1-04 remains dependency-ready but unselected; M1-05 is not selected.
 - **Scope:** The accepted local portfolio MVP only
 
 This roadmap turns the accepted planning baseline into an implementation order. It owns milestone order, task dependencies, integration checkpoints, and progress status. It does not create or override a product requirement, architecture decision, behavioral contract, evaluation result, or release claim. If this roadmap conflicts with an identified requirement or Accepted ADR, the requirement or ADR controls and the roadmap must be corrected.
@@ -21,7 +21,7 @@ Progress labels in this document mean:
 - **Not started:** no implementation claim is made.
 - **Blocked:** an identified prerequisite or governing decision prevents work.
 
-`RD-001`, `RD-002`, and `RD-003` are Complete. RD-003's checkout and clean-start corrections passed execution, independent reviews, final cleanup, and renewed documentation closure. M1-01 is Complete after implementing and verifying pure runtime contracts. M1-02 is Complete after verified local storage and loopback service implementation. The other 23 application tasks remain Not started; real scanning and UI remain unimplemented.
+`RD-001`, `RD-002`, and `RD-003` are Complete. RD-003's checkout and clean-start corrections passed execution, independent reviews, final cleanup, and renewed documentation closure. M1-01 is Complete after implementing and verifying pure runtime contracts. M1-02 is Complete after verified local storage and loopback service implementation. M1-03 is In progress for planning only; the other 22 application tasks remain Not started. Real scanning and UI remain unimplemented.
 
 RD-002 completed on 2026-08-30 (UTC). RD-003's original execution recorded six accepted native outcomes and completed its original reviews and cleanup, but a later independent review at f34cc5d identified two reproducibility gaps: checkout line-ending conversion and no usable clean-start procedure after cleanup. Primary verified both read-only, and the owner explicitly requested their correction. The LF policy passes all 21 checkout-filter comparisons. The clean-start command stopped on its first Node download because socket access was denied; its lease closed compliantly and two empty task directories were preserved at that stop. The owner subsequently authorized exactly one network-enabled retry and verified empty-directory cleanup. That retry passed pinned acquisition, strict typechecking, and structural validation under a compliant terminal lease. Fresh S3 and different integrated reviews, final bounded cleanup, and renewed documentation closure passed. RD-003 is Complete again, preserving original evidence and failure history. M1-01's original planning activation followed the completed prerequisite. The subsequent owner instruction authorized exact-task execution. Its first-module Red, trusted-URL, runtime and literal gates are now resolved, and M1-01 is Complete after guarded TDD, independent reviews and documentation closure. At M1-01 closure no dependent task was selected; the subsequent M1-02 planning-only activation is recorded below.
 
@@ -190,7 +190,9 @@ M5 is semantically dependent only on completed scan evidence from M1. It is sequ
 
 ### M1-03 — Implement the real exact-three-rule scan and minimized evidence
 
-- **Parent milestone / role / status:** M1 / service and validation / **Not started**.
+- **Parent milestone / role / status:** M1 / service and validation / **In progress** (planning only).
+- **Readiness:** The owner explicitly requested this task's ExecPlan on 2026-08-31 (UTC). M1-01 and RD-003 are Complete; applicable requirements/decisions are Accepted or explicitly Deferred, and the six frozen fixture states are unchanged. Fresh baseline checks pass 182 tests and strict typechecking. The currently resolved managed Chromium executable is absent; browser readiness, exact execution literals/commands and explicit task-execution authorization must precede their dependent work. No implementation has begun.
+- **Execution plan:** [M1-03 — Real scan and evidence](plans/m1-03-real-scan-and-evidence.md); concise [progress summary](progress/m1-03-real-scan-and-evidence.md).
 - **Objective:** Execute the accepted Playwright/axe path and normalize the complete result into the M1 contract.
 - **Inputs, dependencies, and scheduling:** Depends on M1-01 and the RD-003 literals. Safely parallelizable with M1-02 and M1-04 against the frozen contract; joins at M1-05.
 - **Expected output:** Basic input rejection, one fresh non-persistent browser context with downloads disabled, finite navigation, exact `image-alt`/`label`/`color-contrast` execution over the top-level document with iframe documents excluded, all-node collection, rule-specific minimization, coverage validation, cleanup, and bounded failures.
