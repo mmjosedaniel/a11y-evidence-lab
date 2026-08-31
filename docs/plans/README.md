@@ -4,9 +4,11 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-- [M1-02 — Establish the loopback service and single-file aggregate](m1-02-local-service-and-aggregate.md) — **In progress, planning only**. M1-01 is verified Complete. The plan bounds safe storage and the local service; exact persistence/lifecycle literals, commands, and side effects must pass the future R3 gate before guarded implementation. No service or persistence exists yet.
+No active plans.
 
 ## Completed plans
+
+- [M1-02 — Establish the loopback service and single-file aggregate](completed/m1-02-local-service-and-aggregate.md) — **Complete** on 2026-08-30. Guarded storage/service TDD, 182 passing tests, independent strict typechecking, both R3 checkpoints, both S3 reviews, different final integrated review, exact cleanup and documentation closure. Preserves the service correction and earlier planning history.
 
 - [M1-01 — Define the minimum run and scan contracts](completed/m1-01-run-and-scan-contracts.md) — **Complete** on 2026-08-30 (UTC). Pure runtime validators, 58 passing tests, strict typechecking, both R3 checkpoints, corrected S3 and different integrated reviews, and documentation closure. Original stops and corrections are preserved.
 
