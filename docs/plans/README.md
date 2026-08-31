@@ -4,11 +4,11 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-No active ExecPlan.
+- [M1-04 — Target and results UI](m1-04-target-and-results-ui.md) — **In progress, planning only** on 2026-08-31 (UTC). The exact owner request activates plan preparation over the completed M1-01 contract. Literal/command review, conditional browser readiness and guarded frontend-visual TDD remain future execution work; M1-05 is unselected.
 
 ## Completed plans
 
-- [M1-03 — Real scan and evidence](completed/m1-03-real-scan-and-evidence.md) — **Complete** on 2026-08-31 (UTC). Both scanner slices and their S3 reviews are accepted. All 290 integrated tests and independent strict typechecking pass, including the failed-launch residue regression. The different final integrated critical review, exact task-owned runtime cleanup and documentation closure passed. M1-04 and M1-05 remain unselected.
+- [M1-03 — Real scan and evidence](completed/m1-03-real-scan-and-evidence.md) — **Complete** on 2026-08-31 (UTC). Both scanner slices and their S3 reviews are accepted. All 290 integrated tests and independent strict typechecking pass, including the failed-launch residue regression. The different final integrated critical review, exact task-owned runtime cleanup and documentation closure passed. At M1-03 closure, M1-04 and M1-05 were unselected.
 
 - [M1-02 — Establish the loopback service and single-file aggregate](completed/m1-02-local-service-and-aggregate.md) — **Complete** on 2026-08-30. Guarded storage/service TDD, 182 passing tests, independent strict typechecking, both R3 checkpoints, both S3 reviews, different final integrated review, exact cleanup and documentation closure. Preserves the service correction and earlier planning history.
 

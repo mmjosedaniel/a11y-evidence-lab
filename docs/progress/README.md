@@ -26,7 +26,9 @@ RD-002 is the first task recorded under this convention and is Complete. Toolcha
 
 M1-02 is Complete. Its [archived ExecPlan](../plans/completed/m1-02-local-service-and-aggregate.md) preserves planning, both R3 checkpoints, the pre-write ignore gate, separate guarded TDD slices and the service notification correction. All 182 product tests, independent strict typechecking, actual startup/reopen/stop and exact synthetic-run deletion passed. Both slice S3 reviews and the different final integrated critical review passed; documentation closure is accepted.
 
-M1-03 is Complete. Both scanner slices and their S3 reviews are accepted. All 290 integrated tests and independent strict typechecking pass, including the failed-launch residue regression. The different final integrated critical review, exact task-owned runtime cleanup and documentation closure passed. M1-04 and M1-05 remain unselected. No lease or owned runtime operation remains. The task-local browser runtime and both scratch roots were removed after review; shared caches and dependencies remain untouched.
+M1-03 is Complete. Both scanner slices and their S3 reviews are accepted. All 290 integrated tests and independent strict typechecking pass, including the failed-launch residue regression. The different final integrated critical review, exact task-owned runtime cleanup and documentation closure passed. At M1-03 closure, M1-04 and M1-05 were unselected. No lease or owned runtime operation remains. The task-local browser runtime and both scratch roots were removed after review; shared caches and dependencies remain untouched.
+
+M1-04 is In progress for owner-requested planning only. Its [active ExecPlan](../plans/m1-04-target-and-results-ui.md) records the reviewed baseline, frontend reuse/evidence boundaries and future execution gates. Fresh nonbrowser verification passed 202 tests and strict typechecking; no browser or UI was created. M1-05 remains unselected.
 
 Add each new task record to this table in the same change that creates the file:
 
@@ -37,6 +39,7 @@ Add each new task record to this table in the same change that creates the file:
 | [M1-01](../DEVELOPMENT_ROADMAP.md#m1-01--define-the-minimum-run-and-scan-contracts) | [Minimum run and scan contracts](m1-01-run-and-scan-contracts.md) | [Task plan](../plans/completed/m1-01-run-and-scan-contracts.md) | Complete | 2026-08-30 |
 | [M1-02](../DEVELOPMENT_ROADMAP.md#m1-02--establish-the-loopback-service-and-single-file-aggregate) | [Local service and aggregate](m1-02-local-service-and-aggregate.md) | [Task plan](../plans/completed/m1-02-local-service-and-aggregate.md) | Complete | 2026-08-30 |
 | [M1-03](../DEVELOPMENT_ROADMAP.md#m1-03--implement-the-real-exact-three-rule-scan-and-minimized-evidence) | [Real scan and evidence](m1-03-real-scan-and-evidence.md) | [Task plan](../plans/completed/m1-03-real-scan-and-evidence.md) | Complete | 2026-08-31 |
+| [M1-04](../DEVELOPMENT_ROADMAP.md#m1-04--present-accessible-target-entry-and-complete-results) | [Target and results UI](m1-04-target-and-results-ui.md) | [Task plan](../plans/m1-04-target-and-results-ui.md) | In progress | 2026-08-31 |
 
 The mirrored status is a convenience snapshot only. The roadmap controls when a task is `Not started`, `In progress`, `Blocked`, or `Complete`.
 

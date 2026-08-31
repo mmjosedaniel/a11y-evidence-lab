@@ -62,7 +62,9 @@ The project is Development ready through [OD-025](requirements/DELIVERY_READINES
 
 The owner-authorized [M1-02 execution](plans/completed/m1-02-local-service-and-aggregate.md) is Complete. All 182 product tests, independent strict typechecking, actual startup/reopen/stop and exact synthetic-run deletion passed. Both slice S3 reviews and the different final integrated critical review passed; documentation closure is accepted. Its archived plan preserves the planning history, literal contract and bounded corrections.
 
-The owner-selected task [M1-03 — Real scan and evidence](plans/completed/m1-03-real-scan-and-evidence.md) is Complete after owner-authorized execution and verified closure. Both scanner slices and their S3 reviews are accepted. All 290 integrated tests and independent strict typechecking pass, including the failed-launch residue regression. The different final integrated critical review, exact task-owned runtime cleanup and documentation closure passed. M1-04 and M1-05 remain unselected.
+The owner-selected task [M1-03 — Real scan and evidence](plans/completed/m1-03-real-scan-and-evidence.md) is Complete after owner-authorized execution and verified closure. Both scanner slices and their S3 reviews are accepted. All 290 integrated tests and independent strict typechecking pass, including the failed-launch residue regression. The different final integrated critical review, exact task-owned runtime cleanup and documentation closure passed. At M1-03 closure, M1-04 and M1-05 were unselected.
+
+[M1-04 — Target and results UI](plans/m1-04-target-and-results-ui.md) is In progress for owner-requested planning only, with M1-01 Complete as its sole declared dependency. UI implementation, exact client literals and browser verification remain future execution work. M1-05 remains unselected.
 
 ## Documentation navigation
 

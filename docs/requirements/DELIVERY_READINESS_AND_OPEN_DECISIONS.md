@@ -6,7 +6,9 @@ This document is part of the authoritative requirements baseline indexed by [Pro
 
 ## Delivery stages
 
-**Latest completed task (2026-08-31 UTC):** [M1-03](../plans/completed/m1-03-real-scan-and-evidence.md) is Complete after owner-authorized execution and verified closure. Both scanner slices and their S3 reviews are accepted. All 290 integrated tests and independent strict typechecking pass, including the failed-launch residue regression. The different final integrated critical review, exact task-owned runtime cleanup and documentation closure passed. M1-04 and M1-05 remain unselected.
+**Latest completed task (2026-08-31 UTC):** [M1-03](../plans/completed/m1-03-real-scan-and-evidence.md) is Complete after owner-authorized execution and verified closure. Both scanner slices and their S3 reviews are accepted. All 290 integrated tests and independent strict typechecking pass, including the failed-launch residue regression. The different final integrated critical review, exact task-owned runtime cleanup and documentation closure passed. At M1-03 closure, M1-04 and M1-05 were unselected.
+
+**Current task (2026-08-31 UTC):** [M1-04](../plans/m1-04-target-and-results-ui.md) is In progress for planning only after the exact owner request and completed M1-01 dependency. No requirement, open decision, architecture status or evaluation boundary changed. UI implementation requires separate execution authorization and the plan's literal/command gates; M1-05 remains unselected.
 
 The owner first selected [M1-02](../plans/completed/m1-02-local-service-and-aggregate.md) for planning, then authorized exact-task execution. It is now Complete: all 182 product tests, independent strict typechecking, actual startup/reopen/stop and exact synthetic-run deletion passed. Both slice S3 reviews and the different final integrated critical review passed; documentation closure is accepted. The earlier completion history below remains unchanged.
 

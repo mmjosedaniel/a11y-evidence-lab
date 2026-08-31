@@ -56,7 +56,9 @@ Development ready. The [development roadmap](docs/DEVELOPMENT_ROADMAP.md) owns i
 
 [M1-02 — Local service and aggregate](docs/plans/completed/m1-02-local-service-and-aggregate.md) is Complete. At its closure, all 182 product tests, independent strict typechecking, actual startup/reopen/stop and exact synthetic-run deletion passed. Both slice S3 reviews and the different final integrated critical review passed; documentation closure is accepted. The service is runnable with the instructions below. HTTP scanning, UI, retrieval, generation, provider calls and later workflows are not implemented; the internal M1-03 scanner is Complete as described below.
 
-[M1-03 — Real scan and evidence](docs/plans/completed/m1-03-real-scan-and-evidence.md) is Complete after owner-authorized execution and verified closure. Both scanner slices and their S3 reviews are accepted. All 290 integrated tests and independent strict typechecking pass, including the failed-launch residue regression. The different final integrated critical review, exact task-owned runtime cleanup and documentation closure passed. M1-04 and M1-05 remain unselected.
+[M1-03 — Real scan and evidence](docs/plans/completed/m1-03-real-scan-and-evidence.md) is Complete after owner-authorized execution and verified closure. Both scanner slices and their S3 reviews are accepted. All 290 integrated tests and independent strict typechecking pass, including the failed-launch residue regression. The different final integrated critical review, exact task-owned runtime cleanup and documentation closure passed. At M1-03 closure, M1-04 and M1-05 were unselected.
+
+[M1-04 — Target and results UI](docs/plans/m1-04-target-and-results-ui.md) is In progress for owner-requested planning only. The current-state review passed 202 nonbrowser tests and independent strict typechecking; the full 290-test browser result above remains accepted historical evidence. No UI implementation or browser acquisition has begun. Exact client literals and execution commands must be reviewed before worker writes; M1-05 remains unselected.
 
 ## Development toolchain
 
