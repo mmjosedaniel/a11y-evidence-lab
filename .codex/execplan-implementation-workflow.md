@@ -4,7 +4,7 @@ This guide defines the normal implementation path for an authorized ExecPlan. Wo
 
 The workflow adds three controls without replacing the ExecPlan, plus one conditional frontend-visual profile:
 
-- a compact work-slice capsule and assignment packet so each role starts with only the authority and evidence it needs;
+- a compact work-slice capsule and assignment packet so each role starts with only the authority, responsibility boundary, and evidence it needs;
 - a machine-verified write lease so the worker can change only the assigned paths; and
 - separate test and code contexts, serial Red-Green-Refactor handoffs when behavior is missing or regressed, work-slice review, and risk-scaled final review; and
 - a reuse-first, browser-evidenced overlay only for work slices that materially change rendered UI; the standard profile remains unchanged for every other slice.
@@ -30,8 +30,8 @@ Only one write-capable worker lease may be active in one worktree. Test and impl
 |---|---|
 | Primary coordinator | Defines work-slice contracts and budgets, creates capsules, packets, and leases, accepts or rejects handoffs, integrates evidence, routes risk, handles approvals and exceptions, and owns final closure. It may make a bounded exceptional test correction between leases, but that invalidates the affected accepted test evidence. |
 | `test_worker` | Performs read-only preflight, then owns a coherent test-side Red or passing characterization under a lease. It never writes production behavior. |
-| `code_worker` | Performs bounded setup or reaches minimum work-slice Green and optionally Refactors in the same turn. It never changes an accepted test. |
-| `frontend_code_worker` | Reaches minimum Green and optionally Refactors only for a `frontend-visual` work slice with an accepted reuse audit and visual contract. It never performs standard-profile work or changes an accepted test. |
+| `code_worker` | Performs bounded setup or reaches minimum complete work-slice Green, dispositions the changed surface's responsibility fit, and optionally Refactors in the same turn. It never changes an accepted test. |
+| `frontend_code_worker` | Reaches minimum complete Green, dispositions the changed surface's responsibility fit, and optionally Refactors only for a `frontend-visual` work slice with an accepted reuse audit and visual contract. It never performs standard-profile work or changes an accepted test. |
 | `milestone_reviewer` | Reviews one ordinary completed work slice and its reusable evidence proportionally. It does not repair findings or close the task. |
 | `independent_reviewer` | Reviews ordinary higher-risk work slices or the integrated final state at Sol high. It does not repair findings or close the task. |
 | `critical_reviewer` | Performs maximum-effort review only for a named critical-risk trigger. It does not repair findings or close the task. |
@@ -73,6 +73,10 @@ Work-slice capsule
 - Current-state and preflight evidence IDs: None when TDD is not applicable
 - Accepted test boundary and current test owner: None until accepted and None for setup
 - Relevant boundaries and paths:
+- Production responsibility placement and fit: None — no application-source responsibility changes; otherwise each existing or planned path or symbol, its primary responsibility, the responsibility added by this slice, and why that placement fits
+- Dependency, runtime-call, or interface-edge changes: None or the exact source-to-target direction and controlling boundary
+- Reuse, justified separation, bounded creation, or local-extraction disposition: None or the exact path or symbol and present-scope rationale
+- Permitted local structural refactor: None or exact path/symbol and why it preserves the declared responsibility and observable contract
 - Non-goals:
 - Named uncertainties:
 - Risk tier: S0 | S1 | S2 | S3
@@ -116,12 +120,14 @@ Frontend-visual capsule
 - Frontend-quality skill: .agents/skills/frontend-quality/SKILL.md
 - Exact UI/design authority anchors:
 - Reuse-audit evidence ID:
-- Reuse dispositions: REUSE_AS_IS | EXTEND | EXTRACT_LOCAL | CREATE, with exact paths
+- Reuse dispositions: REUSE_AS_IS | EXTEND | EXTRACT_LOCAL | CREATE for each cohesive current responsibility, with exact paths
 - Required state matrix:
 - Required viewport and interaction matrix:
 - Browser or visual-evidence target and reproducibility identity:
 - Prohibited visual scope, dependencies, fields, copy, effects, and motion:
 ```
+
+The common responsibility-and-cohesion fields apply to every application-source slice. They freeze production responsibility placement, present-slice fit, dependency direction, and the permitted bounded creation or local-extraction envelope rather than arbitrary private helper names or a line-count target. The frontend capsule cites and specializes those common fields; it does not duplicate them. Use `None — no application-source responsibility changes` only when the slice changes no application-source responsibility.
 
 The primary accepts the read-only reuse audit and frontend-visual capsule before test preflight. A missing or contradictory field stops the visual branch; the implementation worker cannot invent or silently revise it. Use the [frontend-quality skill](../.agents/skills/frontend-quality/SKILL.md) to classify the profile and prepare or review this block. This frontend overlay applies only when TDD is applicable; non-behavioral frontend setup stays on the standard `code_worker` setup route.
 
@@ -131,7 +137,7 @@ When TDD applies, preflight is a read-only `test_worker` turn with no lease; act
 
 The coordinator may add a concise log excerpt, diagram, or exact repository reference when it resolves a named uncertainty. A worker may discover and read an additional relevant file, but must report why the capsule was insufficient. These additions are safe only while they improve understanding without silently widening context or scope.
 
-Stop the worker if new information changes a binding field: roadmap-task or work-slice identity, phase, worker role, objective, governing authority, readiness evidence, expected outcome, risk tier, validation command, dependency, side effect, budget, write scope, or, when present, the implementation profile or any accepted frontend-visual capsule field. The coordinator must close any current lease and decide whether a new packet or work-slice contract is authorized.
+Stop the worker if new information changes a binding field: roadmap-task or work-slice identity, phase, worker role, objective, governing authority, readiness evidence, expected outcome, responsibility or cohesion contract, dependency, runtime-call, or interface direction, risk tier, validation command, side effect, budget, write scope, or, when present, the implementation profile or any accepted frontend-visual capsule field. The coordinator must close any current lease and decide whether a new packet or work-slice contract is authorized. An exact path lease is containment, not proof that the selected path is the correct production responsibility placement. If behavioral Green would require an undeclared cohesive production placement or another path, the worker stops for reconciliation instead of placing the responsibility in an already allowed but unsuitable file.
 
 Accepted command evidence may be reused only when all of these still match: exact command, working directory, relevant-tree fingerprint, environment fingerprint, and guard-backed no-drift state. Evidence against a mutable browser, filesystem, model runtime, provider, network, clock, or other external boundary is `Non-reusable` unless the packet pins an isolated run identity and state. Reuse avoids duplicate execution; it never converts a worker report into proof. Any mismatch invalidates the evidence and requires the proportional command to run again.
 
@@ -227,8 +233,8 @@ For each work slice whose preflight result is `MISSING` or `REGRESSION`:
 2. The test worker adds the smallest coherent test-side change sufficient to prove one indivisible work-slice outcome. Related assertions may travel together when splitting them would create artificial handoffs; future work-slice behavior may not.
 3. The coordinator closes the lease, inspects the actual test diff and focused result, and either accepts the Red or stops for triage. The accepted test boundary and its test-owned files must remain unchanged during the implementation worker's Green assignment.
 4. The coordinator assigns `green` under a new packet and lease to the persistent `code_worker` for `standard` or `frontend_code_worker` for `frontend-visual`. The worker may reuse the accepted Red without rerunning it only when its full evidence identity remains fresh. Otherwise it reproduces Red before editing.
-5. The selected implementation worker writes only the production behavior required by the accepted work-slice contract and may perform a small behavior-preserving Refactor while the accepted test-owned files stay unchanged. It reruns the focused check after an actual Refactor, not when no Refactor occurred. The frontend worker additionally follows the accepted reuse dispositions and visual capsule; it receives no design or scope authority from the stronger model route.
-6. The coordinator closes the implementation lease, inspects the complete production diff and unchanged accepted test boundary, and accepts Green and any Refactor evidence together.
+5. The selected implementation worker writes only the production behavior required by the accepted work-slice contract and reaches behavioral Green with the focused passing command. Passing tests never waive the accepted responsibility-and-cohesion contract. After Green, the worker performs a separate structural-fit checkpoint against the actual changed surface and records exactly one cohesion disposition: `RETAINED` with a path-and-symbol rationale when no material Refactor is needed; `REFACTORED` after a small behavior-preserving Refactor and a fresh focused check; or `RECONCILE` when the accepted production placement, path, dependency edge, or reuse disposition is incorrect. `RECONCILE` stops writes and returns control to the coordinator; it is not a new worker phase or permission to widen scope. The frontend worker additionally follows the accepted reuse dispositions and visual capsule; it receives no design or scope authority from the stronger model route.
+6. The coordinator closes the implementation lease and accepts or rejects the behavioral Green evidence separately from the structural-fit disposition. Green can be behaviorally valid while placement still requires reconciliation. The coordinator accepts the completed implementation handoff only when the complete production diff, unchanged accepted test boundary, and actual changed surface remain within the declared responsibility and dependency boundaries; it also verifies any Refactor evidence.
 7. The coordinator runs the work-slice validation cadence, records concise evidence identities in the living ExecPlan, routes review by risk, and retires both workers after acceptance.
 
 This is still one observable Red-Green-Refactor cycle at a time. “Coherent” changes the handoff granularity, not the order: production code never precedes an accepted Red when behavior is missing or regressed.
@@ -261,12 +267,18 @@ Every worker handoff contains only what the coordinator needs to verify and resu
 
 1. `Assignment` - workflow, roadmap task, work slice, assignment, objective, controlling IDs, phase, attempt, evidence IDs, and contract digest when applicable.
 2. `Lease and changes` - allowed scope, touched paths, unexpected paths, and concise diff intent.
-3. `Validation` - exact commands, exit codes, decisive results, and evidence reused or invalidated; Green includes reused or reproduced Red and a post-Refactor result only when Refactor occurred.
-4. `Outcome` - the role-specific outcome plus any blocker, residual risk, and documentation impact.
+3. `Validation` - exact commands, exit codes, decisive results, and evidence reused or invalidated; after a Green pass, include the `RETAINED`, `REFACTORED`, or `RECONCILE` cohesion disposition with exact path/symbol evidence and a post-Refactor result only when Refactor occurred. Before Green, and for setup or other non-application-source work, record the cohesion disposition as `None`.
+4. `Outcome` - the role-specific outcome plus any blocker, residual risk, and documentation impact. A `RECONCILE` disposition uses the role's existing `ESCALATE` or `BLOCKED` outcome rather than inventing another workflow result.
 
 The coordinator compares the handoff with the packet, terminal receipt, actual diff, and command evidence. A worker summary alone never accepts a barrier.
 
 ## Work-slice and final review
+
+### Changed-surface quality baseline
+
+Every implementation review tier inspects the actual changed production surface, not only packet compliance and passing commands. For each changed module, component, or material function, verify intention-revealing placement, one coherent primary responsibility, explicit error and side-effect boundaries, allowed dependency direction, behavior-oriented tests, and a YAGNI/KISS-proportionate structure. Determine whether new behavior belongs in its declared path or symbol, whether authoritative policy or state was duplicated without a boundary-specific reason, and whether a local extraction reflects a present cohesive responsibility instead of hypothetical reuse. A reviewer may find that an accepted responsibility map or frontend reuse disposition was too coarse; the plan is not self-validating design proof.
+
+File length, function count, branch count, or superficial textual similarity is an inspection signal only and never a standalone finding. A large schema validator or state machine may remain cohesive, while a shorter component or handler may mix unrelated reasons to change. Tests must protect observable behavior without freezing private file layout. Report only material, actionable violations with exact paths or symbols and the smallest current-scope remediation; do not require a generic layer, component library, broad refactor, or future-facing abstraction.
 
 After each work slice's worker handoffs are accepted, the coordinator runs its proportional affected checks and routes review:
 
@@ -275,7 +287,7 @@ After each work slice's worker handoffs are accepted, the coordinator runs its p
 - `S2`: a fresh `independent_reviewer` reviews the work slice at Sol high.
 - `S3`: a fresh `critical_reviewer` reviews at Sol max.
 
-For a `frontend-visual` work slice, the same risk route also reviews the accepted reuse dispositions and the assigned real-browser evidence. This does not promote the risk tier, add a second reviewer, make a component sandbox an acceptance boundary, or claim responsive behavior owned by a later task.
+For a `frontend-visual` work slice, the same risk route also reviews the accepted reuse dispositions, the actual presentation and state ownership, and the assigned real-browser evidence. If execution shows that a disposition grouped unrelated current responsibilities, the reviewer reports that concrete mismatch without promoting the risk tier, adding a second reviewer, making a component sandbox an acceptance boundary, or claiming responsive behavior owned by a later task.
 
 Critical triggers override the nominal tier: security; irreversible migration or data-loss risk; concurrency, locking, or recovery; custom serialization, integrity, or identity contracts; cross-platform byte equivalence; an unresolved Blocker or Major from an ordinary reviewer; or explicit project-owner direction. Reviewers reuse fresh evidence under the identity rule and rerun only missing, stale, contradictory, externally mutable, or risk-critical checks.
 
@@ -293,10 +305,14 @@ The reviewer never edits the repository and no agent report can change authorita
 Act as the primary coordinator for the authorized existing roadmap task and its living
 ExecPlan. Confirm that the roadmap task is In progress and that dependencies, Accepted
 Must requirements and decisions, and evaluation-freeze conditions pass. Define the next
-coherent, independently verifiable work slice. Keep the standard packet unchanged by default. Only
-when the contract materially changes rendered UI, apply the frontend-visual overlay and
+coherent, independently verifiable work slice. Use the common packet for every slice. Only
+when the contract materially changes rendered UI, append the frontend-visual overlay and
 record its marker in the conditional capsule. Define the work slice's
-acceptance contract, exact authority anchors,
+acceptance contract, exact authority anchors, and, for application-source work, the common
+responsibility-and-cohesion contract: existing or planned production placements, present
+responsibility fit, dependency or interface direction, reuse or bounded-creation disposition,
+and any permitted local structural refactor. When that contract does not apply, record:
+None — no application-source responsibility changes. Also record
 non-goals, risk tier, validation cadence, and worker, correction, no-diff, and repeated-
 failure budgets. Put only that information and accepted evidence identities in Milestone
 Assignment Packet v2; expand reading only to resolve a named uncertainty.
@@ -328,8 +344,11 @@ accepted test-owned file inside the Green packet's forbidden scope. Send Green u
 lease to code_worker for standard or frontend_code_worker for frontend-visual. Reuse
 accepted Red evidence only when the
 command, working directory, relevant-tree fingerprint, environment fingerprint, and
-no-drift state still match; otherwise reproduce it. Make minimum Green and run a second
-focused check only after an actual Refactor.
+no-drift state still match; otherwise reproduce it. Reach behavioral Green with the focused
+passing command, then disposition the actual changed surface as RETAINED, REFACTORED, or
+RECONCILE. Refactor only when it materially improves the accepted current-scope structure,
+and run a second focused check only after an actual Refactor. Before Green, or for setup,
+record the cohesion disposition as None.
 
 Allow at most one same-contract correction per role under a fresh attempt-2 lease that
 names its terminal attempt-1 parent. Stop after the
@@ -344,10 +363,11 @@ Green resumes. Never let the implementation worker change the accepted test cont
 
 Run proportional affected validation at the work-slice barrier and route review by risk:
 S0 or S1 milestone_reviewer, S2 independent_reviewer, and S3 or a critical trigger
-critical_reviewer. Reuse fresh evidence; rerun only missing, stale,
+critical_reviewer. Every route applies the common changed-surface quality baseline to the
+actual responsibility placement and dependency direction. Reuse fresh evidence; rerun only missing, stale,
 contradictory, externally mutable, or risk-critical checks. Retire the work-slice workers
-after acceptance. For frontend-visual, have that same reviewer inspect the accepted reuse
-dispositions and assigned real-browser evidence without changing the risk tier or adding
+after acceptance. For frontend-visual, have that same reviewer also inspect the accepted reuse
+dispositions, actual presentation and state placement, and assigned real-browser evidence without changing the risk tier or adding
 a second reviewer.
 
 At task closure, run the ExecPlan's complete validation, relevance, documentation, and

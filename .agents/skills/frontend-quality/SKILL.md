@@ -34,10 +34,12 @@ Inspect only the relevant component, route, style, token, fixture, and test boun
 | --- | --- |
 | `REUSE_AS_IS` | An existing owner satisfies the task without modification. |
 | `EXTEND` | One existing owner can satisfy it through a bounded change. |
-| `EXTRACT_LOCAL` | Concrete duplication in the current task justifies one local shared artifact. |
+| `EXTRACT_LOCAL` | A distinct current-task responsibility or concrete duplication justifies one named local artifact without creating a general shared layer. |
 | `CREATE` | No existing owner can satisfy the task within its responsibility. |
 
-Search absence alone does not justify a new shared abstraction. Do not add a design system, component package, primitive layer, generalized variant API, or theme framework for hypothetical consumers. If implementation evidence invalidates a reuse disposition, reassess that disposition rather than silently expanding scope.
+Apply each disposition to one cohesive current responsibility, not to an entire screen or a group of unrelated regions merely because they share one parent state owner. A component or module may retain overall coordination while delegating present, independently understandable view or pure-mechanics responsibilities. One current consumer can justify `EXTRACT_LOCAL`; hypothetical reuse cannot.
+
+Search absence alone does not justify a new shared abstraction. File length alone does not justify extraction. Do not add a design system, component package, primitive layer, generalized variant API, or theme framework for hypothetical consumers. If implementation evidence invalidates a reuse disposition, reassess that disposition through the work-slice packet instead of silently expanding scope or putting the responsibility in an unsuitable already-authorized file.
 
 ## Preserve an evidence-oriented visual hierarchy
 
@@ -68,6 +70,6 @@ Follow the compact application-accessibility boundary: one automated check, one 
 
 ## Review without expanding scope
 
-For a material UI change, obtain an independent visual-quality review when available. Review against the accepted reuse dispositions, information hierarchy, task-owned states, accessibility authorities, named browser evidence, and explicit non-goals. Findings must cite an authority, exact path, or reproducible browser observation.
+For a material UI change, obtain an independent visual-quality review when available. Review the actual component and state ownership as well as the accepted reuse dispositions, information hierarchy, task-owned states, accessibility authorities, named browser evidence, and explicit non-goals. Passing tests or compliance with the initial file plan does not prove that a coarse reuse disposition remained cohesive. Findings must cite an authority, exact path or symbol, or reproducible browser observation; component size alone is not a finding.
 
 This skill does not require Storybook, a visual-regression service, a screenshot archive, image generation, a mockup pipeline, a component library, a CSS framework, or another design dependency. Add one only when the selected task and an applicable decision independently justify it.
