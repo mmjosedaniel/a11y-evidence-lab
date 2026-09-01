@@ -30,10 +30,10 @@ legend { margin-bottom: 0.5rem; }
 .mode-options label { display: flex; align-items: center; gap: 0.5rem; min-height: 2.75rem; }
 input[type="radio"] { accent-color: #1457c8; width: 1.125rem; height: 1.125rem; margin: 0; flex-shrink: 0; }
 button { font: inherit; font-weight: 600; color: #1457c8; background: #fff; border: 1px solid #68768b; border-radius: 0.375rem; min-height: 2.75rem; padding: 0.625rem 1rem; max-width: 100%; cursor: pointer; }
-button:hover:not(:disabled) { background: #eaf2fb; }
+button:hover:not(:disabled):not([aria-disabled="true"]) { background: #eaf2fb; }
 button.primary { color: #fff; background: #1457c8; border-color: #1457c8; }
-button.primary:hover:not(:disabled) { background: #0e47a1; }
-button:disabled { color: #4a586d; background: #eef2f6; border-color: #68768b; cursor: default; }
+button.primary:hover:not(:disabled):not([aria-disabled="true"]) { background: #0e47a1; }
+button:disabled, button[aria-disabled="true"] { color: #4a586d; background: #eef2f6; border-color: #68768b; cursor: default; }
 :focus { outline: 3px solid #1457c8; outline-offset: 3px; }
 [aria-invalid="true"] { border-color: #a52222; }
 .reopen-form { border-top: 1px solid #c8d1dc; margin-top: 1.5rem; padding-top: 0.25rem; }

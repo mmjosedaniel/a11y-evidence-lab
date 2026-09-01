@@ -167,10 +167,11 @@ export function RunResults({ run, selectedId = null, selectionRequest = 0, onSel
         </section>
         <section id={detailId} aria-labelledby={selected ? detailHeadingId : `${prefix}-detail-empty`} className="finding-detail">
           {selected ? <>
-            <h3 id={detailHeadingId} ref={heading} tabIndex={-1}>Finding {selected.findingId}</h3>
-            <p><strong>State:</strong> {selected.state}</p>
-            <p>Run {run.runId} · {run.providerContext.mode} · {run.providerContext.provider} · {run.providerContext.model}</p>
-            <p>No provider call was attempted.</p>
+            <h3 id={detailHeadingId} ref={heading} tabIndex={-1}
+              aria-describedby={`${prefix}-detail-state ${prefix}-detail-context ${prefix}-detail-provider-call`}>Finding {selected.findingId}</h3>
+            <p id={`${prefix}-detail-state`}><strong>State:</strong> {selected.state}</p>
+            <p id={`${prefix}-detail-context`}>Run {run.runId} · {run.providerContext.mode} · {run.providerContext.provider} · {run.providerContext.model}</p>
+            <p id={`${prefix}-detail-provider-call`}>No provider call was attempted.</p>
             <h4 className="source-label">Scanner evidence</h4>
             <Evidence item={selected} />
             <button type="button" onClick={() => buttons.current.get(selected.findingId)?.focus()}>Back to finding</button>

@@ -28,7 +28,7 @@ M1-02 is Complete. Its [archived ExecPlan](../plans/completed/m1-02-local-servic
 
 M1-03 is Complete. Both scanner slices and their S3 reviews are accepted. All 290 integrated tests and independent strict typechecking pass, including the failed-launch residue regression. The different final integrated critical review, exact task-owned runtime cleanup and documentation closure passed. At M1-03 closure, M1-04 and M1-05 were unselected. No lease or owned runtime operation remains. The task-local browser runtime and both scratch roots were removed after review; shared caches and dependencies remain untouched.
 
-[M1-04](../plans/m1-04-target-and-results-ui.md) is Blocked on actual Narrator and browser-menu zoom evidence. All 35 UI tests, strict typechecking and build pass; fresh S3 review found no supported implementation defect. Full regression, final integrated review and closure remain pending; M1-05 is unselected.
+[M1-04](../plans/m1-04-target-and-results-ui.md) is Blocked only on owner direction for one final cleanup retry after two no-change worker stops. Its corrected UI passes the controlling 329-test regression, static S3 and different final integrated reviews, and accepted human browser-menu 200% zoom/reflow and Narrator checks. All retained artifacts remain intact; exact cleanup and closure remain pending. M1-05 is unselected.
 
 Add each new task record to this table in the same change that creates the file:
 

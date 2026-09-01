@@ -132,6 +132,7 @@ export function App(props: AppProps): ReactElement {
   const [invalidMode, setInvalidMode] = useState(false);
   const [invalidId, setInvalidId] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [pendingAnalysis, setPendingAnalysis] = useState<AnalyzeIntent | null>(null);
   const [announcement, setAnnouncement] = useState('');
   const [error, setError] = useState<{ stage: Stage; text: string; unsaved: boolean; cleanup: boolean } | null>(null);
   const [complete, setComplete] = useState<CompleteRun | null>(null);
@@ -184,6 +185,7 @@ export function App(props: AppProps): ReactElement {
     const known = held.current;
     reservation.current = token;
     setBusy(true);
+    setPendingAnalysis(stage === 'Analyze' && typeof intent !== 'string' ? intent : null);
     setError(null);
     setAnnouncement(stage === 'Analyze' ? 'Analyzing the requested page. No provider call was attempted.' : 'Reopening the requested run. No provider call was attempted.');
     try {
@@ -219,6 +221,7 @@ export function App(props: AppProps): ReactElement {
       if (mounted.current && reservation.current === token) {
         reservation.current = null;
         setBusy(false);
+        setPendingAnalysis(null);
       }
     }
   }
@@ -284,11 +287,12 @@ export function App(props: AppProps): ReactElement {
       <p id="target-notice" className="limitation">{targetNotice}</p>
       {capability && <p id="capability" className="notice">{capability}</p>}
       <form onSubmit={submitAnalyze} noValidate>
+        {pendingAnalysis && <p id="next-analysis-notice" className="limitation">Changes to target and generation mode apply to the next analysis.</p>}
         <label htmlFor="target-url">Target URL</label>
         <input id="target-url" type="text" inputMode="url" value={target} onChange={event => setTarget(event.target.value)}
-          aria-invalid={invalidUrl} aria-describedby={`target-notice${invalidUrl ? ' url-error' : ''}`} />
+          aria-invalid={invalidUrl} aria-describedby={`target-notice${pendingAnalysis ? ' next-analysis-notice' : ''}${invalidUrl ? ' url-error' : ''}`} />
         {invalidUrl && <p id="url-error" className="error">{urlError}</p>}
-        <fieldset aria-describedby={`mode-disclosure${invalidMode ? ' mode-error' : ''}`} aria-invalid={invalidMode}>
+        <fieldset aria-describedby={`mode-disclosure${pendingAnalysis ? ' next-analysis-notice' : ''}${invalidMode ? ' mode-error' : ''}`} aria-invalid={invalidMode}>
           <legend>Generation mode</legend>
           <div className="mode-options">
             <label><input type="radio" name="mode" value="local" checked={mode === 'local'} onChange={() => setMode('local')} /> Local (recommended)</label>
@@ -298,7 +302,7 @@ export function App(props: AppProps): ReactElement {
           <p id="mode-disclosure" className="limitation">{mode === 'local' ? localDisclosure : mode === 'groq' ? groqDisclosure : modeError}</p>
         </fieldset>
         {operationError('Analyze')}
-        <button type="submit" className="primary" disabled={busy || !props.analyze}
+        <button type="submit" className="primary" disabled={!props.analyze} aria-disabled={busy || undefined}
           aria-describedby={[!props.analyze ? 'capability' : '', busy ? 'busy-notice' : '', error?.stage === 'Analyze' ? 'analyze-error' : ''].filter(Boolean).join(' ') || undefined}>Analyze</button>
       </form>
       <form onSubmit={submitReopen} noValidate className="reopen-form">
@@ -308,10 +312,15 @@ export function App(props: AppProps): ReactElement {
           aria-invalid={invalidId} aria-describedby={invalidId ? 'id-error' : undefined} />
         {invalidId && <p id="id-error" className="error">{idError}</p>}
         {operationError('Reopen')}
-        <button type="submit" disabled={busy || !props.reopen}
+        <button type="submit" disabled={!props.reopen} aria-disabled={busy || undefined}
           aria-describedby={[!props.reopen ? 'capability' : '', busy ? 'busy-notice' : '', error?.stage === 'Reopen' ? 'reopen-error' : ''].filter(Boolean).join(' ') || undefined}>Reopen</button>
       </form>
       {busy && <p id="busy-notice" className="notice">{busyNotice}</p>}
+      {pendingAnalysis && <section aria-labelledby="pending-analysis-heading" className="notice">
+        <h3 id="pending-analysis-heading">Pending analysis</h3>
+        <p>Mode: {pendingAnalysis.providerContext.mode}. Provider: {pendingAnalysis.providerContext.provider}. Model: {pendingAnalysis.providerContext.model}.</p>
+        <p>No provider call was attempted.</p>
+      </section>}
       <p role="status" aria-atomic="true" className="status">{announcement}</p>
     </section>
     {incomplete && <section aria-labelledby="history-heading" className="run-history">

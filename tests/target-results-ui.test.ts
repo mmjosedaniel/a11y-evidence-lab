@@ -233,8 +233,8 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
     await reopen(runningRun('interrupted', 'groq'));
     await visible(copy.interrupted);
     await visible('interrupted');
-    assert.equal(await analyzeButton().isEnabled(), true);
-    assert.equal(await reopenButton().isEnabled(), true);
+    assert.equal(await analyzeButton().evaluate(node => !(node as HTMLButtonElement).disabled), true);
+    assert.equal(await reopenButton().evaluate(node => !(node as HTMLButtonElement).disabled), true);
     await retained();
     await reopenResult('other', { ok: false, error: 'not-found' });
     await rejected('Reopen', 'not-found');
@@ -482,14 +482,57 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
     await analyzeButton().click();
     await visible(copy.busy);
     assert.equal(await calls(), 1);
-    assert.equal(await analyzeButton().isDisabled(), true);
-    assert.equal(await reopenButton().isDisabled(), true);
+    assert.equal(await analyzeButton().evaluate(node => !(node as HTMLButtonElement).disabled), true);
+    assert.equal(await reopenButton().evaluate(node => !(node as HTMLButtonElement).disabled), true);
+    assert.equal(await analyzeButton().getAttribute('aria-disabled'), 'true');
+    assert.equal(await reopenButton().getAttribute('aria-disabled'), 'true');
     await described(analyzeButton(), copy.busy);
     await described(reopenButton(), copy.busy);
     await page.evaluate(record => window.m104.resolve({ ok: true, run: record }), richRun('reentry-done'));
     await visible('reentry-done');
     assert.equal(await analyzeButton().isEnabled(), true);
     assert.equal(await reopenButton().isEnabled(), true);
+  });
+
+  it('retains operation-button focus through owned Analyze and reopen work without permitting overlap', async () => {
+    await page.evaluate(() => { window.m104.analyze = () => window.m104.hold(); window.m104.rerender(); });
+    await paint();
+    await textbox().fill(targetUrl);
+    await page.getByRole('radio', { name: /local/i }).check();
+    await analyzeButton().focus();
+    await page.keyboard.press('Enter');
+    await announced('Analyzing the requested page. No provider call was attempted.');
+    assert.ok(await analyzeButton().evaluate(node => node === document.activeElement));
+    assert.equal(await analyzeButton().evaluate(node => !(node as HTMLButtonElement).disabled), true);
+    assert.equal(await analyzeButton().getAttribute('aria-disabled'), 'true');
+    await described(analyzeButton(), copy.busy);
+    await page.keyboard.press('Enter');
+    await visible(copy.busy);
+    assert.equal(await calls(), 1);
+    assert.ok(await analyzeButton().evaluate(node => node === document.activeElement));
+    await page.evaluate(record => window.m104.resolve({ ok: true, run: record }), richRun('focus-analyze'));
+    await visible('focus-analyze');
+    assert.ok(await analyzeButton().evaluate(node => node === document.activeElement));
+    assert.ok(await page.evaluate(() => document.activeElement !== document.body));
+
+    await page.evaluate(() => { window.m104.reopen = () => window.m104.hold(); window.m104.rerender(); });
+    await paint();
+    await runId().fill('focus-reopen');
+    const beforeReopen = await calls();
+    await reopenButton().click();
+    await announced('Reopening the requested run. No provider call was attempted.');
+    assert.ok(await reopenButton().evaluate(node => node === document.activeElement));
+    assert.equal(await reopenButton().evaluate(node => !(node as HTMLButtonElement).disabled), true);
+    assert.equal(await reopenButton().getAttribute('aria-disabled'), 'true');
+    await described(reopenButton(), copy.busy);
+    await reopenButton().evaluate(node => (node as HTMLButtonElement).click());
+    await visible(copy.busy);
+    assert.equal(await calls(), beforeReopen + 1);
+    assert.ok(await reopenButton().evaluate(node => node === document.activeElement));
+    await page.evaluate(() => window.m104.resolve({ ok: false, error: 'not-found' }));
+    await rejected('Reopen', 'not-found');
+    assert.ok(await reopenButton().evaluate(node => node === document.activeElement));
+    assert.ok(await page.evaluate(() => document.activeElement !== document.body));
   });
 
   it('captures intent and callback through form/prop changes and refuses collaborator retargeting', async () => {
@@ -516,6 +559,114 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
     await select();
     await announced('local, ollama, qwen3.5:4b. No provider call was attempted.');
     assert.equal(await calls(), 1);
+  });
+
+  for (const scenario of [
+    { mode: 'local', next: 'groq', width: 1280, settlements: ['success', 'failure'] },
+    { mode: 'groq', next: 'local', width: 320, settlements: ['invalid', 'rejection'] },
+  ] as const) it(`keeps pending ${scenario.mode} identity separate from editable ${scenario.next} controls and clears it on settlement`, async () => {
+    const pending = page.getByRole('region', { name: 'Pending analysis', exact: true });
+    const nextNotice = 'Changes to target and generation mode apply to the next analysis.';
+    const identity = scenario.mode === 'local'
+      ? 'Mode: local. Provider: ollama. Model: qwen3.5:4b.'
+      : 'Mode: groq. Provider: groq. Model: openai/gpt-oss-20b.';
+    await page.setViewportSize({ width: scenario.width, height: 800 });
+    for (const settlement of scenario.settlements) {
+      await mount();
+      const prior = richRun(`prior-${scenario.mode}-${settlement}`, scenario.next);
+      await reopen(prior);
+      await select();
+      await page.evaluate(() => { window.m104.savedNode = document.activeElement; });
+      const results = page.getByRole('region', { name: 'Results', exact: true });
+      const priorText = await results.innerText();
+      assert.equal(await pending.count(), 0);
+      assert.equal(await page.getByText(nextNotice, { exact: true }).count(), 0);
+      await page.evaluate(() => { window.m104.analyze = () => window.m104.hold(); window.m104.rerender(); });
+      await paint();
+      await textbox().fill(targetUrl);
+      await page.getByRole('radio', { name: scenario.mode === 'local' ? /local/i : /groq/i }).check();
+      const beforeCalls = await calls();
+      await analyzeButton().click();
+      await announced('Analyzing the requested page. No provider call was attempted.');
+      await paint();
+      assert.equal(await pending.count(), 1, 'An owned Analyze must expose a separately named Pending analysis region');
+      assert.equal(await pending.isVisible(), true);
+      assert.equal(await pending.getByText(identity, { exact: true }).isVisible(), true);
+      assert.equal(await pending.getByText('No provider call was attempted.', { exact: true }).isVisible(), true);
+      await visible(nextNotice);
+      assert.equal(await textbox().isEnabled(), true);
+      await textbox().fill('https://next.example/changed');
+      const nextMode = page.getByRole('radio', { name: scenario.next === 'local' ? /local/i : /groq/i });
+      assert.equal(await nextMode.isEnabled(), true);
+      await nextMode.check();
+      await paint();
+      await visible(scenario.next === 'local' ? copy.local : copy.groq);
+      assert.equal(await pending.getByText(identity, { exact: true }).isVisible(), true);
+      assert.equal(await results.innerText(), priorText, 'Pending edits must preserve the earlier result and its provider context');
+      assert.ok(await page.evaluate(() => window.m104.savedNode?.isConnected));
+      assert.equal(await findingButton('finding-0').getAttribute('aria-pressed'), 'true');
+      assert.equal(await calls(), beforeCalls + 1, 'Editing next-run controls must not issue a request');
+      assert.equal(await status().count(), 1);
+      const bounds = await pending.boundingBox();
+      assert.ok(bounds && bounds.width > 0 && bounds.x >= 0 && bounds.x + bounds.width <= scenario.width + 1);
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
+
+      const completed = richRun(`settled-${scenario.mode}-${settlement}`, scenario.mode);
+      if (settlement === 'success') {
+        await page.evaluate(run => window.m104.resolve({ ok: true, run }), completed);
+        await visible(completed.runId);
+      } else if (settlement === 'failure') {
+        await page.evaluate(run => window.m104.resolve({ ok: false, error: 'scan-failed', run, persisted: true, cleanupFailed: false }), failedRun(completed.runId, scenario.mode));
+        await rejected('Analyze', 'scan-failed');
+      } else if (settlement === 'invalid') {
+        await page.evaluate(() => window.m104.resolve({ ok: true, run: null }));
+        await rejected('Analyze');
+      } else {
+        await page.evaluate(() => window.m104.reject(new Error('synthetic rejection')));
+        await rejected('Analyze', 'request-failed');
+      }
+      await paint();
+      assert.equal(await pending.count(), 0, 'Only the owning Analyze settlement clears pending context');
+      assert.equal(await page.getByText(nextNotice, { exact: true }).count(), 0);
+      assert.equal(await analyzeButton().isEnabled(), true);
+      assert.equal(await reopenButton().isEnabled(), true);
+      if (settlement !== 'success') {
+        assert.equal(await results.innerText(), priorText);
+        assert.ok(await page.evaluate(() => window.m104.savedNode?.isConnected));
+      }
+
+      await page.evaluate(() => { window.m104.reopen = () => window.m104.hold(); window.m104.rerender(); });
+      await paint();
+      await runId().fill('pending-read');
+      await reopenButton().click();
+      await announced('Reopening the requested run. No provider call was attempted.');
+      assert.equal(await pending.count(), 0, 'Reopen must never fabricate pending analysis context');
+      assert.equal(await page.getByText(nextNotice, { exact: true }).count(), 0);
+      await page.evaluate(() => window.m104.resolve({ ok: false, error: 'not-found' }));
+      await rejected('Reopen', 'not-found');
+      assert.equal(await pending.count(), 0);
+    }
+  });
+
+  it('does not carry pending provider context or late settlement into a newly mounted App', async () => {
+    await page.evaluate(() => { window.m104.analyze = () => window.m104.hold(); window.m104.rerender(); });
+    await paint();
+    await textbox().fill(targetUrl);
+    await page.getByRole('radio', { name: /groq/i }).check();
+    await analyzeButton().click();
+    await announced('Analyzing the requested page. No provider call was attempted.');
+    const pending = page.getByRole('region', { name: 'Pending analysis', exact: true });
+    assert.equal(await pending.count(), 1, 'An owned Analyze must expose pending context before unmount');
+    await page.evaluate(record => {
+      const late = window.m104.resolve;
+      window.m104.mount(false, false);
+      late({ ok: true, run: record });
+    }, richRun('late-pending-context', 'groq'));
+    await paint();
+    await visible(copy.absent);
+    assert.equal(await pending.count(), 0);
+    assert.equal(await page.getByText('Changes to target and generation mode apply to the next analysis.', { exact: true }).count(), 0);
+    assert.equal(await page.getByText('late-pending-context', { exact: true }).count(), 0);
   });
 
   it('captures the requested reopen ID and callback across delayed form/prop changes', async () => {
@@ -702,6 +853,13 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
     const detailId = await findingButton('finding-0').getAttribute('aria-controls');
     assert.ok(detailId);
     assert.ok(await page.evaluate(id => document.getElementById(id)?.contains(document.activeElement), detailId));
+    const detailHeading = page.locator(`[id=${JSON.stringify(detailId)}]`).getByRole('heading', { name: 'Finding finding-0' });
+    await described(detailHeading, 'State: unprocessed');
+    await described(detailHeading, 'Run m104-complete-01');
+    await described(detailHeading, 'local');
+    await described(detailHeading, 'ollama');
+    await described(detailHeading, 'qwen3.5:4b');
+    await described(detailHeading, 'No provider call was attempted.');
     await announced('Selected Finding finding-0, image-alt, unprocessed. local, ollama, qwen3.5:4b. No provider call was attempted.');
     const back = page.getByRole('button', { name: /^back to finding$/i });
     await back.focus();

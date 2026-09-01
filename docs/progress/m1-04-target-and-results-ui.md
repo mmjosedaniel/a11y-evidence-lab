@@ -4,7 +4,7 @@
 > task status, and the task ExecPlan owns live execution and evidence.
 
 - **Roadmap task:** [M1-04](../DEVELOPMENT_ROADMAP.md#m1-04--present-accessible-target-entry-and-complete-results)
-- **Mirrored roadmap status:** Blocked
+- **Mirrored roadmap status:** In progress
 - **ExecPlan:** [Target and results UI](../plans/m1-04-target-and-results-ui.md)
 - **Last updated:** 2026-08-31
 
@@ -88,3 +88,45 @@ The separate frontend candidate passes all 35 unchanged UI tests, default axe at
 - **Agent-workflow outcome:** Fresh S3 review found no supported implementation defect but returned BLOCKED for the missing manual evidence. Primary accepted exact task-owned scratch recovery after an interrupted manual session; a visible-desktop retry is available to the human observer, but Computer Use cannot bind its window. No source repair or budget reset is indicated.
 - **Evidence:** [S3 review](../plans/m1-04-target-and-results-ui.md#m104-ui-s3-review-001--source-audit-clean-manual-evidence-blocked) and [visible-desktop attempt](../plans/m1-04-target-and-results-ui.md#m104-manual-attempt-2--visible-desktop-binding-unavailable) distinguish verified code from absent manual proof.
 - **Next boundary:** Owner reports the actual manual observations and cropped 200% menu capture. Reconcile manual teardown, then complete slice acceptance, sequential full regression, different final integrated review, task-owned final cleanup and documentation closure. Runtime/build/review images are retained for this continuation; no task completion, commit or push is claimed.
+
+## 2026-08-31 — Independent review corrections selected
+
+- **Project outcome:** The owner supplied a valid pending-provider visibility defect and inconsistent current summaries against commit 44702d0. The UI candidate exists but is not accepted.
+- **Agent-workflow outcome:** Primary accepted both findings, reconciled clean source/runtime/scratch state and preserved earlier history. One additional bounded independent Red/Green remediation is selected, with no automatic correction or budget reset. Current summaries distinguish the candidate from incomplete acceptance gates.
+- **Evidence:** [Review remediation](../plans/m1-04-target-and-results-ui.md#m104-review-remediation-001--pending-context-and-summary-reconciliation).
+- **Next boundary:** Prove the intermediate-state regression, preserve captured context visibly, revalidate and obtain fresh critical review. Manual Narrator/menu zoom, final integrated review and final cleanup remain pending.
+
+## 2026-08-31 — Review corrections verified
+
+- **Project outcome:** The pending run now keeps its captured provider/model visible independently of editable next-run controls. Fresh sequential regression passes all 290 existing tests and 38 UI tests, followed by strict typechecking and a reproducible production build. Current summaries consistently describe the implemented candidate and its Blocked acceptance state.
+- **Agent-workflow outcome:** The test worker added three cases that reproduced the defect; the separate frontend worker changed only App.tsx and passed all 38 tests unchanged. Primary inspected the actual changes, closed both leases compliantly, and independently repeated full regression and preservation checks. No additional correction allowance remains.
+- **Evidence:** [Remediation Green](../plans/m1-04-target-and-results-ui.md#m104-review-green-accepted--immutable-pending-context) and [fresh full regression](../plans/m1-04-target-and-results-ui.md#m104-review-regression-001--fresh-full-sequential-verification).
+- **Review outcome:** [Fresh critical review](../plans/m1-04-target-and-results-ui.md#m104-review-s3-002--correction-reviewed-manual-evidence-still-required) found no implementation defects and retained the manual-evidence block. Its two acknowledged stale summary phrases are corrected.
+- **Next boundary:** Human browser-menu 200% zoom/reflow evidence is accepted. Actual heard Narrator evidence remains inconclusive after one silent action without a working Chrome/Narrator baseline; it blocks the different final integrated review and final cleanup/closure. Scratch is empty; the task runtime/build/screenshots remain retained for those gates. No M1-05, commit, push or task acceptance is claimed.
+
+## 2026-08-31 — Narrator path confirms two announcement defects
+
+- **Project outcome:** A fresh exact manual harness session established that Windows Narrator audio works. After separating Spanish control-role speech from English page content, a continuation with Narrator confirmed active exposed two reliable defects: selecting a Finding automatically spoke only `Finding finding-0`, omitting its required provider/model/no-call context, and Reopen spoke the page title instead of its operation result. The earlier completion non-announcement is invalid because Narrator was off at that moment.
+- **Agent-workflow outcome:** The first 15-minute session settled cleanly. The continuation was stopped after the decisive observations and left a reconciled ignored UI-scratch inventory; no source/test write or correction lease has occurred yet.
+- **Next boundary:** Restore empty owned scratch, then use independent test/frontend ownership for one bounded focus-and-description correction. Re-run the complete Narrator path, including completion, before final integrated review and cleanup/closure.
+
+## 2026-08-31 — Narrator correction and dependency recovery verified
+
+- **Project outcome:** Independent test/frontend ownership corrected operation-focus and Finding-description behavior. The accepted UI boundary now contains 39 cases. After exact recovery from an accidental reviewer-created pnpm tree, the controlling sequential regression passes 290 existing tests plus all 39 UI tests, full typechecking and a byte-identical production build.
+- **Agent-workflow outcome:** The final test boundary uses native disabled-property checks and native browser click only to bypass Playwright's ARIA actionability filter for the second already-busy Reopen attempt. Fresh no-diff Green passed. Exact frozen npm restore removed `pnpm-lock.yaml` and all pnpm artifacts while preserving package inputs, source, tests, runtime, screenshots and build. A different static S3 reviewer found no source or test defect; its only Minor finding was stale current-status text, corrected in the current authorities while preserving the historical entries above.
+- **Evidence:** [Narrator correction, dependency recovery and controlling regression](../plans/m1-04-target-and-results-ui.md#m104-narrator-green-conflict-01--playwright-enabled-semantics) records the test correction lineage, accepted Green, 329-test results, incident quarantine and recovery receipts.
+- **Next boundary:** Run the short complete heard Narrator revalidation, including Analyze completion, Finding provider context, Reopen result and predictable focus. Then obtain the different final integrated review and perform exact cleanup/documentation closure. Human browser-menu 200% zoom evidence is already accepted. M1-05, commits and pushes remain unauthorized.
+
+## 2026-08-31 — Complete Narrator evidence accepted
+
+- **Project outcome:** With Windows Narrator audibly active, the corrected exact harness announced the validation error, Analyze start/completion, complete selected-Finding State/run/provider/model/no-call context, and Reopen start/completion. The final capture shows focus retained visibly on Reopen and the existing-evidence status preserved. The previously confusing Spanish and English voices were one Narrator's language presentation.
+- **Agent-workflow outcome:** The stale-summary correction received a same-reviewer `PASS` before the manual run. One reloaded fallback session was discarded; primary restored its exact generated scratch. The fresh connected session supplied the accepted observations, after which exact scratch/listener reconciliation passed. No application, test, dependency, runtime, retained-evidence or build artifact changed.
+- **Evidence:** [Complete heard Narrator revalidation](../plans/m1-04-target-and-results-ui.md#m104-manual-attempt-8--complete-heard-narrator-revalidation-accepted) records the observed phrases, focus capture, invalid fallback session, and settled manual boundary.
+- **Next boundary:** Obtain the different final integrated review, then perform exact task-owned cleanup and documentation closure. M1-05, commits and pushes remain unauthorized.
+
+## 2026-08-31 — Final review passed; cleanup stopped without deletion
+
+- **Project outcome:** The different final integrated review passed after one documentation-only checkbox correction. Two exact cleanup workers then stopped before the first deletion: the first on a PowerShell listener-predicate typo, the second because its process predicate matched its own command line. All six generated roots remain intact and verified.
+- **Agent-workflow outcome:** Both no-change leases closed compliantly with no unexpected path or Git-state change. The repository workflow's two-no-diff stop now prevents another automatic worker handoff.
+- **Evidence:** [Final review and cleanup stops](../plans/m1-04-target-and-results-ui.md#m104-final-review-and-cleanup-attempt-1--review-passed-cleanup-stopped-before-deletion) records the review PASS, exact preflight, both failure modes, receipts, and preserved artifacts.
+- **Next boundary:** Owner direction for one final cleanup attempt that excludes only its own PowerShell PID from the process diagnostic. Then exact cleanup and documentation closure may finish. M1-05, commits and pushes remain unauthorized.

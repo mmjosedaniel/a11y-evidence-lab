@@ -4,7 +4,7 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-- [M1-04 — Target and results UI](m1-04-target-and-results-ui.md) is Blocked on actual Narrator and browser-menu zoom evidence. All 35 UI tests, strict typechecking and build pass; fresh S3 review found no supported implementation defect. Full regression, final integrated review and closure remain pending; M1-05 is unselected.
+- [M1-04 — Target and results UI](m1-04-target-and-results-ui.md) is Blocked only on owner direction for one final cleanup retry after two no-change worker stops. Its corrected UI passes the controlling 329-test regression, static S3 and different final integrated reviews, and accepted human browser-menu 200% zoom/reflow and Narrator checks. All retained artifacts remain intact; exact cleanup and closure remain pending. M1-05 is unselected.
 
 ## Completed plans
 
