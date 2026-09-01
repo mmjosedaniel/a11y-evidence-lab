@@ -2,32 +2,26 @@ import assert from 'node:assert/strict';
 import { after, before, beforeEach, describe, it } from 'node:test';
 import { AxeBuilder } from '@axe-core/playwright';
 import type { Locator, Page } from 'playwright';
-import { completedRun, failedRun, runningRun } from './helpers/m102-run-fixture.ts';
+import { completedRun, failedRun } from './helpers/m102-run-fixture.ts';
 import { richRun, startHarness, targetUrl, valid } from './helpers/m104-ui-harness.ts';
 import type { Harness } from './helpers/m104-ui-harness.ts';
-import type { PageAnalysisRun } from '../src/server/domain/run-contract.ts';
 
 const copy = {
-  absent: 'Analyze and reopen are unavailable in this build; service integration is pending.',
+  absent: 'Analyze is unavailable in this build; service integration is pending.',
   analyzeAbsent: 'Analyze is unavailable in this build; service integration is pending.',
-  reopenAbsent: 'Reopen is unavailable in this build; service integration is pending.',
-  target: 'Choose a non-sensitive public HTTPS page you are permitted to analyze and willing to trust. Hostile, private and authenticated targets are unsupported. The application does not prove authorization, public reachability or safety.',
+  target: 'Use a public HTTPS page you are permitted to analyze. Private, authenticated, and hostile pages aren’t supported.',
   results: 'This automated scan covers only image-alt, label and color-contrast in the current rendered top-level document. Iframes, inactive states and other rules are excluded. Findings and counts do not establish accessibility, conformance, certification or legal compliance.',
   local: 'Local (recommended) — Ollama · qwen3.5:4b. Generation prompts and responses use the approved loopback Ollama endpoint and a locally present model, not hosted inference. The public-page scan still uses external HTTPS; this is not offline or system-wide zero-egress operation.',
   groq: 'Groq — openai/gpt-oss-20b. A later explicit Generate action for one eligible Finding may send minimized rule-specific evidence and required curated-guidance passages to Groq for remote processing. Target URLs, locators, sibling Findings and credentials are excluded from that content. Selecting a mode or scanning makes no provider call.',
   urlError: 'Enter a valid HTTPS URL without embedded credentials.',
   modeError: 'Choose Local or Groq.',
-  idError: 'Enter a run ID using 1–64 letters, numbers, underscores or hyphens, starting with a letter or number.',
-  busy: 'An operation is in progress. Wait before analyzing or reopening another run.',
-  interrupted: 'Interrupted stored run; not currently executing. It will not resume automatically.',
+  busy: 'An operation is in progress.',
 };
 
 let harness: Harness;
 let page: Page;
 const textbox = () => page.getByRole('textbox', { name: /target|url/i });
-const runId = () => page.getByRole('textbox', { name: /run id/i });
 const analyzeButton = () => page.getByRole('button', { name: /^analyze$/i });
-const reopenButton = () => page.getByRole('button', { name: /^reopen(?: run)?$/i });
 const status = () => page.getByRole('status');
 const findingButton = (id: string) => page.getByRole('button', { name: new RegExp(`\\b${id}\\b`) });
 const resultsHeading = () => page.getByRole('heading', { name: /^results$/i });
@@ -40,35 +34,23 @@ async function announced(text: string): Promise<void> {
   await page.waitForFunction(text => document.querySelector('[role="status"]')?.textContent?.includes(text), text);
 }
 async function calls(): Promise<number> { return page.evaluate(() => window.m104.calls.length); }
-async function mount(analyze = true, reopen = true): Promise<void> {
-  await page.evaluate(({ analyze, reopen }) => window.m104.mount(analyze, reopen), { analyze, reopen });
+async function mount(analyze = true): Promise<void> {
+  await page.evaluate(analyze => window.m104.mount(analyze), analyze);
   await paint();
 }
-async function response(stage: 'analyze' | 'reopen', result: unknown): Promise<void> {
-  await page.evaluate(({ stage, result }) => {
+async function response(result: unknown): Promise<void> {
+  await page.evaluate(result => {
     window.m104.raw = result;
-    window.m104[stage] = () => Promise.resolve(window.m104.raw);
+    window.m104.analyze = () => Promise.resolve(window.m104.raw);
     window.m104.rerender();
-  }, { stage, result });
+  }, result);
   await paint();
 }
 async function analyze(result: unknown, mode: 'local' | 'groq' = 'local', target = targetUrl): Promise<void> {
-  await response('analyze', result);
+  await response(result);
   await textbox().fill(target);
   await page.getByRole('radio', { name: mode === 'local' ? /local/i : /groq/i }).check();
   await analyzeButton().click();
-  await paint();
-}
-async function reopen(record: PageAnalysisRun): Promise<void> {
-  await response('reopen', { ok: true, run: record, interrupted: record.status === 'running' });
-  await runId().fill(record.runId);
-  await reopenButton().click();
-  await paint();
-}
-async function reopenResult(id: string, result: unknown): Promise<void> {
-  await response('reopen', result);
-  await runId().fill(id);
-  await reopenButton().click();
   await paint();
 }
 async function openComplete(): Promise<ReturnType<typeof richRun>> {
@@ -104,9 +86,9 @@ async function described(control: Locator, text: string): Promise<void> {
   assert.ok(await control.evaluate((element, expected) => (element.getAttribute('aria-describedby') ?? '').split(/\s+/)
     .some(id => document.getElementById(id)?.textContent?.includes(expected)), text), `Control must describe: ${text}`);
 }
-async function rejected(stage: 'Analyze' | 'Reopen', code = 'invalid-result'): Promise<void> {
-  await announced(`${stage} failed: ${code}.`);
-  await visible(`${stage} failed: ${code}.`);
+async function rejected(code = 'invalid-result'): Promise<void> {
+  await announced(`Analyze failed: ${code}.`);
+  await visible(`Analyze failed: ${code}.`);
 }
 
 describe('M1-04 actual target/results UI: complete bounded observable contract', { concurrency: false }, () => {
@@ -117,7 +99,6 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
     await page.evaluate(async () => {
       await window.m104.settle();
       window.m104.analyze = () => Promise.resolve({ ok: false, error: 'create-failed', run: null, persisted: false, cleanupFailed: false });
-      window.m104.reopen = () => Promise.resolve({ ok: false, error: 'not-found' });
       window.m104.reads = 0; window.m104.canary = 0; window.m104.raw = null;
       window.m104.savedNode = null; window.m104.oldNode = null;
       window.m104.mount();
@@ -126,22 +107,28 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
     await paint();
   });
 
-  it('provides native landmarks, one preexisting atomic status, and truthful absent/partial capabilities', async () => {
-    for (const [hasAnalyze, hasReopen, text] of [[false, false, copy.absent], [true, false, copy.reopenAbsent], [false, true, copy.analyzeAbsent]] as const) {
-      await mount(hasAnalyze, hasReopen);
+  it('provides the accepted entry semantics, one atomic status, and truthful Analyze capability', async () => {
+    for (const [hasAnalyze, text] of [[false, copy.absent], [true, '']] as const) {
+      await mount(hasAnalyze);
       assert.equal(await page.getByRole('main').count(), 1);
       assert.equal(await status().count(), 1);
       assert.equal(await status().getAttribute('aria-atomic'), 'true');
-      await visible(text);
+      if (text) await visible(text);
       assert.equal(await analyzeButton().isDisabled(), !hasAnalyze);
-      assert.equal(await reopenButton().isDisabled(), !hasReopen);
       if (!hasAnalyze) await described(analyzeButton(), text);
-      if (!hasReopen) await described(reopenButton(), text);
       assert.equal(await calls(), 0);
     }
+    assert.equal(await page.getByRole('heading', { level: 1, name: 'Analyze a page', exact: true }).count(), 1);
+    assert.equal(await page.getByRole('heading', { name: 'A11y Evidence Lab', exact: true }).count(), 0);
+    assert.equal(await page.getByRole('heading', { name: 'Target and generation mode', exact: true }).count(), 0);
+    await visible(copy.target);
     await described(textbox(), copy.target);
+    assert.equal(await page.getByText(copy.modeError, { exact: true }).count(), 0);
     assert.equal(await page.getByRole('radio', { checked: true }).count(), 0);
     assert.ok(await page.locator('fieldset legend').count() >= 1);
+    assert.equal(await page.getByRole('textbox', { name: /run id/i }).count(), 0);
+    assert.equal(await page.getByRole('button', { name: /^reopen(?: run)?$/i }).count(), 0);
+    assert.equal(await page.getByText(/reopen retained evidence/i).count(), 0);
     assert.equal(await page.getByRole('button', { name: /generate|retry|resume|cancel|review|compare|filter/i }).count(), 0);
     assert.equal(await page.locator('iframe, object, embed').count(), 0);
   });
@@ -150,6 +137,7 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
     await analyzeButton().click();
     await visible(copy.urlError);
     await visible(copy.modeError);
+    assert.ok((await status().textContent())?.includes(`${copy.urlError} ${copy.modeError}`));
     await described(textbox(), copy.urlError);
     assert.equal(await textbox().getAttribute('aria-invalid'), 'true');
     const modeGroup = page.getByRole('group').filter({ has: page.getByRole('radio', { name: /local/i }) });
@@ -180,31 +168,11 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
     assert.equal(await calls(), 1);
   });
 
-  it('rejects whole-string invalid run IDs and accepts both exact boundary lengths', async () => {
-    for (const id of ['', '_abc', '-abc', 'a/b', 'a.b', 'a b', 'é', 'a'.repeat(65)]) {
-      await runId().fill(id);
-      await reopenButton().click();
-      await visible(copy.idError);
-      await described(runId(), copy.idError);
-    }
-    assert.equal(await calls(), 0);
-    for (const id of ['a', 'A' + 'b_9-'.repeat(15) + 'xyz']) {
-      await reopenResult(id, { ok: false, error: 'not-found' });
-      await rejected('Reopen', 'not-found');
-    }
-    assert.equal(await calls(), 2);
-  });
-
-  it('keeps complete evidence, selection and source/provider context through every closed request failure', async () => {
+  it('keeps complete evidence, selection and source/provider context through every closed Analyze failure', async () => {
     await keepComplete();
     for (const error of ['invalid-request', 'busy', 'stopping', 'create-failed', 'scan-failed', 'result-validation', 'initial-persistence', 'shutdown']) {
       await analyze({ ok: false, error, run: null, persisted: false, cleanupFailed: false });
-      await rejected('Analyze', error);
-      await retained();
-    }
-    for (const error of ['invalid-id', 'busy', 'stopping', 'not-found', 'invalid-run', 'stored-run-unavailable', 'read-failed']) {
-      await reopenResult('missing', { ok: false, error });
-      await rejected('Reopen', error);
+      await rejected(error);
       await retained();
     }
   });
@@ -220,7 +188,7 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
     await visible('Resource cleanup is uncertain.');
     await retained();
     await analyze({ ok: false, error: 'scan-failed', run: failedRun('cleanup-bad', 'local', 'failed'), persisted: true, cleanupFailed: false });
-    await rejected('Analyze');
+    await rejected();
     assert.equal(await page.getByText('cleanup-bad', { exact: true }).count(), 0);
     await analyze({ ok: false, error: 'scan-failed', run: failedRun('cleanup-good', 'local', 'failed'), persisted: true, cleanupFailed: true });
     await visible('cleanup-good');
@@ -228,28 +196,14 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
     await retained();
   });
 
-  it('shows interrupted history independently of live busy and retains earlier completed results', async () => {
-    await keepComplete();
-    await reopen(runningRun('interrupted', 'groq'));
-    await visible(copy.interrupted);
-    await visible('interrupted');
-    assert.equal(await analyzeButton().evaluate(node => !(node as HTMLButtonElement).disabled), true);
-    assert.equal(await reopenButton().evaluate(node => !(node as HTMLButtonElement).disabled), true);
-    await retained();
-    await reopenResult('other', { ok: false, error: 'not-found' });
-    await rejected('Reopen', 'not-found');
-    await visible('interrupted');
-    await retained();
-  });
-
-  for (const stage of ['analyze', 'reopen'] as const) it(`rejects closed-envelope key/type/prototype/descriptor violations for ${stage}`, async () => {
+  it('rejects closed-envelope key/type/prototype/descriptor violations for Analyze', async () => {
     await keepComplete();
     const record = richRun('envelope-candidate');
-    const success = stage === 'analyze' ? { ok: true, run: record } : { ok: true, run: record, interrupted: false };
-    const failure = stage === 'analyze' ? { ok: false, error: 'scan-failed', run: null, persisted: false, cleanupFailed: false } : { ok: false, error: 'not-found' };
+    const success = { ok: true, run: record };
+    const failure = { ok: false, error: 'scan-failed', run: null, persisted: false, cleanupFailed: false };
     for (const base of [success, failure]) {
     for (const mutation of ['null', 'array', 'primitive', 'extra', 'missing', 'undefined', 'symbol', 'nonenumerable', 'accessor', 'prototype', 'boolean', 'throw-ownKeys', 'throw-descriptor', 'throw-prototype']) {
-      await page.evaluate(({ stage, base, mutation }) => {
+      await page.evaluate(({ base, mutation }) => {
         const bridge = window.m104;
         const consumedKey = base.ok ? 'run' : 'error';
         let value: any = structuredClone(base);
@@ -267,13 +221,12 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
         if (mutation === 'throw-ownKeys') value = new Proxy(value, { ownKeys() { throw Error('raw diagnostic'); } });
         if (mutation === 'throw-descriptor') value = new Proxy(value, { getOwnPropertyDescriptor() { throw Error('raw diagnostic'); } });
         if (mutation === 'throw-prototype') value = new Proxy(value, { getPrototypeOf() { throw Error('raw diagnostic'); } });
-        bridge[stage] = () => Promise.resolve(value);
+        bridge.analyze = () => Promise.resolve(value);
         bridge.rerender();
-      }, { stage, base, mutation });
+      }, { base, mutation });
       await paint();
-      if (stage === 'analyze') await analyzeButton().click();
-      else { await runId().fill(record.runId); await reopenButton().click(); }
-      await rejected(stage === 'analyze' ? 'Analyze' : 'Reopen');
+      await analyzeButton().click();
+      await rejected();
       await retained();
       assert.equal(await page.evaluate(() => window.m104.reads), 0, mutation);
       assert.ok(!(await page.locator('body').innerText()).includes('raw diagnostic'));
@@ -311,7 +264,7 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
     const unknownField = { ...candidate, credentials: 'DO-NOT-DISPLAY' };
     const cases: unknown[] = [
       { ok: true, run: missingCoverage }, { ok: true, run: droppedNode }, { ok: true, run: unknownField },
-      { ok: true, run: runningRun('invalid-candidate') }, { ok: true, run: failedRun('invalid-candidate') },
+      { ok: true, run: failedRun('invalid-candidate') },
       { ok: false, error: 'not-found', run: null, persisted: false, cleanupFailed: false },
       { ok: false, error: 'scan-failed', run: candidate, persisted: true, cleanupFailed: false },
       { ok: false, error: 'scan-failed', run: null, persisted: true, cleanupFailed: false },
@@ -322,154 +275,37 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
     ];
     for (const result of cases) {
       await analyze(result);
-      await rejected('Analyze');
+      await rejected();
       await retained();
       assert.equal(await page.getByText('invalid-candidate', { exact: true }).count(), 0);
-    }
-    for (const result of [
-      { ok: true, run: candidate, interrupted: true }, { ok: true, run: runningRun('invalid-candidate'), interrupted: false },
-      { ok: true, run: candidate, interrupted: 0 }, { ok: false, error: 'scan-failed' },
-      { ok: false, error: 'not-found', run: null }, { ok: false },
-    ]) {
-      await reopenResult('invalid-candidate', result);
-      await rejected('Reopen');
-      await retained();
     }
     assert.ok(!(await page.locator('body').innerText()).includes('DO-NOT-DISPLAY'));
   });
 
   it('validates Analyze URL/provider identity even for failed records and rejects either retained run ID', async () => {
     await keepComplete();
-    await reopen(failedRun('retained-failure'));
+    await analyze({ ok: false, error: 'scan-failed', run: failedRun('retained-failure'), persisted: true, cleanupFailed: false });
+    await rejected('scan-failed');
     for (const record of [richRun('m104-complete-01'), richRun('retained-failure'), failedRun('m104-complete-01'), failedRun('retained-failure')]) {
       await analyze(record.status === 'completed' ? { ok: true, run: record } : { ok: false, error: 'scan-failed', run: record, persisted: true, cleanupFailed: false });
-      await rejected('Analyze');
+      await rejected();
       await retained();
       await visible('retained-failure');
     }
     for (const source of [richRun('new-identity'), failedRun('new-identity')]) {
       for (const record of [valid({ ...source, requestedUrl: 'https://different.example/' }), valid({ ...source, providerContext: completedRun('x', 'groq').providerContext })]) {
         await analyze(record.status === 'completed' ? { ok: true, run: record } : { ok: false, error: 'scan-failed', run: record, persisted: true, cleanupFailed: false });
-        await rejected('Analyze');
+        await rejected();
         await retained();
       }
     }
-    await reopenResult('requested-other', { ok: true, run: richRun('response-other'), interrupted: false });
-    await rejected('Reopen');
   });
 
-  it('retains exact completed DOM/evidence/selection on same-ID valid changed evidence; never refreshes terminals', async () => {
-    const record = await keepComplete();
-    const changed = structuredClone(record) as any;
-    changed.scan.findings[0].evidence.altState = { value: 'whitespace-only' };
-    await reopen(valid(changed));
-    await announced(`Run ${record.runId} is already open. Existing evidence and selection retained.`);
-    await retained();
-    assert.equal(await page.getByText('whitespace-only', { exact: true }).count(), 0);
-    for (const statusRecord of [runningRun(record.runId), failedRun(record.runId)]) {
-      await reopen(statusRecord);
-      await rejected('Reopen');
-      await retained();
-    }
-    const failed = failedRun('terminal-failed');
-    await reopen(failed);
-    const changedFailure = valid({ ...failed, failure: { category: 'timeout' } });
-    await reopen(changedFailure);
-    await announced('Run terminal-failed is already open. Existing failed snapshot retained.');
-    assert.equal(await page.getByText('timeout', { exact: true }).count(), 0);
-    for (const statusRecord of [runningRun(failed.runId), completedRun(failed.runId)]) {
-      await reopen(statusRecord);
-      await rejected('Reopen');
-      await visible('terminal-failed');
-      await retained();
-    }
-  });
-
-  it('checks immutable common identity against both retained completed and noncompleted snapshots', async () => {
-    await keepComplete();
-    const failure = failedRun('held-failure');
-    await reopen(failure);
-    for (const held of [richRun(), failure]) {
-      const changes = [
-        { createdAt: '2026-08-30T09:00:00.000Z' }, { applicationRevision: 'b'.repeat(40) },
-        { requestedUrl: 'https://example.org/changed' }, { providerContext: completedRun('x', 'groq').providerContext },
-      ];
-      for (const change of changes) {
-        await reopen(valid({ ...held, ...change }));
-        await rejected('Reopen');
-        await retained();
-        await visible('held-failure');
-      }
-      await reopenResult(held.runId, { ok: true, run: { ...held, formatVersion: 2 }, interrupted: false });
-      await rejected('Reopen');
-    }
-  });
-
-  it('discards matching interrupted reads, rejects profile drift, and accepts monotonic terminal completion', async () => {
-    await keepComplete();
-    const held = runningRun('held-running');
-    await reopen(held);
-    for (const change of [{ createdAt: '2026-08-30T09:00:00.000Z' }, { applicationRevision: 'b'.repeat(40) },
-      { requestedUrl: 'https://example.org/changed' }, { providerContext: completedRun('x', 'groq').providerContext }]) {
-      await reopen(valid({ ...held, ...change }));
-      await rejected('Reopen');
-      await retained();
-    }
-    const improved = valid({ ...held, scanContext: { ...held.scanContext, finalUrl: { value: 'https://example.org/final' }, readinessReached: true } });
-    await reopen(improved);
-    await announced('Run held-running is already open. Existing interrupted snapshot retained.');
-    assert.equal(await page.getByText('https://example.org/final', { exact: true }).count(), 0);
-    const profileChanges = [
-      { readiness: 'load' }, { viewport: { width: 1000, height: 720 } }, { viewport: { width: 1280, height: 900 } },
-      { locale: 'fr-FR' }, { timeoutMs: 25000 },
-      { scannerVersion: 'other' }, { evidencePolicyVersion: 'other' }, { rules: ['label', 'image-alt', 'color-contrast'] },
-      { scope: 'other' }, { freshContext: false }, { importedState: true }, { interaction: true },
-      { crawling: true }, { iframes: true }, { contrastProfile: 'other' },
-    ];
-    for (const change of profileChanges) {
-      await reopenResult(held.runId, { ok: true, run: { ...held, scanContext: { ...held.scanContext, ...change } }, interrupted: true });
-      await rejected('Reopen');
-      await retained();
-      await visible(copy.interrupted);
-    }
-    await reopen(completedRun(held.runId));
-    await visible(held.runId);
-    assert.equal(await page.getByText(copy.interrupted, { exact: true }).count(), 0);
-    assert.equal(await findingButton('finding-0').getAttribute('aria-pressed'), 'false');
-    assert.equal(await page.getByText('m104-complete-01', { exact: true }).count(), 0);
-  });
-
-  it('requires available observations and readiness to remain monotonic on running-to-terminal reads', async () => {
-    await keepComplete();
-    const complete = completedRun('observed-running');
-    const observed = valid({ ...runningRun(complete.runId), scanContext: { ...complete.scan.context, cleanup: 'pending' } });
-    await reopen(observed);
-    for (const key of ['finalUrl', 'scannedAt', 'browserVersion'] as const) {
-      const changedValues = key === 'finalUrl' ? ['https://example.org/other'] : key === 'scannedAt' ? ['2026-08-30T10:00:01.500Z'] : ['999.0'];
-      for (const replacement of [{ unavailable: 'missing' }, { value: changedValues[0] }]) {
-        const candidate = valid({ ...failedRun(complete.runId), scanContext: { ...complete.scan.context, [key]: replacement } });
-        await reopen(candidate);
-        await rejected('Reopen');
-        await retained();
-      }
-    }
-    await reopen(valid({ ...failedRun(complete.runId), scanContext: complete.scan.context }));
-    await visible('navigation');
-    assert.equal(await page.getByText(copy.interrupted, { exact: true }).count(), 0);
-    await retained();
-    const readiness = valid({ ...runningRun('readiness-running'), scanContext: { ...complete.scan.context, scannedAt: { unavailable: 'missing' }, cleanup: 'pending' } });
-    await reopen(readiness);
-    await reopen(valid({ ...failedRun(readiness.runId), scanContext: { ...complete.scan.context, scannedAt: { unavailable: 'missing' }, readinessReached: false } }));
-    await rejected('Reopen');
-    await visible(copy.interrupted);
-    await retained();
-  });
-
-  it('shares a synchronous reservation across Analyze and reopen, including callback reentry', async () => {
+  it('shares a synchronous reservation across Analyze callback reentry', async () => {
     await page.evaluate(() => {
       window.m104.analyze = () => {
         for (const button of document.querySelectorAll('button')) {
-          if (/^(Analyze|Reopen(?: run)?)$/i.test(button.textContent?.trim() ?? '')) button.closest('form')?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+          if (/^Analyze$/i.test(button.textContent?.trim() ?? '')) button.closest('form')?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
         }
         return window.m104.hold();
       };
@@ -477,24 +313,19 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
     });
     await paint();
     await textbox().fill(targetUrl);
-    await runId().fill('reentry');
     await page.getByRole('radio', { name: /local/i }).check();
     await analyzeButton().click();
     await visible(copy.busy);
     assert.equal(await calls(), 1);
     assert.equal(await analyzeButton().evaluate(node => !(node as HTMLButtonElement).disabled), true);
-    assert.equal(await reopenButton().evaluate(node => !(node as HTMLButtonElement).disabled), true);
     assert.equal(await analyzeButton().getAttribute('aria-disabled'), 'true');
-    assert.equal(await reopenButton().getAttribute('aria-disabled'), 'true');
     await described(analyzeButton(), copy.busy);
-    await described(reopenButton(), copy.busy);
     await page.evaluate(record => window.m104.resolve({ ok: true, run: record }), richRun('reentry-done'));
     await visible('reentry-done');
     assert.equal(await analyzeButton().isEnabled(), true);
-    assert.equal(await reopenButton().isEnabled(), true);
   });
 
-  it('retains operation-button focus through owned Analyze and reopen work without permitting overlap', async () => {
+  it('retains Analyze focus through owned work without permitting overlap', async () => {
     await page.evaluate(() => { window.m104.analyze = () => window.m104.hold(); window.m104.rerender(); });
     await paint();
     await textbox().fill(targetUrl);
@@ -515,24 +346,6 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
     assert.ok(await analyzeButton().evaluate(node => node === document.activeElement));
     assert.ok(await page.evaluate(() => document.activeElement !== document.body));
 
-    await page.evaluate(() => { window.m104.reopen = () => window.m104.hold(); window.m104.rerender(); });
-    await paint();
-    await runId().fill('focus-reopen');
-    const beforeReopen = await calls();
-    await reopenButton().click();
-    await announced('Reopening the requested run. No provider call was attempted.');
-    assert.ok(await reopenButton().evaluate(node => node === document.activeElement));
-    assert.equal(await reopenButton().evaluate(node => !(node as HTMLButtonElement).disabled), true);
-    assert.equal(await reopenButton().getAttribute('aria-disabled'), 'true');
-    await described(reopenButton(), copy.busy);
-    await reopenButton().evaluate(node => (node as HTMLButtonElement).click());
-    await visible(copy.busy);
-    assert.equal(await calls(), beforeReopen + 1);
-    assert.ok(await reopenButton().evaluate(node => node === document.activeElement));
-    await page.evaluate(() => window.m104.resolve({ ok: false, error: 'not-found' }));
-    await rejected('Reopen', 'not-found');
-    assert.ok(await reopenButton().evaluate(node => node === document.activeElement));
-    assert.ok(await page.evaluate(() => document.activeElement !== document.body));
   });
 
   it('captures intent and callback through form/prop changes and refuses collaborator retargeting', async () => {
@@ -574,7 +387,7 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
     for (const settlement of scenario.settlements) {
       await mount();
       const prior = richRun(`prior-${scenario.mode}-${settlement}`, scenario.next);
-      await reopen(prior);
+      await analyze({ ok: true, run: prior }, scenario.next);
       await select();
       await page.evaluate(() => { window.m104.savedNode = document.activeElement; });
       const results = page.getByRole('region', { name: 'Results', exact: true });
@@ -617,34 +430,23 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
         await visible(completed.runId);
       } else if (settlement === 'failure') {
         await page.evaluate(run => window.m104.resolve({ ok: false, error: 'scan-failed', run, persisted: true, cleanupFailed: false }), failedRun(completed.runId, scenario.mode));
-        await rejected('Analyze', 'scan-failed');
+        await rejected('scan-failed');
       } else if (settlement === 'invalid') {
         await page.evaluate(() => window.m104.resolve({ ok: true, run: null }));
-        await rejected('Analyze');
+        await rejected();
       } else {
         await page.evaluate(() => window.m104.reject(new Error('synthetic rejection')));
-        await rejected('Analyze', 'request-failed');
+        await rejected('request-failed');
       }
       await paint();
       assert.equal(await pending.count(), 0, 'Only the owning Analyze settlement clears pending context');
       assert.equal(await page.getByText(nextNotice, { exact: true }).count(), 0);
       assert.equal(await analyzeButton().isEnabled(), true);
-      assert.equal(await reopenButton().isEnabled(), true);
       if (settlement !== 'success') {
         assert.equal(await results.innerText(), priorText);
         assert.ok(await page.evaluate(() => window.m104.savedNode?.isConnected));
       }
 
-      await page.evaluate(() => { window.m104.reopen = () => window.m104.hold(); window.m104.rerender(); });
-      await paint();
-      await runId().fill('pending-read');
-      await reopenButton().click();
-      await announced('Reopening the requested run. No provider call was attempted.');
-      assert.equal(await pending.count(), 0, 'Reopen must never fabricate pending analysis context');
-      assert.equal(await page.getByText(nextNotice, { exact: true }).count(), 0);
-      await page.evaluate(() => window.m104.resolve({ ok: false, error: 'not-found' }));
-      await rejected('Reopen', 'not-found');
-      assert.equal(await pending.count(), 0);
     }
   });
 
@@ -659,7 +461,7 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
     assert.equal(await pending.count(), 1, 'An owned Analyze must expose pending context before unmount');
     await page.evaluate(record => {
       const late = window.m104.resolve;
-      window.m104.mount(false, false);
+      window.m104.mount(false);
       late({ ok: true, run: record });
     }, richRun('late-pending-context', 'groq'));
     await paint();
@@ -669,40 +471,24 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
     assert.equal(await page.getByText('late-pending-context', { exact: true }).count(), 0);
   });
 
-  it('captures the requested reopen ID and callback across delayed form/prop changes', async () => {
-    await page.evaluate(() => { window.m104.reopen = () => window.m104.hold(); window.m104.rerender(); });
-    await paint();
-    await runId().fill('captured-read');
-    await reopenButton().click();
-    await announced('Reopening the requested run. No provider call was attempted.');
-    await runId().fill('changed-read');
-    await page.evaluate(() => { window.m104.reopen = () => { window.m104.reads++; throw Error('replacement'); }; window.m104.rerender(); });
-    await paint();
-    await page.evaluate(record => window.m104.resolve({ ok: true, run: record, interrupted: false }), richRun('captured-read', 'groq'));
-    await visible('captured-read');
-    assert.equal(await page.evaluate(() => window.m104.reads), 0);
-    assert.equal(await calls(), 1);
-  });
-
-  for (const stage of ['analyze', 'reopen'] as const) it(`uses fixed request-failed copy for ${stage} throws/rejections and releases ownership`, async () => {
+  it('uses fixed request-failed copy for Analyze throws/rejections and releases ownership', async () => {
     await keepComplete();
     for (const synchronous of [true, false]) {
-      await page.evaluate(({ stage, synchronous }) => {
-        window.m104[stage] = () => {
+      await page.evaluate(synchronous => {
+        window.m104.analyze = () => {
           const error = Object.defineProperty({}, 'message', { get() { window.m104.reads++; return 'PRIVATE'; } });
           if (synchronous) throw error;
           return Promise.reject(error);
         };
         window.m104.rerender();
-      }, { stage, synchronous });
+      }, synchronous);
       await paint();
-      if (stage === 'analyze') await analyzeButton().click(); else { await runId().fill('throws'); await reopenButton().click(); }
-      await rejected(stage === 'analyze' ? 'Analyze' : 'Reopen', 'request-failed');
+      await analyzeButton().click();
+      await rejected('request-failed');
       await retained();
       assert.equal(await page.evaluate(() => window.m104.reads), 0);
       assert.ok(!(await page.locator('body').innerText()).includes('PRIVATE'));
       assert.equal(await analyzeButton().isEnabled(), true);
-      assert.equal(await reopenButton().isEnabled(), true);
     }
   });
 
@@ -714,7 +500,7 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
     await analyzeButton().click();
     await page.evaluate(record => {
       const late = window.m104.resolve;
-      window.m104.mount(false, false);
+      window.m104.mount(false);
       late({ ok: true, run: record });
     }, richRun('late-stale'));
     await paint();
@@ -741,6 +527,7 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
   it('projects every run/context/coverage field and all three rule details without merging duplicate locators', async () => {
     const record = await openComplete();
     await visible(copy.results);
+    assert.equal(await page.getByText(copy.target, { exact: true }).count(), 2, 'The exact target notice appears at entry and completed results');
     const body = await page.getByRole('main').innerText();
     assert.match(body, /(?:4\s+Findings|Findings\s*:?\s*4)/i);
     assert.match(body, /(?:3\s+(?:scanner.review\s+)?observations|observations\s*:?\s*3)/i);
@@ -821,7 +608,7 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
       const detail = await select(id);
       for (const value of expected) assert.ok((await detail.innerText()).includes(value));
     }
-    await reopen(runningRun('unobserved'));
+    await analyze({ ok: false, error: 'scan-failed', run: failedRun('unobserved'), persisted: true, cleanupFailed: false });
     const text = await page.getByRole('main').innerText();
     assert.match(text, /final\s*url[\s\S]*missing/i);
     assert.match(text, /scanned\s*at[\s\S]*missing/i);
@@ -840,7 +627,7 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
     const malformed = structuredClone(record) as any;
     malformed.scan.coverage.label = { violations: null, incomplete: null, passes: null, inapplicable: null };
     await analyze({ ok: true, run: malformed });
-    await rejected('Analyze');
+    await rejected();
     assert.equal(await page.getByText('Completed scan: 0 Findings.', { exact: true }).count(), 0);
     await analyze({ ok: false, error: 'scan-failed', run: failedRun(`failed-${kind}`), persisted: true, cleanupFailed: false });
     assert.equal(await page.getByText('Completed scan: 0 Findings.', { exact: true }).count(), 0);
@@ -890,25 +677,6 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
     assert.equal(await page.getByRole('button', { pressed: true }).count(), 0);
   });
 
-  it('keeps focus in outgoing detail for invalid, failed, interrupted and same-ID reads', async () => {
-    const record = await openComplete();
-    for (const result of [
-      { ok: true, run: record, interrupted: false }, { ok: false, error: 'not-found' },
-      { ok: true, run: failedRun('focus-failed'), interrupted: false },
-      { ok: true, run: runningRun('focus-running'), interrupted: true }, { bad: true },
-    ]) {
-      await page.evaluate(() => { window.m104.reopen = () => window.m104.hold(); window.m104.rerender(); });
-      await paint();
-      await runId().fill('run' in result ? result.run!.runId : 'focus-missing');
-      await reopenButton().click();
-      await select();
-      await page.evaluate(() => { window.m104.savedNode = document.activeElement; });
-      await page.evaluate(result => window.m104.resolve(result), result);
-      await paint();
-      assert.ok(await page.evaluate(() => document.activeElement === window.m104.savedNode));
-    }
-  });
-
   it('renders adversarial accepted strings inertly without hrefs, selectors, HTML, images or executable previews', async () => {
     const run = structuredClone(richRun('inert-text')) as any;
     const markup = '<img src="https://canary.invalid/x" onerror="window.m104.canary++"><script>window.m104.canary++</script>';
@@ -922,7 +690,7 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
     assert.equal(await page.locator('img, iframe, object, embed, a[href*="canary.invalid"], [onerror]').count(), 0);
     assert.equal(await page.locator('a[href]').count(), 0, 'Recorded target URLs and locators must remain text');
     await analyze({ ok: true, run: { ...run, scan: { ...run.scan, context: { ...run.scan.context, locale: markup } } } }, 'local', canary);
-    await rejected('Analyze');
+    await rejected();
     assert.equal(await page.locator('img, iframe, [onerror]').count(), 0);
     assert.equal(await page.evaluate(() => window.m104.canary), 0);
   });
@@ -932,7 +700,6 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
     await select('finding-contrast');
     const desktop = await new AxeBuilder({ page }).analyze();
     assert.deepEqual(desktop.violations.map(({ id, nodes }) => ({ id, nodes: nodes.length })), []);
-    await harness.screenshot('desktop-results.png');
     await page.setViewportSize({ width: 320, height: 800 });
     await paint();
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1), '320 CSS pixels must not require horizontal document scrolling');
@@ -942,6 +709,5 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
     assert.ok((await selected.innerText()).includes('4.478089453577214'), 'Native measurement is not rounded');
     const narrow = await new AxeBuilder({ page }).analyze();
     assert.deepEqual(narrow.violations.map(({ id, nodes }) => ({ id, nodes: nodes.length })), []);
-    await harness.screenshot('narrow-detail.png');
   });
 });

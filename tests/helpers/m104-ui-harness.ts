@@ -16,11 +16,10 @@ import type { AnalyzeIntent, AppProps } from '../../src/client/App.tsx';
 export type Intent = AnalyzeIntent;
 export type ClientCollaborators = AppProps;
 export interface Bridge {
-  calls: { stage: 'analyze' | 'reopen'; value: Intent | string; callback: number }[];
+  calls: { stage: 'analyze'; value: Intent; callback: number }[];
   analyze: (intent: Intent) => unknown;
-  reopen: (id: string) => unknown;
-  mount: (analyze?: boolean, reopen?: boolean) => void;
-  rerender: (analyze?: boolean, reopen?: boolean) => void;
+  mount: (analyze?: boolean) => void;
+  rerender: (analyze?: boolean) => void;
   unmount: () => void;
   settle: () => Promise<void>;
   resolve: (value: unknown) => void;
@@ -36,7 +35,6 @@ declare global { interface Window { m104: Bridge } }
 
 export const repo = path.resolve(fileURLToPath(new URL('../../', import.meta.url)));
 const scratch = path.join(repo, 'temp/m104-ui');
-const evidence = path.join(repo, 'logs/m104-ui-evidence');
 const runtime = path.join(repo, 'm104-browser-runtime');
 const generated = ['m104-test-entry.html', 'm104-test-entry.tsx', 'vite-cache'];
 export const targetUrl = 'https://example.org/start?view=summary#intro';
@@ -137,7 +135,6 @@ const pending = new Set();
 const bridge = window.m104 = {
   calls: [], reads: 0, canary: 0, raw: null, savedNode: null, oldNode: null,
   analyze: () => Promise.resolve({ok:false,error:'create-failed',run:null,persisted:false,cleanupFailed:false}),
-  reopen: () => Promise.resolve({ok:false,error:'not-found'}),
   resolve: () => {}, reject: () => {},
   hold() { return new Promise((resolve,reject) => {
     const release = () => pending.delete(cancel);
@@ -147,28 +144,23 @@ const bridge = window.m104 = {
     bridge.reject = value => { release(); reject(value); };
   }); },
   async settle() { for (const cancel of [...pending]) cancel(); await Promise.resolve(); },
-  rerender(analyze = true, reopen = true) {
+  rerender(analyze = true) {
     const callback = ++version;
     const analyzeHandler = bridge.analyze;
-    const reopenHandler = bridge.reopen;
     const props = {};
     if (analyze) props.analyze = intent => {
       bridge.calls.push({stage:'analyze',value:structuredClone(intent),callback});
       return analyzeHandler(intent);
     };
-    if (reopen) props.reopen = id => {
-      bridge.calls.push({stage:'reopen',value:id,callback});
-      return reopenHandler(id);
-    };
     root.render(<App {...props}/>);
   },
-  mount(analyze = true, reopen = true) {
+  mount(analyze = true) {
     root.unmount(); root = createRoot(document.getElementById('root'));
-    bridge.calls = []; bridge.rerender(analyze,reopen);
+    bridge.calls = []; bridge.rerender(analyze);
   },
   unmount() { root.unmount(); },
 };
-bridge.rerender(false,false);
+bridge.rerender(false);
 `;
 }
 
@@ -176,7 +168,6 @@ export interface Harness {
   page: Page;
   context: BrowserContext;
   origin: string;
-  screenshot: (name: 'desktop-results.png' | 'narrow-detail.png') => Promise<void>;
   close: () => Promise<void>;
 }
 
@@ -219,7 +210,6 @@ export async function startHarness(manual = false): Promise<Harness> {
   let port: number | undefined;
   let origin = '';
   let closed = false;
-  let ownsEvidence = false;
   let ready = false;
   const requests: { path: string; status: number }[] = [];
   const external: string[] = [];
@@ -313,20 +303,7 @@ export async function startHarness(manual = false): Promise<Harness> {
     const hashes = Object.fromEntries(['src/client/App.tsx', 'src/client/RunResults.tsx', 'src/client/styles.css', 'tests/target-results-ui.test.ts', 'tests/helpers/m104-ui-harness.ts']
       .map(file => [file, crypto.createHash('sha256').update(fs.readFileSync(path.join(repo, file))).digest('hex')]));
     console.log(JSON.stringify({ event: 'm104-ui-ready', browser: browser.version(), origin, hashes, synthetic: true }));
-    return { page, context, origin, close, async screenshot(name) {
-      if (!ownsEvidence) {
-        ordinary(evidence);
-        // A later invocation requires primary reconciliation with the last owned
-        // evidence inventory before the command starts; the helper cannot grant it.
-        if (!fs.existsSync(evidence)) fs.mkdirSync(evidence);
-        assert.ok(fs.readdirSync(evidence).every(file => ['desktop-results.png', 'narrow-detail.png', 'zoom-menu-200.png'].includes(file)), 'Preserve unexpected evidence');
-        tree(evidence);
-        ownsEvidence = true;
-      }
-      ordinary(evidence);
-      ordinary(path.join(evidence, name), false);
-      await page!.screenshot({ path: path.join(evidence, name), fullPage: true });
-    } };
+    return { page, context, origin, close };
   } catch (error) {
     try { await close(); } catch (cleanup) { throw new AggregateError([error, cleanup], 'UI setup and cleanup failed'); }
     throw error;
@@ -338,13 +315,9 @@ async function manual(): Promise<void> {
   const template = richRun('m104-manual-01');
   try {
     await harness.page.evaluate(template => {
-      let retained: unknown;
       window.m104.analyze = intent => new Promise(resolve => setTimeout(() => {
-        retained = { ...structuredClone(template), requestedUrl: intent.requestedUrl, providerContext: structuredClone(intent.providerContext) };
-        resolve({ ok: true, run: retained });
+        resolve({ ok: true, run: { ...structuredClone(template), requestedUrl: intent.requestedUrl, providerContext: structuredClone(intent.providerContext) } });
       }, 1500));
-      window.m104.reopen = id => new Promise(resolve => setTimeout(() => resolve(id === 'm104-manual-01' && retained
-        ? { ok: true, run: retained, interrupted: false } : { ok: false, error: 'not-found' }), 1500));
       window.m104.mount();
     }, template);
     console.log('Synthetic manual input: actual App, run m104-manual-01, 1500 ms collaborators. Observe Narrator and actual browser-menu zoom; close this page or press Ctrl+C to finish.');

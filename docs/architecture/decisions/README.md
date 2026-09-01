@@ -39,6 +39,8 @@ ADR-0020 narrows ADR-0005, ADR-0006, ADR-0014, and ADR-0015 only for MVP setup a
 
 ADR-0023 supersedes only ADR-0005's requirement to disable or isolate unrelated runtime networking and its system-wide zero-egress release gate, plus ADR-0012's requirement that all Local-mode operations show no unapproved non-loopback egress and its description of Groq as the only external operation. ADR-0005 and ADR-0012 otherwise remain current. Groq remains the only external generation path; trusted-page navigation and developer-managed model acquisition are separate network operations.
 
+OD-026 narrows ADR-0012 and ADR-0021 only for portfolio-MVP navigation: manual Run ID entry, reload restoration, deep-link loading, and recent-run history are Deferred. The local service and single `run.json` remain the durable authority, and validated aggregate reads still support safe downstream updates and comparison. Neither amendment restores browser storage as authority or changes the persistence mechanism.
+
 ADR-0018 replaces ADR-0017's amendments to ADR-0001, ADR-0005, ADR-0006, ADR-0008, ADR-0009, ADR-0010, and ADRs 0013 through 0016 wherever those amendments imposed the former hostile-network boundary. The current runtime boundary is one trusted, operator-entered and authorized public HTTPS page; the three synthetic profiles remain the separate fixed evaluation baseline.
 
 ## Superseded decision history

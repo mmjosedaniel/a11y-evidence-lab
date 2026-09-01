@@ -36,7 +36,7 @@ Use one responsive application shell. On wider layouts, the complete results lis
 | Human decision | The original AI proposal, confidence and uncertainty, assumptions, blocking pre-acceptance judgment, non-blocking post-change reminder, support confirmation, and one approve, edit-and-accept, or reject path. Reviewer-authored content and the final decision remain distinct from the proposal. | Only for a validated proposal |
 | Comparison | Baseline and later references, pair comparability, target-match disposition when applicable, before/after deterministic evidence, outcome, rationale, limitations, and follow-up checks. Proposal or review information may appear only as context. | After an intentional later scan and comparison |
 
-A retained run may be reopened through the smallest route owned by the applicable implementation task. A run-history dashboard, project browser, or generalized work queue is not required.
+Retained-run navigation is Deferred until after the portfolio MVP through `REQ-UX-014` and OD-026. The MVP provides no manual Run ID field, reload restoration, deep-link loading, run-history dashboard, project browser, or generalized work queue. Durable service-owned evidence remains available to later selected-Finding and comparison work.
 
 ## Evidence-layer presentation
 

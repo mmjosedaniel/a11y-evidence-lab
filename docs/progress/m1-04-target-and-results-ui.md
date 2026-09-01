@@ -6,7 +6,26 @@
 - **Roadmap task:** [M1-04](../DEVELOPMENT_ROADMAP.md#m1-04--present-accessible-target-entry-and-complete-results)
 - **Mirrored roadmap status:** Complete
 - **ExecPlan:** [Target and results UI](../plans/completed/m1-04-target-and-results-ui.md)
-- **Last updated:** 2026-08-31
+- **Last updated:** 2026-09-01
+
+## 2026-09-01 — OD-026 UI simplification preflight
+
+- **Project outcome:** M1-04 is active only to remove browser-facing reopen controls and apply the accepted one-heading, shorter-notice and validation-only mode-error contract. Durable aggregates, validated internal reads and result provenance remain in scope.
+- **Agent-workflow outcome:** The read-only test preflight classified the amended contract `MISSING`. The current UI and 40-case suite still expose the superseded headings, long notice, initial helper and manual Run ID/Reopen path. The bounded Red will own only the UI test and harness; separate frontend Green will own only the four named client files.
+- **Evidence:** The active [M1-04 ExecPlan](../plans/completed/m1-04-target-and-results-ui.md#od-026-and-visible-ui-simplification-amendment--m104-ui-simplification-02) records the exact visible contract, ownership and preserved Analyze/result coverage.
+- **Next boundary:** Reacquire the previously accepted task-local pinned Chromium as an isolated prerequisite, then run guarded Red and separate Green. M1-05, commit and push remain unauthorized.
+
+The isolated browser acquisition then matched the exact earlier runtime, but the disposable transport probe stopped before browser launch on a transient port-5173 conflict; the listener was absent again at final inspection. An empty pre-existing `node_modules/.vite-temp` cache also remains outside that setup lease. No tracked file changed, the acquired runtime is preserved exactly, and the setup lease closed compliant. A bounded cache recovery and the sole same-contract probe correction now precede Red.
+
+The cache recovery passed, but the sole setup correction reproduced the same Vite listen failure despite zero listeners immediately before and after. Both setup leases closed compliant with the exact runtime and empty scratch preserved. The automatic correction is exhausted; a read-only coordinator diagnosis of the frozen port behavior is required before the test Red can start.
+
+The diagnosis found the old repository Vite process still listening on port 5173 even though its browser window had been closed; the earlier PowerShell listener query had missed it. Under the owner's prior close-app direction, primary stopped only that process and confirmed the port is free. One bounded unchanged-probe resume now verifies transport without another download; another failure requires fresh owner direction.
+
+The unchanged probe passed after that process recovery. Independent Red then reduced the UI boundary from 40 to 29 Analyze-only cases without dropping applicable results, security, focus, axe or responsive coverage. The focused run executed all 29 cases: 23 passed and six failed only on current reopen/long-copy text; transport and teardown were clean. Separate frontend Green now runs those tests unchanged.
+
+The first frontend turn authored the intended four-file candidate but stopped before validation because a direct Chromium version diagnostic created one 289-byte runtime `debug.log`. The tracked lease closed compliant; Green is unaccepted. Exact generated-runtime recovery and one same-contract frontend validation attempt are now required.
+
+Exact runtime recovery removed only that fingerprinted log. The same-contract Green then passed all 29 unchanged UI tests, strict typechecking and production build after one bounded type-narrowing correction in Analyze admission. The final source is Analyze-only across App, controls and admission; CSS removes only reopen-form rules, while `RunResults` and backend persistence/read behavior remain unchanged. Full regression, visible/accessibility evidence, reviews, cleanup and renewed closure remain.
 
 ## 2026-08-31 — Current-state review and planning activation
 
@@ -145,3 +164,129 @@ The owner replied `go ahead` directly to that exact approval request. M1-04 retu
 - **Agent-workflow outcome:** The owner-approved cleanup matched every frozen runtime, screenshot and build identity, deleted only the six named generated roots, and closed under a fresh compliant lease. Primary independently verified all six roots absent, seven protected hashes unchanged and no port-5173 listener, then completed the documentation closure gate and archived the ExecPlan. A fresh independent closure review's sole stale-summary Minor was corrected; the same reviewer returned `PASS`.
 - **Evidence:** [Final cleanup and closure](../plans/completed/m1-04-target-and-results-ui.md#m104-final-cleanup-04--owner-approved-cleanup-accepted) records the exact pre-delete inventory, lease and receipt, post-delete checks, protected identities and documentation impact.
 - **Next boundary:** None selected. M1-05 remains Not started. No coordinator commit or push was authorized or performed.
+
+## 2026-08-31 — Reopened for component-boundary refactor
+
+- **Project outcome:** The owner explicitly reopened only M1-04 to divide `App.tsx` into focused components without changing accepted behavior. M1-05 remains Not started and unselected.
+- **Agent-workflow outcome:** Primary reconfirmed dependency and authority readiness, selected one frontend-visual work slice, and accepted `EXTRACT_LOCAL` dispositions for the target/reopen forms and pure run-admission logic. The earlier completion entry remains historical; fresh source identity requires characterization, guarded implementation, regression, review, cleanup and closure.
+- **Evidence:** The clean baseline is HEAD `872feaa7f72e50bde823d1c3bfa059477a2a8e52`. Existing public interfaces, DOM/ARIA/copy/CSS behavior, 39-case UI contract and 290-test backend/scanner contract are frozen as the preservation boundary.
+- **Next boundary:** Complete read-only test preflight, guarded frontend Green/Refactor, task-level verification and independent review. No commit, push or M1-05 work is authorized.
+
+## 2026-08-31 — Refactor characterization and browser setup accepted
+
+- **Project outcome:** Existing behavior is fully characterized by the unchanged 39-case UI contract. Exact task-local Chromium and generic TSX transport are ready for the source-only refactor.
+- **Agent-workflow outcome:** The independent test worker returned `EXISTING_AND_COVERED`. A separate guarded setup worker acquired the pinned runtime and passed its probe. Primary closed the setup lease compliant, restored the runtime ignore rule and completed the permission-blocked process/listener checks through accessible read-only APIs.
+- **Evidence:** [M104-REFACTOR-PREFLIGHT-001](../plans/completed/m1-04-target-and-results-ui.md#m104-refactor-preflight-001--characterization-and-browser-setup-accepted) records the source/test fingerprints, test-to-contract map, runtime digest, browser/probe result and receipt.
+- **Next boundary:** One guarded frontend Green/Refactor may change only `App.tsx`, `RunControls.tsx` and `run-admission.ts`; tests and all other product surfaces remain protected.
+
+## 2026-08-31 — Dependency incident recovered; Green validation pending
+
+- **Project outcome:** The intended three-file extraction is present but not yet accepted. Its first validation was invalid because the frontend worker invoked pnpm; focused browser and build evidence remain pending.
+- **Agent-workflow outcome:** Primary closed the source lease violated for the sole unleased `pnpm-lock.yaml`, preserved the bounded source diff, and assigned a separate generated-environment recovery. That recovery restored the exact npm tree under a fresh compliant lease without changing source, tests, packages, runtime or documentation.
+- **Evidence:** [M104-REFACTOR-RECOVERY-001](../plans/completed/m1-04-target-and-results-ui.md#m104-refactor-recovery-001--first-green-stopped-and-npm-state-restored) records the violated receipt, source identities, frozen npm restore, strict typecheck, runtime preservation and compliant recovery receipt.
+- **Next boundary:** The same frontend role may use its one same-contract correction only to run the exact focused UI, strict typecheck and build commands, then report structural cohesion. Any further command or contract failure stops the slice.
+
+## 2026-08-31 — Component extraction and full regression accepted
+
+- **Project outcome:** `App.tsx` now delegates the two forms to `RunControls.tsx` and pure response admission to `run-admission.ts`. Public types, rendered behavior, accessibility semantics, copy and CSS remain unchanged.
+- **Agent-workflow outcome:** The same frontend role's sole correction made no further source edit and passed 39 UI tests, strict typechecking and the production build under a fresh compliant lease. Primary then ran the complete sequential 290 plus 39 regression, final typecheck and build and verified protected identities, empty scratch and settled browser ownership.
+- **Evidence:** [M104-REFACTOR-GREEN-001](../plans/completed/m1-04-target-and-results-ui.md#m104-refactor-green-001--component-extraction-and-full-regression-accepted) records the three source identities, compliant receipt, 329-test result, build/runtime inventories and cohesion disposition `REFACTORED`.
+- **Next boundary:** Fresh S3 slice review and a different integrated review, followed by exact generated-output cleanup and documentation closure. M1-05, commit and push remain unauthorized.
+
+## 2026-08-31 — Synchronous reentry correction selected
+
+- **Project outcome:** Fresh S3 review found one extraction regression: a render-lagging child `busy` prop can let an invalid second form announce its validation error during same-turn collaborator reentry, instead of the App-owned busy explanation.
+- **Agent-workflow outcome:** Primary accepted the finding, corrected the reviewer's malformed evidence-hash Minor and invalidated the prior regression as final acceptance evidence. One independent test Red and one separate frontend Green are selected with exact paths and no automatic correction.
+- **Evidence:** [M104-REFACTOR-REVIEW-001](../plans/completed/m1-04-target-and-results-ui.md#m104-refactor-review-001--synchronous-reentry-correction-selected) records the path, missed test boundary and correction contract.
+- **Next boundary:** Add the default-empty Reopen reentry regression under test ownership, then restore the App-owned synchronous reservation check before child validation under a separate frontend lease. M1-04 remains In progress.
+
+## 2026-08-31 — Reentry regression reproduced
+
+- **Project outcome:** The new 40th UI case reproduces the exact extraction defect: default-empty Reopen validation overrides the App busy explanation during synchronous Analyze collaborator reentry.
+- **Agent-workflow outcome:** The test worker changed only the UI test under a fresh compliant lease. Syntax and transport passed; 39 existing cases passed and only the new atomic expected-versus-actual assertion failed. Primary inspected and accepted the Red.
+- **Evidence:** [M104-REFACTOR-RED-001](../plans/completed/m1-04-target-and-results-ui.md#m104-refactor-red-001--default-empty-reopen-reentry-reproduced) records the test hash, decisive failure, browser boundary and receipt.
+- **Next boundary:** A separate frontend worker may change only App and RunControls so the synchronous App reservation is consulted before child validation; the accepted 40-case test must remain unchanged.
+
+## 2026-09-01 — Reentry correction and full regression accepted
+
+- **Project outcome:** App again owns the synchronous reservation decision before either extracted form validates, while retaining the second guard before collaborator invocation. The final UI boundary is 40 cases; rendered semantics, copy and CSS are unchanged.
+- **Agent-workflow outcome:** A separate frontend worker changed only App and RunControls under a fresh compliant lease. Focused Green passed 40 UI tests, typecheck and build. Primary then passed the complete sequential 290 plus 40 regression, final typecheck/build and exact runtime/output/teardown checks.
+- **Evidence:** [M104-REFACTOR-CORRECTION-GREEN-001](../plans/completed/m1-04-target-and-results-ui.md#m104-refactor-correction-green-001--app-owned-reservation-restored) records the current source/test identities, compliant receipt, controlling 330-test result, build/runtime inventories and automated review samples.
+- **Next boundary:** Fresh complete S3 review, then a different integrated review, exact generated-output cleanup and documentation closure. M1-05, commit and push remain unauthorized.
+
+## 2026-09-01 — Corrected component boundary passed S3 review
+
+- **Project outcome:** Fresh complete S3 review found no remaining implementation or test defect. The extracted forms now preserve App-owned synchronous operation semantics, and the pure admission boundary remains faithful.
+- **Agent-workflow outcome:** A new critical reviewer independently inspected the actual worktree after resume and returned `PASS` with no findings. It supported the `REFACTORED` cohesion disposition and reuse of existing Narrator/200% evidence because rendered semantics, focus rules and CSS are unchanged.
+- **Evidence:** [M104-REFACTOR-S3-002](../plans/completed/m1-04-target-and-results-ui.md#m104-refactor-s3-002--corrected-component-boundary-passed) records the complete checklist, current identity comparison and review conclusion.
+- **Next boundary:** Different fresh integrated review, then exact generated-output cleanup and documentation closure. M1-05, commit and push remain unauthorized.
+
+## 2026-09-01 — Different integrated review passed
+
+- **Project outcome:** The complete component refactor, correction, 330-test evidence and unchanged rendered contract passed a different fresh integrated review with no findings.
+- **Agent-workflow outcome:** The independent reviewer matched the actual source/test/artifact identities and accepted the TDD, lease and recovery lineage. It confirmed that only the six named generated roots remain before closure.
+- **Evidence:** [M104-REFACTOR-INTEGRATED-001](../plans/completed/m1-04-target-and-results-ui.md#m104-refactor-integrated-001--different-integrated-review-passed) records the verdict and exact cleanup boundary.
+- **Next boundary:** Delete only the six verified task-owned roots, prove absence and protected identities, then reconcile status and archive the ExecPlan. M1-05, commit and push remain unauthorized.
+
+## 2026-09-01 — Cleanup stopped before deletion
+
+- **Project outcome:** All acceptance evidence remains valid and all six generated roots remain intact. The first cleanup preflight stopped because it used the correct Chrome hash with an incorrect zero-byte expected length.
+- **Agent-workflow outcome:** No deletion or other change occurred. Primary closed the cleanup lease fresh and compliant. One same-contract correction is limited to the verified 4,024,832-byte executable length and must repeat the complete preflight.
+- **Evidence:** [M104-REFACTOR-CLEANUP-ATTEMPT-1](../plans/completed/m1-04-target-and-results-ui.md#m104-refactor-cleanup-attempt-1--stopped-before-deletion) records the matched runtime inventory, failure point and no-change receipt.
+- **Next boundary:** Run the single corrected exact cleanup attempt, then finish absence and documentation closure checks.
+
+## 2026-09-01 — Cleanup correction also stopped before deletion
+
+- **Project outcome:** The component refactor remains fully verified, but all six generated roots remain present. The sole cleanup correction stopped before deletion because the worker mistyped the supplied zero-byte marker hash.
+- **Agent-workflow outcome:** Runtime count, digest and corrected Chromium identity passed first; no other path changed. Primary closed the second cleanup lease fresh and compliant with receipt `62035e550638c69a1b95a2e957c20c21a40d11c6afa8cb501675a18e35e6e3ec` and restored the runtime ignore rule. The workflow's two-no-diff stop prevents another automatic cleanup assignment.
+- **Evidence:** [M104-REFACTOR-CLEANUP-ATTEMPT-2](../plans/completed/m1-04-target-and-results-ui.md#m104-refactor-cleanup-attempt-2--second-no-change-stop) records the failure and exact retained identities.
+- **Next boundary:** Owner direction is required before another cleanup attempt. M1-04 is Blocked only on cleanup and documentation closure; M1-05, commit and push remain unauthorized.
+
+## 2026-09-01 — Owner resumed exact cleanup
+
+- **Project outcome:** The owner said `continue` after the safe stop, providing the required direction for one additional cleanup attempt. The earlier explicit authorization to delete only the same six generated roots remains in force. M1-04 returns to In progress; its verified application and test evidence is unchanged.
+- **Agent-workflow outcome:** The new cleanup assignment must use a fresh work slice and lease, repeat containment, ordinary-topology, runtime identity, process, listener, evidence and build checks, and stop before deletion on any mismatch. It may delete only `m104-browser-runtime`, `temp/m104-setup`, `temp/m104-ui`, `temp/m103-scan`, `logs/m104-ui-evidence` and `dist/client`.
+- **Evidence:** [M104-REFACTOR-CLEANUP-RESUME-001](../plans/completed/m1-04-target-and-results-ui.md#m104-refactor-cleanup-resume-001--owner-directed-additional-attempt) records the resumed authority and bounded assignment.
+- **Next boundary:** Complete the fresh guarded cleanup, independent absence checks and documentation closure. M1-05, commit and push remain unauthorized.
+
+## 2026-09-01 — Component refactor and renewed closure complete
+
+- **Project outcome:** M1-04 is Complete. The component extraction and synchronous-reservation correction pass the controlling 290 existing plus 40 UI tests, strict typechecking, build, fresh S3 review and different integrated review. Existing human Narrator and real browser-menu 200% evidence remains applicable because the rendered contract and CSS did not change.
+- **Agent-workflow outcome:** Fresh cleanup preflight matched the exact runtime, Chromium, marker, two screenshots and four-entry build inventories; it found three empty scratch roots and no owned process or port-5173 listener. The worker deleted only the six authorized generated roots. Primary closed lease `M1-04-20260901-02-component-cleanup-03` fresh and compliant with receipt `e003669662f06b949a1a39f3d88b187cf2eaa48b82ac79e630faa810f0b54c68`, restored the runtime ignore rule, and independently verified all six roots absent, no process/listener/residue and unchanged protected identities. The assignment packet's 63-character RunResults postcheck literal was corrected against the controlling plan and actual 64-character hash; it did not affect deletion or the compliant guard result.
+- **Evidence:** [M104-REFACTOR-CLEANUP-ACCEPTED-001](../plans/completed/m1-04-target-and-results-ui.md#m104-refactor-cleanup-accepted-001--exact-cleanup-and-absence-verified) records cleanup, the packet-literal correction and independent verification. The same archived plan preserves all earlier stops and the controlling implementation evidence.
+- **Next boundary:** No task is selected. M1-05 remains Not started and requires a separate exact-task request. No commit or push is authorized.
+
+## 2026-09-01 — MVP reopen control and redundant setup copy selected for removal
+
+- **Project outcome:** The owner accepted OD-026, deferring user-facing retained-run reopening until after the portfolio MVP while preserving durable aggregate storage and validated service reads. The same M1-04 revision will use one `Analyze a page` heading, shorten the required trusted-target notice, hide the mode-selection error until validation fails, and remove the manual Run ID/Reopen interface.
+- **Agent-workflow outcome:** M1-04 returned to In progress and its archived plan returned to the active plans directory. Earlier component-refactor evidence and manual accessibility observations remain history; the changed rendered contract requires a new independent Red/Green, review, browser evidence and closure path.
+- **Evidence:** [OD-026](../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-026--defer-user-facing-retained-run-reopening), [`REQ-UX-014`](../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#evidence-oriented-interface-and-export), and the active [M1-04 plan](../plans/completed/m1-04-target-and-results-ui.md).
+- **Next boundary:** Complete the guarded test/frontend slice, proportional browser/accessibility evidence, independent reviews, cleanup and renewed documentation closure. M1-05, a post-MVP reopen design, commit and push remain unauthorized.
+
+## 2026-09-01 — Simplified Analyze interface passes full regression
+
+- **Project outcome:** The main interface now has one `Analyze a page` heading, the shorter public-HTTPS notice, validation-only mode error text and no user-facing Run ID/Reopen controls. Run IDs remain visible in completed result provenance, and durable backend reads remain unchanged.
+- **Agent-workflow outcome:** Independent Red and separate frontend Green closed under compliant leases with cohesion `REFACTORED`. After one coordinator environment-wrapper error and exact generated-scratch recovery, the corrected complete barrier passed 290 existing plus 29 UI tests, strict typechecking and the production build. The UI browser run reported 14 owned HTTP 200 responses, no external requests or page errors, and settled teardown; scratch/runtime/output identities passed.
+- **Evidence:** [M104-UI-SIMPLIFICATION-02-FULL-001](../plans/completed/m1-04-target-and-results-ui.md#m104-ui-simplification-02-full-001--full-regression-accepted) records the source/test/build/runtime identities, regression counts, recovery lease and automated accessibility/reflow coverage.
+- **Next boundary:** Fresh critical review, real-browser 100%/200% evidence, the short changed-entry Narrator observation, different integrated review, exact cleanup and renewed documentation closure. M1-05, commit and push remain unauthorized.
+
+## 2026-09-01 — Simplified Analyze interface passes critical review
+
+- **Project outcome:** Fresh S3 review found no application or test defect in the Analyze-only amendment and independently supported cohesion `REFACTORED`.
+- **Agent-workflow outcome:** The read-only critical reviewer matched source, test and build identities; inspected reservation/admission integrity, accessibility relationships, pending provider identity, untrusted text and removal of client reopen behavior; and returned `PASS` with no Blocker, Major or Minor finding. Default 1280×720 and proportional 640×360 in-app browser inspection also showed one heading, exact copy and no horizontal overflow; the viewport override was reset and the temporary server closed.
+- **Evidence:** [S3 and proportional browser inspection](../plans/completed/m1-04-target-and-results-ui.md#m104-ui-simplification-02-s3-001--critical-implementation-review-passed) records the review and [default/half-width evidence](../plans/completed/m1-04-target-and-results-ui.md#m104-ui-simplification-02-visual-001--default-and-proportional-browser-inspection) without misclassifying viewport resizing as browser zoom.
+- **Next boundary:** Actual browser-menu 200% observation and the short changed-entry Narrator path, then different integrated review, exact cleanup and documentation closure. M1-05, commit and push remain unauthorized.
+
+## 2026-09-01 — Changed entry passes Narrator and actual 200% zoom
+
+- **Project outcome:** The owner confirmed that Narrator spoke the new page heading, the validation-only mode error, and both Analyze start and completion. An actual Chrome-menu 200% capture shows the simplified form and selected Local disclosure reflowing without horizontal scrolling.
+- **Agent-workflow outcome:** The human evidence used the controlled synthetic harness and exact accepted identities. Ctrl+C ended the helper without its settled-teardown record and left only expected generated UI transport; independent readback found no owned process or port-5173 listener. The retained scratch is explicitly inside final cleanup and does not change application evidence.
+- **Evidence:** [M104-UI-SIMPLIFICATION-02-MANUAL-001](../plans/completed/m1-04-target-and-results-ui.md#m104-ui-simplification-02-manual-001--changed-entry-narrator-and-actual-200-zoom-passed) records the heard observations, capture identity, visible 200% state and exact teardown limitation.
+- **Next boundary:** Different integrated review, deletion of only the six authorized generated roots, absence checks and renewed documentation closure. M1-05, commit and push remain unauthorized.
+
+## 2026-09-01 — Analyze-only amendment and renewed closure complete
+
+- **Project outcome:** M1-04 is Complete. The MVP entry now presents one `Analyze a page` heading, the shortened public-HTTPS notice, a validation-only mode error and no browser-facing Run ID/Reopen controls. Completed results still show their run provenance, while durable storage and validated internal reads remain intact for downstream work.
+- **Agent-workflow outcome:** The different integrated reviewer found no application or test defect and passed the corrected 1608×1099 screenshot evidence. Exact guarded cleanup then removed only the five present authorized roots; the sixth evidence-log root was already absent. Primary closed the lease compliant, proved all six roots absent, reconciled every current-status authority and archived the ExecPlan.
+- **Evidence:** The controlling barrier passed 290 existing plus 29 UI tests, strict typechecking and the production build. Fresh S3, actual Chrome-menu 200% reflow and the owner-confirmed Narrator heading, validation, Analyze-start and completion observations passed. [Integrated review](../plans/completed/m1-04-target-and-results-ui.md#m104-ui-simplification-02-integrated-001--different-integrated-review-passed-after-evidence-correction), [cleanup](../plans/completed/m1-04-target-and-results-ui.md#m104-ui-simplification-02-cleanup-001--exact-cleanup-and-absence-verified) and the [renewed documentation gate](../plans/completed/m1-04-target-and-results-ui.md#m104-ui-simplification-02-closure-001--renewed-documentation-gate-passed) record the final checks.
+- **Next boundary:** No task is selected. M1-05 remains Not started and requires a separate exact-task request. No commit or push is authorized.

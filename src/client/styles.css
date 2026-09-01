@@ -36,8 +36,6 @@ button.primary:hover:not(:disabled):not([aria-disabled="true"]) { background: #0
 button:disabled, button[aria-disabled="true"] { color: #4a586d; background: #eef2f6; border-color: #68768b; cursor: default; }
 :focus { outline: 3px solid #1457c8; outline-offset: 3px; }
 [aria-invalid="true"] { border-color: #a52222; }
-.reopen-form { border-top: 1px solid #c8d1dc; margin-top: 1.5rem; padding-top: 0.25rem; }
-.reopen-form input { max-width: 30rem; }
 .notice { color: #7a4a00; background: #fff4db; border-left: 3px solid #7a4a00; padding: 0.75rem 1rem; }
 .error { color: #a52222; }
 .error p { margin-bottom: 0.5rem; }

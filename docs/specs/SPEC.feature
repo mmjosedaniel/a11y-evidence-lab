@@ -183,14 +183,15 @@ Feature: Evidence-first accessibility analysis for one trusted public page
   @SPEC-007 @BHV-07 @REQ-EVID-011 @REQ-COMP-006 @REQ-QUAL-002 @REQ-QUAL-010 @ADR-0021
   Rule: Preserve earlier local evidence
 
-    Scenario: Preserve and reopen completed evidence after downstream work
+    Scenario: Preserve completed evidence after downstream work
       Given a completed PageAnalysisRun is stored in one local "run.json" with a top-level format version
       When retrieval, generation, review, comparison, or bounded failure data is recorded
       Then the completed scan evidence and every sibling Finding's data remain unchanged
-      And the completed scan, minimized evidence, and downstream state remain available when the user reopens that PageAnalysisRun
-      And reading "run.json" validates it before presenting the stored work
+      And the completed scan, minimized evidence, and downstream state remain durable
+      And every application-owned read of "run.json" validates it before the stored work is used
       And another analysis uses an independent run identifier
       And an intentional rescan may reference the baseline run identifier
+      And the MVP exposes no manual Run ID, retained-run reopen, deep-link load, or automatic reload-restoration action
 
   @SPEC-008 @BHV-08 @REQ-EVID-004 @REQ-GEN-003 @REQ-GEN-004 @REQ-GEN-005 @REQ-GEN-006 @REQ-COMP-005 @REQ-UX-002
   Rule: Keep evidence layers and limitations understandable
