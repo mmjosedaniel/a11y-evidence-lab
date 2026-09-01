@@ -4,9 +4,11 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-- [M1-04 — Target and results UI](m1-04-target-and-results-ui.md) is Blocked only on owner direction for one final cleanup retry after two no-change worker stops. Its corrected UI passes the controlling 329-test regression, static S3 and different final integrated reviews, and accepted human browser-menu 200% zoom/reflow and Narrator checks. All retained artifacts remain intact; exact cleanup and closure remain pending. M1-05 is unselected.
+No roadmap task currently has an active ExecPlan. M1-05 remains Not started and unselected.
 
 ## Completed plans
+
+- [M1-04 — Target and results UI](completed/m1-04-target-and-results-ui.md) — **Complete** on 2026-08-31 (UTC). The corrected accessible UI, controlling 329-test regression, strict typechecking, reproducible build, static S3 and different final integrated reviews, human zoom/Narrator evidence, exact owner-approved cleanup and documentation closure passed. M1-05 remains unselected.
 
 - [M1-03 — Real scan and evidence](completed/m1-03-real-scan-and-evidence.md) — **Complete** on 2026-08-31 (UTC). Both scanner slices and their S3 reviews are accepted. All 290 integrated tests and independent strict typechecking pass, including the failed-launch residue regression. The different final integrated critical review, exact task-owned runtime cleanup and documentation closure passed. At M1-03 closure, M1-04 and M1-05 were unselected.
 
