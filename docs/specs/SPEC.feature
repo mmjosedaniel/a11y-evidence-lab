@@ -180,7 +180,7 @@ Feature: Evidence-first accessibility analysis for one trusted public page
         | the later target is missing or changed, or the rule-and-locator match is duplicate or otherwise ambiguous | inconclusive |
         | the page or scan profiles differ materially                                                       | not comparable |
 
-  @SPEC-007 @BHV-07 @REQ-EVID-011 @REQ-COMP-006 @REQ-QUAL-002 @REQ-QUAL-010 @ADR-0021
+  @SPEC-007 @BHV-07 @REQ-EVID-011 @REQ-COMP-006 @REQ-QUAL-002 @REQ-QUAL-010 @REQ-UX-014 @ADR-0021 @OD-026
   Rule: Preserve earlier local evidence
 
     Scenario: Preserve completed evidence after downstream work

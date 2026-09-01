@@ -1,7 +1,7 @@
 # UI design documentation
 
-- **Status:** Reversible design intent; M1-04 candidate implementation under verification
-- **Last reviewed:** 2026-08-31
+- **Status:** Reversible design intent; the M1-04 implemented subset is verified and later workflow regions remain planning guidance
+- **Last reviewed:** 2026-09-01
 - **Visual direction:** [Visual foundations](VISUAL_FOUNDATIONS.md)
 
 ## Document role

@@ -157,8 +157,6 @@ M5 is semantically dependent only on completed scan evidence from M1. It is sequ
 
 ## M1 — Scan-to-evidence walking skeleton
 
-**Milestone status:** Not started.
-
 **Observable milestone outcome:** A developer starts the local application, enters one supported trusted URL and one global provider mode, activates **Analyze**, and sees a complete persisted list of all Findings and distinct scanner-review observations from the exact three-rule scan—or a bounded failure that cannot be mistaken for zero findings. No retrieval or provider call occurs. User-facing retained-run reopening is Deferred through OD-026.
 
 ### M1-01 — Define the minimum run and scan contracts
@@ -231,8 +229,6 @@ M5 is semantically dependent only on completed scan evidence from M1. It is sequ
 
 ## M2 — Curated retrieval and deterministic abstention
 
-**Milestone status:** Not started.
-
 **Observable milestone outcome:** From a completed scan, the user selects one Finding, inspects its minimized evidence, retrieves inspectable versioned guidance with citations, and sees either `supported` eligibility or the correct terminal application-authored abstention. Retrieval execution/integrity failures remain failures rather than abstentions. No LLM is called.
 
 ### M2-01 — Prepare the authorized closed corpus snapshot
@@ -284,8 +280,6 @@ M5 is semantically dependent only on completed scan evidence from M1. It is sequ
 - **Out of scope:** Model quality, generated remediation, provider comparison, statistical scoring, or release qualification.
 
 ## M3 — Structured Local or Groq generation
-
-**Milestone status:** Not started.
 
 **Observable milestone outcome:** For one eligible selected Finding, the user explicitly activates **Generate** and receives one application-validated, cited structured proposal through only the run's immutable Local or Groq mode. Missing prerequisites and attempted-call failures remain visible; neither causes retry, mode change, mixing, or fallback.
 
@@ -351,8 +345,6 @@ M5 is semantically dependent only on completed scan evidence from M1. It is sequ
 
 ## M4 — Individual human remediation review
 
-**Milestone status:** Not started.
-
 **Observable milestone outcome:** A validated proposal—not an abstention—can be approved, edited and accepted, or rejected once. The original proposal, reviewer-authored content, material-support confirmation, blocking judgment disposition, post-change reminder, action, optional note, and timestamp remain distinguishable.
 
 ### M4-01 — Implement proposal-only review behavior and persistence
@@ -392,8 +384,6 @@ M5 is semantically dependent only on completed scan evidence from M1. It is sequ
 - **Out of scope:** Treating reviewer decisions as automatic ground truth, model training feedback, review analytics, or release evidence.
 
 ## M5 — Independent rescan and conservative comparison
-
-**Milestone status:** Not started.
 
 **Observable milestone outcome:** From any retained baseline Finding, the user starts one later independent scan and sees pair comparability plus a conservative per-Finding outcome and rationale. Retrieval, generation, abstention, and review are not prerequisites and do not change the calculation.
 
