@@ -173,6 +173,14 @@ The whole card is the evidence-selection button. Do not add **View evidence** or
 
 Show one concise explanation immediately below the **Findings** heading when at least one manual-review item exists: **Items tagged Needs manual review could not be determined automatically.** Do not create a second manual-review section.
 
+### Scrollable Findings panel
+
+Place the **Findings** heading, its optional manual-review explanation, all three ordered check groups, and every result card inside one visibly bounded panel. The panel uses a neutral border and spacing consistent with the existing Results surface; it must not add a colored leading accent.
+
+The panel has a deterministic maximum height of `min(42rem, 75vh)` and vertical scrolling when its content exceeds that height. Keep the complete collections in the document; scrolling must not truncate, virtualize, reorder, or omit a card. The panel must not create horizontal scrolling.
+
+Make the named **Findings** panel keyboard focusable with a visible focus indicator. Wheel, touch, scrollbar, and keyboard scrolling inside the panel move its own scroll position instead of moving the application page through the cards. When a result card receives focus or is selected, the browser keeps that card visible within the panel while preserving the existing card focus and selected state.
+
 ## Selected evidence
 
 The selected detail should make deterministic evidence the main content. It must not place all evidence behind a disclosure named **Technical scanner evidence**.
@@ -305,12 +313,13 @@ Removing these elements from the visible UI does not authorize deleting them fro
 ### Wide layout
 
 - Keep the overview above the workspace.
-- Place the unified grouped item list in a bounded left column and the selected evidence in a flexible right column.
+- Place the unified grouped item list in the bounded, internally scrollable Findings panel in the left column and the selected evidence in a flexible right column.
 - Do not make the evidence column narrower merely to preserve equal columns.
 
 ### Narrow layout and 200% browser zoom
 
 - Use one column in DOM and visual order: overview, unified Findings list, selected evidence.
+- Keep the Findings panel's own maximum height and vertical scrolling at narrow widths and 200% browser zoom so navigating its cards does not lengthen the application page.
 - Stack the three overview groups vertically or in a wrapping row without horizontal scrolling.
 - Keep full URLs, locators, colors, ratios, and evidence values readable through wrapping or controlled word breaking.
 - Do not truncate evidence, hide it behind hover, or require horizontal page scrolling.
@@ -320,6 +329,7 @@ Removing these elements from the visible UI does not authorize deleting them fro
 
 - Use one page-level heading and a logical heading hierarchy.
 - Use semantic groups for each supported check and programmatically associate group labels with their items and counts.
+- Expose the bounded Findings container as one named, keyboard-focusable scroll region with a visible focus indicator.
 - Make each Finding and manual-review item keyboard reachable with a stable accessible name. Each button name includes its human label, affected-element summary, and **Needs manual review** when applicable. The native button semantics communicate that the whole card is actionable; do not add a redundant action phrase to the name.
 - Announce analysis start, failure, completion totals, valid zero, and item selection through one shared live-status pattern without moving focus.
 - A visible lifecycle-status field is not required when the completion or failure state is already communicated by the result content and announcement.

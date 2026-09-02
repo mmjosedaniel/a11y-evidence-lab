@@ -27,6 +27,7 @@ const textbox = () => page.getByRole('textbox', { name: 'Target URL', exact: tru
 const analyzeButton = () => page.getByRole('button', { name: 'Analyze', exact: true });
 const status = () => page.getByRole('status');
 const results = () => page.getByRole('region', { name: 'Results', exact: true });
+const findingsPanel = () => results().getByRole('region', { name: 'Findings', exact: true });
 const findingButton = (id: string) => page.getByRole('button', { name: new RegExp(labels[id], 'i') });
 async function paint() { await page.evaluate(() => new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(() => r())))); }
 async function visible(text: string, root: Locator = page.locator('body')) { await root.getByText(text, { exact: true }).first().waitFor({ state: 'visible' }); }
@@ -47,6 +48,31 @@ async function leadingPresentation() {
         const computed = getComputedStyle(element);
         return { borderLeftWidth: computed.borderLeftWidth, paddingLeft: computed.paddingLeft };
       }),
+    };
+  });
+}
+async function findingsPresentation() {
+  return findingsPanel().evaluate(element => {
+    const computed = getComputedStyle(element);
+    const rootFontSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
+    const expectedMaxHeight = Math.min(42 * rootFontSize, window.innerHeight * 0.75);
+    const computedMaxHeight = Number.parseFloat(computed.maxHeight);
+    const borderWidths = [computed.borderTopWidth, computed.borderRightWidth, computed.borderBottomWidth, computed.borderLeftWidth];
+    const borderStyles = [computed.borderTopStyle, computed.borderRightStyle, computed.borderBottomStyle, computed.borderLeftStyle];
+    const borderColors = [computed.borderTopColor, computed.borderRightColor, computed.borderBottomColor, computed.borderLeftColor];
+    return {
+      tabIndex: element.tabIndex,
+      neutralBoundary: borderWidths.every(value => value === '1px')
+        && borderStyles.every(value => value === 'solid')
+        && borderColors.every(value => value === 'rgb(200, 209, 220)'),
+      maxHeightMatches: Number.isFinite(computedMaxHeight) && Math.abs(computedMaxHeight - expectedMaxHeight) <= 1,
+      heightWithinLimit: element.getBoundingClientRect().height <= expectedMaxHeight + 1,
+      overflowY: computed.overflowY,
+      overflowX: computed.overflowX,
+      scrollbarGutter: computed.scrollbarGutter,
+      overscrollBehaviorY: computed.overscrollBehaviorY,
+      verticallyScrollable: element.scrollHeight > element.clientHeight,
+      noHorizontalOverflow: element.scrollWidth <= element.clientWidth,
     };
   });
 }
@@ -302,8 +328,12 @@ describe('M1-04 analyze and evidence-first Results presentation', { concurrency:
   });
 
   it('keeps keyboard focus on the selected finding without a redundant return control', async () => {
-    await openComplete(); const selected = findingButton('finding-0'); await selected.focus(); await page.keyboard.press('Enter'); const detail = page.getByRole('region', { name: /Image alternative issue 1 evidence/i }); await detail.waitFor({ state: 'visible' }); assert.ok(await selected.evaluate(n => n === document.activeElement));
+    await openComplete(); const panel = findingsPanel(); assert.equal(await panel.getAttribute('tabindex'), '0'); await panel.focus(); await paint(); const beforeScroll = await page.evaluate(() => ({ panel: document.querySelector<HTMLElement>('.findings-column')?.scrollTop ?? -1, window: window.scrollY })); await page.keyboard.press('PageDown');
+    const panelScrolled = await page.waitForFunction(previous => (document.querySelector<HTMLElement>('.findings-column')?.scrollTop ?? -1) > previous, beforeScroll.panel, { timeout: 1500 }).then(() => true, () => false);
+    const afterScroll = await page.evaluate(() => { const panel = document.querySelector<HTMLElement>('.findings-column'); const style = panel && getComputedStyle(panel); return { panel: panel?.scrollTop ?? -1, window: window.scrollY, focused: panel === document.activeElement, visibleOutline: style?.outlineStyle === 'solid' && Number.parseFloat(style.outlineWidth) > 0 }; });
+    const selected = findingButton('finding-0'); await selected.focus(); await page.keyboard.press('Enter'); const detail = page.getByRole('region', { name: /Image alternative issue 1 evidence/i }); await detail.waitFor({ state: 'visible' }); assert.ok(await selected.evaluate(n => n === document.activeElement));
     assert.equal(await selected.getAttribute('aria-pressed'), 'true'); assert.equal(await findingButton('finding-1').getAttribute('aria-pressed'), 'false'); await announced('Selected Image alternative issue 1.'); assert.equal(await page.getByRole('button', { name: 'Back to findings', exact: true }).count(), 0);
+    assert.deepEqual({ panelScrolled, panelMoved: afterScroll.panel > beforeScroll.panel, windowStayed: afterScroll.window === beforeScroll.window, focused: afterScroll.focused, visibleOutline: afterScroll.visibleOutline }, { panelScrolled: true, panelMoved: true, windowStayed: true, focused: true, visibleOutline: true });
   });
 
   for (const focusInside of [true, false]) it(`restores replacement focus only when outgoing evidence owns it: ${focusInside}`, async () => {
@@ -316,7 +346,7 @@ describe('M1-04 analyze and evidence-first Results presentation', { concurrency:
   });
 
   it('passes axe and preserves complete evidence at desktop and 320px without horizontal scrolling', async () => {
-    await openComplete(); await select('finding-contrast'); const desktopPresentation = await leadingPresentation(); const desktop = await new AxeBuilder({ page }).analyze(); assert.deepEqual(desktop.violations.map(({ id, nodes }) => ({ id, nodes: nodes.length })), []); await page.setViewportSize({ width: 320, height: 800 }); await paint(); assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)); for (const id of Object.keys(labels)) await findingButton(id).waitFor({ state: 'visible' }); const detail = page.getByRole('region', { name: /Color contrast issue 1 evidence/i }); assert.ok((await detail.innerText()).includes(':root' + ' > :nth-child(1)'.repeat(24))); assert.ok((await detail.innerText()).includes('4.48:1')); assert.ok(!(await detail.innerText()).includes('4.478089453577214')); const narrowPresentation = await leadingPresentation(); const narrow = await new AxeBuilder({ page }).analyze(); assert.deepEqual(narrow.violations.map(({ id, nodes }) => ({ id, nodes: nodes.length })), []);
+    await openComplete(); await select('finding-contrast'); const desktopPresentation = await leadingPresentation(); const desktopFindings = await findingsPresentation(); const desktop = await new AxeBuilder({ page }).analyze(); assert.deepEqual(desktop.violations.map(({ id, nodes }) => ({ id, nodes: nodes.length })), []); await page.setViewportSize({ width: 320, height: 800 }); await paint(); assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)); for (const id of Object.keys(labels)) await findingButton(id).waitFor({ state: 'visible' }); const detail = page.getByRole('region', { name: /Color contrast issue 1 evidence/i }); assert.ok((await detail.innerText()).includes(':root' + ' > :nth-child(1)'.repeat(24))); assert.ok((await detail.innerText()).includes('4.48:1')); assert.ok(!(await detail.innerText()).includes('4.478089453577214')); const narrowPresentation = await leadingPresentation(); const narrowFindings = await findingsPresentation(); const narrow = await new AxeBuilder({ page }).analyze(); assert.deepEqual(narrow.violations.map(({ id, nodes }) => ({ id, nodes: nodes.length })), []);
     const expectedPresentation = {
       overviewBorderLeftWidth: '0px',
       evidence: { borderLeftWidth: '0px', paddingLeft: '0px' },
@@ -324,5 +354,8 @@ describe('M1-04 analyze and evidence-first Results presentation', { concurrency:
     };
     assert.deepEqual(desktopPresentation, expectedPresentation);
     assert.deepEqual(narrowPresentation, expectedPresentation);
+    const expectedFindings = { tabIndex: 0, neutralBoundary: true, maxHeightMatches: true, heightWithinLimit: true, overflowY: 'auto', overflowX: 'hidden', scrollbarGutter: 'stable', overscrollBehaviorY: 'contain', verticallyScrollable: true, noHorizontalOverflow: true };
+    assert.deepEqual(desktopFindings, expectedFindings);
+    assert.deepEqual(narrowFindings, expectedFindings);
   });
 });

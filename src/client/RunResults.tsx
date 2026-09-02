@@ -154,7 +154,7 @@ export function RunResults({ run, selectedResult = null, failure = null, onSelec
     <p className="result-limitation">{limitation}</p>
     <ResultsOverview run={run} />
     <div className="finding-workspace">
-      <section aria-labelledby={`${prefix}-findings`} className="findings-column">
+      <section aria-labelledby={`${prefix}-findings`} className="findings-column" tabIndex={0}>
         <h3 id={`${prefix}-findings`}>Findings</h3>
         {labeledReviews.length > 0 && <p>{manualIntro}</p>}
         {ruleOrder.map(rule => {

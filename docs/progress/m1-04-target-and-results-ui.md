@@ -633,3 +633,10 @@ Primary accepted the complete corrected barrier: 290 backend/scanner plus 30 UI 
 - **Agent-workflow outcome:** Guarded scratch reconciliation, test-owned Red, separate two-file frontend Green, the complete 290 plus 30 regression, strict typecheck, native build and fresh S3 review all pass. Review found no Blocker, Major or Minor issue; cohesion is `REFACTORED`.
 - **Evidence:** The active ExecPlan records exact source/test/build identities, compliant guard receipts and correction lineage, Chromium `151.0.7922.34` network and settled teardown evidence, desktop/320-pixel computed-style, axe and reflow evidence, and `M104-OD027-VISUAL-NOISE-REDUCTION-16-S3-001`.
 - **Next boundary:** Reopen the exact synthetic application for owner inspection. Authorization provenance for the pre-existing baseline commit remains a separate closure question; current commit, push, task closure and M1-05 remain unauthorized.
+
+## 2026-09-02 — Bounded Findings scrolling passed implementation and review
+
+- **Project outcome:** The complete Findings content now appears in its own neutral bordered panel with maximum height `min(42rem, 75vh)` and internal vertical scrolling, so card navigation does not move the application page. The panel remains complete, named, keyboard focusable and horizontally contained.
+- **Agent-workflow outcome:** Guarded scratch cleanup, test-owned Red, separate two-file frontend Green, the complete 290 plus 30 regression, strict typecheck, native build and fresh S3 review all pass. Review found no Blocker, Major or Minor issue; cohesion is `REFACTORED`.
+- **Evidence:** The active ExecPlan records exact source/test/build identities, three compliant receipts, Chromium `151.0.7922.34` owned-network and settled teardown evidence, desktop/320-pixel panel, Page Down isolation, focus, axe and reflow evidence, and `M104-OD027-BOUNDED-FINDINGS-SCROLL-17-S3-001`.
+- **Next boundary:** Reopen the exact synthetic UI for the owner's Chrome-menu 200-percent and short screen-reader observation. Commit, push, task closure and M1-05 remain unauthorized.
