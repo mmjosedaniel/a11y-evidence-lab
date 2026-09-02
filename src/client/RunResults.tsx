@@ -175,7 +175,6 @@ export function RunResults({ run, selectedResult = null, failure = null, onSelec
                     <strong>{item.label}</strong>
                     <span>{affectedElementText(evidenceItem)}</span>
                     {item.kind === 'manual-review' && <span className="manual-review-tag">Needs manual review</span>}
-                    <span className="view-evidence">View evidence</span>
                   </button>
                 </li>;
               })}

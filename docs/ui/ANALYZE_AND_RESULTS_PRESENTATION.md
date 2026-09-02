@@ -156,8 +156,9 @@ Each selectable automated Finding shows only:
    - image alternative: **Image element**;
    - form label: element and input type, such as **Input · text**;
    - color contrast: foreground color, background color, font size, and weight.
-3. The action text **View evidence**, or an equivalent whole-item button with that accessible purpose.
-4. A programmatic selected state that does not rely only on color.
+3. A programmatic selected state that does not rely only on color.
+
+The whole card is the evidence-selection button. Do not add **View evidence** or another redundant action label inside the card.
 
 Do not show the internal Finding ID as the main title, the rule ID, `unprocessed`, provider information, model information, or provider-call information in each list item.
 
@@ -166,8 +167,9 @@ Each selectable manual-review item uses the same card and evidence-opening inter
 1. A stable label such as **Image alternative review 1**, **Form label review 1**, or **Color contrast review 1**.
 2. The same concise affected-element summary used by a Finding for that check.
 3. A visible **Needs manual review** tag. The tag is status text and is included in the item's accessible name; it does not rely on color alone.
-4. The action text **View evidence**, or an equivalent whole-item button with that accessible purpose.
-5. A programmatic selected state that does not rely only on color.
+4. A programmatic selected state that does not rely only on color.
+
+The whole card is the evidence-selection button. Do not add **View evidence** or another redundant action label inside the card.
 
 Show one concise explanation immediately below the **Findings** heading when at least one manual-review item exists: **Items tagged Needs manual review could not be determined automatically.** Do not create a second manual-review section.
 
@@ -318,7 +320,7 @@ Removing these elements from the visible UI does not authorize deleting them fro
 
 - Use one page-level heading and a logical heading hierarchy.
 - Use semantic groups for each supported check and programmatically associate group labels with their items and counts.
-- Make each Finding and manual-review item keyboard reachable with a stable accessible name. Each button name includes its human label, affected-element summary, **Needs manual review** when applicable, and **View evidence** action; visible descendant text may provide that complete name.
+- Make each Finding and manual-review item keyboard reachable with a stable accessible name. Each button name includes its human label, affected-element summary, and **Needs manual review** when applicable. The native button semantics communicate that the whole card is actionable; do not add a redundant action phrase to the name.
 - Announce analysis start, failure, completion totals, valid zero, and item selection through one shared live-status pattern without moving focus.
 - A visible lifecycle-status field is not required when the completion or failure state is already communicated by the result content and announcement.
 - Clearly indicate the selected item programmatically and visually.
@@ -334,7 +336,8 @@ Removing these elements from the visible UI does not authorize deleting them fro
 - Separate the form from Results with spacing and hierarchy rather than another full-width divider or repeated completion message.
 - Give the total Finding count the strongest emphasis inside Results.
 - Use restrained group panels for the three rule counts; do not style them as analytics dashboard metrics.
-- Use a small scanner-evidence label, a leading evidence-color border, plain definition lists, color samples, and readable units to organize evidence.
+- Use a small scanner-evidence label, plain definition lists, color samples, and readable units to organize evidence.
+- Do not use leading accent borders on the Results overview, selected evidence content, or **Needs manual review** tag. Use background, spacing, headings, text weight, and the card boundary to establish hierarchy.
 - Prefer whitespace and headings over nested cards and repeated full-width blue disclosure borders.
 - Reserve Signal Blue for the primary action, links, focus, and selected item.
 - Use caution styling for **Needs manual review**, accompanied by its exact text and an icon only when the icon adds meaning.

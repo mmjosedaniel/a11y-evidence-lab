@@ -32,6 +32,24 @@ async function paint() { await page.evaluate(() => new Promise<void>(r => reques
 async function visible(text: string, root: Locator = page.locator('body')) { await root.getByText(text, { exact: true }).first().waitFor({ state: 'visible' }); }
 async function announced(text: string) { await page.waitForFunction(v => document.querySelector('[role=status]')?.textContent === v, text); }
 async function calls() { return page.evaluate(() => window.m104.calls.length); }
+async function leadingPresentation() {
+  return page.evaluate(() => {
+    const style = (selector: string) => {
+      const element = document.querySelector(selector);
+      if (!(element instanceof HTMLElement)) throw new Error(`Missing ${selector}`);
+      return getComputedStyle(element);
+    };
+    const evidence = style('.rule-evidence');
+    return {
+      overviewBorderLeftWidth: style('.results-overview').borderLeftWidth,
+      evidence: { borderLeftWidth: evidence.borderLeftWidth, paddingLeft: evidence.paddingLeft },
+      manual: Array.from(document.querySelectorAll<HTMLElement>('.manual-review-tag'), element => {
+        const computed = getComputedStyle(element);
+        return { borderLeftWidth: computed.borderLeftWidth, paddingLeft: computed.paddingLeft };
+      }),
+    };
+  });
+}
 async function mount(available = true, configuration: KnownConfiguration = {}) {
   await page.evaluate(x => window.m104.mount(x.available, x.configuration), { available, configuration }); await paint();
 }
@@ -182,10 +200,11 @@ describe('M1-04 analyze and evidence-first Results presentation', { concurrency:
     const run = await openComplete(); await visible(copy.manualIntro, results());
     assert.equal(await results().getByRole('heading', { name: 'Needs manual review', exact: true }).count(), 0);
     assert.equal(await results().getByText('Needs manual review', { exact: true }).count(), 3);
+    assert.equal(await results().getByText('View evidence', { exact: true }).count(), 0);
     const reviews = [
-      ['Image alternatives', 'Image alternative review 1', /Image alternative review 1[\s\S]*Image element[\s\S]*Needs manual review[\s\S]*View evidence/i, 'Alternative text could not be inspected', ['Alternative text', 'Unavailable (missing)']],
-      ['Form labels', 'Form label review 1', /Form label review 1[\s\S]*Input · text[\s\S]*Needs manual review[\s\S]*View evidence/i, 'Label information was withheld', ['Input type', 'Explicit label', 'Implicit label']],
-      ['Color contrast', 'Color contrast review 1', /Color contrast review 1[\s\S]*#777777 · #ffffff · 12\.0pt \(16px\) · normal[\s\S]*Needs manual review[\s\S]*View evidence/i, 'Background imagery prevented a reliable contrast result', ['Measured contrast', '4.48:1']],
+      ['Image alternatives', 'Image alternative review 1', /Image alternative review 1[\s\S]*Image element[\s\S]*Needs manual review$/i, 'Alternative text could not be inspected', ['Alternative text', 'Unavailable (missing)']],
+      ['Form labels', 'Form label review 1', /Form label review 1[\s\S]*Input · text[\s\S]*Needs manual review$/i, 'Label information was withheld', ['Input type', 'Explicit label', 'Implicit label']],
+      ['Color contrast', 'Color contrast review 1', /Color contrast review 1[\s\S]*#777777 · #ffffff · 12\.0pt \(16px\) · normal[\s\S]*Needs manual review$/i, 'Background imagery prevented a reliable contrast result', ['Measured contrast', '4.48:1']],
     ] as const;
     for (const [groupName, label, accessibleName, reason, evidence] of reviews) {
       const group = results().getByRole('group', { name: new RegExp(groupName, 'i') });
@@ -243,13 +262,13 @@ describe('M1-04 analyze and evidence-first Results presentation', { concurrency:
     }
   });
 
-  it('includes each human label, affected-element summary and View evidence in Finding names', async () => {
+  it('includes only each human label and affected-element summary in Finding names', async () => {
     await openComplete();
     for (const name of [
-      /Image alternative issue 1[\s\S]*Image element[\s\S]*View evidence/i,
-      /Image alternative issue 2[\s\S]*Image element[\s\S]*View evidence/i,
-      /Form label issue 1[\s\S]*Input · text[\s\S]*View evidence/i,
-      /Color contrast issue 1[\s\S]*#777777 · #ffffff · 12\.0pt \(16px\) · normal[\s\S]*View evidence/i,
+      /Image alternative issue 1[\s\S]*Image element$/i,
+      /Image alternative issue 2[\s\S]*Image element$/i,
+      /Form label issue 1[\s\S]*Input · text$/i,
+      /Color contrast issue 1[\s\S]*#777777 · #ffffff · 12\.0pt \(16px\) · normal$/i,
     ]) assert.equal(await page.getByRole('button', { name }).count(), 1);
   });
 
@@ -276,7 +295,7 @@ describe('M1-04 analyze and evidence-first Results presentation', { concurrency:
     const imageGroup = results().getByRole('group', { name: /Image alternatives/i });
     if (kind === 'incomplete') {
       assert.equal(await imageGroup.getByText('No findings or manual reviews in this check.', { exact: true }).count(), 0);
-      assert.equal(await imageGroup.getByRole('button', { name: /Image alternative review 1[\s\S]*Image element[\s\S]*Needs manual review[\s\S]*View evidence/i }).count(), 1);
+      assert.equal(await imageGroup.getByRole('button', { name: /Image alternative review 1[\s\S]*Image element[\s\S]*Needs manual review$/i }).count(), 1);
       assert.equal(await results().getByRole('heading', { name: 'Needs manual review', exact: true }).count(), 0);
     }
     assert.equal(await results().getByText(copy.manualIntro, { exact: true }).count(), kind === 'incomplete' ? 1 : 0); await mount(); const malformed = structuredClone(run) as any; malformed.scan.coverage.label = { violations: null, incomplete: null, passes: null, inapplicable: null }; await analyze({ ok: true, run: malformed }); await rejected(); assert.equal(await page.getByText('No automated findings in the three supported checks', { exact: true }).count(), 0);
@@ -297,6 +316,13 @@ describe('M1-04 analyze and evidence-first Results presentation', { concurrency:
   });
 
   it('passes axe and preserves complete evidence at desktop and 320px without horizontal scrolling', async () => {
-    await openComplete(); await select('finding-contrast'); const desktop = await new AxeBuilder({ page }).analyze(); assert.deepEqual(desktop.violations.map(({ id, nodes }) => ({ id, nodes: nodes.length })), []); await page.setViewportSize({ width: 320, height: 800 }); await paint(); assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)); for (const id of Object.keys(labels)) await findingButton(id).waitFor({ state: 'visible' }); const detail = page.getByRole('region', { name: /Color contrast issue 1 evidence/i }); assert.ok((await detail.innerText()).includes(':root' + ' > :nth-child(1)'.repeat(24))); assert.ok((await detail.innerText()).includes('4.48:1')); assert.ok(!(await detail.innerText()).includes('4.478089453577214')); const narrow = await new AxeBuilder({ page }).analyze(); assert.deepEqual(narrow.violations.map(({ id, nodes }) => ({ id, nodes: nodes.length })), []);
+    await openComplete(); await select('finding-contrast'); const desktopPresentation = await leadingPresentation(); const desktop = await new AxeBuilder({ page }).analyze(); assert.deepEqual(desktop.violations.map(({ id, nodes }) => ({ id, nodes: nodes.length })), []); await page.setViewportSize({ width: 320, height: 800 }); await paint(); assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)); for (const id of Object.keys(labels)) await findingButton(id).waitFor({ state: 'visible' }); const detail = page.getByRole('region', { name: /Color contrast issue 1 evidence/i }); assert.ok((await detail.innerText()).includes(':root' + ' > :nth-child(1)'.repeat(24))); assert.ok((await detail.innerText()).includes('4.48:1')); assert.ok(!(await detail.innerText()).includes('4.478089453577214')); const narrowPresentation = await leadingPresentation(); const narrow = await new AxeBuilder({ page }).analyze(); assert.deepEqual(narrow.violations.map(({ id, nodes }) => ({ id, nodes: nodes.length })), []);
+    const expectedPresentation = {
+      overviewBorderLeftWidth: '0px',
+      evidence: { borderLeftWidth: '0px', paddingLeft: '0px' },
+      manual: Array.from({ length: 3 }, () => ({ borderLeftWidth: '0px', paddingLeft: '0px' })),
+    };
+    assert.deepEqual(desktopPresentation, expectedPresentation);
+    assert.deepEqual(narrowPresentation, expectedPresentation);
   });
 });

@@ -28,7 +28,7 @@ Feature: Evidence-first accessibility analysis for one trusted public page
       And the scan executes exactly "image-alt", "label", and "color-contrast"
       And one complete visible results list groups every returned violation-node Finding by those three rules
       And where results are interpreted, the interface shows the normalized analyzed page identity, one concise exact-three-check and non-certification limitation, and one overview derived from the complete Finding and ScannerReviewObservation collections
-      And every Finding shows a stable human-readable label, concise affected-element summary, evidence action, programmatic selected state, and direct complete rule-specific evidence
+      And every Finding uses its whole card as the evidence-selection button and shows a stable human-readable label, concise affected-element summary, programmatic selected state, and direct complete rule-specific evidence without a redundant action label
       And native incomplete observations appear in the same three check groups as Findings with a visible "Needs manual review" tag, a plain-language task, and relevant retained evidence while remaining distinct from Findings
       And deterministic scan Results omit run context, scan context, lifecycle fields, mode, provider, model, no-call text, raw coverage tables, internal Finding IDs, and native check-group names while preserving their canonical data internally
       And a complete zero result is shown only after all three rules complete
