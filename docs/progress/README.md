@@ -28,7 +28,7 @@ M1-02 is Complete. Its [archived ExecPlan](../plans/completed/m1-02-local-servic
 
 M1-03 is Complete. Both scanner slices and their S3 reviews are accepted. All 290 integrated tests and independent strict typechecking pass, including the failed-launch residue regression. The different final integrated critical review, exact task-owned runtime cleanup and documentation closure passed. At M1-03 closure, M1-04 and M1-05 were unselected. No lease or owned runtime operation remains. The task-local browser runtime and both scratch roots were removed after review; shared caches and dependencies remain untouched.
 
-[M1-04](../plans/completed/m1-04-target-and-results-ui.md) is Complete after the accepted OD-027 presentation, purpose-named component extraction, integrated-review correction, complete regression, independent reviews, exact cleanup, and documentation closure. [M1-05](../plans/m1-05-walking-skeleton-integration.md) is In progress after accepted internal local-service and scanner structural slices; HTTP integration remains unimplemented.
+[M1-04](../plans/completed/m1-04-target-and-results-ui.md) is Complete after the accepted OD-027 presentation, purpose-named component extraction, integrated-review correction, complete regression, independent reviews, exact cleanup, and documentation closure. [M1-05](../plans/m1-05-walking-skeleton-integration.md) is In progress after accepted internal local-service, scanner, and run-contract structural slices; HTTP integration remains unimplemented.
 
 Add each new task record to this table in the same change that creates the file:
 

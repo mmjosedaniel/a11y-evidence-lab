@@ -82,3 +82,27 @@ The corrected independent test-worker preflight classified the scanner slice `EX
 - **Evidence:** The fresh compliant two-file correction receipt, direct mutation probe, focused 88-leaf scanner boundary, complete 290-case regression, strict TypeScript, seven syntax checks, exact production/test identities, empty scratch, and renewed critical review all pass.
 - **Documentation impact:** The active ExecPlan and this progress record supersede the earlier review as final correction acceptance. No requirement, ADR, M1-03 authority, product, public contract, dependency, fixture, or executable-configuration update is needed because the correction enforces the already accepted policy boundary.
 - **Next boundary:** M1-05 remains In progress for real HTTP scan integration and its complete browser/build checkpoint. Commit and push remain unauthorized.
+
+## 2026-09-02 — Run-contract composition slice frozen
+
+- **Project outcome:** The owner approved a behavior-preserving extraction of the 497-line aggregate contract into a stable public façade plus focused type, policy, unknown-value reading, finding-validation, scan-validation, and parent-run-validation modules.
+- **Agent-workflow outcome:** R0 source, consumer, authority, and test analysis found the existing 30 contract cases sufficient as the proposed passing characterization boundary. The slice will use read-only test preflight, one guarded seven-path `code_worker` Green/Refactor, complete backend/scanner and build verification, and fresh S3 critical review.
+- **Evidence:** The active [M1-05 ExecPlan](../plans/m1-05-walking-skeleton-integration.md) records the exact public compatibility, responsibilities, dependency direction, frozen-policy requirement, safe-inspection invariants, commands, ownership, cleanup, and stop conditions.
+- **Next boundary:** Obtain independent `EXISTING_AND_COVERED` preflight before opening the production write lease. HTTP scan integration and the complete browser checkpoint remain outside this structural slice.
+
+Independent preflight classified the slice `EXISTING_AND_COVERED`. The unchanged 30 static contract cases executed 58 passing TAP tests with no failure, cancellation, skip, todo, layout assertion, source/test change, or residue. No test write or artificial Red is required; the guarded seven-path Green/Refactor is next.
+
+## 2026-09-02 — Run-contract composition reached verified Green
+
+- **Project outcome:** `run-contract.ts` remains the stable public façade for the seven existing types and two validators. Six focused internal modules now own the accepted type model, frozen policy, hostile-value inspection, finding evidence, scan aggregate, and parent-run validation responsibilities without changing the persisted contract or runtime results.
+- **Agent-workflow outcome:** The guarded seven-path `code_worker` lease closed compliant with exactly the authorized production paths. The worker and primary accepted cohesion as `REFACTORED`; no test, dependency, fixture, configuration, unrelated source, index, or Git reference changed.
+- **Evidence:** The unchanged focused boundary passed 58/58 and the complete backend/scanner regression passed 290/290. Strict TypeScript, seven syntax checks, the production build, exact two-function runtime façade, acyclic import inspection, and a direct probe that all 16 policy arrays are frozen and reject mutation passed. Scanner scratch and generated client output were removed.
+- **Next boundary:** Obtain fresh S3 review of safe hostile-value inspection, evidence privacy, validation precedence, collection and lifecycle integrity, stable exports, policy immutability, and module cohesion. M1-05 remains In progress for later HTTP integration and its complete browser checkpoint.
+
+## 2026-09-02 — Run-contract structural slice accepted
+
+- **Project outcome:** The approved run-contract extraction is complete without changing public imports, persisted data, accepted values, validation precedence, scanner/service/UI behavior, or dependencies. The façade and six internal modules now have the planned focused responsibilities.
+- **Agent-workflow outcome:** Fresh S3 review returned PASS with no Blocker, Major, or Minor finding and accepted cohesion as `REFACTORED`. It independently confirmed hostile-value safety, frozen policy, evidence privacy, immutable detached output, collection and lifecycle integrity, exact façade exports, acyclic dependencies, and equivalence with the prior implementation.
+- **Evidence:** The compliant seven-path lease, unchanged 58-test characterization, complete 290-case regression, strict TypeScript, seven syntax checks, production build, 16-array mutation probe, exact protected identities, bounded cleanup, 1,076 reviewer differential comparisons, and exact proxy inspection-order comparison all pass.
+- **Documentation impact:** The active ExecPlan, this progress record, roadmap readiness, authority-map status, and current project-status statements now include all three accepted M1-05 structural slices. No requirement, ADR, public contract, persistence format, product behavior, test, dependency, fixture, or executable-configuration update is needed because the refactor preserves the accepted boundary.
+- **Next boundary:** M1-05 remains In progress for real HTTP scan integration and its complete browser checkpoint. Commit and push remain unauthorized.

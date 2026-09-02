@@ -2,7 +2,7 @@
 
 This ExecPlan is a living document. Maintain `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` as work proceeds. This document must be maintained in accordance with `PLANS.md`.
 
-This plan owns only [M1-05 — Integrate and verify the walking skeleton](../DEVELOPMENT_ROADMAP.md#m1-05--integrate-and-verify-the-walking-skeleton). The owner explicitly selected M1-05 and approved the structural slices described below. The first preserved the existing loopback-service behavior while giving its stateless responsibilities focused modules. The second preserves the existing scanner behavior while extracting stateless request preparation, native capture, value reading, and rule-evidence projection from its two ordering-sensitive coordinators. Neither slice connects the HTTP Analyze path to the real scanner, completes the milestone integration checkpoint, authorizes M2 work, or authorizes a commit or push.
+This plan owns only [M1-05 — Integrate and verify the walking skeleton](../DEVELOPMENT_ROADMAP.md#m1-05--integrate-and-verify-the-walking-skeleton). The owner explicitly selected M1-05 and approved the structural slices described below. The first preserved the existing loopback-service behavior while giving its stateless responsibilities focused modules. The second preserved scanner behavior while extracting stateless request preparation, native capture, value reading, and rule-evidence projection from its two ordering-sensitive coordinators. The third preserves the `run-contract.ts` public boundary while separating its contract model, fixed policy, hostile-value reader, finding validation, scan validation, and parent-run validation. None of these slices connects the HTTP Analyze path to the real scanner, completes the milestone integration checkpoint, authorizes M2 work, or authorizes a commit or push.
 
 ## Progress
 
@@ -20,6 +20,12 @@ This plan owns only [M1-05 — Integrate and verify the walking skeleton](../DEV
 - [x] (2026-09-02) Accepted the owner-supplied external P2 finding that exported policy tuples remained mutable at runtime. A process-isolated probe reproduced rule/bucket profile corruption and message-key allowlist expansion; the prior scanner S3 PASS is superseded for this correction boundary.
 - [x] (2026-09-02) Froze all six exported policy tuples under a fresh compliant attempt-2 Green lease. The direct mutation-resistance probe, unchanged 88-leaf scanner boundary, complete 290-case regression, strict TypeScript, and seven syntax checks passed before the correction advanced to renewed S3 review.
 - [x] (2026-09-02) Accepted renewed S3 PASS with no Blocker, Major, or Minor finding. The reviewer independently confirmed hostile mutation resistance, exact tuple identity, factory isolation, unknown-message-key withholding, stable exports, and unchanged cohesion; completed correction cleanup and documentation reconciliation while keeping M1-05 In progress.
+- [x] (2026-09-02) Received explicit owner approval of `M105-RUN-CONTRACT-MODULE-REFACTOR-03` with the stable public façade, six focused internal modules, 30-case characterization boundary, frozen exported policy tuples, and behavior-preserving constraints.
+- [x] (2026-09-02) Completed R0 source, consumer, authority, and test analysis. The 497-line contract contains six separable responsibilities, the existing 30 contract cases are the proposed passing characterization boundary, and no new dependency or significant architecture decision is required.
+- [x] (2026-09-02) Accepted independent read-only `EXISTING_AND_COVERED` preflight: the 30 static contract cases execute 58 TAP tests, all passing with no failure, cancellation, skip, todo, snapshot, layout assertion, source/test change, or residue.
+- [x] (2026-09-02) Completed the guarded seven-path contract Green/Refactor under a separate `code_worker` lease without changing tests. The lease closed compliant with exactly the seven authorized source paths, and both worker and primary inspection accepted cohesion as `REFACTORED`.
+- [x] (2026-09-02) Passed the unchanged 58-test focused boundary, complete 290-case regression, strict TypeScript, seven syntax checks, production build, exact runtime-export check, 16-policy-tuple mutation probe, dependency inspection, protected-input identity checks, and bounded generated-output cleanup.
+- [x] (2026-09-02) Accepted fresh S3 PASS with no Blocker, Major, or Minor finding. The reviewer independently validated hostile-value inspection, fixed policy, evidence privacy, validation precedence, immutable output, collection and lifecycle integrity, stable exports, exact behavior against the prior implementation, and cohesion as `REFACTORED`; completed documentation reconciliation while keeping M1-05 In progress.
 - [ ] Implement the separately planned HTTP scan integration and complete M1-05's browser/build integration checkpoint before task closure.
 
 ## Surprises & Discoveries
@@ -33,6 +39,7 @@ This plan owns only [M1-05 — Integrate and verify the walking skeleton](../DEV
 - Observation: `normalize-scan.ts` combines generic safe native-value readers and rule-specific evidence projection with the normalization coordinator. Evidence: envelope validation, failure precedence, exact coverage reconciliation, UUID creation, native ordering, and final collection assembly depend on explicit sequence, while the low-level readers and per-node projections are stateless.
 - Observation: The first scanner-preflight packet named a nonexistent historical M1-03 plan path. Evidence: the test worker returned `UNKNOWN` before running tests; `docs/README.md` identifies `docs/plans/completed/m1-03-real-scan-and-evidence.md` as the accepted completed plan. The corrected read-only packet used that authority and produced fresh focused evidence without a write.
 - Observation: TypeScript `as const` does not freeze a JavaScript array. Evidence: a process-isolated import of the accepted Green changed `scanRules` with `pop()`, causing later `initialScanContext()` and `nativeScanOptions()` calls to expose only two rules; extending `nativeBuckets` changed later result types, and extending `messageKeys` widened the normalization allowlist. This is an internal policy-integrity defect even though no current production consumer mutates the exports.
+- Observation: `src/server/domain/run-contract.ts` has 497 lines and six ordered responsibility clusters: public/internal contract types and policy at lines 1–147, descriptor-safe unknown-value reading at 149–260, finding/evidence validation at 262–373, scan validation at 375–431, and parent-run validation at 434–497. Evidence: complete source inspection plus 30 behavior-oriented cases in `tests/run-contract.test.ts` and imports across server, scanner, persistence, and browser code.
 
 ## Decision Log
 
@@ -54,10 +61,16 @@ This plan owns only [M1-05 — Integrate and verify the walking skeleton](../DEV
 - Decision: Preserve `scan-page.ts` and `normalize-scan.ts` as stable public entry points and add no barrel file.
   Rationale: Existing production and test consumers retain the same imports. The new modules are internal responsibility owners, not another public API layer.
   Date/Author: 2026-09-02 / project owner and primary coordinator.
+- Decision: Preserve `src/server/domain/run-contract.ts` as the only public contract façade and extract `run-types.ts`, `run-policy.ts`, `contract-value-reader.ts`, `finding-validation.ts`, `scan-validation.ts`, and `run-validation.ts` under `src/server/domain/run-contract/`.
+  Rationale: The six modules match proven current responsibilities, retain one-way validation dependencies, and keep every production and test consumer on the existing stable import path.
+  Date/Author: 2026-09-02 / project owner and primary coordinator.
+- Decision: Freeze every policy tuple exported between internal contract modules and reuse the existing 30 contract cases without a layout test.
+  Rationale: Module extraction turns private tuples into internal exports, so runtime immutability must enforce their fixed contract. Existing tests cover observable validation; file-layout assertions would couple tests to private structure.
+  Date/Author: 2026-09-02 / project owner and primary coordinator.
 
 ## Outcomes & Retrospective
 
-The local-service and scanner structural extractions and their verification barriers are complete. An owner-supplied external review found mutable exported policy tuples after the scanner's first S3 review; the bounded correction now freezes all six tuples and renewed S3 review returned PASS with no finding. `scan-page.ts` and `normalize-scan.ts` retain their ordering-sensitive coordinators, and the extracted modules retain their focused responsibilities. M1-05 remains In progress because real HTTP scanner integration and the milestone-level end-to-end browser/build checkpoint remain outstanding.
+The local-service, scanner, and run-contract structural extractions and their verification barriers are complete. The stable run-contract façade now delegates to six focused modules without changing the persisted format, public imports, or accepted validation behavior. M1-05 remains In progress because real HTTP scanner integration and the milestone-level end-to-end browser checkpoint remain outstanding.
 
 ## Purpose / Big Picture
 
@@ -65,9 +78,11 @@ The current local service behavior is well tested, but its public contracts, inp
 
 The later M1-05 integration work will connect the already implemented service, scanner, persistence, and UI. This structural slice prepares that work without adding the missing route or changing a public result.
 
+The third slice makes the central unknown-data and persisted-aggregate boundary easier to inspect without weakening it. A reviewer should see a small stable `run-contract.ts` façade, focused internal modules with acyclic dependencies, and the same accepted results across all 30 contract cases and every current consumer.
+
 ## Context and Orientation
 
-`src/server/service.ts` is the stable public entry point. `src/server/main.ts`, `tests/local-service.test.ts`, and `tests/scan-page.test.ts` import its callable or public types. `src/server/domain/run-contract.ts` owns runtime validation. `src/server/persistence/run-repository.ts` owns aggregate create/read/finish behavior. `src/server/scan/scan-page.ts` owns prepared real scan execution but remains disconnected from the HTTP service until a later M1-05 slice.
+`src/server/service.ts` is the stable service entry point. `src/server/domain/run-contract.ts` is the shared stable contract entry point used by server, scanner, persistence, client admission, UI types, helpers, and tests; it currently owns the aggregate model and all runtime validation in one file. `src/server/persistence/run-repository.ts` owns aggregate create/read/finish behavior. `src/server/scan/scan-page.ts` owns prepared real scan execution but remains disconnected from the HTTP service until a later M1-05 slice.
 
 The applicable authority boundary is the M1-05 roadmap row and its Accepted requirements: one trusted public HTTPS target, exact-three-rule complete scanning, visible failure, durable validated aggregate reads, one-operation admission, clean stop, and accessible Analyze/Results behavior. ADR-0015 owns the developer-started loopback topology, ADR-0021 owns the single-file aggregate, ADR-0018 owns the trusted-input scan boundary, and ADR-0024 owns this worker-first behavior-preserving implementation method. The fixed RD-003 evaluation boundary remains unchanged.
 
@@ -91,6 +106,8 @@ It excludes:
 - a lifecycle class, generic state machine, event bus, context/dependency container, shared persistence transition abstraction, generic HTTP framework, barrel file, or compatibility wrapper;
 - test changes unless read-only preflight discovers a real uncovered observable behavior and the coordinator reconciles the slice before any write; and
 - M1-05 completion, M2 work, commit, or push.
+
+The run-contract slice includes only declaration moves into the six named modules, frozen internal policy tuples, the minimum internal exports needed by the next validation layer, and stable type/function re-exports from `run-contract.ts`. It excludes persistence-format changes, new accepted values, error or precedence changes, scanner-policy consolidation, one-file-per-rule decomposition, generic schema/reader abstractions, JSON Schema, validation libraries, UI behavior, and new public helpers.
 
 ## Plan of Work
 
@@ -180,11 +197,51 @@ Post-Green validation includes the complete normalization suite, complete scan-p
 
 Expected result: 290 passing cases. Verification must also show empty scanner scratch, unchanged retained downloads, absent generated client output, unchanged fixtures, manifests, dependencies, and executable configuration, and stable public imports. Browser UI and production-build verification remain deferred to the real HTTP integration checkpoint because this slice changes no UI or HTTP integration behavior.
 
+### M105-RUN-CONTRACT-MODULE-REFACTOR-03 — aggregate-contract validation extraction
+
+The observable contract is exact behavior preservation. `Fact`, `ProviderContext`, `Finding`, `ScannerReviewObservation`, `ScanResult`, `PageAnalysisRun`, and `ValidationResult` remain type-importable from `src/server/domain/run-contract.ts`; its only runtime exports remain `validateRun` and `validateScan`. Accepted values, exact-key rules, validation and failure precedence, descriptor-only inspection, accessor avoidance, ordinary-object and dense-array requirements, bounded errors, detachment, freezing, collection ordering, unique finding IDs, coverage reconciliation, chronology, cleanup constraints, and failure-category relationships remain unchanged.
+
+TDD is applicable because application source changes. The planned preflight classification is `EXISTING_AND_COVERED`, subject to an independent read-only `test_worker` report. The focused characterization command is:
+
+    node --test --test-timeout=120000 tests/run-contract.test.ts
+
+Expected result: the 30 static contract cases execute 58 passing TAP tests with zero failures, cancellations, skips, or todos. No test write follows an accepted `EXISTING_AND_COVERED` result.
+
+The standard-profile Green/Refactor uses one `code_worker` turn under a lease allowing only:
+
+- `src/server/domain/run-contract.ts`
+- `src/server/domain/run-contract/run-types.ts`
+- `src/server/domain/run-contract/run-policy.ts`
+- `src/server/domain/run-contract/contract-value-reader.ts`
+- `src/server/domain/run-contract/finding-validation.ts`
+- `src/server/domain/run-contract/scan-validation.ts`
+- `src/server/domain/run-contract/run-validation.ts`
+
+The accepted test and all other source, documentation, dependency, fixture, executable configuration, generated output, and Git metadata are forbidden. One same-contract correction is available only if attempt 1 stops on one bounded implementation defect without changing the authority, paths, or behavioral contract. An unexpected path, test change, public-export difference, accepted-value difference, validation-precedence change, mutable exported policy tuple, cycle, or attempt to share the scanner native reader stops the slice.
+
+Responsibility and cohesion contract:
+
+| Production owner | Responsibility after the slice | Fit and dependency direction |
+| --- | --- | --- |
+| `src/server/domain/run-contract.ts` | Stable public façade for the seven existing public types and two validator functions | Retained entry point. Re-exports no internal reader or policy value. |
+| `run-types.ts` | Run, scan, finding, evidence, fact, provider, coverage, and validation-result types | Type-model extraction. Depends only on policy-derived types where necessary. |
+| `run-policy.ts` | Frozen exact rules, failure categories, attribute states, input types, message keys, and check identifiers plus their derived literal types | Fixed contract policy. Has no application dependency and exposes no mutable backing value. |
+| `contract-value-reader.ts` | Descriptor-safe object inspection, exact keys, dense arrays, primitive values, IDs, times, HTTPS URLs, locales, facts, and unavailable values | Lowest validation layer. Depends on model/policy only and never invokes accessors. |
+| `finding-validation.ts` | Locator, check group, rule-specific evidence, Finding, and ScannerReviewObservation validation | Evidence layer. Depends on policy, model, and value readers; owns no collection or parent lifecycle state. |
+| `scan-validation.ts` | Scan context, complete-context assertion, coverage reconciliation, unique IDs, collection ordering, internal `readScan`, and public `validateScan` | Scan coordinator. Depends downward on finding validation and readers; exports only required internal seams to run validation. |
+| `run-validation.ts` | Provider context, chronology, status-specific key sets, cleanup/failure relationships, internal `readRun`, and public `validateRun` | Parent-run coordinator. Depends on scan validation and lower layers; catches all inspection failures at the public boundary. |
+
+Permitted local structural refactor is limited to declaration moves, type-only imports, frozen policy-tuple construction, intention-revealing internal exports, and stable façade re-exports. Do not introduce a schema framework, generic parser, class, dependency container, per-rule module, scanner-reader reuse, compatibility wrapper, or index barrel. Cohesion disposition after Green must be `REFACTORED` or the worker must return `RECONCILE` and stop.
+
+Risk is `S3` because the module validates unknown persisted data, enforces privacy allowlists and identity/collection integrity, suppresses hostile inspection errors, and protects lifecycle chronology. A fresh `critical_reviewer` must inspect accessor/prototype/key/array safety, frozen policy values, exact evidence allowlists, validation precedence, detachment/freezing, coverage and identity rules, lifecycle constraints, public compatibility, dependency direction, and decisive evidence.
+
+Post-Green validation includes the exact 30-case contract suite, strict TypeScript, syntax checks for the façade and all six modules, the complete 290-case backend/scanner regression under the required scanner environment, and `npm run build` because browser admission imports `validateRun`. Verification must show unchanged tests, fixtures, dependencies, package metadata and TypeScript configuration; exact stable public exports; empty scanner scratch; and removal of generated `dist/client` and `.vite-temp` output. The complete 30-case browser suite remains deferred to the real HTTP integration checkpoint because this structural slice changes no rendered or interaction behavior.
+
 ## Concrete Steps
 
 Work from `C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab`.
 
-The first eight steps below are complete for the local-service slice. Repeat the same barriers for the scanner slice with its distinct identities and scope.
+The first two structural slices and their corrections are complete. Repeat the same barriers for the run-contract slice with its distinct identities, scope, build check, and S3 review contract.
 
 1. Confirm the task is In progress, the worktree/index baseline, no active lease, and the exact allowed Green paths.
 2. Send Milestone Assignment Packet v2 for read-only preflight to one persistent `test_worker`.
@@ -224,15 +281,39 @@ Accept `M105-SCANNER-MODULE-REFACTOR-02` only when:
 
 The scanner tests receive the same relevance audit. The expected outcome is no change: the 20 normalization cases and 68 scan-execution cases remain the behavior boundary, with no file-layout assertions, implementation snapshots, skipped cases, or focused-only markers added.
 
+Accept `M105-RUN-CONTRACT-MODULE-REFACTOR-03` only when:
+
+- the test worker independently classifies the behavior as `EXISTING_AND_COVERED` and the 30 static contract cases execute 58 passing TAP tests unchanged;
+- the public façade exports exactly the current seven public types and two runtime validators, and every current consumer continues importing from the same path;
+- exact values, key requirements, safe-inspection behavior, bounded errors, immutability, ordering, coverage, identity, chronology, cleanup, and failure semantics remain unchanged;
+- every policy tuple exported between internal modules is frozen and has no mutable backing alias;
+- only the seven allowed production paths change and the internal import graph is acyclic and points from coordinators to lower validation layers;
+- strict TypeScript, seven syntax checks, the 30 focused cases, all 290 backend/scanner cases, and the production build pass;
+- scanner scratch and generated build output are removed, protected inputs are unchanged, and the implementation worker reports cohesion `REFACTORED` with primary acceptance;
+- fresh S3 review returns PASS with no unresolved finding; and
+- documentation closure records that the change is internal, preserves the canonical aggregate and public behavior, and does not complete M1-05.
+
+The 30 static contract cases and their 28 generated concealed-array-extension cases receive the same relevance audit. The expected outcome is no change: all 58 TAP tests remain behavior-oriented through the stable façade, with no file-layout assertions, snapshots, skipped cases, todos, or focused-only markers added.
+
 ## Idempotence and Recovery
 
 Read-only inspection and verification commands are safe to repeat after confirming no owned processes or test residue remain. The extraction is additive except for moved declarations inside `service.ts`; a stopped worker must not be reset or reverted automatically. Close the lease, inspect the actual five-path state, preserve unrelated work, and issue at most one fresh attempt-2 packet with the same scope and terminal attempt-1 parent when the correction remains inside the frozen contract.
+
+For the run-contract slice, the extraction is additive except for declarations moved from the façade. A stopped worker must preserve the seven-path state; the primary closes the lease, inspects exact exports and dependencies, and may issue one attempt-2 packet only for the same frozen contract. A cycle, public-boundary drift, validation change, mutable policy, or need for another path requires reconciliation rather than automatic continuation.
 
 An unexpected file, changed test, Git mutation, public API drift, behavior difference, active-resource leak, or need for shared lifecycle state outside `service.ts` freezes writes. The primary reconciles the tree and this plan before any new assignment. No worker stages, commits, pushes, changes refs, stashes, worktrees, remotes, repository configuration, or hooks.
 
 ## Artifacts and Notes
 
 Retain in this plan only the accepted preflight identity and result, Green lease/digest/receipt, exact changed paths, focused/strict/syntax/full results, cohesion disposition, reviewer verdict, and any bounded correction lineage. Guard runtime records remain ignored workflow state and are not copied into tracked documentation.
+
+Accepted preflight `M105-RUN-CONTRACT-MODULE-REFACTOR-03-PREFLIGHT-01` ran `node --test --test-timeout=120000 tests/run-contract.test.ts` at HEAD `eb408882fad215b72ca6f6cbc9f8730a3050f145`: the 30 static cases and 28 generated concealed-array-extension cases produced 58 passes, zero failures/cancellations/skips/todos, and 415.943 milliseconds duration. Source and test identities remained `run-contract.ts` `3585bd3621d7e24b234b03e5be68e4feafdf2c3280b102dabb0294b1767df37e` and `run-contract.test.ts` `e97aac5b0e77bda74381a44c3052637d4d46e05e166bc9f6be4495df6b4130c4`. The worker classified `EXISTING_AND_COVERED`; no test write or artificial Red is needed.
+
+Accepted Green/Refactor assignment `M105-RUN-CONTRACT-MODULE-REFACTOR-03-GREEN-01` used lease `M1-05-20260902-03-run-contract-refactor-green-01`, guard digest `b6dfb54651215e5772038e2b0214fc7dad52fde22acfac9180c3bb896872ad26`, and compliant close receipt `88f5727fc0dbb38105ec90811ac8a8e5ae9251780b690213b032257e2857979a`. It modified only `src/server/domain/run-contract.ts` and created the six approved files under `src/server/domain/run-contract/`; no test, dependency, fixture, executable configuration, unrelated source, index, or Git reference changed. The implementation worker reported cohesion `REFACTORED`, and primary inspection accepted the façade, responsibility placement, and acyclic import direction. Current production identities are `run-contract.ts` `0546bd5586145fc3a5e653e189630559ac6399477a7f28bc1ff7a5a9acee8707`, `run-types.ts` `ca5cf83a234d814cd59bdac14058aa8d6ce25d51c201c2576f3c91aa87bc2131`, `run-policy.ts` `0123e4118cc424b3cdb3e58138e1b9eef24cfeee92e6d4399e75f4e7c1e4b969`, `contract-value-reader.ts` `1ffd1c19fda7cd17fc8cb942e16c2dbdbc5fa93403ea9746f8cb59438ceb51b9`, `finding-validation.ts` `a7e693ea43a0557ea2c75937ec90a3fee9ac96f2e1b822f40f1618ce548ae6fe`, `scan-validation.ts` `7bf5dab81ca4a9f1f7d530d47fb40e9dc0c768b167b2eb5ddba3578894b9f648`, and `run-validation.ts` `3491f707d4932106df0f3124f2a9dfc47fac14bf44928536ec6e338369083004`.
+
+Post-Green verification passed 58 of 58 focused TAP tests and 290 of 290 complete backend/scanner tests with zero failure, cancellation, skip, or todo. Strict TypeScript, syntax checks for all seven production modules, and the native Vite production build passed. Runtime inspection found exactly `validateRun` and `validateScan` on the public façade. A process-isolated probe found all 16 exported internal policy arrays frozen, rejected mutation of each, and retained every value. Static import inspection found no dependency cycle. `tests/run-contract.test.ts`, `package.json`, `package-lock.json`, and `tsconfig.json` retained their accepted identities. Repository-owned scanner scratch and generated `dist/client` output were removed after verification; `.vite-temp` remained absent. Fresh S3 review remains the acceptance barrier.
+
+Fresh review `M105-RUN-CONTRACT-MODULE-REFACTOR-03-REVIEW-01` returned PASS with no Blocker, Major, or Minor finding and accepted cohesion as `REFACTORED`. The reviewer independently passed all 58 focused tests, strict TypeScript, seven syntax checks, exact runtime-export inspection, frozen-policy and privacy probes, a deep walk of 92 frozen returned containers, 1,076 deterministic old-monolith versus extracted-validator comparisons, and an exact 216-event proxy inspection-order comparison with zero property-get traps. The reviewed production and protected-input identities matched the accepted Green and complete-regression/build evidence; the lease remained compliant, scratch and generated output were absent, the retained browser runtime remained intact, and M1-05 remained In progress. No requirement, ADR, public-contract, persistence-format, test, dependency, or product-authority change is required because this slice preserves the accepted behavior and boundary.
 
 Accepted preflight `M105-LOCAL-SERVICE-MODULE-REFACTOR-01-PREFLIGHT-01` ran `node --test --test-timeout=120000 tests/local-service.test.ts` under Node 24.20.0 at HEAD `696042e664d27de83f65a7d8a680f0388b541486`: 69 passed, zero failed/cancelled/skipped/todo. Frozen source/test identities are `service.ts` `3502789d6edea78d93e2659f8731e7ff060f9c897b77bc667be45a0127a78c1f`, `local-service.test.ts` `b9aa1dc1fb6ec5c9dba3e5937de761eb91edeb913cdc93a5989e934ef79aab89`, `main.ts` `854b90af5dd4f94c0144ab8a96369f28f360aa48661c5be044b831b13782ee39`, and `scan-page.test.ts` `f9247f87b8271f1fad308b6b27f3aed5c0dd6836511e6bc83666d038134aff84`. No file changed and no test resource remained.
 
@@ -261,6 +342,8 @@ Renewed review `M105-SCANNER-MODULE-REFACTOR-02-S3-REVIEW-02` returned PASS with
 ## Interfaces and Dependencies
 
 The completed slice preserves the public `src/server/service.ts` import boundary. `contracts.ts` contains types only. `input-validation.ts` depends on domain validation and Node UUID generation only as needed to prepare a running record. `scan-run-records.ts` depends on domain validation, deep equality, and persistence record types. `loopback-api.ts` depends on the default `node:http` object and narrow lifecycle/read callbacks. `service.ts` depends on those internal modules plus the existing repository. No new package, route, environment variable, stored field, build setting, browser runtime, or external service is introduced.
+
+The run-contract slice preserves `src/server/domain/run-contract.ts` as the sole public import boundary. Internally, fixed policy and model types are the lowest layers; hostile-value readers depend on them; finding validation depends on readers; scan validation depends on finding validation; and parent-run validation depends on scan validation. The browser receives only the existing validator through the façade. Scanner-native readers and policies remain separate trust-boundary implementations. No public export, persisted field, package, schema dialect, code generator, or runtime service is introduced.
 
 ## Revision Note
 
@@ -291,3 +374,9 @@ The completed slice preserves the public `src/server/service.ts` import boundary
 2026-09-02: Accepted the fresh compliant attempt-2 policy-integrity correction and renewed mutation, focused, complete-regression, strict, syntax, identity, and scratch evidence. Only the six policy tuple constructions changed; renewed S3 review is next.
 
 2026-09-02: Closed the scanner policy-integrity follow-up after renewed S3 review returned PASS with no finding, independently confirmed unknown-key withholding, and accepted cohesion as `REFACTORED`. The scanner structural slice is accepted again; M1-05 remains In progress for HTTP scan integration and its browser/build checkpoint.
+
+2026-09-02: Added owner-approved `M105-RUN-CONTRACT-MODULE-REFACTOR-03` as the third behavior-preserving M1-05 structural slice. Recorded the stable façade, six-module responsibility boundary, frozen internal policy, existing 30-case characterization route, acyclic dependencies, S3 triggers, guarded ownership, build and regression verification, cleanup criteria, and unchanged later integration work.
+
+2026-09-02: Accepted independent run-contract preflight as `EXISTING_AND_COVERED`. Corrected the evidence wording to distinguish 30 static cases from 58 executed TAP tests; source/tests remain unchanged and the guarded seven-path Green/Refactor is next.
+
+2026-09-02: Accepted the compliant seven-path run-contract Green/Refactor, complete focused/regression/type/syntax/build/mutation/export/cleanup evidence, and fresh S3 PASS with no finding. The third structural slice is complete and documentation is reconciled; M1-05 remains In progress for HTTP scan integration and its browser checkpoint.
