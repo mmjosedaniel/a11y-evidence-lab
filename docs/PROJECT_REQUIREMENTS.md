@@ -16,10 +16,10 @@
 - **Closed corpus and Local-mode data boundaries:** Accepted on 2026-08-27 through ADR-0022 and ADR-0023
 - **Fixed three-scenario evaluation baseline:** Retained from OD-019 for deterministic evaluation
 - **MVP persona, provider, startup, retention, evaluation, workflow, and UI-presentation narrowing:** Accepted or Deferred as recorded through OD-027
-- **Implementation status:** RD-002 toolchain, RD-003 evaluation freeze, and M1-01 through M1-04 are Complete. M1-05 is In progress after accepted behavior-preserving local-service, scanner, and run-contract module refactors. The accepted OD-026 no-reopen boundary is unchanged, and HTTP scan integration remains unimplemented.
+- **Implementation status:** RD-002 toolchain, RD-003 evaluation freeze, and M1-01 through M1-04 are Complete. M1-05 is In progress after accepted behavior-preserving local-service, scanner, run-contract, and run-repository module refactors. The accepted OD-026 no-reopen boundary is unchanged, and HTTP scan integration remains unimplemented.
 - **Last reviewed:** 2026-09-02 (UTC)
 - **Latest fully closed task:** M1-04. Its full implementation and closure history remains preserved in the [completed plan](plans/completed/m1-04-target-and-results-ui.md).
-- **Current task:** M1-05 only. The owner explicitly selected and completed behavior-preserving local-service, scanner, and run-contract structural slices before the later HTTP scan integration checkpoint.
+- **Current task:** M1-05 only. The owner explicitly selected and completed behavior-preserving local-service, scanner, run-contract, and run-repository structural slices before the later HTTP scan integration checkpoint.
 
 This document is the canonical index and global authority for the current product goal and the modular, stage-scoped requirements baseline. The linked requirement modules collectively define the first portfolio slice and later distributable-product obligations; none describes implemented behavior. Requirement status has the following meaning:
 

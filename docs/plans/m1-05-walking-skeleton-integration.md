@@ -2,7 +2,7 @@
 
 This ExecPlan is a living document. Maintain `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` as work proceeds. This document must be maintained in accordance with `PLANS.md`.
 
-This plan owns only [M1-05 — Integrate and verify the walking skeleton](../DEVELOPMENT_ROADMAP.md#m1-05--integrate-and-verify-the-walking-skeleton). The owner explicitly selected M1-05 and approved the structural slices described below. The first preserved the existing loopback-service behavior while giving its stateless responsibilities focused modules. The second preserved scanner behavior while extracting stateless request preparation, native capture, value reading, and rule-evidence projection from its two ordering-sensitive coordinators. The third preserves the `run-contract.ts` public boundary while separating its contract model, fixed policy, hostile-value reader, finding validation, scan validation, and parent-run validation. None of these slices connects the HTTP Analyze path to the real scanner, completes the milestone integration checkpoint, authorizes M2 work, or authorizes a commit or push.
+This plan owns only [M1-05 — Integrate and verify the walking skeleton](../DEVELOPMENT_ROADMAP.md#m1-05--integrate-and-verify-the-walking-skeleton). The owner explicitly selected M1-05 and approved the structural slices described below. The first preserved the existing loopback-service behavior while giving its stateless responsibilities focused modules. The second preserved scanner behavior while extracting stateless request preparation, native capture, value reading, and rule-evidence projection from its two ordering-sensitive coordinators. The third preserves the `run-contract.ts` public boundary while separating its contract model, fixed policy, hostile-value reader, finding validation, scan validation, and parent-run validation. The fourth preserves the `run-repository.ts` public boundary while extracting its public contracts, bounded errors, Windows path protection, and transition validation from the ordering-sensitive repository coordinator. None of these slices connects the HTTP Analyze path to the real scanner, completes the milestone integration checkpoint, authorizes M2 work, or authorizes a commit or push.
 
 ## Progress
 
@@ -26,6 +26,11 @@ This plan owns only [M1-05 — Integrate and verify the walking skeleton](../DEV
 - [x] (2026-09-02) Completed the guarded seven-path contract Green/Refactor under a separate `code_worker` lease without changing tests. The lease closed compliant with exactly the seven authorized source paths, and both worker and primary inspection accepted cohesion as `REFACTORED`.
 - [x] (2026-09-02) Passed the unchanged 58-test focused boundary, complete 290-case regression, strict TypeScript, seven syntax checks, production build, exact runtime-export check, 16-policy-tuple mutation probe, dependency inspection, protected-input identity checks, and bounded generated-output cleanup.
 - [x] (2026-09-02) Accepted fresh S3 PASS with no Blocker, Major, or Minor finding. The reviewer independently validated hostile-value inspection, fixed policy, evidence privacy, validation precedence, immutable output, collection and lifecycle integrity, stable exports, exact behavior against the prior implementation, and cohesion as `REFACTORED`; completed documentation reconciliation while keeping M1-05 In progress.
+- [x] (2026-09-02) Received explicit owner approval of `M105-RUN-REPOSITORY-MODULE-REFACTOR-04` with the stable public entry point, four focused internal modules, 55-case characterization boundary, and behavior-preserving persistence constraints.
+- [x] (2026-09-02) Completed R0 source, consumer, authority, and test analysis. The 270-line repository contains separable contract, error, Windows path-safety, transition, and stateful publication responsibilities; the focused suite passes 55/55 and no new dependency or significant architecture decision is required.
+- [x] (2026-09-02) Accepted independent read-only `EXISTING_AND_COVERED` preflight: all 55 repository cases passed with no failure, cancellation, skip, todo, source/test change, or retained test-owned residue.
+- [x] (2026-09-02) Completed the guarded five-path repository Green/Refactor without changing tests. The lease closed fresh and compliant; focused 55-case, complete 290-case, strict TypeScript, five syntax, stable-export/import, identity, and cleanup checks pass.
+- [x] (2026-09-02) Accepted fresh S3 PASS with no Blocker, Major, or Minor finding. The reviewer independently validated Windows path and identity protection, publication and interruption ordering, cleanup truthfulness, error precedence, stable exports, dependency direction, and cohesion as `REFACTORED`; completed documentation reconciliation while keeping M1-05 In progress.
 - [ ] Implement the separately planned HTTP scan integration and complete M1-05's browser/build integration checkpoint before task closure.
 
 ## Surprises & Discoveries
@@ -40,6 +45,8 @@ This plan owns only [M1-05 — Integrate and verify the walking skeleton](../DEV
 - Observation: The first scanner-preflight packet named a nonexistent historical M1-03 plan path. Evidence: the test worker returned `UNKNOWN` before running tests; `docs/README.md` identifies `docs/plans/completed/m1-03-real-scan-and-evidence.md` as the accepted completed plan. The corrected read-only packet used that authority and produced fresh focused evidence without a write.
 - Observation: TypeScript `as const` does not freeze a JavaScript array. Evidence: a process-isolated import of the accepted Green changed `scanRules` with `pop()`, causing later `initialScanContext()` and `nativeScanOptions()` calls to expose only two rules; extending `nativeBuckets` changed later result types, and extending `messageKeys` widened the normalization allowlist. This is an internal policy-integrity defect even though no current production consumer mutates the exports.
 - Observation: `src/server/domain/run-contract.ts` has 497 lines and six ordered responsibility clusters: public/internal contract types and policy at lines 1–147, descriptor-safe unknown-value reading at 149–260, finding/evidence validation at 262–373, scan validation at 375–431, and parent-run validation at 434–497. Evidence: complete source inspection plus 30 behavior-oriented cases in `tests/run-contract.test.ts` and imports across server, scanner, persistence, and browser code.
+- Observation: `src/server/persistence/run-repository.ts` has 270 lines and five responsibility clusters: public contracts, bounded store errors, Windows identifier/path and filesystem-identity checks, immutable transition validation, and the stateful repository/publication coordinator. Evidence: complete source and consumer inspection plus 55 passing repository cases covering real filesystem topology, staged-write faults, cleanup ownership, and process interruption around rename.
+- Observation: Atomic publication and cleanup share descriptor, staged-path, directory-identity, canonical-identity, and commit-point state. Evidence: the `publish` closure performs exclusive stage creation, identity checks, short-write completion, flush, close, topology revalidation, rename, and verified cleanup in one sequence; extracting it would require a new one-consumer transaction abstraction and weaken auditability.
 
 ## Decision Log
 
@@ -67,10 +74,19 @@ This plan owns only [M1-05 — Integrate and verify the walking skeleton](../DEV
 - Decision: Freeze every policy tuple exported between internal contract modules and reuse the existing 30 contract cases without a layout test.
   Rationale: Module extraction turns private tuples into internal exports, so runtime immutability must enforce their fixed contract. Existing tests cover observable validation; file-layout assertions would couple tests to private structure.
   Date/Author: 2026-09-02 / project owner and primary coordinator.
+- Decision: Preserve `src/server/persistence/run-repository.ts` as the only public repository entry point and extract `contracts.ts`, `store-errors.ts`, `windows-run-paths.ts`, and `run-transition.ts` under `src/server/persistence/run-repository/`.
+  Rationale: These modules own four current cohesive responsibilities while every external production and test consumer retains the existing import path.
+  Date/Author: 2026-09-02 / project owner and primary coordinator.
+- Decision: Keep root identity, canonical reads, the complete `publish` transaction, `create`/`read`/`finish`, rollback, cleanup, and error precedence together inside `openRunRepository`.
+  Rationale: They form one ordering-sensitive integrity boundary whose shared state determines whether canonical bytes were committed and whether cleanup is known to have succeeded.
+  Date/Author: 2026-09-02 / project owner and primary coordinator.
+- Decision: Reuse the existing 55 repository cases and add no private-layout test if independent preflight returns `EXISTING_AND_COVERED`.
+  Rationale: The suite already exercises the observable persistence and failure contract. A file-placement assertion would add coupling without improving data-integrity evidence.
+  Date/Author: 2026-09-02 / project owner and primary coordinator.
 
 ## Outcomes & Retrospective
 
-The local-service, scanner, and run-contract structural extractions and their verification barriers are complete. The stable run-contract façade now delegates to six focused modules without changing the persisted format, public imports, or accepted validation behavior. M1-05 remains In progress because real HTTP scanner integration and the milestone-level end-to-end browser checkpoint remain outstanding.
+The local-service, scanner, run-contract, and run-repository structural extractions and their verification barriers are complete. M1-05 remains In progress because real HTTP scanner integration and the milestone-level end-to-end browser/build checkpoint remain outstanding.
 
 ## Purpose / Big Picture
 
@@ -79,6 +95,8 @@ The current local service behavior is well tested, but its public contracts, inp
 The later M1-05 integration work will connect the already implemented service, scanner, persistence, and UI. This structural slice prepares that work without adding the missing route or changing a public result.
 
 The third slice makes the central unknown-data and persisted-aggregate boundary easier to inspect without weakening it. A reviewer should see a small stable `run-contract.ts` façade, focused internal modules with acyclic dependencies, and the same accepted results across all 30 contract cases and every current consumer.
+
+The fourth slice makes the filesystem repository easier to audit without separating its commit protocol. A reviewer should see a stable `run-repository.ts` entry point, four focused internal modules, the complete publication sequence still locally visible, and unchanged results across all 55 repository cases and every current consumer.
 
 ## Context and Orientation
 
@@ -108,6 +126,8 @@ It excludes:
 - M1-05 completion, M2 work, commit, or push.
 
 The run-contract slice includes only declaration moves into the six named modules, frozen internal policy tuples, the minimum internal exports needed by the next validation layer, and stable type/function re-exports from `run-contract.ts`. It excludes persistence-format changes, new accepted values, error or precedence changes, scanner-policy consolidation, one-file-per-rule decomposition, generic schema/reader abstractions, JSON Schema, validation libraries, UI behavior, and new public helpers.
+
+The run-repository slice includes only declaration moves into four named modules, the minimum internal exports needed by the coordinator, and stable type/callable re-exports from `run-repository.ts`. It excludes persistence-format or API changes, recovery, locking, retries, staging-file sweeping or promotion, a filesystem adapter, repository class, transaction framework, generic path library, dependency, migration, UI behavior, and changes to completed M1-02 authorities or tests.
 
 ## Plan of Work
 
@@ -237,11 +257,47 @@ Risk is `S3` because the module validates unknown persisted data, enforces priva
 
 Post-Green validation includes the exact 30-case contract suite, strict TypeScript, syntax checks for the façade and all six modules, the complete 290-case backend/scanner regression under the required scanner environment, and `npm run build` because browser admission imports `validateRun`. Verification must show unchanged tests, fixtures, dependencies, package metadata and TypeScript configuration; exact stable public exports; empty scanner scratch; and removal of generated `dist/client` and `.vite-temp` output. The complete 30-case browser suite remains deferred to the real HTTP integration checkpoint because this structural slice changes no rendered or interaction behavior.
 
+### M105-RUN-REPOSITORY-MODULE-REFACTOR-04 — persistence responsibility extraction
+
+The observable contract is exact behavior preservation. `RunningRun`, `CompletedRun`, `FailedRun`, `TerminalRun`, `StoreError`, `StoreResult`, `RunRepository`, and `openRunRepository` remain importable from `src/server/persistence/run-repository.ts`. Synchronous results, validation and error precedence, Windows root and identifier admission, exact spelling, topology and identity checks, aggregate serialization, detached immutable reads, transition rules, staged publication, commit-point semantics, canonical-byte preservation, and cleanup truthfulness remain unchanged.
+
+TDD is applicable because application source changes. The planned preflight classification is `EXISTING_AND_COVERED`, subject to an independent read-only `test_worker` report. The focused characterization command is:
+
+    node --test --test-timeout=120000 tests/run-repository.test.ts
+
+Expected result: 55 passing cases with zero failures, cancellations, skips, or todos and no retained test-owned filesystem residue. No test write follows an accepted `EXISTING_AND_COVERED` result.
+
+The standard-profile Green/Refactor uses one `code_worker` turn under a lease allowing only:
+
+- `src/server/persistence/run-repository.ts`
+- `src/server/persistence/run-repository/contracts.ts`
+- `src/server/persistence/run-repository/store-errors.ts`
+- `src/server/persistence/run-repository/windows-run-paths.ts`
+- `src/server/persistence/run-repository/run-transition.ts`
+
+The accepted test and all other source, documentation, dependency, fixture, executable configuration, generated output, and Git metadata are forbidden. One same-contract correction is available only if attempt 1 stops on one bounded implementation defect without changing the authority, paths, or behavioral contract. An unexpected path, test change, public-export difference, error-precedence change, captured named filesystem callable, publication-state extraction, cleanup difference, or need for another path stops the slice.
+
+Responsibility and cohesion contract:
+
+| Production owner | Responsibility after the slice | Fit and dependency direction |
+| --- | --- | --- |
+| `src/server/persistence/run-repository.ts` | Stable public entry point; captured root identity, root/run/canonical revalidation, validated current reads, complete staged publication and cleanup, and `create`/`read`/`finish` coordination | Retained integrity coordinator. Imports the four focused modules and re-exports public contracts; all publication state remains local. |
+| `run-repository/contracts.ts` | Existing public run aliases, closed store errors/results, and repository interface | Type-only extraction. Depends on the stable domain contract; external consumers continue through the façade. |
+| `run-repository/store-errors.ts` | Internal bounded exception, rejection, failure-result mapping, and native error-code inspection | Lowest operational-error layer. Depends only on public store result/error types and exposes no raw exception content. |
+| `run-repository/windows-run-paths.ts` | Run-ID and reserved-name policy, absolute-root validation/establishment, case-insensitive entry discovery, exact-name enforcement, ordinary file/directory checks, real-path comparison, and `dev`/`ino` identity comparison | Focused filesystem-safety layer. Retains the default `node:fs` object so existing fault interception remains effective. |
+| `run-repository/run-transition.ts` | Pure compatibility validation from a persisted running record to a proposed terminal record | Focused domain-transition layer. Depends on public run aliases and bounded rejection; owns no filesystem or repository state. |
+
+Keep `checkRoot`, `checkRun`, `checkCanonical`, `readCurrent`, the complete `publish` transaction, directory rollback, and the three repository methods inside `openRunRepository`. Permitted local refactor is limited to declaration moves, intention-revealing internal exports, type-only imports, and stable façade re-exports. Do not introduce a filesystem adapter, repository class, transaction framework, locking, retries, recovery or staging sweep, generic path library, new dependency, compatibility wrapper, or barrel. Cohesion disposition after Green must be `REFACTORED` or the worker must return `RECONCILE` and stop.
+
+Risk is `S3` because path identity, reparse/hard-link rejection, write atomicity, process interruption, cleanup ownership, and no-partial-publication are critical even though the intended change is structural. A fresh `critical_reviewer` must inspect default filesystem-object use, exact Windows admission, repeated topology checks, descriptor/path identity, short-write and close behavior, rename as the final filesystem operation, failure and cleanup precedence, public compatibility, dependency direction, and decisive evidence.
+
+Post-Green validation includes the exact 55-case repository suite, strict TypeScript, syntax checks for all five resulting modules, stable runtime/type export and external-consumer inspection, and the complete 290-case backend/scanner regression under the required scanner environment. Verification must show unchanged tests, fixtures, dependencies, package metadata, TypeScript configuration, persisted format, retained browser runtime, and absent generated output; scanner scratch must be empty and removed after use. Browser UI and production-build verification remain deferred to the real HTTP integration checkpoint because this slice changes no UI, browser runtime, or client import.
+
 ## Concrete Steps
 
 Work from `C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab`.
 
-The first two structural slices and their corrections are complete. Repeat the same barriers for the run-contract slice with its distinct identities, scope, build check, and S3 review contract.
+The first four structural slices and their corrections are complete. The next implementation must use the separately planned HTTP scan-integration boundary and its integration-specific verification contract.
 
 1. Confirm the task is In progress, the worktree/index baseline, no active lease, and the exact allowed Green paths.
 2. Send Milestone Assignment Packet v2 for read-only preflight to one persistent `test_worker`.
@@ -295,17 +351,40 @@ Accept `M105-RUN-CONTRACT-MODULE-REFACTOR-03` only when:
 
 The 30 static contract cases and their 28 generated concealed-array-extension cases receive the same relevance audit. The expected outcome is no change: all 58 TAP tests remain behavior-oriented through the stable façade, with no file-layout assertions, snapshots, skipped cases, todos, or focused-only markers added.
 
+Accept `M105-RUN-REPOSITORY-MODULE-REFACTOR-04` only when:
+
+- the test worker independently classifies the behavior as `EXISTING_AND_COVERED` and all 55 repository cases pass unchanged;
+- the façade preserves the current seven public types and `openRunRepository`, and every current production/test consumer continues importing through it;
+- Windows path admission, exact spelling, collision handling, topology and filesystem identity, validation and error precedence, transition rules, serialization, publication ordering, interruption behavior, canonical-byte preservation, and cleanup truthfulness remain unchanged;
+- the default `node:fs` value object remains the call surface in every module that performs filesystem operations, and staged publication state remains inside `openRunRepository`;
+- only the five allowed production paths change, with no test, fixture, dependency, configuration, persisted-format, generated-output, or Git-state drift;
+- strict TypeScript, five syntax checks, all 55 focused cases, and all 290 backend/scanner cases pass, with empty scanner scratch and unchanged retained browser runtime;
+- the implementation worker reports cohesion `REFACTORED`, primary inspection accepts it, and fresh S3 review returns PASS with no unresolved finding; and
+- documentation closure records that the change is internal, preserves ADR-0021 and completed M1-02 semantics, and does not complete M1-05.
+
+The repository tests receive the same relevance audit. The expected outcome is no change: all 55 cases remain behavior-oriented through the stable façade, with real filesystem and process-interruption coverage and no file-layout assertions, snapshots, skipped cases, todos, or focused-only markers added.
+
 ## Idempotence and Recovery
 
 Read-only inspection and verification commands are safe to repeat after confirming no owned processes or test residue remain. The extraction is additive except for moved declarations inside `service.ts`; a stopped worker must not be reset or reverted automatically. Close the lease, inspect the actual five-path state, preserve unrelated work, and issue at most one fresh attempt-2 packet with the same scope and terminal attempt-1 parent when the correction remains inside the frozen contract.
 
 For the run-contract slice, the extraction is additive except for declarations moved from the façade. A stopped worker must preserve the seven-path state; the primary closes the lease, inspects exact exports and dependencies, and may issue one attempt-2 packet only for the same frozen contract. A cycle, public-boundary drift, validation change, mutable policy, or need for another path requires reconciliation rather than automatic continuation.
 
+For the run-repository slice, the extraction is additive except for declarations moved from the façade. A stopped worker must preserve the five-path state; the primary closes the lease, inspects exact exports, filesystem imports, publication placement, and focused behavior, and may issue one attempt-2 packet only for the same frozen contract. Public-boundary drift, changed error or cleanup precedence, movement of publication state, or need for another path requires reconciliation rather than automatic continuation.
+
 An unexpected file, changed test, Git mutation, public API drift, behavior difference, active-resource leak, or need for shared lifecycle state outside `service.ts` freezes writes. The primary reconciles the tree and this plan before any new assignment. No worker stages, commits, pushes, changes refs, stashes, worktrees, remotes, repository configuration, or hooks.
 
 ## Artifacts and Notes
 
 Retain in this plan only the accepted preflight identity and result, Green lease/digest/receipt, exact changed paths, focused/strict/syntax/full results, cohesion disposition, reviewer verdict, and any bounded correction lineage. Guard runtime records remain ignored workflow state and are not copied into tracked documentation.
+
+Accepted preflight `M105-RUN-REPOSITORY-MODULE-REFACTOR-04-PREFLIGHT-01` ran `node --test --test-timeout=120000 tests/run-repository.test.ts` at HEAD `d30c5616342cb92999772250b36f31fb0341f657`: 55 tests passed with zero failures, cancellations, skips, or todos. Source and test identities remained `run-repository.ts` `58ced192be1386e8052f370a12d0bd3b68858dab7127a2843b1652cda74c0625` and `run-repository.test.ts` `20629f51635028cad097831e2d653c41a25aaadfd79458232d8b2dea45263e73`; the domain façade, service, package, lockfile, and TypeScript configuration also retained their recorded identities. The worker independently mapped stable exports and consumers, immutable round trips, schema/ID/transition/error precedence, Windows root and topology protection, repeated identity checks, short-write and flush/close/rename ordering, every staged-write and cleanup fault, canonical-byte preservation, commit-point behavior, and actual child interruption immediately before and after rename. No test write or artificial Red is needed. Two initial fingerprint probes guessed absent paths and exited without changing repository state; corrected inspection used the actual domain façade and npm lockfile.
+
+Accepted Green/Refactor assignment `M105-RUN-REPOSITORY-MODULE-REFACTOR-04-GREEN-01` used lease `M1-05-20260902-04-run-repository-refactor-green-01`, guard digest `f1a8f7d4dbf3884ba66c11f61387c3ac8065f2148dd8b35a032071e8190e2c41`, and fresh compliant receipt `0026f50a4464d7eb23e0c4ed7f56598baa090613a7f60a7c04e33f82bd3e468c`. It modified only `src/server/persistence/run-repository.ts` and created the four approved files under `src/server/persistence/run-repository/`; no test, fixture, dependency, configuration, unrelated source, index, HEAD, branch, or ignore-control drift occurred. The first focused Green run passed 3 and failed 52 because the initial extraction omitted the `ordinaryDirectory` façade import; the worker corrected that same-scope extraction defect within the same lease, and the final focused run passed all 55. Both worker and primary inspection accept cohesion as `REFACTORED`: the façade retains all captured repository/publication/cleanup state, while the four modules own only their declared responsibilities. Current production identities are `run-repository.ts` `0440ac6ed5ede1445b4ffaeeea3b525ef0fe63fc9f4b88cf69bd136d9f41816a`, `contracts.ts` `7b0511655d8b7b20e97823b6a10fdf5aa567bb9320fe9c7fd9ae9215f178394d`, `store-errors.ts` `4c0b21dccc864df7c59fe0f13f4380e67ba5f9632bba6cedebac220ef8bf987d`, `windows-run-paths.ts` `391cfd03d57e82ecdada07d5c0c398a9f14d17a0ed2fe9d14a827b9896e360d0`, and `run-transition.ts` `b844ddfce3c52e9848376c3f9bbec06b676dfe4897987e183186eea9d9807466`.
+
+Post-Green verification passed all 55 focused repository tests and all 290 complete backend/scanner tests with zero failure, cancellation, skip, or todo. Strict TypeScript and five syntax checks passed. Runtime façade inspection found exactly `openRunRepository`; static consumer inspection found no external deep import. Both filesystem-calling modules retain the shared default `node:fs` object, the complete publication state remains inside `openRunRepository`, and no filesystem operation follows successful rename. The test, package, lockfile, and TypeScript-configuration hashes remain unchanged. Scanner scratch was empty and removed, the retained Chromium inventory remains 331 entries, and `dist/client` and `.vite-temp` are absent.
+
+Fresh review `M105-RUN-REPOSITORY-MODULE-REFACTOR-04-REVIEW-01` returned PASS with no Blocker, Major, or Minor finding and accepted cohesion as `REFACTORED`. The reviewer independently passed all 55 focused repository tests, strict TypeScript, five syntax checks, exact runtime-export inspection, and external-import inspection. It confirmed Windows drive-absolute and reserved-name admission, exact spelling and collision handling, repeated real-path and filesystem-identity checks, link/junction/hard-link rejection, short-write/flush/close/rename ordering, canonical-byte preservation, bounded cleanup ownership, truthful `cleanupFailed`, error precedence, shared default-`node:fs` interception, and the retained stateful publication coordinator. Reviewed production identities matched the accepted Green and exact-identity 290-case regression evidence; the lease receipt remained compliant, scratch and generated output were absent, and the retained Chromium runtime remained intact. Final documentation validation resolved 517 relative-link targets across ten changed documents with zero broken target, reconciled every current task-status statement, and passed `git diff --check`. Accepted limitations remain ordinary local Windows filesystem operation without guarantees against malicious same-user races, concurrent writers, operating-system or power loss, storage-filter stalls, or abandoned-stage recovery. No requirement, ADR, public contract, persistence format, test, dependency, or product-authority change is required because this slice preserves the accepted behavior and boundary.
 
 Accepted preflight `M105-RUN-CONTRACT-MODULE-REFACTOR-03-PREFLIGHT-01` ran `node --test --test-timeout=120000 tests/run-contract.test.ts` at HEAD `eb408882fad215b72ca6f6cbc9f8730a3050f145`: the 30 static cases and 28 generated concealed-array-extension cases produced 58 passes, zero failures/cancellations/skips/todos, and 415.943 milliseconds duration. Source and test identities remained `run-contract.ts` `3585bd3621d7e24b234b03e5be68e4feafdf2c3280b102dabb0294b1767df37e` and `run-contract.test.ts` `e97aac5b0e77bda74381a44c3052637d4d46e05e166bc9f6be4495df6b4130c4`. The worker classified `EXISTING_AND_COVERED`; no test write or artificial Red is needed.
 
@@ -345,6 +424,8 @@ The completed slice preserves the public `src/server/service.ts` import boundary
 
 The run-contract slice preserves `src/server/domain/run-contract.ts` as the sole public import boundary. Internally, fixed policy and model types are the lowest layers; hostile-value readers depend on them; finding validation depends on readers; scan validation depends on finding validation; and parent-run validation depends on scan validation. The browser receives only the existing validator through the façade. Scanner-native readers and policies remain separate trust-boundary implementations. No public export, persisted field, package, schema dialect, code generator, or runtime service is introduced.
 
+The run-repository slice preserves `src/server/persistence/run-repository.ts` as the sole public import boundary. Internally, contracts are the type foundation; bounded store errors depend on those contracts; Windows path protection depends on bounded rejection; transition validation depends on contracts and bounded rejection; and the façade/coordinator depends on all four. Filesystem-calling modules use the shared default `node:fs` object. No public export, route, persisted field, format version, package, recovery mechanism, or runtime service is introduced.
+
 ## Revision Note
 
 2026-09-02: Created the M1-05 ExecPlan after the owner explicitly selected the task and its first structural slice. Recorded completed dependencies, the conservative module boundary, existing characterization route, S3 risk, guarded worker ownership, exact verification commands, and the later integration work that remains before task completion.
@@ -380,3 +461,11 @@ The run-contract slice preserves `src/server/domain/run-contract.ts` as the sole
 2026-09-02: Accepted independent run-contract preflight as `EXISTING_AND_COVERED`. Corrected the evidence wording to distinguish 30 static cases from 58 executed TAP tests; source/tests remain unchanged and the guarded seven-path Green/Refactor is next.
 
 2026-09-02: Accepted the compliant seven-path run-contract Green/Refactor, complete focused/regression/type/syntax/build/mutation/export/cleanup evidence, and fresh S3 PASS with no finding. The third structural slice is complete and documentation is reconciled; M1-05 remains In progress for HTTP scan integration and its browser checkpoint.
+
+2026-09-02: Added owner-approved `M105-RUN-REPOSITORY-MODULE-REFACTOR-04` as the fourth behavior-preserving M1-05 structural slice. Recorded the stable façade, four-module responsibility boundary, retained atomic publication coordinator, existing 55-case characterization route, default-filesystem interception constraint, S3 triggers, guarded ownership, verification commands, cleanup criteria, and unchanged later integration work.
+
+2026-09-02: Accepted independent run-repository preflight as `EXISTING_AND_COVERED`. All 55 cases pass with unchanged source/tests and no retained residue; no test write is needed and the guarded five-path Green/Refactor is next.
+
+2026-09-02: Accepted the fresh compliant five-path run-repository Green/Refactor and focused, complete-regression, strict, syntax, export/import, identity, and cleanup evidence. The publication coordinator remains intact and cohesion is `REFACTORED`; fresh S3 review is next.
+
+2026-09-02: Closed the run-repository structural slice after fresh S3 PASS with no finding, exact cleanup, status/navigation reconciliation, formatting validation, and documentation closure. All four approved M1-05 structural slices are accepted; M1-05 remains In progress for real HTTP scan integration and its browser/build checkpoint.

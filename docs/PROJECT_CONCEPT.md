@@ -8,11 +8,11 @@ A11y Evidence Lab.
 
 **Document status:** Product-intent and planning-context summary, reviewed on 2026-09-01 (UTC). This document is not acceptance authority; individual directions are Accepted, Proposed, Deferred, or Superseded only where the canonical requirements baseline or an ADR records that status.
 
-**Repository stage:** Development ready through OD-025, with current MVP scope narrowed by OD-026 and OD-027 on 2026-09-01. Implementation follows the derived [development roadmap](DEVELOPMENT_ROADMAP.md). RD-002, RD-003, and M1-01 through M1-04 are Complete. M1-05 is In progress after accepted internal local-service, scanner, and run-contract structural slices. HTTP scan integration and provider calls remain unimplemented.
+**Repository stage:** Development ready through OD-025, with current MVP scope narrowed by OD-026 and OD-027 on 2026-09-01. Implementation follows the derived [development roadmap](DEVELOPMENT_ROADMAP.md). RD-002, RD-003, and M1-01 through M1-04 are Complete. M1-05 is In progress after accepted internal local-service, scanner, run-contract, and run-repository structural slices. HTTP scan integration and provider calls remain unimplemented.
 
 [M1-02](plans/completed/m1-02-local-service-and-aggregate.md) is Complete after verified storage/service implementation and documentation closure. [M1-03 — Real scan and evidence](plans/completed/m1-03-real-scan-and-evidence.md) is Complete after owner-authorized execution and verified closure. Both scanner slices and their S3 reviews are accepted. All 290 integrated tests and independent strict typechecking pass, including the failed-launch residue regression. The different final integrated critical review, exact task-owned runtime cleanup and documentation closure passed. At M1-03 closure, M1-04 and M1-05 were unselected.
 
-[M1-04 — Target and results UI](plans/completed/m1-04-target-and-results-ui.md) is Complete after the accepted [Analyze and results presentation](ui/ANALYZE_AND_RESULTS_PRESENTATION.md), renewed verification, and closure. Its accepted OD-026 boundary and canonical data remain unchanged. M1-05 is In progress after accepted internal local-service, scanner, and run-contract structural slices; HTTP scan integration remains unimplemented.
+[M1-04 — Target and results UI](plans/completed/m1-04-target-and-results-ui.md) is Complete after the accepted [Analyze and results presentation](ui/ANALYZE_AND_RESULTS_PRESENTATION.md), renewed verification, and closure. Its accepted OD-026 boundary and canonical data remain unchanged. M1-05 is In progress after accepted internal local-service, scanner, run-contract, and run-repository structural slices; HTTP scan integration remains unimplemented.
 
 ## Concept
 

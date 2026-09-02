@@ -1,124 +1,37 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { isDeepStrictEqual } from 'node:util';
 import { validateRun } from '../domain/run-contract.ts';
 import type { PageAnalysisRun } from '../domain/run-contract.ts';
+import type { RunRepository, RunningRun, StoreResult, TerminalRun } from './run-repository/contracts.ts';
+import { StoreFailure, failure, hasCode, reject } from './run-repository/store-errors.ts';
+import { checkTransition } from './run-repository/run-transition.ts';
+import {
+  entryName,
+  establishRunRoot,
+  ordinaryDirectory,
+  ordinaryFile,
+  requireExactEntry,
+  sameIdentity,
+  validId,
+  walkRoot,
+} from './run-repository/windows-run-paths.ts';
 
-export type RunningRun = Extract<PageAnalysisRun, { status: 'running' }>;
-export type CompletedRun = Extract<PageAnalysisRun, { status: 'completed' }>;
-export type FailedRun = Extract<PageAnalysisRun, { status: 'failed' }>;
-export type TerminalRun = CompletedRun | FailedRun;
-export type StoreError =
-  | 'invalid-id' | 'unsafe-path' | 'collision' | 'not-found'
-  | 'invalid-run' | 'identity-mismatch' | 'invalid-transition'
-  | 'read-failed' | 'write-failed';
-export type StoreResult<T> =
-  | { ok: true; value: T }
-  | { ok: false; error: StoreError; cleanupFailed: boolean };
-export interface RunRepository {
-  create(input: unknown): StoreResult<RunningRun>;
-  read(runId: unknown): StoreResult<PageAnalysisRun>;
-  finish(input: unknown): StoreResult<TerminalRun>;
-}
-
-class StoreFailure extends Error {
-  readonly code: StoreError;
-  constructor(code: StoreError) {
-    super(code);
-    this.code = code;
-  }
-}
-
-function reject(code: StoreError): never { throw new StoreFailure(code); }
-function failure(error: unknown, fallback: StoreError, cleanupFailed = false): StoreResult<never> {
-  return { ok: false, error: error instanceof StoreFailure ? error.code : fallback, cleanupFailed };
-}
-function hasCode(error: unknown, code: string): boolean {
-  return error instanceof Error && 'code' in error && error.code === code;
-}
-const deviceName = /^(?:CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\.|$)/i;
-function validId(input: unknown): input is string {
-  return typeof input === 'string' && /^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/.exec(input)?.[0] === input
-    && !deviceName.test(input);
-}
-function samePath(left: string, right: string): boolean { return left.toLowerCase() === right.toLowerCase(); }
-function sameIdentity(left: fs.Stats, right: fs.Stats): boolean {
-  return left.dev === right.dev && left.ino === right.ino;
-}
-function statEntry(target: string): fs.Stats {
-  try { return fs.lstatSync(target); }
-  catch (error) {
-    if (hasCode(error, 'ENOENT')) reject('not-found');
-    throw error;
-  }
-}
-function ordinaryDirectory(target: string): fs.Stats {
-  const stat = statEntry(target);
-  if (!stat.isDirectory() || stat.isSymbolicLink() || !samePath(fs.realpathSync(target), target)) reject('unsafe-path');
-  return stat;
-}
-function ordinaryFile(target: string): fs.Stats {
-  const stat = statEntry(target);
-  if (!stat.isFile() || stat.isSymbolicLink() || stat.nlink !== 1 || !samePath(fs.realpathSync(target), target)) reject('unsafe-path');
-  return stat;
-}
-function walkRoot(root: string, establish: boolean): fs.Stats {
-  const volume = path.parse(root).root;
-  let current = volume;
-  let stat = ordinaryDirectory(current);
-  for (const component of root.slice(volume.length).split(path.sep).filter(Boolean)) {
-    current = path.join(current, component);
-    if (establish) {
-      try { fs.lstatSync(current); }
-      catch (error) {
-        if (!hasCode(error, 'ENOENT')) throw error;
-        try { fs.mkdirSync(current); }
-        catch (mkdirError) { if (!hasCode(mkdirError, 'EEXIST')) throw mkdirError; }
-      }
-    }
-    stat = ordinaryDirectory(current);
-  }
-  return stat;
-}
-function entryName(directory: string, expected: string): string | undefined {
-  try { return fs.readdirSync(directory).find(name => samePath(name, expected)); }
-  catch { return reject('read-failed'); }
-}
-function requireExactEntry(directory: string, expected: string): void {
-  const found = entryName(directory, expected);
-  if (found === undefined) reject('not-found');
-  if (found !== expected) reject('identity-mismatch');
-}
-function checkTransition(previous: PageAnalysisRun, next: TerminalRun): void {
-  if (previous.status !== 'running') reject('invalid-transition');
-  for (const key of ['formatVersion', 'runId', 'createdAt', 'applicationRevision', 'requestedUrl', 'providerContext'] as const) {
-    if (!isDeepStrictEqual(previous[key], next[key])) reject('invalid-transition');
-  }
-  const before = previous.scanContext;
-  const after = next.status === 'completed' ? next.scan.context : next.scanContext;
-  for (const key of ['scannerVersion', 'evidencePolicyVersion', 'rules', 'scope', 'readiness', 'viewport',
-    'locale', 'timeoutMs', 'freshContext', 'importedState', 'interaction', 'crawling', 'iframes', 'contrastProfile'] as const) {
-    if (!isDeepStrictEqual(before[key], after[key])) reject('invalid-transition');
-  }
-  for (const key of ['finalUrl', 'scannedAt', 'browserVersion'] as const) {
-    if ('value' in before[key] && !isDeepStrictEqual(before[key], after[key])) reject('invalid-transition');
-  }
-  if (before.readinessReached && !after.readinessReached) reject('invalid-transition');
-}
+export type {
+  CompletedRun,
+  FailedRun,
+  RunRepository,
+  RunningRun,
+  StoreError,
+  StoreResult,
+  TerminalRun,
+} from './run-repository/contracts.ts';
 
 export function openRunRepository(rootDirectory: string): StoreResult<RunRepository> {
   let root: string;
   let rootIdentity: fs.Stats;
   try {
-    if (typeof rootDirectory !== 'string' || !/^[A-Za-z]:[\\/]/.test(rootDirectory)
-      || rootDirectory.includes('\0') || rootDirectory.slice(2).includes(':')) reject('unsafe-path');
-    for (const component of rootDirectory.slice(3).split(/[\\/]/)) {
-      if (component === '.' || component === '..') continue;
-      if (deviceName.test(component) || /[. ]$/.test(component)) reject('unsafe-path');
-    }
-    root = path.resolve(rootDirectory);
-    rootIdentity = walkRoot(root, true);
+    ({ root, identity: rootIdentity } = establishRunRoot(rootDirectory));
   } catch (error) { return failure(error, 'write-failed'); }
 
   function checkRoot(): void {
