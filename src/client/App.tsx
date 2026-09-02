@@ -1,13 +1,13 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import type { PageAnalysisRun } from '../server/domain/run-contract.ts';
-import { TargetAnalysisForm } from './RunControls.tsx';
-import type { AnalysisConfiguration, AnalyzeIntent, OperationError } from './RunControls.tsx';
-import { RunResults } from './RunResults.tsx';
-import type { ResultSelection } from './RunResults.tsx';
+import { AnalyzeSection } from './components/analysis/AnalyzeSection.tsx';
+import type { AnalysisConfiguration, AnalysisError, AnalyzeIntent } from './components/analysis/analysisTypes.ts';
+import { ResultsSection } from './components/results/ResultsSection.tsx';
+import type { ResultSelection } from './components/results/resultPresentation.ts';
 import { admit, sameProvider } from './run-admission.ts';
 
-export type { AnalyzeIntent } from './RunControls.tsx';
+export type { AnalyzeIntent } from './components/analysis/analysisTypes.ts';
 
 export interface AppProps {
   readonly analyze?: (intent: AnalyzeIntent) => Promise<unknown>;
@@ -25,7 +25,7 @@ export function App(props: AppProps): ReactElement {
   const [busy, setBusy] = useState(false);
   const [pendingAnalysis, setPendingAnalysis] = useState<AnalyzeIntent | null>(null);
   const [announcement, setAnnouncement] = useState('');
-  const [error, setError] = useState<OperationError | null>(null);
+  const [error, setError] = useState<AnalysisError | null>(null);
   const [complete, setComplete] = useState<CompleteRun | null>(null);
   const [failed, setFailed] = useState<FailedRun | null>(null);
   const [selectedResult, setSelectedResult] = useState<ResultSelection | null>(null);
@@ -137,20 +137,12 @@ export function App(props: AppProps): ReactElement {
   const failedIsDisplayed = displayedRun?.status === 'failed';
 
   return <main>
-    <section aria-labelledby="setup-heading" className="setup">
-      <h1 id="setup-heading">Analyze a page</h1>
-      {capability && <p id="capability" className="notice">{capability}</p>}
-      <TargetAnalysisForm available={!!props.analyze} busy={busy} configuration={props.configuration}
-        error={failedIsDisplayed ? null : error} onOperationReserved={operationIsReserved}
-        onAnalyze={analyze} onAnnounce={setAnnouncement} />
-      <p role="status" aria-atomic="true" className="status">{announcement}</p>
-    </section>
-    {displayedRun && <section aria-labelledby="results-heading" className="results">
-      <h2 id="results-heading" tabIndex={-1} ref={resultsHeading}>Results</h2>
-      <div ref={resultsContent}>
-        <RunResults key={displayedRun.runId} run={displayedRun} selectedResult={selectedResult}
-          failure={failedIsDisplayed ? error : null} onSelect={selectResult} />
-      </div>
-    </section>}
+    <AnalyzeSection available={!!props.analyze} busy={busy} capability={capability}
+      configuration={props.configuration} error={failedIsDisplayed ? null : error}
+      announcement={announcement} onOperationReserved={operationIsReserved}
+      onAnalyze={analyze} onAnnounce={setAnnouncement} />
+    {displayedRun && <ResultsSection run={displayedRun}
+      selectedResult={selectedResult} failure={failedIsDisplayed ? error : null}
+      headingRef={resultsHeading} contentRef={resultsContent} onSelect={selectResult} />}
   </main>;
 }

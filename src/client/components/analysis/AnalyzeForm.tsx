@@ -1,28 +1,13 @@
 import { useState } from 'react';
 import type { ReactElement, SubmitEvent } from 'react';
-import type { ProviderContext } from '../server/domain/run-contract.ts';
+import type { ProviderContext } from '../../../server/domain/run-contract.ts';
+import type { AnalysisConfiguration, AnalysisError, AnalyzeIntent } from './analysisTypes.ts';
 
-export interface AnalyzeIntent {
-  readonly requestedUrl: string;
-  readonly providerContext: ProviderContext;
-}
-
-export interface AnalysisConfiguration {
-  readonly localModelInstalled?: boolean;
-  readonly groqApiUrlConfigured?: boolean;
-}
-
-export interface OperationError {
-  readonly text: string;
-  readonly unsaved: boolean;
-  readonly cleanup: boolean;
-}
-
-interface TargetAnalysisFormProps {
+interface AnalyzeFormProps {
   readonly available: boolean;
   readonly busy: boolean;
   readonly configuration?: AnalysisConfiguration;
-  readonly error: OperationError | null;
+  readonly error: AnalysisError | null;
   readonly onOperationReserved: () => boolean;
   readonly onAnalyze: (intent: AnalyzeIntent) => void;
   readonly onAnnounce: (message: string) => void;
@@ -42,7 +27,10 @@ function normalizeTarget(raw: string): string | null {
   }
 }
 
-function OperationErrorMessage({ id, error }: { readonly id: string; readonly error: OperationError | null }): ReactElement | null {
+function AnalysisErrorMessage({ id, error }: {
+  readonly id: string;
+  readonly error: AnalysisError | null;
+}): ReactElement | null {
   if (!error) return null;
   return <div className="error" id={id}>
     <p>{error.text}</p>
@@ -51,7 +39,7 @@ function OperationErrorMessage({ id, error }: { readonly id: string; readonly er
   </div>;
 }
 
-export function TargetAnalysisForm(props: TargetAnalysisFormProps): ReactElement {
+export function AnalyzeForm(props: AnalyzeFormProps): ReactElement {
   const [target, setTarget] = useState('');
   const [mode, setMode] = useState<ProviderContext['mode'] | ''>('');
   const [invalidUrl, setInvalidUrl] = useState(false);
@@ -101,7 +89,7 @@ export function TargetAnalysisForm(props: TargetAnalysisFormProps): ReactElement
       {invalidMode && <p id="mode-error" className="error">{modeError}</p>}
       {configurationMessage && <p id="mode-configuration" className="configuration-message">{configurationMessage}</p>}
     </fieldset>
-    <OperationErrorMessage id="analyze-error" error={props.error} />
+    <AnalysisErrorMessage id="analyze-error" error={props.error} />
     <button type="submit" className="primary" disabled={!props.available} aria-disabled={props.busy || undefined}
       aria-describedby={[!props.available ? 'capability' : '', props.error ? 'analyze-error' : ''].filter(Boolean).join(' ') || undefined}>Analyze</button>
   </form>;

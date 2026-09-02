@@ -304,8 +304,13 @@ export async function startHarness(manual = false): Promise<Harness> {
     await page.getByRole('main').waitFor();
     assert.deepEqual(pageErrors, []);
     ready = true;
-    const hashes = Object.fromEntries(['src/client/App.tsx', 'src/client/RunResults.tsx', 'src/client/styles.css', 'tests/target-results-ui.test.ts', 'tests/helpers/m104-ui-harness.ts']
-      .map(file => [file, crypto.createHash('sha256').update(fs.readFileSync(path.join(repo, file))).digest('hex')]));
+    const clientHashes = (JSON.parse(tree(path.join(repo, 'src/client'))) as { path: string; hash: string | null }[])
+      .filter(entry => entry.hash !== null && ['.ts', '.tsx', '.css'].includes(path.extname(entry.path)))
+      .map(entry => [path.relative(repo, entry.path).replaceAll('\\', '/'), entry.hash!] as const);
+    const evidenceHashes = ['tests/target-results-ui.test.ts', 'tests/helpers/m104-ui-harness.ts']
+      .map(file => [file, crypto.createHash('sha256').update(fs.readFileSync(path.join(repo, file))).digest('hex')] as const);
+    const hashes = Object.fromEntries([...clientHashes, ...evidenceHashes]
+      .sort(([left], [right]) => left.localeCompare(right)));
     console.log(JSON.stringify({ event: 'm104-ui-ready', browser: browser.version(), origin, hashes, synthetic: true }));
     return { page, context, origin, close };
   } catch (error) {

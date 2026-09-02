@@ -1,23 +1,16 @@
 import type { CSSProperties, ReactElement, ReactNode } from 'react';
-import type { Finding, ScannerReviewObservation } from '../server/domain/run-contract.ts';
-
-export type EvidenceItem = Finding | ScannerReviewObservation;
-type DisplayFact = { readonly value: unknown } | { readonly unavailable: string };
-
-function availableValue(fact: DisplayFact): unknown | undefined {
-  return 'value' in fact ? fact.value : undefined;
-}
-
-function plainReason(reason: string): string {
-  return reason.replaceAll('-', ' ');
-}
+import {
+  affectedElementText,
+  availableValue,
+  ordinaryText,
+  plainReason,
+  ratioText,
+  unavailableText,
+} from './resultPresentation.ts';
+import type { DisplayFact, EvidenceItem } from './resultPresentation.ts';
 
 function titleCase(value: string): string {
   return value.length ? value[0].toUpperCase() + value.slice(1) : value;
-}
-
-function unavailableText(fact: DisplayFact): string {
-  return 'unavailable' in fact ? `Unavailable (${plainReason(fact.unavailable)})` : '';
 }
 
 function attributeText(fact: DisplayFact): string {
@@ -39,17 +32,6 @@ function booleanText(fact: DisplayFact): string {
   return fact.value ? 'Yes' : 'No';
 }
 
-function ordinaryText(fact: DisplayFact): string {
-  if ('unavailable' in fact) return fact.unavailable === 'not-applicable' ? 'Not applicable' : unavailableText(fact);
-  return String(fact.value);
-}
-
-function ratioText(fact: DisplayFact): string {
-  if ('unavailable' in fact) return unavailableText(fact);
-  const value = Number(fact.value);
-  return `${Number.isInteger(value) ? value : Number(value.toFixed(2))}:1`;
-}
-
 function Field({ label, children }: { readonly label: string; readonly children: ReactNode }): ReactElement {
   return <div><dt>{label}</dt><dd>{children}</dd></div>;
 }
@@ -63,51 +45,6 @@ function ColorValue({ fact }: { readonly fact: DisplayFact }): ReactElement {
     {safeColor && <span className="color-sample" style={style} aria-hidden="true" />}
     <code>{value}</code>
   </span>;
-}
-
-export function ruleDisplayName(ruleId: EvidenceItem['ruleId']): string {
-  switch (ruleId) {
-    case 'image-alt': return 'Image alternatives';
-    case 'label': return 'Form labels';
-    case 'color-contrast': return 'Color contrast';
-  }
-}
-
-export function affectedElementText(item: EvidenceItem): string {
-  switch (item.ruleId) {
-    case 'image-alt': return 'Image element';
-    case 'label': {
-      const element = availableValue(item.evidence.elementKind);
-      const inputType = availableValue(item.evidence.inputType);
-      if (element === 'textarea') return 'Textarea';
-      if (element === 'input') return inputType ? `Input · ${inputType}` : 'Input';
-      return 'Form control';
-    }
-    case 'color-contrast':
-      return [ordinaryText(item.evidence.foregroundColor), ordinaryText(item.evidence.backgroundColor),
-        ordinaryText(item.evidence.fontSize), ordinaryText(item.evidence.fontWeight)].join(' · ');
-  }
-}
-
-export function findingExplanation(item: Finding): string {
-  switch (item.ruleId) {
-    case 'image-alt': return 'The image does not have usable alternative text.';
-    case 'label': return 'The form control does not have a usable accessible name.';
-    case 'color-contrast':
-      return `Measured contrast is ${ratioText(item.evidence.contrastRatio)}; this text requires ${ratioText(item.evidence.expectedContrastRatio)}.`;
-  }
-}
-
-export function manualReviewReason(item: ScannerReviewObservation): string {
-  switch (item.ruleId) {
-    case 'image-alt': return 'Alternative text could not be inspected';
-    case 'label': return 'unavailable' in item.incompleteReason && item.incompleteReason.unavailable === 'missing'
-      ? 'Label information was not available'
-      : 'Label information was withheld';
-    case 'color-contrast': return availableValue(item.incompleteReason) === 'bgImage'
-      ? 'Background imagery prevented a reliable contrast result'
-      : 'Color contrast could not be measured reliably';
-  }
 }
 
 function Location({ locator }: { readonly locator: EvidenceItem['locator'] }): ReactElement {
