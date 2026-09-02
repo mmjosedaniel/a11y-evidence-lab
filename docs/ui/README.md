@@ -1,7 +1,7 @@
 # UI design documentation
 
-- **Status:** M1-04 Analyze/Results presentation is accepted through OD-027 and in implementation; later workflow regions remain planning guidance
-- **Last reviewed:** 2026-09-01
+- **Status:** M1-04 Analyze/Results presentation is implemented and verified through OD-027; later workflow regions remain planning guidance
+- **Last reviewed:** 2026-09-02
 - **Analyze and Results contract:** [Analyze and results presentation](ANALYZE_AND_RESULTS_PRESENTATION.md)
 - **Visual direction:** [Visual foundations](VISUAL_FOUNDATIONS.md)
 

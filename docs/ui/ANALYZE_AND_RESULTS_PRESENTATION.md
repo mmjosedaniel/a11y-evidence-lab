@@ -1,6 +1,6 @@
 # Analyze and results presentation
 
-- **Status:** Accepted M1-04 presentation contract through OD-027; implementation in progress
+- **Status:** Accepted and implemented M1-04 presentation contract through OD-027
 - **Last reviewed:** 2026-09-02
 - **Scope:** Analysis input and deterministic scan results only
 

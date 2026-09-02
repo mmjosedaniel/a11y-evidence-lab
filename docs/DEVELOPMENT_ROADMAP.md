@@ -4,9 +4,9 @@
 
 - **Repository stage:** Development ready
 - **Roadmap status:** Accepted implementation sequence on 2026-08-28 through OD-025
-- **Implementation status:** RD-001, RD-002, RD-003 and M1-01 through M1-03 are Complete. M1-04 is In progress for the owner-selected OD-027 Analyze/Results presentation replacement and renewed verification. Its earlier OD-026 Analyze-only verification remains accepted history. HTTP scan integration remains unimplemented.
-- **Latest fully closed task:** M1-03. M1-04 is the current In-progress task; its earlier closure evidence is preserved as history in the reactivated [M1-04 plan](plans/m1-04-target-and-results-ui.md).
-- **Current task:** M1-04 only, implementing the accepted OD-027 Analyze/Results presentation before renewed verification, review, cleanup, and closure. M1-05 remains Not started and unselected.
+- **Implementation status:** RD-001, RD-002, RD-003 and M1-01 through M1-04 are Complete. M1-05 is In progress for the owner-selected walking-skeleton work, beginning with a behavior-preserving local-service module refactor. HTTP scan integration remains unimplemented.
+- **Latest fully closed task:** M1-04. Its complete implementation and closure history is preserved in the [completed M1-04 plan](plans/completed/m1-04-target-and-results-ui.md).
+- **Current task:** M1-05 only. The owner explicitly selected its first structural slice before the later service/scanner/UI integration checkpoint.
 - **Scope:** The accepted local portfolio MVP only
 
 This roadmap turns the accepted planning baseline into an implementation order. It owns milestone order, task dependencies, integration checkpoints, and progress status. It does not create or override a product requirement, architecture decision, behavioral contract, evaluation result, or release claim. If this roadmap conflicts with an identified requirement or Accepted ADR, the requirement or ADR controls and the roadmap must be corrected.
@@ -22,7 +22,7 @@ Progress labels in this document mean:
 - **Not started:** no implementation claim is made.
 - **Blocked:** an identified prerequisite or governing decision prevents work.
 
-`RD-001`, `RD-002`, and `RD-003` are Complete. RD-003's checkout and clean-start corrections passed execution, independent reviews, final cleanup, and renewed documentation closure. M1-01 is Complete after implementing and verifying pure runtime contracts. M1-02 is Complete after verified local storage and loopback service implementation. M1-03 is Complete. M1-04 is In progress for the accepted OD-027 evidence-first presentation replacement and renewed verification. The previous implementation and closure evidence remains history. The other 21 application tasks remain Not started. Internal scanning and minimization are verified; HTTP integration remains unimplemented.
+`RD-001`, `RD-002`, and `RD-003` are Complete. RD-003's checkout and clean-start corrections passed execution, independent reviews, final cleanup, and renewed documentation closure. M1-01 is Complete after implementing and verifying pure runtime contracts. M1-02 is Complete after verified local storage and loopback service implementation. M1-03 and M1-04 are Complete after their task-specific verification and closure gates. M1-05 is In progress for its owner-selected first structural slice. The other 20 application tasks remain Not started. Internal scanning, minimization, and the target/results UI are verified; HTTP integration remains unimplemented.
 
 RD-002 completed on 2026-08-30 (UTC). RD-003's original execution recorded six accepted native outcomes and completed its original reviews and cleanup, but a later independent review at f34cc5d identified two reproducibility gaps: checkout line-ending conversion and no usable clean-start procedure after cleanup. Primary verified both read-only, and the owner explicitly requested their correction. The LF policy passes all 21 checkout-filter comparisons. The clean-start command stopped on its first Node download because socket access was denied; its lease closed compliantly and two empty task directories were preserved at that stop. The owner subsequently authorized exactly one network-enabled retry and verified empty-directory cleanup. That retry passed pinned acquisition, strict typechecking, and structural validation under a compliant terminal lease. Fresh S3 and different integrated reviews, final bounded cleanup, and renewed documentation closure passed. RD-003 is Complete again, preserving original evidence and failure history. M1-01's original planning activation followed the completed prerequisite. The subsequent owner instruction authorized exact-task execution. Its first-module Red, trusted-URL, runtime and literal gates are now resolved, and M1-01 is Complete after guarded TDD, independent reviews and documentation closure. At M1-01 closure no dependent task was selected; the subsequent M1-02 planning-only activation is recorded below.
 
@@ -203,9 +203,9 @@ M5 is semantically dependent only on completed scan evidence from M1. It is sequ
 
 ### M1-04 — Present accessible target entry and complete results
 
-- **Parent milestone / role / status:** M1 / UI / **In progress**.
-- **Readiness:** The previously complete UI and OD-026 amendment remain accepted history. The owner accepted OD-027 and selected this existing task for a bounded Analyze/Results presentation replacement. Dependencies and the exact three-rule evaluation boundary remain complete; M1-05 remains unselected.
-- **Execution plan:** [M1-04 — Target and results UI](plans/m1-04-target-and-results-ui.md); [accepted Analyze and Results presentation](ui/ANALYZE_AND_RESULTS_PRESENTATION.md); [progress summary](progress/m1-04-target-and-results-ui.md).
+- **Parent milestone / role / status:** M1 / UI / **Complete**.
+- **Readiness:** The OD-026 Analyze-only amendment, OD-027 presentation replacement, purpose-named component extraction, integrated-review correction, complete 290-plus-30 regression, strict typecheck, production build, browser/accessibility evidence, independent reviews, exact cleanup, and documentation closure are accepted.
+- **Execution plan:** [M1-04 — Target and results UI](plans/completed/m1-04-target-and-results-ui.md); [accepted Analyze and Results presentation](ui/ANALYZE_AND_RESULTS_PRESENTATION.md); [progress summary](progress/m1-04-target-and-results-ui.md).
 - **Objective:** Project the M1 contract through the unprivileged React UI without creating a second state model.
 - **Inputs, dependencies, and scheduling:** Depends on M1-01. Safely parallelizable with M1-02 and M1-03 against the frozen contract; joins at M1-05.
 - **Expected output:** The exact [Analyze and Results presentation](ui/ANALYZE_AND_RESULTS_PRESENTATION.md): keyboard-operable target and initially unselected mode controls, validation-only mode feedback, one Analyze action, an ordinary single-operation busy guard, meaningful loading/failure/complete announcements, analyzed-page and limitation context, one complete overview, human-readable three-check groups containing automated Findings and visibly tagged manual-review observations, and one shared direct rule-specific evidence workspace. Canonical Finding and observation collections, run, scan, provider, and native evidence remain retained but internal execution metadata is omitted from the primary interface. The main interface has no manual Run ID or reopen control.
@@ -217,7 +217,9 @@ M5 is semantically dependent only on completed scan evidence from M1. It is sequ
 
 ### M1-05 — Integrate and verify the walking skeleton
 
-- **Parent milestone / role / status:** M1 / integration and verification / **Not started**.
+- **Parent milestone / role / status:** M1 / integration and verification / **In progress**.
+- **Readiness:** M1-02, M1-03, and M1-04 are Complete. The owner explicitly selected M1-05 and its first behavior-preserving structural slice. Applicable Must requirements and decisions remain Accepted or explicitly Deferred, the RD-003 evaluation boundary is unchanged, and no integration behavior is claimed by the structural slice.
+- **Execution plan:** [M1-05 — Walking-skeleton integration](plans/m1-05-walking-skeleton-integration.md); [progress summary](progress/m1-05-walking-skeleton-integration.md).
 - **Objective:** Join the service, scanner, persistence, and UI into the first real end-to-end user workflow.
 - **Inputs, dependencies, and scheduling:** Depends on M1-02, M1-03, and M1-04. Critical-path integration checkpoint; M2-01 and dependent work cannot start until it passes.
 - **Expected output:** One integrated scan-to-disk slice exercised against the controlled cases and one trusted public-page smoke target.

@@ -28,7 +28,7 @@ M1-02 is Complete. Its [archived ExecPlan](../plans/completed/m1-02-local-servic
 
 M1-03 is Complete. Both scanner slices and their S3 reviews are accepted. All 290 integrated tests and independent strict typechecking pass, including the failed-launch residue regression. The different final integrated critical review, exact task-owned runtime cleanup and documentation closure passed. At M1-03 closure, M1-04 and M1-05 were unselected. No lease or owned runtime operation remains. The task-local browser runtime and both scratch roots were removed after review; shared caches and dependencies remain untouched.
 
-[M1-04](../plans/m1-04-target-and-results-ui.md) is In progress for the owner-selected OD-027 Analyze/Results presentation replacement and renewed verification. Its earlier OD-026 Analyze-only amendment and closure remain accepted history. M1-05 remains Not started and unselected.
+[M1-04](../plans/completed/m1-04-target-and-results-ui.md) is Complete after the accepted OD-027 presentation, purpose-named component extraction, integrated-review correction, complete regression, independent reviews, exact cleanup, and documentation closure. [M1-05](../plans/m1-05-walking-skeleton-integration.md) is In progress for its owner-selected first structural slice.
 
 Add each new task record to this table in the same change that creates the file:
 
@@ -39,7 +39,8 @@ Add each new task record to this table in the same change that creates the file:
 | [M1-01](../DEVELOPMENT_ROADMAP.md#m1-01--define-the-minimum-run-and-scan-contracts) | [Minimum run and scan contracts](m1-01-run-and-scan-contracts.md) | [Task plan](../plans/completed/m1-01-run-and-scan-contracts.md) | Complete | 2026-08-30 |
 | [M1-02](../DEVELOPMENT_ROADMAP.md#m1-02--establish-the-loopback-service-and-single-file-aggregate) | [Local service and aggregate](m1-02-local-service-and-aggregate.md) | [Task plan](../plans/completed/m1-02-local-service-and-aggregate.md) | Complete | 2026-08-30 |
 | [M1-03](../DEVELOPMENT_ROADMAP.md#m1-03--implement-the-real-exact-three-rule-scan-and-minimized-evidence) | [Real scan and evidence](m1-03-real-scan-and-evidence.md) | [Task plan](../plans/completed/m1-03-real-scan-and-evidence.md) | Complete | 2026-08-31 |
-| [M1-04](../DEVELOPMENT_ROADMAP.md#m1-04--present-accessible-target-entry-and-complete-results) | [Target and results UI](m1-04-target-and-results-ui.md) | [Task plan](../plans/m1-04-target-and-results-ui.md) | In progress | 2026-09-02 |
+| [M1-04](../DEVELOPMENT_ROADMAP.md#m1-04--present-accessible-target-entry-and-complete-results) | [Target and results UI](m1-04-target-and-results-ui.md) | [Task plan](../plans/completed/m1-04-target-and-results-ui.md) | Complete | 2026-09-02 |
+| [M1-05](../DEVELOPMENT_ROADMAP.md#m1-05--integrate-and-verify-the-walking-skeleton) | [Walking-skeleton integration](m1-05-walking-skeleton-integration.md) | [Task plan](../plans/m1-05-walking-skeleton-integration.md) | In progress | 2026-09-02 |
 
 The mirrored status is a convenience snapshot only. The roadmap controls when a task is `Not started`, `In progress`, `Blocked`, or `Complete`.
 

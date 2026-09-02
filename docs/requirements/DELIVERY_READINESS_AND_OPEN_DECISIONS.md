@@ -6,9 +6,9 @@ This document is part of the authoritative requirements baseline indexed by [Pro
 
 ## Delivery stages
 
-**Latest fully closed task:** M1-03. [M1-04](../plans/m1-04-target-and-results-ui.md) preserves its earlier closure evidence and is In progress for the owner-selected OD-027 Analyze/Results presentation replacement, verification, review, cleanup, and renewed closure.
+**Latest fully closed task:** [M1-04](../plans/completed/m1-04-target-and-results-ui.md). The accepted OD-027 presentation, complete regression, independent reviews, exact cleanup, and documentation closure passed. M1-05 is In progress for its owner-selected first structural slice.
 
-**Current task (2026-09-01 UTC):** M1-04 only, implementing the accepted OD-027 presentation contract through separate test and frontend ownership before fresh browser/accessibility evidence and review. M1-05 remains Not started and unselected.
+**Current task (2026-09-02 UTC):** M1-05 only. The owner selected its first behavior-preserving structural slice after M1-04 completed; HTTP scan integration and the M1-05 verification checkpoint remain outstanding.
 
 The owner first selected [M1-02](../plans/completed/m1-02-local-service-and-aggregate.md) for planning, then authorized exact-task execution. It is now Complete: all 182 product tests, independent strict typechecking, actual startup/reopen/stop and exact synthetic-run deletion passed. Both slice S3 reviews and the different final integrated critical review passed; documentation closure is accepted. The earlier completion history below remains unchanged.
 
