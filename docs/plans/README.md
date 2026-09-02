@@ -4,7 +4,7 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-- [M1-05 — Walking-skeleton integration](m1-05-walking-skeleton-integration.md) — **In progress** for the owner-selected walking-skeleton work, beginning with a behavior-preserving local-service module refactor. HTTP scan integration remains a later M1-05 slice.
+- [M1-05 — Walking-skeleton integration](m1-05-walking-skeleton-integration.md) — **In progress** after accepted behavior-preserving local-service and scanner module refactors. HTTP scan integration remains a later M1-05 slice.
 
 ## Completed plans
 

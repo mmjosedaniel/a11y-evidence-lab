@@ -6,7 +6,7 @@ This document is part of the authoritative requirements baseline indexed by [Pro
 
 ## Delivery stages
 
-**Latest fully closed task:** [M1-04](../plans/completed/m1-04-target-and-results-ui.md). The accepted OD-027 presentation, complete regression, independent reviews, exact cleanup, and documentation closure passed. M1-05 is In progress for its owner-selected first structural slice.
+**Latest fully closed task:** [M1-04](../plans/completed/m1-04-target-and-results-ui.md). The accepted OD-027 presentation, complete regression, independent reviews, exact cleanup, and documentation closure passed. M1-05 is In progress after accepted internal local-service and scanner structural slices; HTTP integration remains unimplemented.
 
 **Current task (2026-09-02 UTC):** M1-05 only. The owner selected its first behavior-preserving structural slice after M1-04 completed; HTTP scan integration and the M1-05 verification checkpoint remain outstanding.
 
