@@ -1,16 +1,16 @@
 # Analyze and results presentation
 
-- **Status:** Proposed follow-up UI baseline; not implemented
-- **Last reviewed:** 2026-09-01
+- **Status:** Accepted M1-04 presentation contract through OD-027; implementation in progress
+- **Last reviewed:** 2026-09-02
 - **Scope:** Analysis input and deterministic scan results only
 
 ## Document role
 
-This document defines the intended visible content, order, hierarchy, and responsive behavior for a later revision of the Analyze and Results interface. It is based on review of the current rendered M1-04 interface. It does not change source code, tests, canonical run data, requirements, roadmap status, or implementation authorization.
+This document defines the required visible content, order, hierarchy, and responsive behavior for the M1-04 Analyze and Results interface. It is based on review of the earlier rendered M1-04 interface and is the presentation contract selected by the project owner through [OD-027](../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-027--simplify-analysis-and-results-presentation). Canonical requirements, the roadmap, and the owning ExecPlan remain the implementation and verification authorities.
 
-The proposal deliberately removes internal execution metadata from the visible results experience and replaces the current repeated summary, coverage, and technical-detail regions with one concise overview and an evidence-first finding workspace. Canonical data may remain persisted for validation, provenance, downstream work, and diagnostics even when this document says it should not appear in the primary interface.
+The contract removes internal execution metadata from the visible results experience and replaces the earlier repeated summary, coverage, and technical-detail regions with one concise overview and an evidence-first finding workspace. Canonical data remains persisted for validation, provenance, downstream work, and diagnostics even when this document says it must not appear in the primary interface.
 
-Before implementation, the owning task must reconcile this proposal with requirements that currently require a visible trusted-input limitation, mode disclosure, persistent provider/model context, lifecycle state, exact scan configuration, coverage, and provider-call announcements. In particular, `REQ-LLM-002`, `REQ-LLM-020`, `REQ-INST-004`, `REQ-INST-005`, `REQ-INST-017`, `REQ-UX-003`, `REQ-UX-004`, `REQ-UX-011`, `REQ-UX-012`, `REQ-A11Y-002`, `REQ-A11Y-009`, `REQ-A11Y-010`, SPEC-001, and the M1-04 roadmap description must be reviewed together. The proposed Groq API URL message also differs from the current fixed-adapter and credential model, while a user-configurable remote URL remains Deferred. This file records the target presentation; it does not silently override those authorities.
+OD-027 reconciles the earlier requirements that called for a visible trusted-input notice, mode disclosure, persistent provider/model context, lifecycle field, exact scan configuration, complete coverage table, and provider-call announcement in the deterministic scan interface. Those facts remain canonical and available to application logic, validation, later provider-specific workflow stages, and diagnostics. The fixed Groq adapter remains the only remote MVP path: **Groq API URL** below means its application-owned configured endpoint, never a user-entered URL or arbitrary remote profile. Selecting a mode or starting the provider-independent scan performs no availability probe.
 
 ## Presentation objective
 
@@ -30,9 +30,8 @@ The interface uses one responsive page in this order:
 1. **Analyze a page**
 2. **Results** after a completed or failed analysis
 3. **Results overview** for a completed analysis
-4. **Findings** grouped by the three supported checks
-5. **Selected finding evidence**
-6. **Needs manual review** for incomplete scanner observations
+4. **Findings** containing automated findings and tagged manual-review items, grouped by the three supported checks
+5. **Selected evidence** for either kind of item
 
 There is no separate **Summary**, **Complete coverage**, **Technical run details**, **Run context**, **Scan context**, or **Technical scanner evidence** region.
 
@@ -138,17 +137,19 @@ The visible overview is derived from the complete canonical collections. It must
 
 ### Grouping
 
-Show all Findings in one list grouped under these user-facing headings:
+Show every automated Finding and every ScannerReviewObservation in one list grouped under these user-facing headings:
 
 1. **Image alternatives**
 2. **Form labels**
 3. **Color contrast**
 
-Keep all three groups in this order. If a group has no Findings, show **No findings in this check.** Do not remove the group or imply that the entire page passed.
+Keep all three groups in this order. Within a group, show automated Findings first and manual-review items second. If a group has neither kind of item, show **No findings or manual reviews in this check.** Do not remove the group or imply that the entire page passed.
+
+Manual-review items remain ScannerReviewObservations in the canonical data and application state. Presenting them beside Findings must not convert them into Findings or include them in the automated Finding total.
 
 ### Finding item content
 
-Each selectable item shows only:
+Each selectable automated Finding shows only:
 
 1. A stable, human-readable label such as **Image alternative issue 1**, **Form label issue 1**, or **Color contrast issue 1**.
 2. A concise affected-element summary:
@@ -160,20 +161,32 @@ Each selectable item shows only:
 
 Do not show the internal Finding ID as the main title, the rule ID, `unprocessed`, provider information, model information, or provider-call information in each list item.
 
-## Selected finding evidence
+Each selectable manual-review item uses the same card and evidence-opening interaction, and shows only:
+
+1. A stable label such as **Image alternative review 1**, **Form label review 1**, or **Color contrast review 1**.
+2. The same concise affected-element summary used by a Finding for that check.
+3. A visible **Needs manual review** tag. The tag is status text and is included in the item's accessible name; it does not rely on color alone.
+4. The action text **View evidence**, or an equivalent whole-item button with that accessible purpose.
+5. A programmatic selected state that does not rely only on color.
+
+Show one concise explanation immediately below the **Findings** heading when at least one manual-review item exists: **Items tagged Needs manual review could not be determined automatically.** Do not create a second manual-review section.
+
+## Selected evidence
 
 The selected detail should make deterministic evidence the main content. It must not place all evidence behind a disclosure named **Technical scanner evidence**.
 
-### Elements shown for every Finding
+### Elements shown for every selected item
 
 Show these elements in this order:
 
-1. The same human-readable Finding label used in the list.
-2. A one-sentence deterministic explanation of what was detected.
-3. **Affected element** with the concise target summary.
-4. **Where on the page** with the retained structural locator in code styling when available. If it is unavailable, show **Page location unavailable** with the bounded reason in plain language.
-5. **Evidence** with the rule-specific fields below.
-6. **Back to findings** on stacked or narrow layouts. It returns focus to the selected list item.
+1. The same human-readable item label used in the list.
+2. The visible **Needs manual review** tag when the selected item is a ScannerReviewObservation.
+3. A one-sentence deterministic explanation of what was detected or why manual review is required.
+4. **Affected element** with the concise target summary.
+5. **Where on the page** with the retained structural locator in code styling when available. If it is unavailable, show **Page location unavailable** with the bounded reason in plain language.
+6. **Evidence** with the rule-specific fields below.
+
+Do not show a **Back to findings** control. Selecting either kind of item updates the adjacent or following evidence detail while keyboard focus remains on the selected item.
 
 Do not show lifecycle status, mode, provider, model, Run ID, native result, native check-group names, or provider-call text in this detail.
 
@@ -218,26 +231,15 @@ Show:
 | **Font size** | Retained size |
 | **Font weight** | Retained weight |
 
-Show **Shadow color** only when it is available and materially affects the measurement. The deterministic explanation should compare the measured and required ratios, for example: **Measured contrast is 4.48:1; this text requires 4.5:1.**
+Show **Shadow color** only when it is available and the retained native reason is `shadowOnBgColor` or `fgOnShadowColor`, which identifies a material shadow contribution. The deterministic explanation should compare the measured and required ratios, for example: **Measured contrast is 4.48:1; this text requires 4.5:1.**
 
 Do not show `axe-core`, raw message keys such as `bgImage`, or `Any`, `All`, and `None` check groups in the primary interface.
 
-## Needs manual review
+## Manual-review evidence
 
-Rename **Scanner-review observations** to **Needs manual review**.
+A selected manual-review item uses the shared selected-evidence area. Its one-sentence explanation uses a plain-language reason such as **Alternative text could not be inspected**, **Label information was not available**, **Label information was withheld**, or **Background imagery prevented a reliable contrast result**. A retained `missing` label reason must not be presented as `withheld`.
 
-Show a short introduction: **The scanner could not determine these results automatically. Review each item manually.**
-
-Each observation appears as a separate item with:
-
-1. A stable label such as **Image alternative review 1**.
-2. The user-facing check name.
-3. The affected-element summary.
-4. A plain-language reason, such as **Alternative text could not be inspected**, **Label information was withheld**, or **Background imagery prevented a reliable contrast result**.
-5. **Where on the page** when a locator is available.
-6. The same relevant rule-specific evidence fields defined for Findings.
-
-An observation may use one native disclosure when needed to reduce page length, but its summary must describe the review task in plain language. Do not nest another **Technical scanner evidence** disclosure inside it.
+Show **Where on the page** when a locator is available and the same relevant rule-specific evidence fields defined for Findings. Do not add a native or **Technical scanner evidence** disclosure.
 
 ## Complete-zero result
 
@@ -262,9 +264,11 @@ When analysis fails, show only:
 
 Do not show a completed-results overview, Findings, manual-review items, Run context, Scan context, coverage tables, or partial success. The ordinary input form remains available for a new independent analysis; do not add a dedicated Retry action.
 
+When a new independent analysis begins while an older failed result is displayed, remove that older failed result. If the new attempt fails before producing a run, show the new operation error and any persistence or cleanup uncertainty with the form; do not attach it to the older failed run or hide it behind that result. A previously completed result remains preserved by the separate retained-evidence rule.
+
 ## Information omitted from the primary interface
 
-The following data must not appear in the proposed Analysis results interface:
+The following data must not appear in the accepted Analysis results interface:
 
 - supported-use or trusted-input notices;
 - selected-mode explanations when configuration is available;
@@ -299,27 +303,26 @@ Removing these elements from the visible UI does not authorize deleting them fro
 ### Wide layout
 
 - Keep the overview above the workspace.
-- Place the grouped Findings list in a bounded left column and the selected evidence in a flexible right column.
-- Keep **Needs manual review** below the Finding workspace.
+- Place the unified grouped item list in a bounded left column and the selected evidence in a flexible right column.
 - Do not make the evidence column narrower merely to preserve equal columns.
 
 ### Narrow layout and 200% browser zoom
 
-- Use one column in DOM and visual order: overview, Findings list, selected evidence, manual-review items.
+- Use one column in DOM and visual order: overview, unified Findings list, selected evidence.
 - Stack the three overview groups vertically or in a wrapping row without horizontal scrolling.
 - Keep full URLs, locators, colors, ratios, and evidence values readable through wrapping or controlled word breaking.
 - Do not truncate evidence, hide it behind hover, or require horizontal page scrolling.
-- Preserve a visible **Back to findings** action after selected evidence.
+- Keep the selected item and its evidence in the same sequential page flow without adding a return action.
 
 ## Accessibility behavior
 
 - Use one page-level heading and a logical heading hierarchy.
 - Use semantic groups for each supported check and programmatically associate group labels with their items and counts.
-- Make each Finding and manual-review item keyboard reachable with a stable accessible name.
-- Announce analysis start, failure, completion totals, valid zero, and Finding selection through one shared live-status pattern without moving focus.
+- Make each Finding and manual-review item keyboard reachable with a stable accessible name. Each button name includes its human label, affected-element summary, **Needs manual review** when applicable, and **View evidence** action; visible descendant text may provide that complete name.
+- Announce analysis start, failure, completion totals, valid zero, and item selection through one shared live-status pattern without moving focus.
 - A visible lifecycle-status field is not required when the completion or failure state is already communicated by the result content and announcement.
-- Clearly indicate the selected Finding programmatically and visually.
-- Preserve a predictable return location when leaving selected evidence.
+- Clearly indicate the selected item programmatically and visually.
+- Keep keyboard focus on the selected item when its evidence appears so the user retains their place in the list.
 - Never rely only on color, position, or item count for meaning.
 - Keep external target and scanner strings inert; never render them as executable markup.
 
@@ -336,7 +339,7 @@ Removing these elements from the visible UI does not authorize deleting them fro
 - Reserve Signal Blue for the primary action, links, focus, and selected item.
 - Use caution styling for **Needs manual review**, accompanied by its exact text and an icon only when the icon adds meaning.
 
-## Proposed information architecture
+## Information architecture
 
 ```text
 Analyze a page
@@ -356,15 +359,13 @@ Results
     Form labels
     Color contrast
   Findings
-    Grouped finding list
-    Selected finding evidence
-  Needs manual review
-    Observation list and relevant evidence
+    Grouped automated findings and tagged manual-review items
+    Selected evidence
 ```
 
 ## Explicit non-goals
 
-This proposal does not add a score, dashboard, chart, filter, sort, search, bulk action, page preview, code editor, remediation action, provider call, run history, Run ID entry, deep link, reload restoration, settings page, model manager, export, dark theme, or new dependency.
+This contract does not add a score, dashboard, chart, filter, sort, search, bulk action, page preview, code editor, remediation action, provider call, run history, Run ID entry, deep link, reload restoration, settings page, model manager, export, dark theme, or new dependency.
 
 It also does not define the later retrieved-guidance, generation, abstention, human-review, or comparison presentations. Those regions remain owned by their future roadmap tasks and must reuse the evidence-first hierarchy without being prebuilt here.
 

@@ -1,251 +1,194 @@
-import { useId, useLayoutEffect, useRef } from 'react';
+import { useId } from 'react';
 import type { ReactElement, ReactNode } from 'react';
 import type { Finding, PageAnalysisRun, ScannerReviewObservation } from '../server/domain/run-contract.ts';
+import { affectedElementText, findingExplanation, manualReviewReason, RuleEvidence, ruleDisplayName } from './RuleEvidence.tsx';
+
+interface FailureNotice {
+  readonly text: string;
+  readonly unsaved: boolean;
+  readonly cleanup: boolean;
+}
+
+type CompleteRun = Extract<PageAnalysisRun, { status: 'completed' }>;
+type FailedRun = Extract<PageAnalysisRun, { status: 'failed' }>;
 
 interface RunResultsProps {
-  readonly run: PageAnalysisRun;
-  readonly selectedId?: string | null;
-  readonly selectionRequest?: number;
-  readonly onSelect?: (findingId: string) => void;
-}
-type DisplayFact = { readonly value: string | number | boolean } | { readonly unavailable: string };
-type EvidenceItem = Finding | ScannerReviewObservation;
-
-function factText(fact: DisplayFact): string {
-  return 'value' in fact ? String(fact.value) : `Unavailable: ${fact.unavailable}`;
+  readonly run: CompleteRun | FailedRun;
+  readonly selectedResult?: ResultSelection | null;
+  readonly failure?: FailureNotice | null;
+  readonly onSelect?: (selection: ResultSelection, label: string) => void;
 }
 
-function conciseTargetFacts(item: EvidenceItem): readonly string[] {
-  switch (item.ruleId) {
-    case 'image-alt':
-      return [factText(item.evidence.elementKind)];
-    case 'label':
-      return [factText(item.evidence.elementKind), factText(item.evidence.inputType)];
-    case 'color-contrast':
-      return [factText(item.evidence.foregroundColor), factText(item.evidence.backgroundColor),
-        factText(item.evidence.fontSize), factText(item.evidence.fontWeight)];
-  }
+type RuleId = Finding['ruleId'];
+
+export type ResultSelection =
+  | { readonly kind: 'finding'; readonly findingId: string }
+  | { readonly kind: 'manual-review'; readonly observationIndex: number };
+
+interface LabeledFinding {
+  readonly kind: 'finding';
+  readonly finding: Finding;
+  readonly label: string;
 }
 
-function conciseTargetText(item: EvidenceItem): string {
-  return conciseTargetFacts(item).join(' · ');
+interface LabeledReview {
+  readonly kind: 'manual-review';
+  readonly observation: ScannerReviewObservation;
+  readonly observationIndex: number;
+  readonly label: string;
 }
+
+type LabeledResult = LabeledFinding | LabeledReview;
+
+const ruleOrder: readonly RuleId[] = ['image-alt', 'label', 'color-contrast'];
+const limitation = 'Checks cover image alternatives, form labels, and color contrast in the rendered top-level page. Results are not an accessibility or compliance certification.';
+const manualIntro = 'Items tagged Needs manual review could not be determined automatically.';
 
 function Field({ label, children }: { readonly label: string; readonly children: ReactNode }): ReactElement {
   return <div><dt>{label}</dt><dd>{children}</dd></div>;
 }
 
-function FactField({ label, fact }: { readonly label: string; readonly fact: DisplayFact }): ReactElement {
-  return <Field label={label}>{factText(fact)}</Field>;
+function countText(count: number, singular: string, plural = `${singular}s`): string {
+  return `${count} ${count === 1 ? singular : plural}`;
 }
 
-function Evidence({ item }: { readonly item: EvidenceItem }): ReactElement {
-  return <>
-    <dl className="facts">
-      <Field label="Rule ID">{item.ruleId}</Field>
-      <Field label="Native result">{item.nativeResult}</Field>
-      <FactField label="Locator" fact={item.locator} />
-      {'incompleteReason' in item && <FactField label="Incomplete reason" fact={item.incompleteReason} />}
-    </dl>
-    <h5>Checks</h5>
-    {'value' in item.checks ? <dl className="facts">
-      <Field label="Any">{item.checks.value.any.join(', ') || 'None'}</Field>
-      <Field label="All">{item.checks.value.all.join(', ') || 'None'}</Field>
-      <Field label="None">{item.checks.value.none.join(', ') || 'None'}</Field>
-    </dl> : <p>{factText(item.checks)}</p>}
-    <h5>Rule evidence</h5>
-    {item.ruleId === 'image-alt' && <dl className="facts">
-      <FactField label="Element kind" fact={item.evidence.elementKind} />
-      <FactField label="Alt state" fact={item.evidence.altState} />
-    </dl>}
-    {item.ruleId === 'label' && <>
-      <dl className="facts">
-        <FactField label="Element kind" fact={item.evidence.elementKind} />
-        <FactField label="Input type" fact={item.evidence.inputType} />
-      </dl>
-      <h5>Name sources</h5>
-      <dl className="facts">
-        <FactField label="Explicit label" fact={item.evidence.nameSources.explicitLabel} />
-        <FactField label="Implicit label" fact={item.evidence.nameSources.implicitLabel} />
-        <FactField label="Aria label" fact={item.evidence.nameSources.ariaLabel} />
-        <FactField label="Aria labelledby" fact={item.evidence.nameSources.ariaLabelledby} />
-        <FactField label="Title" fact={item.evidence.nameSources.title} />
-        <FactField label="Placeholder" fact={item.evidence.nameSources.placeholder} />
-        <FactField label="Presentational role" fact={item.evidence.nameSources.presentationalRole} />
-      </dl>
-    </>}
-    {item.ruleId === 'color-contrast' && <dl className="facts">
-      <FactField label="Foreground color" fact={item.evidence.foregroundColor} />
-      <FactField label="Background color" fact={item.evidence.backgroundColor} />
-      <FactField label="Shadow color" fact={item.evidence.shadowColor} />
-      <FactField label="Contrast ratio" fact={item.evidence.contrastRatio} />
-      <FactField label="Expected contrast ratio" fact={item.evidence.expectedContrastRatio} />
-      <FactField label="Font size" fact={item.evidence.fontSize} />
-      <FactField label="Font weight" fact={item.evidence.fontWeight} />
-      <Field label="Measurement source">{item.evidence.measurementSource}</Field>
-      <FactField label="Message key" fact={item.evidence.messageKey} />
-    </dl>}
-  </>;
+function findingLabel(finding: Finding, index: number): string {
+  switch (finding.ruleId) {
+    case 'image-alt': return `Image alternative issue ${index}`;
+    case 'label': return `Form label issue ${index}`;
+    case 'color-contrast': return `Color contrast issue ${index}`;
+  }
 }
 
-function Coverage({ run, complete }: { readonly run: Extract<PageAnalysisRun, { status: 'completed' }>;
-  readonly complete: boolean }): ReactElement {
-  const buckets = ['violations', 'incomplete', 'passes', 'inapplicable'] as const;
-  return <div className="coverage">
-    {run.scan.context.rules.map(rule => {
-      const facts = <dl className="facts">
-        {buckets.map(bucket => {
-          const value = run.scan.coverage[rule][bucket];
-          return (complete || value !== null) && <Field key={bucket} label={bucket[0].toUpperCase() + bucket.slice(1)}>
-            {value ?? 'Not reported'}
-          </Field>;
-        })}
-      </dl>;
-      return <table key={rule}>
-        <tbody><tr><th scope="row">{rule}</th><td>{facts}</td></tr></tbody>
-      </table>;
-    })}
-  </div>;
+function manualReviewLabel(observation: ScannerReviewObservation, index: number): string {
+  switch (observation.ruleId) {
+    case 'image-alt': return `Image alternative review ${index}`;
+    case 'label': return `Form label review ${index}`;
+    case 'color-contrast': return `Color contrast review ${index}`;
+  }
 }
 
-function TechnicalRunDetails({ run }: { readonly run: PageAnalysisRun }): ReactElement {
-  const context = run.status === 'completed' ? run.scan.context : run.scanContext;
-  return <details className="technical-disclosure">
-    <summary>Technical run details</summary>
-    <div className="disclosure-content">
-      <h3>Run context</h3>
-      <dl className="facts context-facts">
-        <Field label="Run ID">{run.runId}</Field>
-        <Field label="Status">{run.status}</Field>
-        <Field label="Format version">{run.formatVersion}</Field>
-        <Field label="Created at">{run.createdAt}</Field>
-        {'finishedAt' in run && <Field label="Finished at">{run.finishedAt}</Field>}
-        <Field label="Application revision">{run.applicationRevision}</Field>
-        <Field label="Requested URL">{run.requestedUrl}</Field>
-        <Field label="Mode">{run.providerContext.mode}</Field>
-        <Field label="Provider">{run.providerContext.provider}</Field>
-        <Field label="Model">{run.providerContext.model}</Field>
-        {run.status === 'failed' && <Field label="Failure category">{run.failure.category}</Field>}
-      </dl>
-      <p>No provider call was attempted.</p>
-      <h3>Scan context</h3>
-      <dl className="facts context-facts">
-        <FactField label="Final URL" fact={context.finalUrl} />
-        <FactField label="Scanned at" fact={context.scannedAt} />
-        <FactField label="Browser version" fact={context.browserVersion} />
-        <Field label="Scanner version">{context.scannerVersion}</Field>
-        <Field label="Evidence policy version">{context.evidencePolicyVersion}</Field>
-        <Field label="Rules">{context.rules.join(', ')}</Field>
-        <Field label="Scope">{context.scope}</Field>
-        <Field label="Readiness">{context.readiness}</Field>
-        <Field label="Readiness reached">{String(context.readinessReached)}</Field>
-        <Field label="Viewport width">{context.viewport.width}</Field>
-        <Field label="Viewport height">{context.viewport.height}</Field>
-        <Field label="Locale">{context.locale}</Field>
-        <Field label="Timeout ms">{context.timeoutMs}</Field>
-        <Field label="Fresh context">{String(context.freshContext)}</Field>
-        <Field label="Imported state">{String(context.importedState)}</Field>
-        <Field label="Interaction">{String(context.interaction)}</Field>
-        <Field label="Crawling">{String(context.crawling)}</Field>
-        <Field label="Iframes">{String(context.iframes)}</Field>
-        <Field label="Cleanup">{context.cleanup}</Field>
-        <Field label="Contrast profile">{context.contrastProfile}</Field>
-      </dl>
-      {run.status === 'completed' && <>
-        <h3>Complete coverage</h3>
-        <Coverage run={run} complete />
-      </>}
+function selectionFor(item: LabeledResult): ResultSelection {
+  return item.kind === 'finding'
+    ? { kind: 'finding', findingId: item.finding.findingId }
+    : { kind: 'manual-review', observationIndex: item.observationIndex };
+}
+
+function isSelected(item: LabeledResult, selected: ResultSelection | null): boolean {
+  if (!selected) return false;
+  if (item.kind === 'finding') {
+    return selected.kind === 'finding' && item.finding.findingId === selected.findingId;
+  }
+  return selected.kind === 'manual-review' && item.observationIndex === selected.observationIndex;
+}
+
+function failureExplanation(category: Extract<PageAnalysisRun, { status: 'failed' }>['failure']['category']): string {
+  switch (category) {
+    case 'navigation': return 'The requested page could not be opened.';
+    case 'timeout': return 'The page did not become ready before the analysis timed out.';
+    case 'browser': return 'The analysis browser could not complete the request.';
+    case 'scanner': return 'The accessibility checks could not be completed.';
+    case 'result-validation':
+    case 'coverage-validation': return 'The scanner returned an invalid result.';
+    case 'evidence-capture': return 'The scanner could not retain the required evidence.';
+    case 'initial-persistence': return 'The analysis could not be saved.';
+    case 'shutdown': return 'The analysis stopped before it could finish.';
+    case 'cleanup': return 'The analysis stopped because cleanup could not be confirmed.';
+  }
+}
+
+function ResultsOverview({ run }: { readonly run: CompleteRun }): ReactElement {
+  const findings = run.scan.findings.length;
+  const reviews = run.scan.scannerReviewObservations.length;
+  return <section aria-labelledby="results-overview-heading" className="results-overview">
+    <h3 id="results-overview-heading">Results overview</h3>
+    <p className="finding-total">{findings === 0 ? 'No automated findings in the three supported checks' : `${countText(findings, 'finding')} ${findings === 1 ? 'needs' : 'need'} review`}</p>
+    {reviews > 0 && <p className="review-total">{countText(reviews, 'item')} {reviews === 1 ? 'needs' : 'need'} manual review</p>}
+    <div className="overview-groups">
+      {ruleOrder.map(rule => {
+        const findingCount = run.scan.findings.filter(item => item.ruleId === rule).length;
+        const reviewCount = run.scan.scannerReviewObservations.filter(item => item.ruleId === rule).length;
+        return <div className="overview-group" key={rule}>
+          <h4>{ruleDisplayName(rule)}</h4>
+          <p>{countText(findingCount, 'finding')} · {countText(reviewCount, 'manual review', 'manual reviews')}</p>
+        </div>;
+      })}
     </div>
-  </details>;
+    {findings === 0 && <p className="zero-limitation">This does not prove that the page is accessible or compliant.</p>}
+  </section>;
 }
 
-function RunSummary({ run }: { readonly run: PageAnalysisRun }): ReactElement {
-  return <div className="run-summary">
-    <dl className="facts summary-facts">
-      <Field label={run.status === 'completed' ? 'Analyzed page' : 'Requested page'}>
-        {run.status === 'completed' ? run.scan.context.finalUrl.value : run.requestedUrl}
-      </Field>
-      <Field label="Status">{run.status}</Field>
-      <Field label="Mode">{run.providerContext.mode}</Field>
-      <Field label="Provider">{run.providerContext.provider}</Field>
-      <Field label="Model">{run.providerContext.model}</Field>
-    </dl>
-    <p>No provider call was attempted.</p>
-  </div>;
-}
-
-function TechnicalScannerEvidence({ item }: { readonly item: EvidenceItem }): ReactElement {
-  return <details className="technical-disclosure scanner-disclosure">
-    <summary>Technical scanner evidence</summary>
-    <div className="disclosure-content">
-      <h4 className="source-label">Scanner evidence</h4>
-      <Evidence item={item} />
-    </div>
-  </details>;
-}
-
-export function RunResults({ run, selectedId = null, selectionRequest = 0, onSelect }: RunResultsProps): ReactElement {
+export function RunResults({ run, selectedResult = null, failure = null, onSelect }: RunResultsProps): ReactElement {
   const prefix = useId();
-  const detailId = `${prefix}-detail`;
-  const detailHeadingId = `${prefix}-detail-heading`;
-  const heading = useRef<HTMLHeadingElement>(null);
-  const buttons = useRef(new Map<string, HTMLButtonElement>());
-  const selected = run.status === 'completed' ? run.scan.findings.find(item => item.findingId === selectedId) : undefined;
 
-  useLayoutEffect(() => {
-    if (selectedId !== null) heading.current?.focus();
-  }, [selectedId, selectionRequest]);
+  const labeledFindings: LabeledFinding[] = run.status === 'completed' ? run.scan.findings.map(finding => ({
+    kind: 'finding',
+    finding,
+    label: findingLabel(finding, run.scan.findings.filter(candidate => candidate.ruleId === finding.ruleId)
+      .findIndex(candidate => candidate.findingId === finding.findingId) + 1),
+  })) : [];
+  const labeledReviews: LabeledReview[] = run.status === 'completed'
+    ? run.scan.scannerReviewObservations.map((observation, observationIndex) => ({
+      kind: 'manual-review',
+      observation,
+      observationIndex,
+      label: manualReviewLabel(observation, run.scan.scannerReviewObservations
+        .filter(candidate => candidate.ruleId === observation.ruleId)
+        .findIndex(candidate => candidate === observation) + 1),
+    }))
+    : [];
+  const selected = selectedResult?.kind === 'finding'
+    ? labeledFindings.find(item => item.finding.findingId === selectedResult.findingId)
+    : labeledReviews.find(item => item.observationIndex === selectedResult?.observationIndex);
+
+  if (run.status === 'failed') return <div className="run-evidence failed-result">
+    <dl className="results-context"><Field label="Requested page">{run.requestedUrl}</Field></dl>
+    <h3>Analysis could not be completed</h3>
+    <p>{failureExplanation(run.failure.category)}</p>
+    {failure?.unsaved && <p>This failed run was not saved.</p>}
+    {failure?.cleanup && <p>Resource cleanup is uncertain.</p>}
+  </div>;
 
   return <div className="run-evidence">
-    <RunSummary run={run} />
-    {run.status === 'completed' && <>
-      <h3>Summary</h3>
-      <p className="result-summary">Completed scan: {run.scan.findings.length} Findings.</p>
-      <p>{run.scan.scannerReviewObservations.length} scanner-review observations.</p>
-      <Coverage run={run} complete={false} />
-      <TechnicalRunDetails run={run} />
-      <div className="finding-workspace">
-        <section aria-labelledby={`${prefix}-findings`}>
-          <h3 id={`${prefix}-findings`}>Findings</h3>
-          {run.scan.context.rules.map(rule => <section key={rule} aria-labelledby={`${prefix}-${rule}`}>
-            <h4 id={`${prefix}-${rule}`}>{rule}</h4>
-            <ul className="finding-list">
-              {run.scan.findings.filter(finding => finding.ruleId === rule).map(finding => <li key={finding.findingId}>
-                <button type="button" aria-pressed={selectedId === finding.findingId} aria-controls={detailId}
-                  aria-label={`${finding.findingId}, ${finding.ruleId}, ${conciseTargetText(finding)}, ${finding.state}`}
-                  ref={node => { if (node) buttons.current.set(finding.findingId, node); else buttons.current.delete(finding.findingId); }}
-                  onClick={() => onSelect?.(finding.findingId)}>
-                  <strong>{finding.findingId}</strong>
-                  <span>{finding.ruleId} · {finding.state}</span>
-                  <span className="target-summary">Target: {conciseTargetText(finding)}</span>
-                </button>
-              </li>)}
-            </ul>
-            {!run.scan.findings.some(finding => finding.ruleId === rule) && <p>No Findings.</p>}
-          </section>)}
-        </section>
-        <section id={detailId} aria-labelledby={selected ? detailHeadingId : `${prefix}-detail-empty`} className="finding-detail">
-          {selected ? <>
-            <h3 id={detailHeadingId} ref={heading} tabIndex={-1}
-              aria-describedby={`${prefix}-detail-state ${prefix}-detail-context ${prefix}-detail-provider-call`}>Finding {selected.findingId}</h3>
-            <p id={`${prefix}-detail-state`}><strong>State:</strong> {selected.state}</p>
-            <p><strong>Target:</strong> {conciseTargetText(selected)}</p>
-            <p id={`${prefix}-detail-context`}>{run.providerContext.mode} · {run.providerContext.provider} · {run.providerContext.model}</p>
-            <p id={`${prefix}-detail-provider-call`}>No provider call was attempted.</p>
-            <TechnicalScannerEvidence key={selected.findingId} item={selected} />
-            <button type="button" onClick={() => buttons.current.get(selected.findingId)?.focus()}>Back to finding</button>
-          </> : <h3 id={`${prefix}-detail-empty`}>Finding detail</h3>}
-        </section>
-      </div>
-      <section aria-labelledby={`${prefix}-observations`} className="observations">
-        <h3 id={`${prefix}-observations`}>Scanner-review observations</h3>
-        {run.scan.scannerReviewObservations.length === 0 && <p>No scanner-review observations.</p>}
-        {run.scan.scannerReviewObservations.map((observation, index) => <details key={index}>
-          <summary>Scanner-review observation {index + 1} — {observation.ruleId} — incomplete — {conciseTargetText(observation)} — {factText(observation.incompleteReason)}</summary>
-          <TechnicalScannerEvidence item={observation} />
-        </details>)}
+    <dl className="results-context"><Field label="Analyzed page">{run.scan.context.finalUrl.value}</Field></dl>
+    <p className="result-limitation">{limitation}</p>
+    <ResultsOverview run={run} />
+    <div className="finding-workspace">
+      <section aria-labelledby={`${prefix}-findings`} className="findings-column">
+        <h3 id={`${prefix}-findings`}>Findings</h3>
+        {labeledReviews.length > 0 && <p>{manualIntro}</p>}
+        {ruleOrder.map(rule => {
+          const group: LabeledResult[] = [
+            ...labeledFindings.filter(item => item.finding.ruleId === rule),
+            ...labeledReviews.filter(item => item.observation.ruleId === rule),
+          ];
+          const headingId = `${prefix}-${rule}-findings`;
+          return <div key={rule} role="group" aria-labelledby={headingId} className="finding-group">
+            <h4 id={headingId}>{ruleDisplayName(rule)}</h4>
+            {group.length === 0 ? <p>No findings or manual reviews in this check.</p> : <ul className="finding-list">
+              {group.map(item => {
+                const evidenceItem = item.kind === 'finding' ? item.finding : item.observation;
+                const key = item.kind === 'finding' ? `finding-${item.finding.findingId}` : `review-${item.observationIndex}`;
+                return <li key={key}>
+                  <button type="button" aria-pressed={isSelected(item, selectedResult)}
+                    onClick={() => onSelect?.(selectionFor(item), item.label)}>
+                    <strong>{item.label}</strong>
+                    <span>{affectedElementText(evidenceItem)}</span>
+                    {item.kind === 'manual-review' && <span className="manual-review-tag">Needs manual review</span>}
+                    <span className="view-evidence">View evidence</span>
+                  </button>
+                </li>;
+              })}
+            </ul>}
+          </div>;
+        })}
       </section>
-    </>}
-    {run.status === 'failed' && <TechnicalRunDetails run={run} />}
+      {selected && <section className="finding-detail" role="region" aria-label={`${selected.label} evidence`}>
+        <h3 id={`${prefix}-selected-heading`}>{selected.label}</h3>
+        {selected.kind === 'manual-review' && <p className="manual-review-tag">Needs manual review</p>}
+        <RuleEvidence item={selected.kind === 'finding' ? selected.finding : selected.observation}
+          explanation={selected.kind === 'finding' ? findingExplanation(selected.finding) : manualReviewReason(selected.observation)} />
+      </section>}
+    </div>
   </div>;
 }

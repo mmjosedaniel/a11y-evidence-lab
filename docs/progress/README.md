@@ -28,7 +28,7 @@ M1-02 is Complete. Its [archived ExecPlan](../plans/completed/m1-02-local-servic
 
 M1-03 is Complete. Both scanner slices and their S3 reviews are accepted. All 290 integrated tests and independent strict typechecking pass, including the failed-launch residue regression. The different final integrated critical review, exact task-owned runtime cleanup and documentation closure passed. At M1-03 closure, M1-04 and M1-05 were unselected. No lease or owned runtime operation remains. The task-local browser runtime and both scratch roots were removed after review; shared caches and dependencies remain untouched.
 
-[M1-04](../plans/m1-04-target-and-results-ui.md) is In progress for manual evidence, integrated review, cleanup and closure after the trusted-input correction passed fresh S3 review. Its earlier OD-026 Analyze-only amendment and closure remain accepted history. M1-05 remains Not started and unselected.
+[M1-04](../plans/m1-04-target-and-results-ui.md) is In progress for the owner-selected OD-027 Analyze/Results presentation replacement and renewed verification. Its earlier OD-026 Analyze-only amendment and closure remain accepted history. M1-05 remains Not started and unselected.
 
 Add each new task record to this table in the same change that creates the file:
 

@@ -15,11 +15,15 @@ import type { AnalyzeIntent, AppProps } from '../../src/client/App.tsx';
 
 export type Intent = AnalyzeIntent;
 export type ClientCollaborators = AppProps;
+export interface KnownConfiguration {
+  readonly localModelInstalled?: boolean;
+  readonly groqApiUrlConfigured?: boolean;
+}
 export interface Bridge {
   calls: { stage: 'analyze'; value: Intent; callback: number }[];
   analyze: (intent: Intent) => unknown;
-  mount: (analyze?: boolean) => void;
-  rerender: (analyze?: boolean) => void;
+  mount: (analyze?: boolean, configuration?: KnownConfiguration) => void;
+  rerender: (analyze?: boolean, configuration?: KnownConfiguration) => void;
   unmount: () => void;
   settle: () => Promise<void>;
   resolve: (value: unknown) => void;
@@ -144,19 +148,19 @@ const bridge = window.m104 = {
     bridge.reject = value => { release(); reject(value); };
   }); },
   async settle() { for (const cancel of [...pending]) cancel(); await Promise.resolve(); },
-  rerender(analyze = true) {
+  rerender(analyze = true, configuration = {}) {
     const callback = ++version;
     const analyzeHandler = bridge.analyze;
-    const props = {};
+    const props = { configuration };
     if (analyze) props.analyze = intent => {
       bridge.calls.push({stage:'analyze',value:structuredClone(intent),callback});
       return analyzeHandler(intent);
     };
     root.render(<App {...props}/>);
   },
-  mount(analyze = true) {
+  mount(analyze = true, configuration = {}) {
     root.unmount(); root = createRoot(document.getElementById('root'));
-    bridge.calls = []; bridge.rerender(analyze);
+    bridge.calls = []; bridge.rerender(analyze, configuration);
   },
   unmount() { root.unmount(); },
 };

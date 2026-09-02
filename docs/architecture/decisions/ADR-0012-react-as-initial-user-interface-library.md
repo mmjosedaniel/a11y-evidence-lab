@@ -29,6 +29,10 @@ React supports TypeScript and component-based client interfaces. It can support 
 
 [OD-026](../../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-026--defer-user-facing-retained-run-reopening) defers user-facing reopening after reload, deep-link loading, recent-run history, and manual Run ID entry. Service-owned records remain the durable authority and React state still cannot replace them, but the portfolio MVP is not required to reconstruct a prior run's visible view after the page or service is restarted.
 
+### Analyze/Results presentation clarification recorded 2026-09-01
+
+[OD-027](../../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-027--simplify-analysis-and-results-presentation) and the accepted [Analyze and results presentation](../../ui/ANALYZE_AND_RESULTS_PRESENTATION.md) define M1-04's concise evidence-first visible contract. React may derive human-readable overview counts and evidence labels from the validated aggregate, but it must not delete or mutate omitted canonical metadata. Result content and the shared live-status pattern may communicate lifecycle without a duplicate visible status field. Provider-specific disclosure remains a later workflow responsibility rather than persistent scan-results metadata.
+
 ## Considered options
 
 1. Use a server-rendered or full-stack React framework as the application boundary.
@@ -78,6 +82,8 @@ This evaluation decision does not qualify React or a browser version as a releas
 - [ADR-0023: Local-mode data boundary](ADR-0023-local-mode-data-boundary.md)
 - [Minimum complete MVP behavior contracts](../../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-024--minimum-complete-mvp-behavior-contracts)
 - [OD-026: Defer user-facing retained-run reopening](../../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-026--defer-user-facing-retained-run-reopening)
+- [OD-027: Simplify Analysis and Results presentation](../../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-027--simplify-analysis-and-results-presentation)
+- [Analyze and results presentation](../../ui/ANALYZE_AND_RESULTS_PRESENTATION.md)
 - [Evidence and review workflow requirements](../../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md): `REQ-EVID-004` and `REQ-UX-*`
 - [Installation and model lifecycle requirements](../../requirements/generation-provider-and-model-lifecycle/INSTALLATION_AND_MODEL_LIFECYCLE.md): `REQ-INST-002`
 - [Application accessibility requirements](../../requirements/quality-security-and-operations/APPLICATION_ACCESSIBILITY.md): `REQ-A11Y-*`

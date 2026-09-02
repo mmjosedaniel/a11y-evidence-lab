@@ -1,14 +1,15 @@
 # UI design documentation
 
-- **Status:** Reversible design intent; the M1-04 implemented subset is verified and later workflow regions remain planning guidance
+- **Status:** M1-04 Analyze/Results presentation is accepted through OD-027 and in implementation; later workflow regions remain planning guidance
 - **Last reviewed:** 2026-09-01
+- **Analyze and Results contract:** [Analyze and results presentation](ANALYZE_AND_RESULTS_PRESENTATION.md)
 - **Visual direction:** [Visual foundations](VISUAL_FOUNDATIONS.md)
 
 ## Document role
 
-This directory describes the smallest coherent interface for the accepted portfolio MVP. It owns reversible presentation guidance only: information hierarchy, minimum visible regions, and visual foundations. It does not create product scope, accept architecture, select packages or components, define a second workflow state model, authorize implementation, or prove that any interface exists.
+This directory describes the smallest coherent interface for the accepted portfolio MVP. [Analyze and results presentation](ANALYZE_AND_RESULTS_PRESENTATION.md) is the accepted M1-04 visible contract through OD-027. Other material in this directory remains reversible guidance for information hierarchy, minimum visible regions, and visual foundations. This directory does not select packages or components, define a second workflow state model, or prove that an interface passes its verification gates.
 
-The identified rows in the [project requirements](../PROJECT_REQUIREMENTS.md) and their focused modules remain authoritative. [ADR-0012](../architecture/decisions/ADR-0012-react-as-initial-user-interface-library.md) owns React's presentation-only boundary, the [development roadmap](../DEVELOPMENT_ROADMAP.md) owns implementation order, and the [documentation-only Gherkin specifications](../specs/README.md) provide derived behavior examples. If this guidance conflicts with one of those sources, the authoritative source controls and this document must be reconciled.
+The identified rows in the [project requirements](../PROJECT_REQUIREMENTS.md) and their focused modules remain authoritative. [OD-027](../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-027--simplify-analysis-and-results-presentation) reconciles the Analyze/Results presentation contract with those authorities. [ADR-0012](../architecture/decisions/ADR-0012-react-as-initial-user-interface-library.md) owns React's presentation-only boundary, the [development roadmap](../DEVELOPMENT_ROADMAP.md) owns implementation order, and the [documentation-only Gherkin specifications](../specs/README.md) provide derived behavior examples.
 
 ## UI objective
 
@@ -29,10 +30,11 @@ Use one responsive application shell. On wider layouts, the complete results lis
 
 | Region | Minimum content and behavior | Appears when |
 | --- | --- | --- |
-| Analysis setup | One non-authenticated public HTTPS URL field, a concise notice that the developer is responsible for choosing a permitted target they are willing to trust and that hostile, private, and authenticated targets are unsupported, one explicit Local-or-Groq selection, Local visibly recommended, the applicable run-level provider disclosure, and one **Analyze** action. Selection alone performs no probe or provider call. | Before a new analysis |
-| Run context and status | Normalized analyzed page identity, immutable selected provider and exact model, exact `image-alt`, `label`, and `color-contrast` coverage, parent state, trusted-input limitation, and the non-certification limitation. | During and after a run |
-| Complete results | Every Finding grouped by supported rule, with stable label, target summary, individual state, and detail action. Native `incomplete` ScannerReviewObservations use a separate, explicitly named group. A valid zero appears only after complete three-rule coverage. A failed or coverage-incomplete scan remains in the run-status region and never publishes this region as a complete result. | Only after a complete scan |
-| Selected-finding workspace | Finding identity and state followed by deterministic evidence, retrieved guidance and citations, evidence sufficiency, actual provider-call provenance when one exists, and the applicable proposal, abstention, or failure branch. Only one FindingWorkflow is selected at a time; sibling states remain visible and unchanged. | After a Finding is selected |
+| Analysis setup | The compact [Analyze and results presentation](ANALYZE_AND_RESULTS_PRESENTATION.md): one public HTTPS URL field, one initially unselected Local-or-Groq group with Local visibly recommended, validation or an already-known missing-configuration message only when applicable, and one **Analyze** action. Selection and Analyze perform no provider probe or call. | Before a new analysis |
+| Results overview | Normalized analyzed page identity, one exact-three-check/non-certification limitation, one prominent Finding total, an optional manual-review total, and complete user-facing counts for Image alternatives, Form labels, and Color contrast. | Only after a complete scan |
+| Complete results | Every Finding grouped by the three user-facing checks with a stable human-readable label, concise affected-element summary, selection action, and programmatic selected state. Native `incomplete` ScannerReviewObservations appear under **Needs manual review**. A valid zero appears only after complete three-rule coverage. | Only after a complete scan |
+| Selected-finding workspace | Human-readable Finding identity, deterministic explanation, affected element, page location, and direct rule-specific evidence. Retrieved guidance, citations, evidence sufficiency, provider-relevant disclosure/provenance, and proposal, abstention, or failure branches are added only by their later owning tasks. Only one FindingWorkflow is selected at a time; sibling states remain visible and unchanged. | After a Finding is selected |
+| Failed analysis | Requested page, **Analysis could not be completed**, one safe stage-specific explanation, and any actionable persistence or cleanup uncertainty. It never presents partial success or a completed-results overview. | Only after failure |
 | Human decision | The original AI proposal, confidence and uncertainty, assumptions, blocking pre-acceptance judgment, non-blocking post-change reminder, support confirmation, and one approve, edit-and-accept, or reject path. Reviewer-authored content and the final decision remain distinct from the proposal. | Only for a validated proposal |
 | Comparison | Baseline and later references, pair comparability, target-match disposition when applicable, before/after deterministic evidence, outcome, rationale, limitations, and follow-up checks. Proposal or review information may appear only as context. | After an intentional later scan and comparison |
 

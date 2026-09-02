@@ -1,32 +1,34 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import type { PageAnalysisRun } from '../server/domain/run-contract.ts';
-import { TARGET_NOTICE, TargetAnalysisForm } from './RunControls.tsx';
-import type { AnalyzeIntent } from './RunControls.tsx';
+import { TargetAnalysisForm } from './RunControls.tsx';
+import type { AnalysisConfiguration, AnalyzeIntent, OperationError } from './RunControls.tsx';
 import { RunResults } from './RunResults.tsx';
+import type { ResultSelection } from './RunResults.tsx';
 import { admit, sameProvider } from './run-admission.ts';
 
 export type { AnalyzeIntent } from './RunControls.tsx';
 
 export interface AppProps {
   readonly analyze?: (intent: AnalyzeIntent) => Promise<unknown>;
+  readonly configuration?: AnalysisConfiguration;
 }
 
 type CompleteRun = Extract<PageAnalysisRun, { status: 'completed' }>;
 type FailedRun = Extract<PageAnalysisRun, { status: 'failed' }>;
 
-const resultsNotice = 'This automated scan covers only image-alt, label and color-contrast in the current rendered top-level document. Iframes, inactive states and other rules are excluded. Findings and counts do not establish accessibility, conformance, certification or legal compliance.';
-const busyNotice = 'An operation is in progress.';
+function countText(count: number, singular: string): string {
+  return `${count} ${count === 1 ? singular : `${singular}s`}`;
+}
 
 export function App(props: AppProps): ReactElement {
   const [busy, setBusy] = useState(false);
   const [pendingAnalysis, setPendingAnalysis] = useState<AnalyzeIntent | null>(null);
   const [announcement, setAnnouncement] = useState('');
-  const [error, setError] = useState<{ text: string; unsaved: boolean; cleanup: boolean } | null>(null);
+  const [error, setError] = useState<OperationError | null>(null);
   const [complete, setComplete] = useState<CompleteRun | null>(null);
   const [failed, setFailed] = useState<FailedRun | null>(null);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [selectionRequest, setSelectionRequest] = useState(0);
+  const [selectedResult, setSelectedResult] = useState<ResultSelection | null>(null);
   const held = useRef<{ complete: CompleteRun | null; failed: FailedRun | null }>({ complete: null, failed: null });
   const reservation = useRef<object | null>(null);
   const mounted = useRef(true);
@@ -38,6 +40,7 @@ export function App(props: AppProps): ReactElement {
     mounted.current = true;
     return () => { mounted.current = false; reservation.current = null; };
   }, []);
+
   useLayoutEffect(() => {
     if (moveResultsFocus.current) {
       moveResultsFocus.current = false;
@@ -53,7 +56,6 @@ export function App(props: AppProps): ReactElement {
 
   function operationIsReserved(): boolean {
     if (!reservation.current) return false;
-    setAnnouncement(busyNotice);
     return true;
   }
 
@@ -61,27 +63,30 @@ export function App(props: AppProps): ReactElement {
     if (run.status === 'completed') {
       if (run.runId !== held.current.complete?.runId) {
         moveResultsFocus.current = !!resultsContent.current?.contains(document.activeElement);
-        setSelectedId(null);
+        setSelectedResult(null);
       }
       held.current = { complete: run, failed: null };
       setComplete(run);
       setFailed(null);
-      setAnnouncement(`Completed scan: ${run.scan.findings.length} Findings. ${run.scan.scannerReviewObservations.length} scanner-review observations. No provider call was attempted.`);
-    } else {
-      held.current = { complete: held.current.complete, failed: run };
-      setFailed(run);
-      setAnnouncement(`Run ${run.runId} failed: ${run.failure.category}. No provider call was attempted.`);
+      setAnnouncement(`Analysis completed: ${countText(run.scan.findings.length, 'finding')} and ${countText(run.scan.scannerReviewObservations.length, 'item')} need manual review.`);
+      return;
     }
+
+    held.current = { complete: held.current.complete, failed: run };
+    setFailed(run);
+    setAnnouncement('Analysis could not be completed.');
   }
 
   async function execute(callback: () => Promise<unknown>, intent: AnalyzeIntent): Promise<void> {
     const token = {};
     const known = held.current;
+    held.current = { complete: known.complete, failed: null };
     reservation.current = token;
     setBusy(true);
     setPendingAnalysis(intent);
     setError(null);
-    setAnnouncement('Analyzing the requested page. No provider call was attempted.');
+    setFailed(null);
+    setAnnouncement('Analysis started.');
     try {
       const raw = await callback();
       if (!mounted.current || reservation.current !== token) return;
@@ -97,7 +102,7 @@ export function App(props: AppProps): ReactElement {
         return;
       }
       if (run) publish(run);
-      if (!outcome.ok) showError(outcome.error, run !== null && !outcome.persisted, outcome.cleanupFailed);
+      if (!outcome.ok) showError(outcome.error, !outcome.persisted, outcome.cleanupFailed);
     } catch {
       if (mounted.current && reservation.current === token) showError('request-failed');
     } finally {
@@ -116,44 +121,36 @@ export function App(props: AppProps): ReactElement {
     void execute(() => callback(intent), intent);
   }
 
-  function selectFinding(id: string): void {
-    const finding = complete?.scan.findings.find(item => item.findingId === id);
-    if (!complete || !finding) return;
-    setSelectedId(id);
-    setSelectionRequest(value => value + 1);
-    const provider = complete.providerContext;
-    setAnnouncement(`Selected Finding ${id}, ${finding.ruleId}, unprocessed. ${provider.mode}, ${provider.provider}, ${provider.model}. No provider call was attempted.`);
+  function selectResult(selection: ResultSelection, label: string): void {
+    if (!complete) return;
+    const exists = selection.kind === 'finding'
+      ? complete.scan.findings.some(item => item.findingId === selection.findingId)
+      : Number.isInteger(selection.observationIndex) &&
+        complete.scan.scannerReviewObservations[selection.observationIndex] !== undefined;
+    if (!exists) return;
+    setSelectedResult(selection);
+    setAnnouncement(`Selected ${label}.`);
   }
 
   const capability = !props.analyze ? 'Analyze is unavailable in this build; service integration is pending.' : '';
+  const displayedRun = complete ?? failed;
+  const failedIsDisplayed = displayedRun?.status === 'failed';
 
   return <main>
     <section aria-labelledby="setup-heading" className="setup">
       <h1 id="setup-heading">Analyze a page</h1>
-      <p id="target-notice" className="limitation">{TARGET_NOTICE}</p>
       {capability && <p id="capability" className="notice">{capability}</p>}
-      <TargetAnalysisForm available={!!props.analyze} busy={busy} pending={pendingAnalysis !== null}
-        error={error} onOperationReserved={operationIsReserved}
+      <TargetAnalysisForm available={!!props.analyze} busy={busy} configuration={props.configuration}
+        error={failedIsDisplayed ? null : error} onOperationReserved={operationIsReserved}
         onAnalyze={analyze} onAnnounce={setAnnouncement} />
-      {busy && <p id="busy-notice" className="notice">{busyNotice}</p>}
-      {pendingAnalysis && <section aria-labelledby="pending-analysis-heading" className="notice">
-        <h3 id="pending-analysis-heading">Pending analysis</h3>
-        <p>Mode: {pendingAnalysis.providerContext.mode}. Provider: {pendingAnalysis.providerContext.provider}. Model: {pendingAnalysis.providerContext.model}.</p>
-        <p>No provider call was attempted.</p>
-      </section>}
       <p role="status" aria-atomic="true" className="status">{announcement}</p>
     </section>
-    {failed && <section aria-labelledby="history-heading" className="run-history">
-      <h2 id="history-heading">Failed run</h2>
-      <RunResults key={failed.runId} run={failed} />
-    </section>}
-    <section aria-labelledby="results-heading" className="results">
+    {displayedRun && <section aria-labelledby="results-heading" className="results">
       <h2 id="results-heading" tabIndex={-1} ref={resultsHeading}>Results</h2>
-      <p className="limitation"><span>{resultsNotice}</span> <span>{TARGET_NOTICE}</span></p>
       <div ref={resultsContent}>
-        {complete && <RunResults key={complete.runId} run={complete} selectedId={selectedId}
-          selectionRequest={selectionRequest} onSelect={selectFinding} />}
+        <RunResults key={displayedRun.runId} run={displayedRun} selectedResult={selectedResult}
+          failure={failedIsDisplayed ? error : null} onSelect={selectResult} />
       </div>
-    </section>
+    </section>}
   </main>;
 }

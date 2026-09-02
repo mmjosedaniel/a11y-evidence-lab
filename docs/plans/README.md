@@ -4,7 +4,7 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-- [M1-04 — Target and results UI](m1-04-target-and-results-ui.md) — **In progress** for manual evidence, integrated review, cleanup and closure after the trusted-input correction passed fresh S3 review. M1-05 remains Not started and unselected.
+- [M1-04 — Target and results UI](m1-04-target-and-results-ui.md) — **In progress** for the owner-selected OD-027 Analyze/Results presentation replacement and renewed verification. M1-05 remains Not started and unselected.
 
 ## Completed plans
 

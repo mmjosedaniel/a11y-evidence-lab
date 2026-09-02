@@ -6,7 +6,7 @@
 - **Roadmap task:** [M1-04](../DEVELOPMENT_ROADMAP.md#m1-04--present-accessible-target-entry-and-complete-results)
 - **Mirrored roadmap status:** In progress
 - **ExecPlan:** [Target and results UI](../plans/m1-04-target-and-results-ui.md)
-- **Last updated:** 2026-09-01
+- **Last updated:** 2026-09-02
 
 ## 2026-09-01 — Results-presentation correction selected
 
@@ -477,3 +477,152 @@ The owner replied `go ahead` directly to that exact approval request. M1-04 retu
 - **Agent-workflow outcome:** A brand-new critical reviewer matched every frozen source/test/helper/build identity, passed independent strict typechecking and diff validation, and returned `PASS` with no Blocker, Major or Minor finding. All previous results-presentation and trusted-input corrections remain accepted.
 - **Evidence:** [M104-RESULTS-TRUSTED-INPUT-S3-CORRECTION-07-S3-005](../plans/m1-04-target-and-results-ui.md#m104-results-trusted-input-s3-correction-07-s3-005--fresh-review-passed) records the complete review dimensions and residual manual gates.
 - **Next boundary:** Capture actual Chrome-menu 200% result-path evidence and human-heard Narrator evidence, then obtain a different integrated review, perform exact cleanup and complete documentation closure. M1-05, commit and push remain unauthorized.
+
+## 2026-09-01 — Owner selected the evidence-first Analyze/Results replacement
+
+- **Project outcome:** The owner rejected the still-technical progressive-disclosure preview, supplied the exact [Analyze and results presentation](../ui/ANALYZE_AND_RESULTS_PRESENTATION.md), and requested both authority linkage and implementation. OD-027 now accepts that contract while preserving canonical run, scan, evidence, and provider data.
+- **Agent-workflow outcome:** M1-04 remains In progress under workflow `M1-04-20260901-09`. Primary reconciled the requirement, decision, architecture, roadmap, specification, UI-index, and status authorities and recorded a living Decision Review Contract plus one S3 test/frontend slice. No application source or test has changed at this checkpoint.
+- **Evidence:** [M104-ANALYZE-RESULTS-PRESENTATION-REPLACEMENT-08](../plans/m1-04-target-and-results-ui.md#m104-analyze-results-presentation-replacement-08--od-027-owner-selected-replacement) records the exact acceptance contract, responsibilities, reuse dispositions, validation, browser evidence, stop conditions, and closure route.
+- **Next boundary:** Accept the read-only Decision Review Contract audit, then run one guarded test-owned Red and one separate guarded frontend Green/Refactor. M1-05, commit and push remain unauthorized.
+
+## 2026-09-01 — OD-027 decision contract accepted
+
+- **Project outcome:** The exact Analyze/Results presentation is now linked from the project, requirement, architecture, specification, roadmap and UI authorities. Trusted-input admission remains enforced and documented without ready-state copy; provider disclosure remains in the later provider-relevant workflow; canonical run/scan/provider data remains unchanged.
+- **Agent-workflow outcome:** The decision analyst and fresh R3 reviewers found and primary reconciled all current authority contradictions. The final different reviewer passed all eight Decision Review Contract questions and the plan-local `P8.1`–`P8.9` invariant packet. Source, test, dependency, fixture and executable-configuration identities remain frozen.
+- **Evidence:** [OD-027 Decision Review Contract](../plans/m1-04-target-and-results-ui.md#decision-review-contract) and [Analyze and results presentation](../ui/ANALYZE_AND_RESULTS_PRESENTATION.md).
+- **Next boundary:** Run one guarded test-worker preflight/Red, then a separate guarded frontend Green/Refactor. M1-05, commit and push remain unauthorized.
+
+## 2026-09-01 — OD-027 presentation Red accepted
+
+- **Project outcome:** The browser contract now requires the compact Analyze form, nonblocking known-configuration feedback, one evidence-first Results overview, complete human-readable Finding groups, direct rule evidence, plain-language manual-review tasks, valid-zero/failure separation, lifecycle announcements, accessible focus, and 320-pixel reflow while omitting the superseded technical presentation.
+- **Agent-workflow outcome:** A separate test worker changed only the UI test and harness under a fresh compliant lease. Syntax passed and one focused Chromium run produced application-owned Red: all 26 cases failed against the frozen pre-OD-027 source, with no external requests, page errors, teardown residue, or forbidden path changes.
+- **Evidence:** [M104-ANALYZE-RESULTS-PRESENTATION-REPLACEMENT-08](../plans/m1-04-target-and-results-ui.md#m104-analyze-results-presentation-replacement-08--od-027-owner-selected-replacement) records test hash `E82C2DD2…83A5`, helper hash `1A5E20E0…7507`, and compliant lease receipt `1f1f2efc…6e7e53`.
+- **Next boundary:** One separate frontend worker may implement Green only in the accepted client paths while keeping both test-side identities unchanged. Full regression, S3 review, actual browser/Narrator evidence, different integrated review, cleanup, and closure remain pending. M1-05, commit and push remain unauthorized.
+
+## 2026-09-01 — Initial OD-027 Green requires bounded correction
+
+- **Project outcome:** The replacement UI is implemented in the five accepted client paths, but the first focused run is not Green. Thirteen of 26 cases passed; the remaining failures trace to three bounded presentation defects rather than a changed contract.
+- **Agent-workflow outcome:** The first frontend lease closed fresh and compliant after one run. Primary inspection confirmed that hidden live-status CSS removes the region from the accessibility tree, the selected-detail region has a conflicting accessible name, and a blocked recursive submit overwrites the required start announcement. Test/helper identities remain accepted and unchanged.
+- **Evidence:** [M104-ANALYZE-RESULTS-PRESENTATION-REPLACEMENT-08](../plans/m1-04-target-and-results-ui.md#m104-analyze-results-presentation-replacement-08--od-027-owner-selected-replacement) records the exact three-defect correction boundary and lease receipt `7cedc8bc…5c3cf6`.
+- **Next boundary:** Use the single attempt-2 child lease to correct only these three production behaviors, then run the accepted focused suite once. Typecheck/build follow only after Green. M1-05, commit and push remain unauthorized.
+
+## 2026-09-01 — OD-027 Green correction isolates final test and axe defects
+
+- **Project outcome:** The bounded frontend correction fixed the live-region, evidence-region naming, and start-announcement defects. Twenty-four of 26 cases now pass.
+- **Agent-workflow outcome:** The correction lease closed fresh and compliant. One failure is a test-transport contradiction between `aria-disabled="true"` and Playwright's ordinary click action; the other is an axe `aria-allowed-role` defect on the three Finding-group containers. The frontend correction allowance is exhausted.
+- **Evidence:** The active [M1-04 plan](../plans/m1-04-target-and-results-ui.md#m104-analyze-results-presentation-replacement-08--od-027-owner-selected-replacement) records receipt `f1add9c9…6bb32`, exact source identities, and the two-failure boundary.
+- **Next boundary:** Use the remaining test attempt-2 allowance to correct only the contradictory activation transport and re-establish Red against the axe defect. Any additional frontend write requires owner direction because the planned correction budget is exhausted. M1-05, commit and push remain unauthorized.
+
+## 2026-09-01 — Corrected Red isolates one Finding-group accessibility defect
+
+- **Project outcome:** The corrected 26-case contract now passes 25 cases. The only remaining failure is axe `aria-allowed-role` on the three Finding-group wrappers; no functional, copy, data, provider, focus, or responsive defect remains in this focused result.
+- **Agent-workflow outcome:** The test worker changed one activation call under its attempt-2 child lease and preserved every behavioral assertion and the harness. The lease closed fresh and compliant. Both planned frontend write turns are now consumed, so repository workflow requires owner direction before the exact source correction.
+- **Evidence:** The active [M1-04 plan](../plans/m1-04-target-and-results-ui.md#m104-analyze-results-presentation-replacement-08--od-027-owner-selected-replacement) records accepted test hash `1822FA1F…D8D47`, helper hash `1A5E20E0…7507`, and receipt `34b3afa6…9a82e1`.
+- **Next boundary:** If the owner authorizes one additional frontend correction, change only the three invalid Finding-group container elements while preserving labels, order, copy, and styling; then run one focused suite, strict typecheck, and build. M1-05, commit and push remain unauthorized.
+
+## 2026-09-01 — Owner authorizes exact Finding-group accessibility correction
+
+- **Project outcome:** The owner authorized correcting the sole remaining axe defect in the OD-027 presentation.
+- **Agent-workflow outcome:** One new bounded correction slice owns only `RunResults.tsx`. It may replace the repeated invalid section/group wrapper with a valid labelled group container and must preserve all accepted test, content, ordering, styling, data, and interaction contracts.
+- **Evidence:** [M104-ANALYZE-RESULTS-PRESENTATION-REPLACEMENT-08](../plans/m1-04-target-and-results-ui.md#m104-analyze-results-presentation-replacement-08--od-027-owner-selected-replacement) records the owner direction and exact scope.
+- **Next boundary:** Run one guarded frontend correction, then the unchanged focused suite, strict typecheck, and build. Full regression and all review/manual/cleanup/closure gates remain pending. M1-05, commit and push remain unauthorized.
+
+## 2026-09-01 — Finding-group correction reveals the actual axe nodes
+
+- **Project outcome:** The valid Finding-group wrapper change preserved all behavior, but the focused result remains 25 of 26. The earlier node attribution was wrong: axe's three failures correspond to the manual-review `article[role="group"]` items.
+- **Agent-workflow outcome:** The exact owner-authorized lease changed only `RunResults.tsx` and closed fresh and compliant. Because that authorization named the Finding wrappers and prohibited another correction, workflow stops before changing the different manual-review elements.
+- **Evidence:** The active [M1-04 plan](../plans/m1-04-target-and-results-ui.md#m104-analyze-results-presentation-replacement-08--od-027-owner-selected-replacement) records RunResults hash `E50B334F…1BCF5`, the unchanged 25/26 result, and receipt `e8648130…43f5fa`.
+- **Next boundary:** Owner direction is required for one exact RunResults correction replacing the three manual-review `article[role="group"]` wrappers with valid labelled group containers, followed by the unchanged focused suite, strict typecheck, and build. M1-05, commit and push remain unauthorized.
+
+## 2026-09-01 — Owner authorizes the corrected manual-review wrapper scope
+
+- **Project outcome:** The owner authorized correcting the actual three axe-invalid manual-review wrappers.
+- **Agent-workflow outcome:** Attempt 2 of the one-file accessibility slice may replace only the repeated `article[role="group"]` element with a valid labelled `div[role="group"]`, preserving all content and behavior.
+- **Evidence:** The active [M1-04 plan](../plans/m1-04-target-and-results-ui.md#m104-analyze-results-presentation-replacement-08--od-027-owner-selected-replacement) records the exact corrected scope and stop conditions.
+- **Next boundary:** Run the guarded correction and unchanged focused suite; continue to strict typecheck and build only if all 26 cases pass. Full regression and review/manual/cleanup/closure gates remain pending. M1-05, commit and push remain unauthorized.
+
+## 2026-09-01 — Focused Green passes; exact typecheck recovery authorized
+
+- **Project outcome:** The corrected manual-review wrappers pass all 26 focused browser cases, including axe at desktop and 320 pixels. Runtime behavior, visible presentation, network ownership and teardown are Green. Strict typechecking found only a completed-fixture inference issue in the test and an overly broad terminal-run prop type in Results.
+- **Agent-workflow outcome:** The exact wrapper lease closed fresh and compliant. The owner then replied `go ahead`, authorizing one test-only type annotation followed by one separate source-only terminal-union narrowing. Both changes are nonvisual and must preserve every accepted browser assertion and rendered behavior.
+- **Evidence:** The active [M1-04 plan](../plans/m1-04-target-and-results-ui.md#typecheck-recovery-after-focused-green) records the 26/26 result, the exact two-diagnostic boundary and the new guarded recovery scope.
+- **Next boundary:** A test worker corrects only the completed fixture type, then a separate code worker narrows `RunResultsProps.run`; strict typecheck, the unchanged focused suite and build must pass before full regression. M1-05, commit and push remain unauthorized.
+
+The test-only compile Red is accepted: one explicit completed-run generic removed every test diagnostic while preserving the complete runtime contract. Strict typechecking now fails only at the production terminal-run prop boundary. The fresh compliant lease receipt is `5ca33821…745e`; the accepted test and helper hashes are `7F97911B…E4326` and `1A5E20E0…7507`.
+
+The separate code worker narrowed the Results prop to completed or failed terminal records without changing runtime code or presentation. Strict typechecking, all 26 unchanged Chromium cases and the native-loader build pass; both leases closed fresh and compliant. Primary complete regression and risk-routed reviews remain.
+
+Primary accepted the complete sequential regression: 290 backend/scanner tests plus all 26 UI cases pass, followed by strict typechecking and a reproducible three-file build. Browser transport, teardown, scratch, generated Vite cache and port checks pass. A fresh S3 review now owns the implementation gate; actual browser-menu 200% and heard Narrator evidence remain later manual checks.
+
+## 2026-09-01 — Fresh S3 review requires one bounded correction loop
+
+- **Project outcome:** The evidence-first UI passes its complete automated barrier, but review found three uncovered truthfulness/accessibility defects: a later run-less failure can be hidden by an older failed result, accepted label/shadow evidence variants are not projected truthfully and completely, and Finding focus names omit their affected-element summaries. Singular count grammar also needs correction.
+- **Agent-workflow outcome:** The critical reviewer matched every frozen identity and independently passed strict typecheck, link/fragment, diff, scratch and scope checks. Primary confirmed the findings, corrected two stale authority clauses, clarified the exact presentation contract, and activated the plan's one S3 Red/Green loop without broadening product scope.
+- **Evidence:** [M104-OD027-S3-CORRECTION-11](../plans/m1-04-target-and-results-ui.md#m104-analyze-results-presentation-replacement-08--od-027-owner-selected-replacement) records the exact test/source ownership and stop conditions.
+- **Next boundary:** One test worker establishes focused Red, then one separate frontend worker reaches Green in App, RunResults and RuleEvidence only. Full regression and a fresh S3 review must pass before manual browser/Narrator evidence. M1-05, commit and push remain unauthorized.
+
+The S3 Red is accepted. All 26 previous cases pass and four added cases fail only on the assigned application behaviors; syntax, strict typecheck, browser isolation and teardown pass. The new frozen test/helper hashes are `6DBA06E4…209F3` and `1A5E20E0…7507`.
+
+The first S3 Green passed the new evidence, Finding-name and count behavior but stopped at 27 of 30. Two failures are the same stale test expression expecting `1 items` for both modes; the third is App's remaining run-less unsaved-warning guard. The source lease closed compliantly. A one-expression primary test correction is required between leases, followed by fresh contract acceptance and one exact App-only attempt-2 Green.
+
+Primary corrected only the stale dynamic announcement expectation. Syntax, typecheck and a fresh focused run now pass 29 of 30; the sole Red is App's run-less unsaved-warning guard. The corrected test hash is `F9E68BD9…A3C5AE`, and one exact attempt-2 source correction remains.
+
+The exact App-only attempt-2 correction is Green. All 30 corrected UI cases, strict typecheck and native-loader build pass with clean browser transport and teardown; RunResults, RuleEvidence, test and helper remained frozen. Primary full regression and a brand-new S3 review remain.
+
+Primary accepted the complete corrected barrier: 290 backend/scanner plus 30 UI tests pass, followed by strict typecheck and the same three-file build. Browser ownership, teardown, scratch and port checks pass. A brand-new critical reviewer now owns the S3 gate before manual evidence.
+
+## 2026-09-01 — Corrected OD-027 presentation passes fresh S3 review
+
+- **Project outcome:** Fresh review found no remaining application, test, truthfulness, accessibility, or responsive-presentation defect. All prior review findings are corrected and P8.1 through P8.9 pass.
+- **Agent-workflow outcome:** The reviewer returned `PASS WITH FOLLOW-UPS` with no Blocker or Major issue. One unused internal App state variable is a nonblocking maintenance observation; removing it now would reopen an accepted application identity without changing observable behavior, so it is deferred to a later selected client-maintenance task.
+- **Evidence:** The active [M1-04 plan](../plans/m1-04-target-and-results-ui.md#m104-analyze-results-presentation-replacement-08--od-027-owner-selected-replacement) records the matched source/test/build identities, independent typecheck and diff checks, cohesion disposition, and reviewer verdict.
+- **Next boundary:** Capture fresh actual Chrome-menu 200% reflow and human-heard Narrator evidence for the changed UI, then obtain a different integrated review, perform exact cleanup, and complete documentation closure. M1-05, commit and push remain unauthorized.
+
+## 2026-09-01 — Fresh Narrator and 200% reflow paths pass
+
+- **Project outcome:** The owner directly confirmed that Narrator spoke the changed form, validation, analysis lifecycle, Finding evidence, and return path correctly, and explicitly confirmed that the enlarged controlled-window capture used Chrome zoom at `200%`. The captured form reflows vertically without a visible horizontal page scrollbar; fresh desktop and 320-pixel result captures show complete readable evidence presentation.
+- **Agent-workflow outcome:** Heard Narrator and actual-Chrome 200% acceptance are complete. Computer Use could not safely bind Chrome for Testing because Windows conflated its app owner with personal Chrome, so the owner observation supplies zoom provenance and the retained image is labelled truthfully rather than represented as an open-menu capture. The headed and automated capture sessions both closed with owned network and teardown checks satisfied.
+- **Evidence:** The active plan records exact dimensions and SHA-256 identities for `zoom-reflow-200-owner-observed.png`, `desktop-results.png`, and `narrow-detail.png`.
+- **Next boundary:** Obtain a different integrated review, then perform exact cleanup and documentation closure. M1-05, commit and push remain unauthorized.
+
+## 2026-09-01 — Different integrated review passes
+
+- **Project outcome:** The different independent reviewer found no application, test, scope, accessibility, provider-boundary, responsive, or documentation-authority defect in the final OD-027 candidate.
+- **Agent-workflow outcome:** The verdict is `PASS` with one closure-only Minor: the living-plan retrospective retained an earlier blocker after later evidence had superseded it. Primary corrected that paragraph before cleanup. The known unused App state remains an acceptable nonblocking future-maintenance item.
+- **Evidence:** The reviewer matched every final source, test, helper, build and screenshot identity, visually inspected all three captures, and accepted the truthful owner-observed Narrator and actual-Chrome 200% provenance.
+- **Next boundary:** Delete only the six authorized generated M1-04 roots under a fresh guarded cleanup turn, independently verify absence and preserved source/Git state, then reconcile status and archive the ExecPlan. M1-05, commit and push remain unauthorized.
+
+## 2026-09-01 — Cleanup attempt stopped before deletion
+
+- **Project outcome:** No generated output was deleted; the final application and review evidence remain unchanged.
+- **Agent-workflow outcome:** The deletion approval check did not accept the older cleanup authorization as sufficient for this new attempt. The worker made no change, the no-change lease closed fresh and compliant, the temporarily removed runtime ignore rule was restored exactly, and no lease remains active.
+- **Evidence:** Lease `M1-04-20260901-09-od027-final-cleanup-01` closed with receipt `6ce49718…9df`; all allowed, forbidden, unleased, HEAD, index, ref, and ignore-control change sets were empty.
+- **Next boundary:** Obtain explicit current owner authorization to recursively delete only `m104-browser-runtime`, `temp/m104-setup`, `temp/m104-ui`, `temp/m103-scan`, `logs/m104-ui-evidence`, and `dist/client`, then run one fresh guarded cleanup attempt and complete documentation closure. Commit, push, M1-05, shared-cache deletion, and any other path remain unauthorized.
+
+## 2026-09-02 — Redundant Finding return action selected for removal
+
+- **Project outcome:** The owner selected one additional M1-04 refinement: selected evidence remains in the same Results workspace, so the **Back to findings** button and its focus transfer are removed. Selecting a Finding will retain focus on that item while evidence updates and the existing selection announcement remains available.
+- **Agent-workflow outcome:** The accepted presentation, OD-027 accessibility interpretation, roadmap verification and living ExecPlan now agree on the bounded focus-retention behavior. One guarded test-owned Red and one separate frontend-owned Green are authorized under the existing M1-04 workflow.
+- **Evidence:** [M104-OD027-FINDING-FOCUS-SIMPLIFICATION-13](../plans/m1-04-target-and-results-ui.md#m104-od027-finding-focus-simplification-13--owner-selected-removal-of-the-redundant-return-action) records exact ownership, scope, validation and stop conditions.
+- **Next boundary:** Establish the exact 30-case Red, reach Green without changing evidence or announcements, run the complete regression and fresh S3 review, then reopen the UI for the owner's next one-by-one review. Cleanup, task closure, commit, push and M1-05 remain unauthorized.
+
+## 2026-09-02 — Finding focus simplification passed implementation and review
+
+- **Project outcome:** **Back to findings** and its supporting focus transfer are removed. Selecting a Finding retains keyboard focus on that item while the evidence region, selected state and exact live announcement update in the same Results workspace.
+- **Agent-workflow outcome:** Guarded Red, separate frontend Green, the complete 290 plus 30 regression, strict typecheck, native build and fresh S3 review all pass. The changed three-file responsibility fit is `REFACTORED`; review found no Blocker, Major or Minor issue.
+- **Evidence:** The active ExecPlan records the final source/test/build identities, compliant lease receipts, full regression and `M104-OD027-FINDING-FOCUS-RUNNER-RECONCILIATION-14-S3-001` verdict.
+- **Next boundary:** Reopen the synthetic application for the owner's next one-by-one UI review. Generated runtime/build cleanup, task closure, commit, push and M1-05 remain outside this checkpoint.
+
+## 2026-09-02 — Unified Finding groups selected
+
+- **Project outcome:** The owner selected one additional M1-04 presentation refinement: place automated Findings and manual-review observations in the same three user-facing check groups, mark every observation with an explicit **Needs manual review** tag, and open both item types in the same evidence workspace. The canonical Finding and ScannerReviewObservation collections and totals remain distinct.
+- **Agent-workflow outcome:** The presentation contract, OD-027, accessibility requirements, specification and roadmap now agree on the bounded behavior. One guarded test-owned Red and one separate frontend-owned Green are authorized under the active M1-04 workflow after exact generated-scratch recovery.
+- **Evidence:** The living [M1-04 ExecPlan](../plans/m1-04-target-and-results-ui.md) records the responsibility boundary, protected semantics, paths, commands, evidence and stop conditions for `M104-OD027-UNIFIED-RESULT-GROUPS-15`.
+- **Next boundary:** Complete read-only test preflight, exact guarded scratch recovery, Red, separate frontend Green, full regression and fresh S3 review before reopening the UI. Task closure, commit, push and M1-05 remain unauthorized.
+
+## 2026-09-02 — Unified Finding groups pass implementation and review
+
+- **Project outcome:** Automated Findings and manual-review observations now share the same three check groups and selected-evidence workspace. Every observation remains a distinct canonical record and total, appears once as a keyboard-selectable card, and carries the visible and accessible **Needs manual review** tag. The separate manual-review section is removed.
+- **Agent-workflow outcome:** Guarded setup, Red, separate frontend Green plus one bounded TypeScript correction, the complete 290 plus 30 regression, strict typecheck, native build and fresh S3 review all pass. Review found no Blocker, Major or Minor issue; cohesion is `REFACTORED`.
+- **Evidence:** The active ExecPlan records the exact source/test/build identities, four compliant receipts, Chromium `151.0.7922.34` network and teardown evidence, desktop/320-pixel axe and reflow evidence, and `M104-OD027-UNIFIED-RESULT-GROUPS-15-S3-001`.
+- **Next boundary:** Reopen the exact synthetic application for the owner's one-by-one visual review. Generated runtime/build cleanup, task closure, commit, push and M1-05 remain outside this checkpoint.

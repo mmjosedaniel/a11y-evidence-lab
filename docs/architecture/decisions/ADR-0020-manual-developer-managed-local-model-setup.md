@@ -12,6 +12,10 @@ Those behaviors would create a small model manager and provider-diagnostics subs
 
 This decision changes setup and disclosure mechanics only. It does not change the accepted provider-neutral contract, exact Local/Groq modes, fixed evaluation models, evidence-sufficiency gate, minimized provider input, structured validation, explicit invocation, provider provenance, or prohibition on provider mixing and automatic fallback.
 
+### Analyze/Results presentation clarification recorded 2026-09-01
+
+[OD-027](../../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-027--simplify-analysis-and-results-presentation) supersedes only the placement of this record's initial provider disclosure and persistent label. The Analyze form now shows the explicit Local/Groq choice with no normal explanation, and provider-independent scan Results omit provider/model metadata. Provider-specific disclosure still appears when a later selected-Finding workflow makes an invocation possible or needs to explain its failure, provenance, abstention, proposal, or review. Selecting a mode and starting Analyze still perform no provider probe. An already-known missing Local model or fixed Groq-adapter API URL may be shown as concise nonblocking configuration feedback without changing the attempt-time validation boundary below.
+
 ## Considered options
 
 1. Keep an application-triggered model pull, download progress and state, detailed consent UI, and synthetic provider probes.
@@ -40,10 +44,10 @@ Accept option 2.
 - The bounded context-fit check remains deterministic application behavior before the actual request so required evidence, guidance, citations, or constraints are never silently truncated.
 - Missing setup, request failure, or invalid output remains a visible finding-level failure. It preserves the completed scan and evidence and never causes an automatic retry, provider switch, or fallback.
 
-### Minimal provider disclosure
+### Minimal provider disclosure — historical initial placement
 
-- At global mode selection, show one concise run-level disclosure: Local uses the approved loopback Ollama boundary; Groq uses the external Groq service and may receive only the selected finding's minimized application-owned evidence and required curated guidance after an explicit generation action.
-- Keep the selected provider and exact model visibly labeled throughout the run.
+- Historical OD-022 placement showed one concise disclosure at global mode selection and kept the selected provider/model visibly labeled throughout the run. OD-027 supersedes that initial and persistent placement.
+- Show the Local or Groq disclosure when a later selected-Finding workflow makes provider use relevant. Local uses the approved loopback Ollama boundary; Groq uses the external Groq service and may receive only the selected finding's minimized application-owned evidence and required curated guidance after an explicit generation action.
 - A separate repeated disclosure or confirmation gate before every finding invocation is not required. Each invocation still requires the user's explicit finding-level generation action.
 - Groq credential isolation, minimized payload rules, non-secret invocation provenance, provider-controlled service limitations, no batching, no provider mixing, and no fallback remain unchanged.
 
@@ -73,5 +77,6 @@ Accept option 2.
 - [ADR-0006: EmbeddingGemma as the initial embedding model](ADR-0006-embeddinggemma-as-initial-embedding-model.md)
 - [ADR-0014: Groq as the MVP external generation provider](ADR-0014-groq-as-mvp-external-generation-provider.md)
 - [ADR-0015: Localhost browser MVP execution](ADR-0015-localhost-browser-mvp-execution.md)
-- [Generation provider execution requirements](../../requirements/generation-provider-and-model-lifecycle/GENERATION_PROVIDER_EXECUTION.md): `REQ-LLM-019` and `REQ-LLM-020`
+- [OD-027: Simplify Analysis and Results presentation](../../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-027--simplify-analysis-and-results-presentation)
+- [Generation provider execution requirements](../../requirements/generation-provider-and-model-lifecycle/GENERATION_PROVIDER_EXECUTION.md): `REQ-LLM-019`–`REQ-LLM-021`
 - [Installation and model lifecycle requirements](../../requirements/generation-provider-and-model-lifecycle/INSTALLATION_AND_MODEL_LIFECYCLE.md): `REQ-INST-003`–`REQ-INST-006` and `REQ-INST-017`
