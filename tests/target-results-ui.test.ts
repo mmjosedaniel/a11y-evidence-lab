@@ -216,7 +216,14 @@ describe('M1-04 analyze and evidence-first Results presentation', { concurrency:
 
   it('renders one overview, complete human groups and direct rule evidence without internal fields', async () => {
     const run = await openComplete(); await visible(copy.limitation, results()); await visible('4 findings need review', results()); await visible('3 items need manual review', results());
-    for (const heading of ['Image alternatives', 'Form labels', 'Color contrast']) assert.ok(await results().getByRole('heading', { name: heading, exact: true }).count() >= 1);
+    const overview = results().getByRole('region', { name: 'Results overview', exact: true });
+    assert.equal(await overview.getByRole('group').count(), 3);
+    for (const [name, count] of [['Image alternatives', '2 findings · 1 manual review'], ['Form labels', '1 finding · 1 manual review'], ['Color contrast', '1 finding · 1 manual review']] as const) {
+      const group = overview.getByRole('group', { name, exact: true });
+      assert.equal(await group.count(), 1);
+      assert.equal(await group.getByRole('heading', { name, exact: true }).count(), 1);
+      assert.equal(await group.getByText(count, { exact: true }).count(), 1);
+    }
     for (const id of Object.keys(labels)) assert.equal(await findingButton(id).count(), 1);
     for (const [id, expected] of [['finding-0', ['The image does not have usable alternative text.', 'Affected element', 'Where on the page', 'Alternative text', 'Missing']], ['finding-label', ['The form control does not have a usable accessible name.', 'Input type', 'Explicit label', 'Implicit label', 'ARIA label', 'ARIA labelled by', 'Title', 'Placeholder']], ['finding-contrast', ['Measured contrast is 4.48:1; this text requires 4.5:1.', 'Text color', 'Background color', 'Measured contrast', 'Required contrast', 'Font size', 'Font weight']]] as const) { const text = await (await select(id)).innerText(); for (const value of expected) assert.ok(text.includes(value), `${id} missing ${value}`); }
     const text = await results().innerText(); for (const omitted of [run.runId, run.providerContext.provider, run.providerContext.model, 'unprocessed', 'Native result', 'Technical run details', 'Technical scanner evidence', 'Message key', 'axe-core']) assert.ok(!text.includes(omitted), `exposed ${omitted}`);

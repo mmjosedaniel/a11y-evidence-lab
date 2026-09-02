@@ -1,7 +1,6 @@
 import { useId } from 'react';
 import type { ReactElement, ReactNode, RefObject } from 'react';
 import type { PageAnalysisRun } from '../../../server/domain/run-contract.ts';
-import type { AnalysisError } from '../analysis/analysisTypes.ts';
 import { FindingsPanel } from './FindingsPanel.tsx';
 import { ResultDetail } from './ResultDetail.tsx';
 import { ResultsOverview } from './ResultsOverview.tsx';
@@ -11,10 +10,15 @@ import type { ResultSelection } from './resultPresentation.ts';
 type CompleteRun = Extract<PageAnalysisRun, { status: 'completed' }>;
 type FailedRun = Extract<PageAnalysisRun, { status: 'failed' }>;
 
+interface FailureNotice {
+  readonly unsaved: boolean;
+  readonly cleanup: boolean;
+}
+
 interface ResultsSectionProps {
   readonly run: CompleteRun | FailedRun;
   readonly selectedResult?: ResultSelection | null;
-  readonly failure?: AnalysisError | null;
+  readonly failure?: FailureNotice | null;
   readonly headingRef: RefObject<HTMLHeadingElement | null>;
   readonly contentRef: RefObject<HTMLDivElement | null>;
   readonly onSelect?: (selection: ResultSelection, label: string) => void;
@@ -41,7 +45,7 @@ function failureExplanation(category: FailedRun['failure']['category']): string 
 
 function FailedResults({ run, failure }: {
   readonly run: FailedRun;
-  readonly failure: AnalysisError | null;
+  readonly failure: FailureNotice | null;
 }): ReactElement {
   return <div className="run-evidence failed-result">
     <dl className="results-context"><Field label="Requested page">{run.requestedUrl}</Field></dl>

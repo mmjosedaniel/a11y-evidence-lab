@@ -39,7 +39,7 @@ Add each new task record to this table in the same change that creates the file:
 | [M1-01](../DEVELOPMENT_ROADMAP.md#m1-01--define-the-minimum-run-and-scan-contracts) | [Minimum run and scan contracts](m1-01-run-and-scan-contracts.md) | [Task plan](../plans/completed/m1-01-run-and-scan-contracts.md) | Complete | 2026-08-30 |
 | [M1-02](../DEVELOPMENT_ROADMAP.md#m1-02--establish-the-loopback-service-and-single-file-aggregate) | [Local service and aggregate](m1-02-local-service-and-aggregate.md) | [Task plan](../plans/completed/m1-02-local-service-and-aggregate.md) | Complete | 2026-08-30 |
 | [M1-03](../DEVELOPMENT_ROADMAP.md#m1-03--implement-the-real-exact-three-rule-scan-and-minimized-evidence) | [Real scan and evidence](m1-03-real-scan-and-evidence.md) | [Task plan](../plans/completed/m1-03-real-scan-and-evidence.md) | Complete | 2026-08-31 |
-| [M1-04](../DEVELOPMENT_ROADMAP.md#m1-04--present-accessible-target-entry-and-complete-results) | [Target and results UI](m1-04-target-and-results-ui.md) | [Task plan](../plans/m1-04-target-and-results-ui.md) | In progress | 2026-09-01 |
+| [M1-04](../DEVELOPMENT_ROADMAP.md#m1-04--present-accessible-target-entry-and-complete-results) | [Target and results UI](m1-04-target-and-results-ui.md) | [Task plan](../plans/m1-04-target-and-results-ui.md) | In progress | 2026-09-02 |
 
 The mirrored status is a convenience snapshot only. The roadmap controls when a task is `Not started`, `In progress`, `Blocked`, or `Complete`.
 

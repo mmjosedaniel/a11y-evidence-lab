@@ -15,8 +15,9 @@ export function ResultsOverview({ run }: { readonly run: CompleteRun }): ReactEl
       {ruleOrder.map(rule => {
         const findingCount = run.scan.findings.filter(item => item.ruleId === rule).length;
         const reviewCount = run.scan.scannerReviewObservations.filter(item => item.ruleId === rule).length;
-        return <div className="overview-group" key={rule}>
-          <h4>{ruleDisplayName(rule)}</h4>
+        const headingId = `${rule}-overview-heading`;
+        return <div aria-labelledby={headingId} className="overview-group" key={rule} role="group">
+          <h4 id={headingId}>{ruleDisplayName(rule)}</h4>
           <p>{countText(findingCount, 'finding')} · {countText(reviewCount, 'manual review', 'manual reviews')}</p>
         </div>;
       })}
