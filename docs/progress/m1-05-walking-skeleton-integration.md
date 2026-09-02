@@ -60,3 +60,25 @@ The corrected independent test-worker preflight classified the scanner slice `EX
 - **Evidence:** Exact-identical focused 88-leaf and complete 290-case regressions pass; strict TypeScript, seven syntax checks, isolated reporter serialization, dependency-cycle inspection, exact identities, empty scratch, retained-runtime integrity, and generated-output absence pass. Final documentation validation passes 529 relative links and 116 fragments across ten changed documents, formatting, status reconciliation, and `git diff --check`. The active ExecPlan records the complete lease, review, validation, cleanup, and documentation evidence.
 - **Documentation impact:** The active ExecPlan, this progress record, roadmap status text, and documentation indexes now reflect both accepted internal structural slices. No requirement, ADR, product, API, dependency, M1-03, fixture, or executable-configuration update is needed because observable behavior and authority semantics are unchanged.
 - **Next boundary:** M1-05 remains In progress for real HTTP scan integration and its complete browser/build integration checkpoint. Commit and push remain unauthorized.
+
+## 2026-09-02 — External scanner policy-integrity follow-up opened
+
+- **Finding:** An owner-supplied independent review found that the exported `as const` policy arrays remain mutable JavaScript values. Primary reproduced rule and result-bucket corruption in later profile factories and expansion of the native message-key allowlist.
+- **Correction boundary:** Freeze the six existing exported policy tuples without changing their values, order, types, consumers, public entry points, scanner behavior, tests, dependencies, fixtures, configuration, or lifecycle/normalization placement.
+- **Evidence route:** Use the existing scanner characterization and bounded attempt-2 `code_worker` lineage, add no file-layout test, and require a direct mutation-resistance probe plus focused 88-leaf, complete 290-case, strict, syntax, cleanup, and renewed S3 evidence.
+- **Status:** The earlier scanner S3 PASS is superseded as final slice acceptance until this correction closes. M1-05 remains In progress; HTTP integration is still unimplemented.
+
+## 2026-09-02 — Scanner policy-integrity correction reached verified Green
+
+- **Project outcome:** All six scan-feature policy tuples are now runtime-frozen at construction. Their exact literals, order, readonly types, consumers, stable entry points, and scanner behavior remain unchanged.
+- **Agent-workflow outcome:** The attempt-2 `code_worker` lease closed fresh and compliant with only `scan-profile.ts` and `native-value-reader.ts` modified. The worker and primary accepted cohesion as `REFACTORED`; no test, dependency, fixture, configuration, unrelated source, or Git state changed.
+- **Evidence:** A process-isolated mutation probe confirms all six tuples are frozen and unchanged after generic array-mutation attempts, while fresh scan contexts/options retain three rules and four buckets. The unchanged scanner boundary passed all 88 leaf cases, the complete regression passed 290/290, strict TypeScript and seven syntax checks passed, and scanner scratch is empty.
+- **Next boundary:** Obtain renewed S3 review of runtime immutability and evidence-allowlist integrity before accepting the scanner structural slice again. M1-05 remains In progress for later HTTP integration.
+
+## 2026-09-02 — Scanner policy-integrity follow-up accepted
+
+- **Project outcome:** The runtime-mutable policy defect is corrected. The six existing scanner policy tuples are frozen without changing their literals, order, types, consumers, public API, normalization behavior, or browser lifecycle.
+- **Agent-workflow outcome:** Renewed S3 review returned PASS with no Blocker, Major, or Minor finding and accepted cohesion as `REFACTORED`. It independently confirmed frozen descriptors, rejection of five generic mutation methods, detached factory results, and end-to-end withholding of an injected unknown native message key.
+- **Evidence:** The fresh compliant two-file correction receipt, direct mutation probe, focused 88-leaf scanner boundary, complete 290-case regression, strict TypeScript, seven syntax checks, exact production/test identities, empty scratch, and renewed critical review all pass.
+- **Documentation impact:** The active ExecPlan and this progress record supersede the earlier review as final correction acceptance. No requirement, ADR, M1-03 authority, product, public contract, dependency, fixture, or executable-configuration update is needed because the correction enforces the already accepted policy boundary.
+- **Next boundary:** M1-05 remains In progress for real HTTP scan integration and its complete browser/build checkpoint. Commit and push remain unauthorized.

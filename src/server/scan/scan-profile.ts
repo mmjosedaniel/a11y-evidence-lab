@@ -1,8 +1,8 @@
 import type axe from 'axe-core';
 import type { RunningRun } from '../persistence/run-repository.ts';
 
-export const scanRules = ['image-alt', 'label', 'color-contrast'] as const;
-export const nativeBuckets = ['violations', 'incomplete', 'passes', 'inapplicable'] as const;
+export const scanRules = Object.freeze(['image-alt', 'label', 'color-contrast'] as const);
+export const nativeBuckets = Object.freeze(['violations', 'incomplete', 'passes', 'inapplicable'] as const);
 export const scannerVersion = '4.13.0';
 export const reporterId = 'm103-native-dom-v1';
 

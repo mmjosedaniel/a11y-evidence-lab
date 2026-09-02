@@ -2,13 +2,13 @@ export type Unavailable<R extends string = 'missing' | 'invalid' | 'withheld'> =
 export type Fact<T, R extends string = 'missing' | 'invalid' | 'withheld'> = { readonly value: T } | Unavailable<R>;
 export type Source<T = unknown> = Fact<T, 'missing' | 'invalid'>;
 
-export const ordinaryReasons = ['missing', 'invalid', 'withheld'] as const;
-export const attributeStates = ['absent', 'empty', 'whitespace-only', 'non-empty'] as const;
-export const inputTypes = ['button', 'checkbox', 'color', 'date', 'datetime-local', 'email', 'file', 'hidden',
-  'image', 'month', 'number', 'password', 'radio', 'range', 'reset', 'search', 'submit', 'tel', 'text', 'time', 'url', 'week'] as const;
-export const messageKeys = ['nonBmp', 'pseudoContent', 'complexTextShadows', 'colorParse', 'equalRatio',
+export const ordinaryReasons = Object.freeze(['missing', 'invalid', 'withheld'] as const);
+export const attributeStates = Object.freeze(['absent', 'empty', 'whitespace-only', 'non-empty'] as const);
+export const inputTypes = Object.freeze(['button', 'checkbox', 'color', 'date', 'datetime-local', 'email', 'file', 'hidden',
+  'image', 'month', 'number', 'password', 'radio', 'range', 'reset', 'search', 'submit', 'tel', 'text', 'time', 'url', 'week'] as const);
+export const messageKeys = Object.freeze(['nonBmp', 'pseudoContent', 'complexTextShadows', 'colorParse', 'equalRatio',
   'shortTextContent', 'shadowOnBgColor', 'fgOnShadowColor', 'imgNode', 'bgGradient', 'bgImage',
-  'bgOverlap', 'elmPartiallyObscuring', 'elmPartiallyObscured', 'outsideViewport'] as const;
+  'bgOverlap', 'elmPartiallyObscuring', 'elmPartiallyObscured', 'outsideViewport'] as const);
 
 export function requireValid(condition: unknown): asserts condition {
   if (!condition) throw new Error('Invalid native structure');
