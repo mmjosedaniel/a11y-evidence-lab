@@ -23,7 +23,7 @@ interface TargetAnalysisFormProps {
   readonly onAnnounce: (message: string) => void;
 }
 
-export const TARGET_NOTICE = 'Use a public HTTPS page you are permitted to analyze. Private, authenticated, and hostile pages aren’t supported.';
+export const TARGET_NOTICE = 'Use a public HTTPS page you are permitted to analyze and willing to trust. Private, authenticated, and hostile pages aren’t supported.';
 
 const localDisclosure = 'Local (recommended) — Ollama · qwen3.5:4b. Generation prompts and responses use the approved loopback Ollama endpoint and a locally present model, not hosted inference. The public-page scan still uses external HTTPS; this is not offline or system-wide zero-egress operation.';
 const groqDisclosure = 'Groq — openai/gpt-oss-20b. A later explicit Generate action for one eligible Finding may send minimized rule-specific evidence and required curated-guidance passages to Groq for remote processing. Target URLs, locators, sibling Findings and credentials are excluded from that content. Selecting a mode or scanning makes no provider call.';

@@ -5,11 +5,12 @@ import type { Locator, Page } from 'playwright';
 import { completedRun, failedRun } from './helpers/m102-run-fixture.ts';
 import { richRun, startHarness, targetUrl, valid } from './helpers/m104-ui-harness.ts';
 import type { Harness } from './helpers/m104-ui-harness.ts';
+import type { Finding, ScannerReviewObservation } from '../src/server/domain/run-contract.ts';
 
 const copy = {
   absent: 'Analyze is unavailable in this build; service integration is pending.',
   analyzeAbsent: 'Analyze is unavailable in this build; service integration is pending.',
-  target: 'Use a public HTTPS page you are permitted to analyze. Private, authenticated, and hostile pages aren’t supported.',
+  target: 'Use a public HTTPS page you are permitted to analyze and willing to trust. Private, authenticated, and hostile pages aren’t supported.',
   results: 'This automated scan covers only image-alt, label and color-contrast in the current rendered top-level document. Iframes, inactive states and other rules are excluded. Findings and counts do not establish accessibility, conformance, certification or legal compliance.',
   local: 'Local (recommended) — Ollama · qwen3.5:4b. Generation prompts and responses use the approved loopback Ollama endpoint and a locally present model, not hosted inference. The public-page scan still uses external HTTPS; this is not offline or system-wide zero-egress operation.',
   groq: 'Groq — openai/gpt-oss-20b. A later explicit Generate action for one eligible Finding may send minimized rule-specific evidence and required curated-guidance passages to Groq for remote processing. Target URLs, locators, sibling Findings and credentials are excluded from that content. Selecting a mode or scanning makes no provider call.',
@@ -74,7 +75,17 @@ async function select(id = 'finding-0'): Promise<Locator> {
 async function retained(): Promise<void> {
   assert.equal(await findingButton('finding-0').getAttribute('aria-pressed'), 'true');
   assert.ok(await page.evaluate(() => window.m104.savedNode?.isConnected));
-  await visible('m104-complete-01');
+  await technicalRunContains('m104-complete-01');
+}
+async function technicalRunContains(runId: string, root: Locator = page.getByRole('region', { name: 'Results', exact: true }), outcome = 'completed'): Promise<void> {
+  const defaultText = await root.innerText();
+  assert.ok(defaultText.includes(outcome));
+  assert.ok(defaultText.includes('No provider call was attempted.'));
+  const technical = disclosure('Technical run details', root);
+  assert.equal(await technical.count(), 1);
+  assert.equal(await technical.evaluate(node => (node as HTMLDetailsElement).open), false);
+  assert.equal(await technical.getByText(runId, { exact: true }).count(), 1);
+  assert.equal(await technical.getByText(runId, { exact: true }).isVisible(), false);
 }
 async function keepComplete(): Promise<ReturnType<typeof richRun>> {
   const record = await openComplete();
@@ -85,6 +96,51 @@ async function keepComplete(): Promise<ReturnType<typeof richRun>> {
 async function described(control: Locator, text: string): Promise<void> {
   assert.ok(await control.evaluate((element, expected) => (element.getAttribute('aria-describedby') ?? '').split(/\s+/)
     .some(id => document.getElementById(id)?.textContent?.includes(expected)), text), `Control must describe: ${text}`);
+}
+async function notDescribed(control: Locator, text: string): Promise<void> {
+  assert.ok(await control.evaluate((element, excluded) => (element.getAttribute('aria-describedby') ?? '').split(/\s+/)
+    .every(id => !document.getElementById(id)?.textContent?.includes(excluded)), text), `Control must not describe: ${text}`);
+}
+function renderedFact(fact: { readonly value: unknown } | { readonly unavailable: string }): string {
+  return 'value' in fact ? String(fact.value) : `Unavailable: ${fact.unavailable}`;
+}
+function conciseTargetFacts(item: Finding | ScannerReviewObservation): readonly string[] {
+  switch (item.ruleId) {
+    case 'image-alt': return [renderedFact(item.evidence.elementKind)];
+    case 'label': return [renderedFact(item.evidence.elementKind), renderedFact(item.evidence.inputType)];
+    case 'color-contrast': return [renderedFact(item.evidence.foregroundColor), renderedFact(item.evidence.backgroundColor),
+      renderedFact(item.evidence.fontSize), renderedFact(item.evidence.fontWeight)];
+  }
+}
+function disclosure(label: string, root: Locator = page.locator('body')): Locator {
+  return root.getByText(label, { exact: true }).locator('xpath=ancestor::details[1]');
+}
+async function openDisclosure(label: string, root: Locator = page.locator('body'), keyboard = false): Promise<Locator> {
+  const details = disclosure(label, root);
+  assert.equal(await details.count(), 1, `${label} must identify one native disclosure`);
+  assert.equal(await details.evaluate(node => node instanceof HTMLDetailsElement && node.open), false, `${label} must start collapsed`);
+  const summary = details.locator('summary');
+  if (keyboard) {
+    await summary.focus();
+    await page.keyboard.press('Enter');
+  } else {
+    await summary.click();
+  }
+  assert.equal(await details.evaluate(node => node instanceof HTMLDetailsElement && node.open), true, `${label} must open`);
+  return details;
+}
+async function hasCoverageRuleGroup(root: Locator, rule: string, counts: Record<string, number | null>, complete: boolean): Promise<boolean> {
+  const expected = Object.entries(counts).filter(([, value]) => complete || value !== null);
+  const semanticLabels = root.getByRole('heading', { name: rule, exact: true })
+    .or(root.getByRole('rowheader', { name: rule, exact: true }));
+  for (let index = 0; index < await semanticLabels.count(); index += 1) {
+    const label = semanticLabels.nth(index);
+    const group = label.locator('xpath=ancestor::*[self::section or self::article or self::tr or @role="group" or @role="region"][1]');
+    if (await group.count() !== 1) continue;
+    const text = await group.innerText();
+    if (expected.every(([bucket, value]) => new RegExp(`${bucket}[\\s\\S]*?${value ?? 'Not reported'}`, 'i').test(text))) return true;
+  }
+  return false;
 }
 async function rejected(code = 'invalid-result'): Promise<void> {
   await announced(`Analyze failed: ${code}.`);
@@ -121,8 +177,6 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
     assert.equal(await page.getByRole('heading', { level: 1, name: 'Analyze a page', exact: true }).count(), 1);
     assert.equal(await page.getByRole('heading', { name: 'A11y Evidence Lab', exact: true }).count(), 0);
     assert.equal(await page.getByRole('heading', { name: 'Target and generation mode', exact: true }).count(), 0);
-    await visible(copy.target);
-    await described(textbox(), copy.target);
     assert.equal(await page.getByText(copy.modeError, { exact: true }).count(), 0);
     assert.equal(await page.getByRole('radio', { checked: true }).count(), 0);
     assert.ok(await page.locator('fieldset legend').count() >= 1);
@@ -131,6 +185,19 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
     assert.equal(await page.getByText(/reopen retained evidence/i).count(), 0);
     assert.equal(await page.getByRole('button', { name: /generate|retry|resume|cancel|review|compare|filter/i }).count(), 0);
     assert.equal(await page.locator('iframe, object, embed').count(), 0);
+    const resultsLimitation = page.getByRole('region', { name: 'Results', exact: true }).locator('p').filter({ hasText: /image-alt/i });
+    const entryDescription = await textbox().evaluate(element => {
+      const descriptions = (element.getAttribute('aria-describedby') ?? '').split(/\s+/)
+        .map(id => document.getElementById(id)).filter((node): node is HTMLElement => node instanceof HTMLElement);
+      return { text: descriptions.map(node => node.textContent).join(' '), visible: descriptions.every(node => node.getClientRects().length > 0) };
+    });
+    assert.deepEqual({
+      entryDescription,
+      resultsLimitation: await resultsLimitation.innerText(),
+    }, {
+      entryDescription: { text: copy.target, visible: true },
+      resultsLimitation: `${copy.results} ${copy.target}`,
+    }, 'Entry and Results must state both permission and willingness to trust the public HTTPS page');
   });
 
   it('requires URL and explicit mode with associated errors without issuing any request', async () => {
@@ -160,7 +227,7 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
     const normalized = 'https://example.org/a?x=1#fragment';
     const record = valid({ ...completedRun(`normal-${mode}`, mode), requestedUrl: normalized });
     await analyze({ ok: true, run: record }, mode, ' HTTPS://EXAMPLE.ORG:443/a?x=1#fragment ');
-    await visible(`normal-${mode}`);
+    await technicalRunContains(record.runId);
     const recorded = await page.evaluate(() => window.m104.calls);
     assert.deepEqual(recorded.map(call => ({ stage: call.stage, value: call.value })), [{ stage: 'analyze', value: { requestedUrl: normalized, providerContext: record.providerContext } }]);
     await select();
@@ -179,8 +246,29 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
 
   it('distinguishes failed canonical records, unsaved failures and both directions of cleanup uncertainty', async () => {
     await keepComplete();
-    await analyze({ ok: false, error: 'scan-failed', run: failedRun('failed-closed'), persisted: false, cleanupFailed: true });
-    await visible('failed-closed');
+    const failed = failedRun('failed-closed');
+    await analyze({ ok: false, error: 'scan-failed', run: failed, persisted: false, cleanupFailed: true });
+    const failedRegion = page.getByRole('region', { name: 'Failed run', exact: true });
+    const failedDefault = await failedRegion.innerText();
+    for (const value of [failed.requestedUrl, 'failed', failed.providerContext.mode, failed.providerContext.provider,
+      failed.providerContext.model, 'No provider call was attempted.']) assert.ok(failedDefault.includes(value), `Missing failed-run summary ${value}`);
+    const combinedAxe = await new AxeBuilder({ page }).analyze();
+    assert.deepEqual({
+      runSummaryRegions: await page.getByRole('region', { name: 'Run summary', exact: true }).count(),
+      failedRequestedPageLabels: await failedRegion.getByText('Requested page', { exact: true }).count(),
+      failedAnalyzedPageLabels: await failedRegion.getByText('Analyzed page', { exact: true }).count(),
+      failedRequestedUrlPresent: await failedRegion.getByText(failed.requestedUrl, { exact: true }).count() > 0,
+      axeViolations: combinedAxe.violations.map(({ id, nodes }) => ({ id, nodes: nodes.length })),
+    }, {
+      runSummaryRegions: 0,
+      failedRequestedPageLabels: 1,
+      failedAnalyzedPageLabels: 0,
+      failedRequestedUrlPresent: true,
+      axeViolations: [],
+    }, 'Combined retained-complete and failed results must have distinct navigation and truthful requested-page labeling');
+    assert.ok(!failedDefault.includes(failed.runId), 'Run ID is technical provenance, not default failure content');
+    const failedTechnical = await openDisclosure('Technical run details', failedRegion, true);
+    assert.ok((await failedTechnical.innerText()).includes(failed.runId));
     await visible('This failed run was not saved.');
     await visible('Resource cleanup is uncertain.');
     await retained();
@@ -190,8 +278,11 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
     await analyze({ ok: false, error: 'scan-failed', run: failedRun('cleanup-bad', 'local', 'failed'), persisted: true, cleanupFailed: false });
     await rejected();
     assert.equal(await page.getByText('cleanup-bad', { exact: true }).count(), 0);
-    await analyze({ ok: false, error: 'scan-failed', run: failedRun('cleanup-good', 'local', 'failed'), persisted: true, cleanupFailed: true });
-    await visible('cleanup-good');
+    const cleanupGood = failedRun('cleanup-good', 'local', 'failed');
+    await analyze({ ok: false, error: 'scan-failed', run: cleanupGood, persisted: true, cleanupFailed: true });
+    const cleanupRegion = page.getByRole('region', { name: 'Failed run', exact: true });
+    const cleanupTechnical = await openDisclosure('Technical run details', cleanupRegion);
+    assert.ok((await cleanupTechnical.innerText()).includes(cleanupGood.runId));
     await visible('Resource cleanup is uncertain.');
     await retained();
   });
@@ -249,7 +340,7 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
       await textbox().fill(targetUrl);
       await page.getByRole('radio', { name: /local/i }).check();
       await analyzeButton().click();
-      await visible(record.runId);
+      await technicalRunContains(record.runId);
       assert.equal(await page.evaluate(() => window.m104.reads), 0);
     }
   });
@@ -290,7 +381,7 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
       await analyze(record.status === 'completed' ? { ok: true, run: record } : { ok: false, error: 'scan-failed', run: record, persisted: true, cleanupFailed: false });
       await rejected();
       await retained();
-      await visible('retained-failure');
+      await technicalRunContains('retained-failure', page.getByRole('region', { name: 'Failed run', exact: true }), 'failed');
     }
     for (const source of [richRun('new-identity'), failedRun('new-identity')]) {
       for (const record of [valid({ ...source, requestedUrl: 'https://different.example/' }), valid({ ...source, providerContext: completedRun('x', 'groq').providerContext })]) {
@@ -321,7 +412,7 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
     assert.equal(await analyzeButton().getAttribute('aria-disabled'), 'true');
     await described(analyzeButton(), copy.busy);
     await page.evaluate(record => window.m104.resolve({ ok: true, run: record }), richRun('reentry-done'));
-    await visible('reentry-done');
+    await technicalRunContains('reentry-done');
     assert.equal(await analyzeButton().isEnabled(), true);
   });
 
@@ -342,7 +433,7 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
     assert.equal(await calls(), 1);
     assert.ok(await analyzeButton().evaluate(node => node === document.activeElement));
     await page.evaluate(record => window.m104.resolve({ ok: true, run: record }), richRun('focus-analyze'));
-    await visible('focus-analyze');
+    await technicalRunContains('focus-analyze');
     assert.ok(await analyzeButton().evaluate(node => node === document.activeElement));
     assert.ok(await page.evaluate(() => document.activeElement !== document.body));
 
@@ -367,7 +458,7 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
     await page.evaluate(() => { window.m104.analyze = () => { window.m104.reads++; throw Error('new callback'); }; window.m104.rerender(); });
     await paint();
     await page.evaluate(record => window.m104.resolve({ ok: true, run: record }), richRun('captured'));
-    await visible('captured');
+    await technicalRunContains('captured');
     assert.equal(await page.evaluate(() => window.m104.reads), 0);
     await select();
     await announced('local, ollama, qwen3.5:4b. No provider call was attempted.');
@@ -427,7 +518,7 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
       const completed = richRun(`settled-${scenario.mode}-${settlement}`, scenario.mode);
       if (settlement === 'success') {
         await page.evaluate(run => window.m104.resolve({ ok: true, run }), completed);
-        await visible(completed.runId);
+        await technicalRunContains(completed.runId);
       } else if (settlement === 'failure') {
         await page.evaluate(run => window.m104.resolve({ ok: false, error: 'scan-failed', run, persisted: true, cleanupFailed: false }), failedRun(completed.runId, scenario.mode));
         await rejected('scan-failed');
@@ -512,7 +603,7 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
   it('detaches admitted data from later collaborator mutation without freezing or changing the input', async () => {
     const record = richRun('detached');
     await analyze({ ok: true, run: record });
-    await visible('detached');
+    await technicalRunContains(record.runId);
     const inputBefore = await page.evaluate(() => JSON.stringify(window.m104.raw));
     await select();
     assert.equal(await page.evaluate(() => JSON.stringify(window.m104.raw)), inputBefore);
@@ -524,13 +615,33 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
     assert.equal(await page.getByText('whitespace-only', { exact: true }).count(), 0);
   });
 
-  it('projects every run/context/coverage field and all three rule details without merging duplicate locators', async () => {
+  it('leads with a concise complete result and preserves full provenance, coverage and scanner evidence in disclosures', async () => {
     const record = await openComplete();
-    await visible(copy.results);
-    assert.equal(await page.getByText(copy.target, { exact: true }).count(), 2, 'The exact target notice appears at entry and completed results');
-    const body = await page.getByRole('main').innerText();
-    assert.match(body, /(?:4\s+Findings|Findings\s*:?\s*4)/i);
-    assert.match(body, /(?:3\s+(?:scanner.review\s+)?observations|observations\s*:?\s*3)/i);
+    const results = page.getByRole('region', { name: 'Results', exact: true });
+    const limitation = results.locator('p').filter({ hasText: /image-alt/i }).filter({ hasText: /private/i }).filter({ hasText: /certification/i });
+    assert.equal(await limitation.count(), 1, 'Results must combine scan scope, unsupported targets and non-certification in one limitation');
+    const defaultText = await results.innerText();
+    for (const value of ['completed', String(record.scan.findings.length),
+      String(record.scan.scannerReviewObservations.length), record.providerContext.mode, record.providerContext.provider,
+      record.providerContext.model, 'No provider call was attempted.']) assert.ok(defaultText.includes(value), `Missing default result context ${value}`);
+    const analyzedPageTerm = results.locator('dt').filter({ hasText: /^Analyzed page$/ });
+    assert.deepEqual({
+      terms: await analyzedPageTerm.count(),
+      value: await analyzedPageTerm.locator('xpath=following-sibling::dd[1]').innerText(),
+    }, {
+      terms: 1,
+      value: record.scan.context.finalUrl.value,
+    }, 'Completed summary must associate Analyzed page with the observed final URL');
+    assert.ok(!defaultText.includes(record.applicationRevision), 'Application revision must not dominate the default result');
+    assert.equal(await results.getByText('Not reported', { exact: true }).first().isVisible(), false, 'Null coverage buckets start in technical detail');
+    const missingCoverageAssociations: string[] = [];
+    for (const [rule, counts] of Object.entries(record.scan.coverage)) {
+      const reported = Object.entries(counts).filter(([, value]) => value !== null).map(([bucket, value]) => `${bucket}[\\s\\S]*?${value}`);
+      assert.match(defaultText, new RegExp(rule + '[\\s\\S]*?' + reported.join('[\\s\\S]*?'), 'i'));
+      if (!await hasCoverageRuleGroup(results, rule, counts, false)) missingCoverageAssociations.push(`default ${rule}`);
+    }
+    const runTechnical = await openDisclosure('Technical run details', results, true);
+    const body = await runTechnical.innerText();
     for (const value of [record.runId, record.createdAt, record.applicationRevision, record.requestedUrl, record.finishedAt,
       'completed', 'local', 'ollama', 'qwen3.5:4b', 'https://example.org/final?view=summary#results', '2026-08-30T10:00:01.000Z',
       '145.0.7632.6', '4.13.0', 'm1-public-v1', 'current-rendered-top-level-document', 'domcontentloaded', '1280', '720', 'en-US', '30000', 'closed', 'axe-core-4.13.0-default']) assert.ok(body.includes(value), `Missing context ${value}`);
@@ -541,11 +652,22 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
       const button = findingButton(finding.findingId);
       const name = await button.getAttribute('aria-label') ?? await button.innerText();
       assert.ok(name.includes(finding.ruleId));
+      assert.ok(name.includes(finding.findingId));
+      assert.ok(name.includes(finding.state));
+      for (const fact of conciseTargetFacts(finding)) assert.ok((await button.innerText()).includes(fact), `Finding target summary missing ${fact}`);
+      assert.ok(!(await button.innerText()).includes(renderedFact(finding.locator)), 'Raw locator stays out of the default Finding card');
       const detail = await select(finding.findingId);
-      const text = await detail.innerText();
+      const concise = await detail.innerText();
+      for (const value of [finding.findingId, finding.state, ...conciseTargetFacts(finding), record.providerContext.mode,
+        record.providerContext.provider, record.providerContext.model, 'No provider call was attempted.']) assert.ok(concise.includes(value));
+      assert.ok(!concise.includes(renderedFact(finding.locator)), 'Raw locator starts collapsed');
+      assert.ok(!concise.includes('Native result'), 'Raw native result starts collapsed');
+      assert.ok(!concise.includes('Checks'), 'Raw checks start collapsed');
+      const scannerTechnical = await openDisclosure('Technical scanner evidence', detail);
+      const text = await scannerTechnical.innerText();
       assert.ok(text.includes('Scanner evidence'));
-      assert.ok(text.includes('unprocessed'));
       assert.ok(text.includes('violation'));
+      assert.ok(text.includes(renderedFact(finding.locator)));
       for (const [key, fact] of Object.entries(finding.evidence)) {
         if (key === 'nameSources') {
           for (const [source, value] of Object.entries(fact as object)) {
@@ -563,33 +685,48 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
       assert.equal(await page.getByRole('button', { pressed: true }).count(), 1);
       assert.equal(await page.getByRole('button', { name: /finding-/ }).count(), record.scan.findings.length);
     }
-    assert.match(body, /coverage/i);
-    for (const bucket of ['violations', 'incomplete', 'passes', 'inapplicable']) assert.match(body, new RegExp(bucket, 'i'));
-    assert.ok(body.includes('Not reported'));
+    const coverageTechnical = results.locator('details').filter({ hasText: 'Not reported' }).first();
+    assert.equal(await coverageTechnical.count(), 1, 'One technical disclosure must retain null coverage buckets');
+    if (!await coverageTechnical.evaluate(node => (node as HTMLDetailsElement).open)) await coverageTechnical.locator('summary').click();
+    const coverageText = await coverageTechnical.innerText();
+    assert.match(coverageText, /coverage/i);
+    for (const bucket of ['violations', 'incomplete', 'passes', 'inapplicable']) assert.match(coverageText, new RegExp(bucket, 'i'));
+    assert.ok(coverageText.includes('Not reported'));
     // Accept either a native table or labelled rule groups; the contract fixes
     // the exact values and their association, not one particular layout owner.
     for (const [rule, counts] of Object.entries(record.scan.coverage)) {
       const values = Object.values(counts).map(value => value === null ? 'Not reported' : String(value));
-      assert.match(body, new RegExp(rule + '[\\s\\S]*?' + values.join('[\\s\\S]*?'), 'i'));
+      assert.match(coverageText, new RegExp(rule + '[\\s\\S]*?' + values.join('[\\s\\S]*?'), 'i'));
+      if (!await hasCoverageRuleGroup(runTechnical, rule, counts, true)) missingCoverageAssociations.push(`technical ${rule}`);
     }
+    assert.deepEqual(missingCoverageAssociations, [], 'Every default and technical coverage rule must semantically label its bucket/value group');
   });
 
-  it('retains every observation with global index, full evidence and no Finding selection/state semantics', async () => {
+  it('retains every observation as a concise distinct summary with complete nested technical evidence', async () => {
     const record = await openComplete();
     for (const [index, observation] of record.scan.scannerReviewObservations.entries()) {
-      const label = `Scanner-review observation ${index + 1} — ${observation.ruleId} — incomplete`;
-      const heading = page.getByText(label, { exact: true });
-      await heading.waitFor();
-      const container = heading.locator('xpath=ancestor::*[self::details or self::article or self::li or self::section][1]');
-      if (await container.evaluate(node => node.tagName === 'DETAILS' && !node.hasAttribute('open'))) await heading.click();
-      const text = await container.innerText();
-      assert.ok(text.includes('incomplete'));
+      const summary = page.locator('summary').filter({ hasText: `Scanner-review observation ${index + 1}` });
+      assert.equal(await summary.count(), 1);
+      const summaryText = await summary.innerText();
+      const requiredSummaryFacts = [observation.ruleId, 'incomplete', ...conciseTargetFacts(observation),
+        renderedFact(observation.incompleteReason)];
+      for (const value of requiredSummaryFacts) assert.ok(summaryText.includes(value), `Observation summary missing ${value}`);
+      assert.doesNotMatch(summaryText, /\bLocator\b/i);
+      const rawLocator = renderedFact(observation.locator);
+      if (!requiredSummaryFacts.includes(rawLocator)) assert.ok(!summaryText.includes(rawLocator), 'Distinct raw observation locator stays out of its summary');
+      const container = summary.locator('xpath=ancestor::details[1]');
+      assert.equal(await container.evaluate(node => (node as HTMLDetailsElement).open), false);
+      await summary.click();
+      assert.equal(await container.evaluate(node => (node as HTMLDetailsElement).open), true);
+      const concise = await container.innerText();
+      assert.ok(!concise.includes('unprocessed'));
+      assert.ok(!concise.includes('findingId'));
+      assert.equal(await container.locator('[aria-pressed], button').count(), 0);
+      const scannerTechnical = await openDisclosure('Technical scanner evidence', container);
+      const text = await scannerTechnical.innerText();
       assert.match(text, /incomplete\s*reason/i);
       assert.match(text, /locator/i);
       assert.match(text, /checks/i);
-      assert.ok(!text.includes('unprocessed'));
-      assert.ok(!text.includes('findingId'));
-      assert.equal(await container.locator('[aria-pressed], button').count(), 0);
       for (const key of Object.keys(observation.evidence)) assert.match(text, new RegExp(key.replace(/[A-Z]/g, letter => `\\s*${letter}`), 'i'));
     }
     assert.equal(await calls(), 1);
@@ -606,10 +743,11 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
     await analyze({ ok: true, run: valid(run) });
     for (const [id, expected] of [['finding-0', ['unsupported', 'withheld', 'missing', 'invalid']], ['finding-1', ['too-long']], ['finding-label', ['textarea', 'not-applicable', 'false', 'true']]] as const) {
       const detail = await select(id);
-      for (const value of expected) assert.ok((await detail.innerText()).includes(value));
+      const scannerTechnical = await openDisclosure('Technical scanner evidence', detail);
+      for (const value of expected) assert.ok((await scannerTechnical.innerText()).includes(value));
     }
     await analyze({ ok: false, error: 'scan-failed', run: failedRun('unobserved'), persisted: true, cleanupFailed: false });
-    const text = await page.getByRole('main').innerText();
+    const text = await (await openDisclosure('Technical run details', page.getByRole('region', { name: 'Failed run', exact: true }))).innerText();
     assert.match(text, /final\s*url[\s\S]*missing/i);
     assert.match(text, /scanned\s*at[\s\S]*missing/i);
     assert.match(text, /browser\s*version[\s\S]*missing/i);
@@ -640,14 +778,18 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
     const detailId = await findingButton('finding-0').getAttribute('aria-controls');
     assert.ok(detailId);
     assert.ok(await page.evaluate(id => document.getElementById(id)?.contains(document.activeElement), detailId));
-    const detailHeading = page.locator(`[id=${JSON.stringify(detailId)}]`).getByRole('heading', { name: 'Finding finding-0' });
+    const detail = page.locator(`[id=${JSON.stringify(detailId)}]`);
+    const detailHeading = detail.getByRole('heading', { name: 'Finding finding-0' });
+    assert.ok(!(await detail.innerText()).includes('m104-complete-01'), 'Run ID stays out of selected Finding default content');
     await described(detailHeading, 'State: unprocessed');
-    await described(detailHeading, 'Run m104-complete-01');
+    await notDescribed(detailHeading, 'm104-complete-01');
     await described(detailHeading, 'local');
     await described(detailHeading, 'ollama');
     await described(detailHeading, 'qwen3.5:4b');
     await described(detailHeading, 'No provider call was attempted.');
     await announced('Selected Finding finding-0, image-alt, unprocessed. local, ollama, qwen3.5:4b. No provider call was attempted.');
+    const technical = await openDisclosure('Technical scanner evidence', page.locator(`[id=${JSON.stringify(detailId)}]`), true);
+    assert.ok((await technical.innerText()).includes(':root > :nth-child(1)'));
     const back = page.getByRole('button', { name: /^back to finding$/i });
     await back.focus();
     await page.keyboard.press('Enter');
@@ -671,7 +813,7 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
     if (focusInside) await select('finding-contrast'); else await textbox().focus();
     await resultsHeading().evaluate(node => { window.m104.oldNode = node; });
     await page.evaluate(record => window.m104.resolve({ ok: true, run: record }), richRun('replacement'));
-    await visible('replacement');
+    await technicalRunContains('replacement');
     assert.ok(await resultsHeading().evaluate(node => window.m104.oldNode === node));
     assert.ok(await (focusInside ? resultsHeading() : textbox()).evaluate(node => node === document.activeElement));
     assert.equal(await page.getByRole('button', { pressed: true }).count(), 0);
@@ -685,7 +827,10 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
     run.scan.context.finalUrl = { value: canary };
     await analyze({ ok: true, run: valid(run) }, 'local', canary);
     await visible(canary);
-    await select();
+    const results = page.getByRole('region', { name: 'Results', exact: true });
+    await openDisclosure('Technical run details', results);
+    const detail = await select();
+    await openDisclosure('Technical scanner evidence', detail);
     assert.equal(await page.evaluate(() => window.m104.canary), 0);
     assert.equal(await page.locator('img, iframe, object, embed, a[href*="canary.invalid"], [onerror]').count(), 0);
     assert.equal(await page.locator('a[href]').count(), 0, 'Recorded target URLs and locators must remain text');
@@ -697,7 +842,9 @@ describe('M1-04 actual target/results UI: complete bounded observable contract',
 
   it('passes unrestricted axe and preserves long evidence at desktop and narrow width with review samples', async () => {
     await openComplete();
-    await select('finding-contrast');
+    const detail = await select('finding-contrast');
+    await openDisclosure('Technical run details', page.getByRole('region', { name: 'Results', exact: true }));
+    await openDisclosure('Technical scanner evidence', detail);
     const desktop = await new AxeBuilder({ page }).analyze();
     assert.deepEqual(desktop.violations.map(({ id, nodes }) => ({ id, nodes: nodes.length })), []);
     await page.setViewportSize({ width: 320, height: 800 });

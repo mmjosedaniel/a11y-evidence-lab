@@ -15,10 +15,10 @@
 - **Closed corpus and Local-mode data boundaries:** Accepted on 2026-08-27 through ADR-0022 and ADR-0023
 - **Fixed three-scenario evaluation baseline:** Retained from OD-019 for deterministic evaluation
 - **MVP persona, provider, startup, retention, evaluation, and workflow narrowing:** Accepted or Deferred as recorded through OD-026
-- **Implementation status:** RD-002 toolchain, RD-003 evaluation freeze, M1-01 runtime contracts, M1-02 service/storage, M1-03 real scanning/minimized evidence, and M1-04 target/results UI are Complete. The final M1-04 interface applies OD-026 and has no browser-facing reopen control. HTTP scan integration remains unimplemented.
+- **Implementation status:** RD-002 toolchain, RD-003 evaluation freeze, M1-01 runtime contracts, M1-02 service/storage and M1-03 real scanning/minimized evidence are Complete. M1-04 target/results UI is In progress after its trusted-input correction, complete regression and fresh S3 review passed; manual evidence, integrated review, cleanup and closure remain. Its accepted OD-026 no-reopen boundary is unchanged. HTTP scan integration remains unimplemented.
 - **Last reviewed:** 2026-09-01 (UTC)
-- **Latest completed task:** M1-04 completed its owner-authorized Analyze-only amendment and renewed closure; the evidence is preserved in its [archived plan](plans/completed/m1-04-target-and-results-ui.md).
-- **Current task:** None. M1-05 remains Not started and unselected.
+- **Latest fully closed task:** M1-03. M1-04's earlier closure evidence remains preserved in its reactivated [plan](plans/m1-04-target-and-results-ui.md).
+- **Current task:** M1-04 only, completing manual evidence, integrated review, cleanup and closure after fresh S3 passed. M1-05 remains Not started and unselected.
 
 This document is the canonical index and global authority for the current product goal and the modular, stage-scoped requirements baseline. The linked requirement modules collectively define the first portfolio slice and later distributable-product obligations; none describes implemented behavior. Requirement status has the following meaning:
 

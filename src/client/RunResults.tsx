@@ -15,6 +15,22 @@ function factText(fact: DisplayFact): string {
   return 'value' in fact ? String(fact.value) : `Unavailable: ${fact.unavailable}`;
 }
 
+function conciseTargetFacts(item: EvidenceItem): readonly string[] {
+  switch (item.ruleId) {
+    case 'image-alt':
+      return [factText(item.evidence.elementKind)];
+    case 'label':
+      return [factText(item.evidence.elementKind), factText(item.evidence.inputType)];
+    case 'color-contrast':
+      return [factText(item.evidence.foregroundColor), factText(item.evidence.backgroundColor),
+        factText(item.evidence.fontSize), factText(item.evidence.fontWeight)];
+  }
+}
+
+function conciseTargetText(item: EvidenceItem): string {
+  return conciseTargetFacts(item).join(' · ');
+}
+
 function Field({ label, children }: { readonly label: string; readonly children: ReactNode }): ReactElement {
   return <div><dt>{label}</dt><dd>{children}</dd></div>;
 }
@@ -72,48 +88,100 @@ function Evidence({ item }: { readonly item: EvidenceItem }): ReactElement {
   </>;
 }
 
-function RunContext({ run }: { readonly run: PageAnalysisRun }): ReactElement {
+function Coverage({ run, complete }: { readonly run: Extract<PageAnalysisRun, { status: 'completed' }>;
+  readonly complete: boolean }): ReactElement {
+  const buckets = ['violations', 'incomplete', 'passes', 'inapplicable'] as const;
+  return <div className="coverage">
+    {run.scan.context.rules.map(rule => {
+      const facts = <dl className="facts">
+        {buckets.map(bucket => {
+          const value = run.scan.coverage[rule][bucket];
+          return (complete || value !== null) && <Field key={bucket} label={bucket[0].toUpperCase() + bucket.slice(1)}>
+            {value ?? 'Not reported'}
+          </Field>;
+        })}
+      </dl>;
+      return <table key={rule}>
+        <tbody><tr><th scope="row">{rule}</th><td>{facts}</td></tr></tbody>
+      </table>;
+    })}
+  </div>;
+}
+
+function TechnicalRunDetails({ run }: { readonly run: PageAnalysisRun }): ReactElement {
   const context = run.status === 'completed' ? run.scan.context : run.scanContext;
-  return <>
-    <h3>Run context</h3>
-    <dl className="facts context-facts">
-      <Field label="Run ID">{run.runId}</Field>
+  return <details className="technical-disclosure">
+    <summary>Technical run details</summary>
+    <div className="disclosure-content">
+      <h3>Run context</h3>
+      <dl className="facts context-facts">
+        <Field label="Run ID">{run.runId}</Field>
+        <Field label="Status">{run.status}</Field>
+        <Field label="Format version">{run.formatVersion}</Field>
+        <Field label="Created at">{run.createdAt}</Field>
+        {'finishedAt' in run && <Field label="Finished at">{run.finishedAt}</Field>}
+        <Field label="Application revision">{run.applicationRevision}</Field>
+        <Field label="Requested URL">{run.requestedUrl}</Field>
+        <Field label="Mode">{run.providerContext.mode}</Field>
+        <Field label="Provider">{run.providerContext.provider}</Field>
+        <Field label="Model">{run.providerContext.model}</Field>
+        {run.status === 'failed' && <Field label="Failure category">{run.failure.category}</Field>}
+      </dl>
+      <p>No provider call was attempted.</p>
+      <h3>Scan context</h3>
+      <dl className="facts context-facts">
+        <FactField label="Final URL" fact={context.finalUrl} />
+        <FactField label="Scanned at" fact={context.scannedAt} />
+        <FactField label="Browser version" fact={context.browserVersion} />
+        <Field label="Scanner version">{context.scannerVersion}</Field>
+        <Field label="Evidence policy version">{context.evidencePolicyVersion}</Field>
+        <Field label="Rules">{context.rules.join(', ')}</Field>
+        <Field label="Scope">{context.scope}</Field>
+        <Field label="Readiness">{context.readiness}</Field>
+        <Field label="Readiness reached">{String(context.readinessReached)}</Field>
+        <Field label="Viewport width">{context.viewport.width}</Field>
+        <Field label="Viewport height">{context.viewport.height}</Field>
+        <Field label="Locale">{context.locale}</Field>
+        <Field label="Timeout ms">{context.timeoutMs}</Field>
+        <Field label="Fresh context">{String(context.freshContext)}</Field>
+        <Field label="Imported state">{String(context.importedState)}</Field>
+        <Field label="Interaction">{String(context.interaction)}</Field>
+        <Field label="Crawling">{String(context.crawling)}</Field>
+        <Field label="Iframes">{String(context.iframes)}</Field>
+        <Field label="Cleanup">{context.cleanup}</Field>
+        <Field label="Contrast profile">{context.contrastProfile}</Field>
+      </dl>
+      {run.status === 'completed' && <>
+        <h3>Complete coverage</h3>
+        <Coverage run={run} complete />
+      </>}
+    </div>
+  </details>;
+}
+
+function RunSummary({ run }: { readonly run: PageAnalysisRun }): ReactElement {
+  return <div className="run-summary">
+    <dl className="facts summary-facts">
+      <Field label={run.status === 'completed' ? 'Analyzed page' : 'Requested page'}>
+        {run.status === 'completed' ? run.scan.context.finalUrl.value : run.requestedUrl}
+      </Field>
       <Field label="Status">{run.status}</Field>
-      <Field label="Format version">{run.formatVersion}</Field>
-      <Field label="Created at">{run.createdAt}</Field>
-      {'finishedAt' in run && <Field label="Finished at">{run.finishedAt}</Field>}
-      <Field label="Application revision">{run.applicationRevision}</Field>
-      <Field label="Requested URL">{run.requestedUrl}</Field>
       <Field label="Mode">{run.providerContext.mode}</Field>
       <Field label="Provider">{run.providerContext.provider}</Field>
       <Field label="Model">{run.providerContext.model}</Field>
-      {run.status === 'failed' && <Field label="Failure category">{run.failure.category}</Field>}
     </dl>
     <p>No provider call was attempted.</p>
-    <h3>Scan context</h3>
-    <dl className="facts context-facts">
-      <FactField label="Final URL" fact={context.finalUrl} />
-      <FactField label="Scanned at" fact={context.scannedAt} />
-      <FactField label="Browser version" fact={context.browserVersion} />
-      <Field label="Scanner version">{context.scannerVersion}</Field>
-      <Field label="Evidence policy version">{context.evidencePolicyVersion}</Field>
-      <Field label="Rules">{context.rules.join(', ')}</Field>
-      <Field label="Scope">{context.scope}</Field>
-      <Field label="Readiness">{context.readiness}</Field>
-      <Field label="Readiness reached">{String(context.readinessReached)}</Field>
-      <Field label="Viewport width">{context.viewport.width}</Field>
-      <Field label="Viewport height">{context.viewport.height}</Field>
-      <Field label="Locale">{context.locale}</Field>
-      <Field label="Timeout ms">{context.timeoutMs}</Field>
-      <Field label="Fresh context">{String(context.freshContext)}</Field>
-      <Field label="Imported state">{String(context.importedState)}</Field>
-      <Field label="Interaction">{String(context.interaction)}</Field>
-      <Field label="Crawling">{String(context.crawling)}</Field>
-      <Field label="Iframes">{String(context.iframes)}</Field>
-      <Field label="Cleanup">{context.cleanup}</Field>
-      <Field label="Contrast profile">{context.contrastProfile}</Field>
-    </dl>
-  </>;
+  </div>;
+}
+
+function TechnicalScannerEvidence({ item }: { readonly item: EvidenceItem }): ReactElement {
+  return <details className="technical-disclosure scanner-disclosure">
+    <summary>Technical scanner evidence</summary>
+    <div className="disclosure-content">
+      <h4 className="source-label">Scanner evidence</h4>
+      <Evidence item={item} />
+    </div>
+  </details>;
 }
 
 export function RunResults({ run, selectedId = null, selectionRequest = 0, onSelect }: RunResultsProps): ReactElement {
@@ -129,22 +197,13 @@ export function RunResults({ run, selectedId = null, selectionRequest = 0, onSel
   }, [selectedId, selectionRequest]);
 
   return <div className="run-evidence">
-    <RunContext run={run} />
+    <RunSummary run={run} />
     {run.status === 'completed' && <>
-      <h3>Coverage and summary</h3>
+      <h3>Summary</h3>
       <p className="result-summary">Completed scan: {run.scan.findings.length} Findings.</p>
       <p>{run.scan.scannerReviewObservations.length} scanner-review observations.</p>
-      <div className="coverage">
-        {run.scan.context.rules.map(rule => <div key={rule}>
-          <strong>{rule}</strong>
-          <dl className="facts">
-            <Field label="Violations">{run.scan.coverage[rule].violations ?? 'Not reported'}</Field>
-            <Field label="Incomplete">{run.scan.coverage[rule].incomplete ?? 'Not reported'}</Field>
-            <Field label="Passes">{run.scan.coverage[rule].passes ?? 'Not reported'}</Field>
-            <Field label="Inapplicable">{run.scan.coverage[rule].inapplicable ?? 'Not reported'}</Field>
-          </dl>
-        </div>)}
-      </div>
+      <Coverage run={run} complete={false} />
+      <TechnicalRunDetails run={run} />
       <div className="finding-workspace">
         <section aria-labelledby={`${prefix}-findings`}>
           <h3 id={`${prefix}-findings`}>Findings</h3>
@@ -153,12 +212,12 @@ export function RunResults({ run, selectedId = null, selectionRequest = 0, onSel
             <ul className="finding-list">
               {run.scan.findings.filter(finding => finding.ruleId === rule).map(finding => <li key={finding.findingId}>
                 <button type="button" aria-pressed={selectedId === finding.findingId} aria-controls={detailId}
-                  aria-label={`${finding.findingId}, ${finding.ruleId}, ${factText(finding.locator)}, ${finding.state}`}
+                  aria-label={`${finding.findingId}, ${finding.ruleId}, ${conciseTargetText(finding)}, ${finding.state}`}
                   ref={node => { if (node) buttons.current.set(finding.findingId, node); else buttons.current.delete(finding.findingId); }}
                   onClick={() => onSelect?.(finding.findingId)}>
                   <strong>{finding.findingId}</strong>
                   <span>{finding.ruleId} · {finding.state}</span>
-                  <span className="locator">{factText(finding.locator)}</span>
+                  <span className="target-summary">Target: {conciseTargetText(finding)}</span>
                 </button>
               </li>)}
             </ul>
@@ -170,10 +229,10 @@ export function RunResults({ run, selectedId = null, selectionRequest = 0, onSel
             <h3 id={detailHeadingId} ref={heading} tabIndex={-1}
               aria-describedby={`${prefix}-detail-state ${prefix}-detail-context ${prefix}-detail-provider-call`}>Finding {selected.findingId}</h3>
             <p id={`${prefix}-detail-state`}><strong>State:</strong> {selected.state}</p>
-            <p id={`${prefix}-detail-context`}>Run {run.runId} · {run.providerContext.mode} · {run.providerContext.provider} · {run.providerContext.model}</p>
+            <p><strong>Target:</strong> {conciseTargetText(selected)}</p>
+            <p id={`${prefix}-detail-context`}>{run.providerContext.mode} · {run.providerContext.provider} · {run.providerContext.model}</p>
             <p id={`${prefix}-detail-provider-call`}>No provider call was attempted.</p>
-            <h4 className="source-label">Scanner evidence</h4>
-            <Evidence item={selected} />
+            <TechnicalScannerEvidence key={selected.findingId} item={selected} />
             <button type="button" onClick={() => buttons.current.get(selected.findingId)?.focus()}>Back to finding</button>
           </> : <h3 id={`${prefix}-detail-empty`}>Finding detail</h3>}
         </section>
@@ -182,11 +241,11 @@ export function RunResults({ run, selectedId = null, selectionRequest = 0, onSel
         <h3 id={`${prefix}-observations`}>Scanner-review observations</h3>
         {run.scan.scannerReviewObservations.length === 0 && <p>No scanner-review observations.</p>}
         {run.scan.scannerReviewObservations.map((observation, index) => <details key={index}>
-          <summary>Scanner-review observation {index + 1} — {observation.ruleId} — incomplete</summary>
-          <h4 className="source-label">Scanner evidence</h4>
-          <Evidence item={observation} />
+          <summary>Scanner-review observation {index + 1} — {observation.ruleId} — incomplete — {conciseTargetText(observation)} — {factText(observation.incompleteReason)}</summary>
+          <TechnicalScannerEvidence item={observation} />
         </details>)}
       </section>
     </>}
+    {run.status === 'failed' && <TechnicalRunDetails run={run} />}
   </div>;
 }

@@ -6,9 +6,9 @@ This document is part of the authoritative requirements baseline indexed by [Pro
 
 ## Delivery stages
 
-**Latest completed task (2026-09-01 UTC):** [M1-04](../plans/completed/m1-04-target-and-results-ui.md) completed its owner-directed OD-026 Analyze-only amendment and renewed closure.
+**Latest fully closed task:** M1-03. [M1-04](../plans/m1-04-target-and-results-ui.md) preserves its earlier OD-026 closure evidence and is In progress for manual evidence, integrated review, cleanup and closure after the trusted-input correction passed fresh S3 review.
 
-**Current task (2026-09-01 UTC):** None. M1-05 remains Not started and unselected.
+**Current task (2026-09-01 UTC):** M1-04 only, completing manual evidence, integrated review, cleanup and closure after fresh S3 passed. M1-05 remains Not started and unselected.
 
 The owner first selected [M1-02](../plans/completed/m1-02-local-service-and-aggregate.md) for planning, then authorized exact-task execution. It is now Complete: all 182 product tests, independent strict typechecking, actual startup/reopen/stop and exact synthetic-run deletion passed. Both slice S3 reviews and the different final integrated critical review passed; documentation closure is accepted. The earlier completion history below remains unchanged.
 

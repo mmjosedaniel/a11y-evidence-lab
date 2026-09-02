@@ -46,6 +46,9 @@ button:disabled, button[aria-disabled="true"] { color: #4a586d; background: #eef
 dt { color: #4a586d; }
 dd { margin: 0; }
 .context-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 2rem; }
+.run-summary { background: #eef2f6; border-left: 3px solid #0b5cad; padding: 1rem; margin-bottom: 1.5rem; }
+.run-summary p:last-child { margin-bottom: 0; }
+.summary-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 2rem; }
 .result-summary { font-weight: 600; }
 .coverage { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; }
 .finding-workspace { display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.4fr); gap: 2rem; border-top: 1px solid #c8d1dc; }
@@ -54,17 +57,21 @@ dd { margin: 0; }
 .finding-list button { display: block; width: 100%; text-align: left; color: #172033; padding: 0.75rem; }
 .finding-list button span { display: block; font-weight: 400; margin-top: 0.25rem; }
 .finding-list button[aria-pressed="true"] { border: 2px solid #1457c8; background: #eaf2fb; }
-.locator { font-size: 0.875rem; color: #4a586d; }
+.target-summary { font-size: 0.875rem; color: #4a586d; }
 .finding-detail { border-left: 1px solid #c8d1dc; padding-left: 2rem; }
 .source-label { color: #0b5cad; border-left: 3px solid #0b5cad; padding-left: 0.75rem; }
 .observations { border-top: 1px solid #c8d1dc; margin-top: 2rem; }
 details { border-bottom: 1px solid #c8d1dc; padding: 0.75rem 0; }
 summary { cursor: pointer; color: #7a4a00; font-weight: 600; min-height: 2.75rem; padding: 0.5rem 0; }
+.technical-disclosure > summary { color: #1457c8; }
+.technical-disclosure[open] > summary { border-bottom: 1px solid #c8d1dc; }
+.disclosure-content { padding: 0.25rem 0 0.5rem; }
+.scanner-disclosure { margin-bottom: 1rem; }
 
 @media (max-width: 48rem) {
   main { padding: 1rem; }
   .setup, .results, .run-history { padding: 1rem; }
-  .context-facts, .coverage, .finding-workspace { grid-template-columns: minmax(0, 1fr); }
+  .context-facts, .summary-facts, .coverage, .finding-workspace { grid-template-columns: minmax(0, 1fr); }
   .coverage { gap: 0.5rem; }
   .finding-detail { border-left: 0; border-top: 1px solid #c8d1dc; padding-left: 0; }
 }

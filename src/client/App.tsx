@@ -149,8 +149,7 @@ export function App(props: AppProps): ReactElement {
     </section>}
     <section aria-labelledby="results-heading" className="results">
       <h2 id="results-heading" tabIndex={-1} ref={resultsHeading}>Results</h2>
-      <p className="limitation">{resultsNotice}</p>
-      {complete && <p className="limitation">{TARGET_NOTICE}</p>}
+      <p className="limitation"><span>{resultsNotice}</span> <span>{TARGET_NOTICE}</span></p>
       <div ref={resultsContent}>
         {complete && <RunResults key={complete.runId} run={complete} selectedId={selectedId}
           selectionRequest={selectionRequest} onSelect={selectFinding} />}
