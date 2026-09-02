@@ -1,4 +1,4 @@
-import http from 'node:http';
+import type { Server } from 'node:http';
 import { openRunRepository } from './persistence/run-repository.ts';
 import type { RunningRun, FailedRun } from './persistence/run-repository.ts';
 import { parseServiceConfiguration, prepareRunningRun } from './local-service/input-validation.ts';
@@ -161,7 +161,7 @@ export async function startLocalService(options: ServiceOptions): Promise<StartR
     return completion.promise;
   }
 
-  let server: http.Server;
+  let server: Server;
   try {
     server = createLoopbackApiServer({ isStopping: () => admissionClosed, isBusy: busy, readRun });
   } catch { return { ok: false, error: 'listen-failed' }; }

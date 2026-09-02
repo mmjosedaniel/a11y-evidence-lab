@@ -28,3 +28,11 @@ The independent test worker classified the slice `EXISTING_AND_COVERED`. The exa
 - **Evidence:** Focused 69/69 and complete 290/290 regressions, strict TypeScript, five syntax checks, compliant lease closure, 14-document link validation, `git diff --check`, and exact empty-scratch cleanup all pass. Production cohesion is `REFACTORED`.
 - **Documentation impact:** The active ExecPlan and this progress record contain the structural evidence. The two stale M1-04 UI status lines now agree with the completed roadmap task. No ADR or further product-authority change is needed because runtime behavior, public contracts, dependencies, and architecture are unchanged.
 - **Remaining task scope:** M1-05 remains In progress. Real HTTP scan integration and the complete browser/build integration checkpoint are not part of this accepted structural slice.
+
+## 2026-09-02 — External dependency-clarity follow-up accepted
+
+- **Finding:** An external independent reviewer confirmed behavioral correctness but found that `service.ts` still loads the default `node:http` value solely for a server type annotation after HTTP construction moved to `loopback-api.ts`.
+- **Correction boundary:** Change only the import and annotation in `service.ts` to a type-only `Server` dependency. Public contracts, lifecycle behavior, tests, other extracted modules, dependencies, and M1-05 scope remain unchanged.
+- **Evidence:** The attempt-2 lease closed compliant with only `service.ts` modified. Focused service validation passed 69/69, strict TypeScript and all five syntax checks passed, the complete backend/scanner regression passed 290/290, and the empty scanner scratch was removed.
+- **Review and closure:** Bounded correction review returned PASS with no finding and confirmed `loopback-api.ts` as the sole production runtime owner of the default HTTP object. No ADR or product-authority change is required.
+- **Next boundary:** The structural slice is accepted again. M1-05 remains In progress for HTTP scan integration and its browser/build checkpoint.
