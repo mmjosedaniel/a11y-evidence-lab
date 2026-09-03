@@ -47,10 +47,16 @@ function clientResponse(body: Buffer, contentType: ClientResponse['contentType']
 
 function attributes(tag: string): Record<string, string> {
   const result: Record<string, string> = Object.create(null);
-  for (const match of tag.matchAll(/\s([A-Za-z][A-Za-z0-9:-]*)\s*=\s*(["'])(.*?)\2/g)) {
+  const attribute = /\s+([A-Za-z][A-Za-z0-9:-]*)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'`=<>]+)))?/y;
+  let position = /^<[A-Za-z]+/.exec(tag)![0].length;
+  while (!/^\s*\/?>$/.test(tag.slice(position))) {
+    attribute.lastIndex = position;
+    const match = attribute.exec(tag);
+    if (!match) throw new Error('client-unavailable');
     const name = match[1]!.toLowerCase();
     if (Object.hasOwn(result, name)) throw new Error('client-unavailable');
-    result[name] = match[3]!;
+    result[name] = match[2] ?? match[3] ?? match[4] ?? '';
+    position = attribute.lastIndex;
   }
   return result;
 }

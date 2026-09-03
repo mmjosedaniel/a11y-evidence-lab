@@ -2,9 +2,20 @@
 
 This ExecPlan is a living document. Maintain `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` as work proceeds. This document must be maintained in accordance with `PLANS.md`.
 
-This plan owns only [M1-05 — Integrate and verify the walking skeleton](../../DEVELOPMENT_ROADMAP.md#m1-05--integrate-and-verify-the-walking-skeleton). The owner explicitly selected M1-05. Preserve the accepted history of its four behavior-preserving module refactors and bounded App dead-state cleanup below. The coherent HTTP/browser integration slice that joins the existing UI, loopback service, real scanner, and single-file repository is accepted. The authorized public-page smoke now passes. The different final integrated review, exact cleanup, and documentation closure passed; M1-05 is Complete. This plan does not authorize M2 work, a provider call, a hostile-target hardening subsystem, a commit, or a push.
+This plan owns only [M1-05 — Integrate and verify the walking skeleton](../../DEVELOPMENT_ROADMAP.md#m1-05--integrate-and-verify-the-walking-skeleton). M1-05 is Complete again after the two owner-authorized post-closure corrections at `1f92fe8`, replacement 335-test verification, fresh independent reviews, exact cleanup, and renewed documentation closure. Earlier implementation, failed evidence, review, public smoke, and closure history remain preserved. Correction commands record the completed execution; do not replay one-shot setup or cleanup. Only explicitly identified read-only definitions and verification checks are reusable. No M2 work, public smoke, provider call, new dependency, requirement/ADR change, commit, or push is authorized.
 
 ## Progress
+
+- [x] (2026-09-03) Reproduced both post-closure findings at clean committed baseline `1f92fe89e28fb2e645a97875ee38390d4744a858`: quoted CSS loads, unquoted local/external `rel=stylesheet` bypasses the asset map; five existing abort-helper attempts reach zero server requests/data/aborted/error events while a control request reaches intake. All probes were file-free and the diagnostic listener closed.
+- [x] (2026-09-03) Received explicit owner authorization to reopen M1-05 for only these corrections. Dependencies remain Complete, Accepted contracts unchanged, original source/test/runtime/protected identities match, no lease is active, build/scratch are absent, and run siblings are empty. Returned this same plan to the active directory and reconciled current task status.
+- [x] (2026-09-03) Accepted `M105-PC08-PREFLIGHT-01` as PARTIAL. Strict TypeScript, all three syntax checks, source/test/Node identities, endpoint/index, and absent generated-state checks passed. Only stylesheet recognition is missing; real abort behavior remains existing-but-uncovered. Confirmed real-startup quoted/mixed/unquoted positives and external/missing/malformed/duplicate negatives, plus restored test-only intake observation that waits for actual partial data before destruction and proves no callback dispatch/effects.
+- [x] (2026-09-03) Accepted `M105-PC08-RED-01`: strict TypeScript and three syntax checks passed; 15 focused tests produced 5 pass / 10 intended stylesheet failures / zero cancellation, skip or todo. All four original lanes and the quoted boolean-attribute control passed. Corrected abort characterization proves actual partial receipt, real aborted/error settlement, no completed-body dispatch, unchanged scanner/storage/sibling state and responsive service. Lease `M1-05-20260903-08-postclosure-red-01` closed fresh compliant with exactly the two test paths, contract `eda28cccf51326f4203dc97fab9b0e3e83048b38dc93a198de0724df0ec0e38a`, receipt `fe96da0b301fc87f8ea5cebbf6146a58195cf75b56c4f72e23ce4d62bc7e850d`. Primary inspected both diffs and independently rechecked identities and clean generated state.
+- [x] (2026-09-03) Accepted `M105-PC08-GREEN-01`: separate code worker reproduced the 15-case 5-pass/10-fail Red, changed only `client-assets.ts::attributes()`, then passed strict TypeScript, three syntax checks and all 15 focused cases with unchanged accepted tests. Contiguous token recognition handles quoted/unquoted/boolean attributes and rejects malformed/duplicate tokens; no dependency or responsibility moves. Cohesion RETAINED. Fresh compliant Green lease `M1-05-20260903-08-postclosure-green-01`, contract `950c6a47267f193470e3919317c6ccb93a1fdb90ca4f43524a2df47545a7e7c8`, receipt `3670dac391a923b6af5e2875cbb6650d6c0dd69f1cee6ba2b98cd6e8c9930681`. Primary inspected the exact one-file diff, accepted structure, and rechecked source/test identities.
+- [x] (2026-09-03) Accepted replacement complete verification: all 335 tests, strict TypeScript, three syntax checks, exact corrected source/test/build/runtime identities, empty scratch/siblings and absent caches passed. Added the frozen two-receipt correction identity and exact post-review cleanup commands; documentation validation passed 86 files / 1,891 links / 529 fragments / 25 PowerShell blocks.
+- [x] (2026-09-03) Accepted fresh slice review `M105-PC08-S3-01` as PASS WITH FOLLOW-UPS after consolidating its sole Minor duplicate progress checkpoint. No Blocker/Major; independent 25-case tokenizer matrix, three real aborts, deliberate no-arrival timeout and restored hooks, strict/syntax and frozen identities passed. Cohesion RETAINED.
+- [x] (2026-09-03) Accepted different fresh final integrated review `M105-PC08-FINAL-01`: PASS, no remaining findings, RETAINED cohesion. Independent identities, strict/syntax, Green-start test hashes, file-free integrated asset/HTTP/abort/control probe, command isolation and status checks passed; the exact 335-test barrier remains reusable.
+- [x] (2026-09-03) Exact correction cleanup passed: removed only identity-checked `dist/client` and three verified-empty scratch roots; no run deletion. Corrected source/tests, retained runtime, evaluation/fixtures, protected inputs, both receipts, empty run siblings, Git endpoint and empty index remain exact. Reconciled current-status owners for renewed closure.
+- [x] (2026-09-03) Renewed post-archive closure passed after current-status reconciliation and link repair: exact corrected files/trees/receipts, retained runtime, absent generated state, empty run siblings/index and unchanged Git endpoint; 16 changed paths; eight Complete / 20 Not started / no active roadmap task; 86 Markdown files, 1,892 links, 529 fragments, 26 PowerShell blocks, required headings, UTF-8 and whitespace. M1-05 is Complete again.
 
 - [x] (2026-09-02) Confirmed M1-02, M1-03, and M1-04 are Complete and reconciled M1-04's final umbrella closure from its accepted verification, review, cleanup, and documentation evidence.
 - [x] (2026-09-02) Received explicit owner selection of M1-05 and approval of `M105-LOCAL-SERVICE-MODULE-REFACTOR-01` with the named module boundary and behavior-preserving constraints.
@@ -88,6 +99,8 @@ This plan owns only [M1-05 — Integrate and verify the walking skeleton](../../
 
 ## Surprises & Discoveries
 
+- Observation: Passing full-path tests did not cover unquoted stylesheet discovery or actual partial-request arrival. Evidence: the post-closure probes above reproduced both P2 findings without artifact writes; `attributes()` ignored unquoted `rel`, while immediate client destruction preceded HTTP intake. A test must prove its adverse event occurred before absence of effects counts as coverage.
+
 - Observation: `service.ts` combines stateless validation and transport policy with one ordering-sensitive lifecycle protocol. Evidence: `src/server/service.ts` keeps admission, synchronous read ownership, active operation reservation, stop notification, abort, deadline, cleanup uncertainty, listener close, and stop settlement in one closure. Splitting those state transitions would require a shared mutable abstraction and would weaken local reasoning.
 - Observation: Existing interception tests replace methods on the default `node:http` object. Evidence: `tests/local-service.test.ts` patches `http.createServer`; the extracted HTTP module must continue importing and using that default object.
 - Observation: The local-service suite already characterizes the public API and the critical ordering paths in 69 cases. Evidence: `tests/local-service.test.ts`; the approved change is structural and does not justify file-layout assertions or implementation-shaped tests.
@@ -118,6 +131,8 @@ This plan owns only [M1-05 — Integrate and verify the walking skeleton](../../
 - Observation: The preserved Groq failure was caused before the managed-scan wrapper could launch. Evidence: the UI browser started while `TEMP` and `TMP` pointed at `temp/m103-scan`, so its profile artifacts violated `executeScan`'s scanner-scratch clean-entry requirement. The failed aggregate finished nine milliseconds after creation with browser version, final URL, scan time, and readiness still missing, which corroborates that branch. UI browser artifacts belong under `temp/m104-ui`; scanner environment must be restored before form submission.
 
 ## Decision Log
+
+- (2026-09-03) Reopen only M1-05 under the owner's bounded correction authorization. Extend the existing attribute recognizer to cover ordinary unquoted values, preserving quoted values and boolean attributes emitted by Vite; invalid/external/duplicate asset references still fail before storage/listen. Replace the vacuous abort helper with bounded server-observed partial-body synchronization and explicit stream-event/no-effect assertions. Preserve production abort handling unless new evidence supports an owner-authorized scope change. Use one coherent corrected startup/intake verification slice with Red only for missing stylesheet behavior and passing characterization for existing stream behavior.
 
 - (2026-09-03) Accepted final integrated review after its sole documentation-only follow-up was resolved and validated. Preserve the reviewed implementation and all historical evidence; perform only the exact disposable-artifact cleanup, current-status reconciliation, plan archival, and post-archive closure checks. No requirement, ADR, evaluation baseline, source, test, or next-task scope changes.
 
@@ -190,6 +205,8 @@ This plan owns only [M1-05 — Integrate and verify the walking skeleton](../../
 
 ## Outcomes & Retrospective
 
+Current outcome: Both post-closure P2 findings are corrected and independently reviewed. All 335 tests, strict TypeScript, three syntax checks, exact identity/receipt checks and the bounded cleanup passed. M1-05 is Complete again after renewed documentation closure. The following original 324-test/public-smoke account is historical; neither is presented as new correction evidence.
+
 The local-service, scanner, run-contract, and run-repository structural extractions and their verification barriers are complete. The App dead-state cleanup is also complete: the unread state and its two setter calls are gone, while the existing coordinator, public interfaces, rendered behavior, and browser contract remain unchanged. The controlled integration checkpoint is accepted: the production service serves the exact built client from its loopback origin, the browser submits target plus mode through the same-origin POST boundary, the real scanner publishes one validated durable run, and the existing Results surface admits the bounded outcome. API-only construction remains read-only, and the closed asset table rejects linked descendants while isolating stored response bytes. The authorized network-capable public-page smoke now passes with complete three-rule coverage, zero Findings and 20 distinct scanner-review observations. Different final integrated critical review passed with one documentation follow-up, resolved before exact cleanup. All 324 tests, strict TypeScript, syntax checks, and final documentation closure passed. M1-05 is Complete; no retrieval or provider work is implemented.
 
 ## Purpose / Big Picture
@@ -251,6 +268,73 @@ The run-repository slice includes only declaration moves into four named modules
 The App cleanup includes only deletion of the unread `pendingAnalysis` state declaration and its operation-start and settlement setter calls in `src/client/App.tsx`. It excludes module extraction, hooks, reducers, controllers, components, CSS, markup, copy, ARIA, focus rules, admission behavior, public interfaces, test changes, service integration, dependencies, and any M1-04 authority change.
 
 ## Plan of Work
+
+### M105-POST-CLOSURE-CORRECTION-08 — complete startup and intake evidence
+
+Completed correction workflow `M1-05-20260903-08`, work slice `M105-POST-CLOSURE-CORRECTION-08`, baseline HEAD `1f92fe89e28fb2e645a97875ee38390d4744a858`, branch `codex/m1-05-walking-skeleton-integration`. This is R0 repository-local reconciliation and S3 implementation verification (closed asset identity and request-stream settlement). No research or architecture decision is required. Dependencies M1-02/03/04 remain Complete; the original M1-05 authority anchors below, ADR-0015/0018/0021/0024, REQ-INST-002, REQ-SEC-005/006, REQ-QUAL-011/012/020, BHV-01/07, and HS-001/004/006 remain Accepted or explicitly Deferred as before. RD-003 manifest and six fixtures are unchanged.
+
+The corrected observable contract is one trustworthy configured-client startup/intake boundary: ordinary unquoted stylesheet attributes must be recognized instead of silently skipped. A local stylesheet is included with exact CSS bytes; an external, missing, malformed, or duplicate reference fails as `client-unavailable` before repository/listener effects. Preserve quoted attributes and Vite's boolean attributes, closed asset keys, linked-ancestor rejection, private response bytes, and API-only construction. The current tokenizer may be extended locally; no general HTML parser package or generic serving layer is needed.
+
+The abort evidence must traverse the actual HTTP intake: observe the server receiving an incomplete body, then destroy the client, then observe the server-side aborted/error settlement with a bounded wait that fails on timeout. Assert no scan/provider call, no run publication or preparation effects observable through the existing service/repository seams, intact siblings, and a responsive service afterward. No sleep-only success, synthetic emitted abort substituted for the real event, or production observability export is permitted. Existing deliverable-failure projection and real shutdown semantics remain unchanged.
+
+Production responsibility and permitted change: only `src/server/local-service/client-assets.ts`, specifically its existing attribute-recognition/startup validation responsibility. Dependency direction stays `service -> client-assets -> node:fs/node:path`; no runtime/interface edge is added. Reuse the existing module and finite response table. A small private extraction inside this file is allowed only if it clarifies current token recognition; no other production path or public type may change. The unchanged HTTP handler remains the production owner of stream settlement. The test worker owns only `tests/walking-skeleton.test.ts` and `tests/helpers/m105-walking-skeleton-harness.ts`; the existing helper owns test-only arrival/event synchronization and restores every interception.
+
+TDD applies. Preflight is read-only and should distinguish the missing stylesheet behavior from existing-but-uncovered abort handling. Primary reconciles PARTIAL if returned. One guarded Red turn may add the coherent failing stylesheet regression matrix and passing abort characterization; only the missing production behavior advances through a separate `code_worker` Green. All accepted tests stay byte-identical during Green. Existing four full-path cases remain; new asset cases may be grouped without skipped/focused/conditional assertions. Use real startup for rejection-before-storage and actual transport for abort evidence; filesystem seams may supplement, not replace, those integration assertions.
+
+Budget: one preflight, one Red, one Green, at most one same-contract correction per role with its terminal attempt-1 parent, one fresh slice S3 review, and a different fresh final integrated S3 review. Stop on repeated decisive failure, two no-diff handoffs, exhausted budget, new actionable finding outside these two fixes, conflicting authority, unknown/changed contract, unexpected path, missing prerequisite, or guard ambiguity. Additional production paths, public smoke, dependency download, provider work, and altered evaluation fixtures require new owner direction. Standard profile only: no rendered component, style, focus, copy, or ARIA change; no frontend-visual capsule.
+
+Baseline evidence: source tree `1CDEF37A13522636497B196180E537B098C2610E4498C355690C61AB55606B75`; test tree `4D8800E7ACF958D5C914AB686CDBD03A3AE2D5965954D7F8DE7B54F01BDE240C`; browser tree `4FDF9490EDBA2FC4662FF487C591F769F682D8031B3E59FC26C0C35AEE8371CC` (332 entries, 318 files, 14 directories, 451,193,922 bytes); manifest tree `3048E8A9F4412437116513F830CF4317C87F5A00C5C3FFD8675474BD173FD4AE`. Package/lock/tsconfig/Vite/index hashes remain the historical protected values. The previous public smoke is preserved only as historical external observation and will not be rerun. Capture new affected-file and test/source-tree hashes after each accepted correction phase; preserve old tuple/receipt blocks rather than editing them to imply fresh evidence.
+
+### M105-CMD-CORRECTION-PREFLIGHT — read-only readiness
+
+Run from the repository root after loading only the first fenced block of `M105-CMD-PREP`. Do not call its historical planning/Git assertions or any old Green/cleanup/closure block: those pin the prior commit and removed artifacts. This restriction applies to every correction command below.
+
+```powershell
+if ((& git rev-parse HEAD).Trim() -cne '1f92fe89e28fb2e645a97875ee38390d4744a858') { throw 'Correction HEAD drift' }
+if ((& git branch --show-current).Trim() -cne 'codex/m1-05-walking-skeleton-integration') { throw 'Correction branch drift' }
+if (@(& git diff --cached --name-only).Count) { throw 'Correction index must remain empty' }
+Invoke-M105Command {
+  & $m105Node node_modules/typescript/bin/tsc --project tsconfig.json
+  if ($LASTEXITCODE -ne 0) { throw 'Correction strict TypeScript failed' }
+  & $m105Node --check src/server/local-service/client-assets.ts
+  if ($LASTEXITCODE -ne 0) { throw 'Correction production syntax failed' }
+  & $m105Node --check tests/walking-skeleton.test.ts
+  if ($LASTEXITCODE -ne 0) { throw 'Correction test syntax failed' }
+  & $m105Node --check tests/helpers/m105-walking-skeleton-harness.ts
+  if ($LASTEXITCODE -ne 0) { throw 'Correction helper syntax failed' }
+}
+```
+
+### M105-CMD-CORRECTION-SETUP — primary-owned disposable build
+
+Accepted setup on 2026-09-03: primary ran the unchanged README setup block after preflight. Strict TypeScript and the native 32-module build passed. Build identity is 4 entries / 3 files / 1 directory / 225,483 bytes / `1D1198338F4C1E267737F5F9D8F5540854A33A7C7E52BFC3EDC36C35164A503F`; retained browser identity is unchanged and all three ordinary scratch roots are empty. The controlled tests may reuse this exact build; no public scan occurred.
+
+After accepted preflight and before Red, primary runs the existing README build block: verify/create only the three absent ordinary scratch roots, strict TypeScript, and one native Vite build with output absent at entry. Retain the exact build identity through focused and complete verification and reviews. No package acquisition or browser setup is needed. Tests may create/remove only their exact owned synthetic descendants and must settle all browser/listener/interception state. Shared runtime/dependencies/caches stay unchanged.
+
+### M105-CMD-CORRECTION-FOCUSED — corrected integration test boundary
+
+Accepted Red identities: `tests/walking-skeleton.test.ts` = `F51AC6CF9652E8B5094EFB83760D55DF7DD55A4F5A5D3A77039D6739A81F9729`; helper = `C58B1428D96452FD3CE131C710CD955DA5895BAB3B6450D3956F5ED3690C4001`; whole test tree = `66AE699D6A4984048F97FE057B794BD481312C6FF3FCE25E636EF076FC33EAA6`. Source, build, browser, scratch, siblings, caches, HEAD and index retain their verified state. Green must execute all 15 tests unchanged; downstream positive assertions not reached during Red become mandatory Green evidence.
+
+Run once per Red/Green evidence phase after PREP. A Red run must exit nonzero only for the intended stylesheet regression; abort characterization must pass. Record the native test exit code before running the final scratch checks. Green requires every case to pass, followed by strict TypeScript. The test-count change, names, and identities are recorded on acceptance.
+
+```powershell
+foreach ($m105Scratch in @($m105ScanTemp,$m105UiTemp,$m105IntegrationTemp)) { Assert-M105EmptyDirectory $m105Scratch }
+Invoke-M105Command {
+  & $m105Node --test --test-timeout=120000 tests/walking-skeleton.test.ts
+  $script:m105CorrectionTestExit = $LASTEXITCODE
+} $m105ScanTemp
+foreach ($m105Scratch in @($m105ScanTemp,$m105UiTemp,$m105IntegrationTemp)) { Assert-M105EmptyDirectory $m105Scratch }
+if ($m105CorrectionTestExit -ne 0) { throw ('Correction focused tests exit ' + $m105CorrectionTestExit) }
+```
+
+### M105-CMD-CORRECTION-COMPLETE — replacement closure evidence
+
+Accepted Green source SHA-256: `client-assets.ts` = `9DE67BA8E09C2D6FF12B999A5D57E82D693C1C36844A18080C4B6F9932D005CD`; whole source = 52 entries / 40 files / 12 directories / 156,106 bytes / `168E3847A44D4AEB3A9E142991ED27363FFBF0ACD434D3CC96B3718FDF3F5848`. Accepted test tree = 11 / 10 / 1 / 352,774 / `66AE699D6A4984048F97FE057B794BD481312C6FF3FCE25E636EF076FC33EAA6`. The Red receipt file hashes to `19D401784D26E9BAA844E9C94CD1F048F160D6AD6D47DBC9B85671B33F7B29C4`; Green receipt file to `131B0982586737E8E5B6117CFAF244A7A2BF3CA5132E88801EFD18AD340A9323`. These new immutable receipts belong to HEAD `1f92fe8`; historical `552f57ec` receipt helpers must not be used for them.
+
+After Green and test-relevance/structural audit, run the README's exact sequential seven-file suite against the retained build, plus the correction preflight strict/syntax block. Recheck source/test/protected/evaluation/runtime identities, empty scratch and siblings, absent Vite caches, no active lease, unchanged HEAD/branch and empty index. Record the new total honestly. The slice reviewer may reuse that exact frozen evidence; final reviewer must be a different fresh instance and inspect cross-slice interaction, both findings, and closure. Do not represent the old 324-case record or prior public-page result as evidence of these corrected paths.
+
+After both reviews pass and any follow-up is resolved, primary removes only the exact identity-checked correction build and three verified-empty scratch roots; no run deletion is needed because controlled tests own their run descendants and siblings began empty. Reconcile current-status owners, archive this same plan, repair navigation, and run proportional Markdown/fragment/PowerShell/UTF-8/whitespace plus new-baseline identity/status/residue checks after the final documentation mutation. Do not execute the old post-archive validator pinned to `552f57ec` or its old three-file required-change set. Preserve the retained browser and historical receipts. M1-05 remains In progress until renewed verification and documentation closure pass.
+
 
 ### M105-LOCAL-SERVICE-MODULE-REFACTOR-01 — conservative service extraction
 
@@ -489,6 +573,127 @@ Using the exact `M105-CMD-PUBLIC-SMOKE` block below with the already accepted bu
 Before the smoke, snapshot the exact immediate child names under `data/runs`; afterward require exactly one new ordinary non-link run directory. Pin its run ID, canonical `run.json` SHA-256, accepted source/build/browser identities, application revision, process-environment name set, selected mode, date, bounded completion/coverage result, validation result, and clean-stop/scratch result. The URL remains a private execution input and no page content, Finding, evidence value, redirect identity, or provider secret enters tracked documentation. Public network evidence remains `Non-reusable`; a mutable-page or network failure does not justify code change or automatic retry, and one owner-directed replacement target is the maximum before stopping for direction.
 
 Keep that exact aggregate intact through the different fresh final integrated `critical_reviewer` inspection. Preserve and fingerprint every pre-existing sibling if any exists, but do not manufacture a durable sibling merely for this smoke; the controlled transport/lifecycle lane owns the mandatory sibling-preservation proof. The reviewer must read the pinned canonical bytes and independently reconcile their identity, minimized shape, publication/read evidence, surrounding directory state, and exact deletion preconditions. Only after that review returns PASS may the primary resolve the literal smoke-run path beneath `data/runs`, recheck ordinary non-link topology and hash, remove only the declared smoke run directory, prove it absent, and confirm every pre-existing sibling identity is unchanged. This final deterministic cleanup does not authorize another scan or source change and does not require another full integrated review; its exact command result belongs to the documentation closure gate. It demonstrates the manual deletion boundary without adding a deletion UI, backup, recycle bin, cascade, tombstone, or provider-erasure claim.
+
+### M105-PC08-ACCEPTED-VERIFICATION — replacement evidence
+
+Primary executed the unchanged README sequential seven-file command and correction strict/syntax block on 2026-09-03: 58 contract + 55 repository + 69 service + 20 normalization + 88 scanner + 15 integration + 30 UI = 335 tests, all passed with zero failure/cancellation/skip/todo. Independent strict TypeScript and all three changed-path syntax checks passed. UI teardown reported no external request or page error and settled normally. Source, tests, build, and browser matched the frozen corrected identities; owned scratch and run siblings remained empty. The test-relevance audit retained the four full-path lanes, replaced only vacuous abort evidence with real arrival/settlement assertions, and added eleven table-driven startup cases with genuine positive/negative behavior. No focused/skipped/todo test, production substitute, changed evaluation fixture, or rendered UI change was introduced.
+
+### M105-CMD-CORRECTION-IDENTITY — frozen replacement tuple
+
+After the first PREP definitions, load this block and call `Assert-M105CorrectionIdentity` for review or before cleanup. Call it with `-AfterCleanup` only after the exact cleanup below; that mode requires build/scratch absence while preserving all source, test, evaluation, runtime, receipt, and endpoint checks. These constants were captured after accepted Green, not regenerated during verification.
+
+```powershell
+function Assert-M105CorrectionIdentity([switch]$AfterCleanup) {
+  if ((& git rev-parse HEAD).Trim() -cne '1f92fe89e28fb2e645a97875ee38390d4744a858' -or
+      (& git branch --show-current).Trim() -cne 'codex/m1-05-walking-skeleton-integration') { throw 'Correction endpoint drift' }
+  if (@(& git diff --cached --name-only).Count) { throw 'Correction index drift' }
+  $null = Assert-M105OrdinaryPath $m105ActiveLease -AllowMissing
+  if (Test-Path -LiteralPath $m105ActiveLease) { throw 'Correction lease remains active' }
+  $allowed = $m105PreArchiveDocumentationPaths + @('docs/plans/completed/m1-05-walking-skeleton-integration.md',
+    'src/server/local-service/client-assets.ts','tests/walking-skeleton.test.ts','tests/helpers/m105-walking-skeleton-harness.ts')
+  foreach ($row in @(& git -c status.renames=false status --porcelain=v1 --untracked-files=all)) {
+    if ($allowed -cnotcontains $row.Substring(3)) { throw ('Unexpected correction path: ' + $row.Substring(3)) }
+  }
+  Assert-M105FileHashes ([ordered]@{
+    'src/server/local-service/client-assets.ts'='9DE67BA8E09C2D6FF12B999A5D57E82D693C1C36844A18080C4B6F9932D005CD';
+    'tests/walking-skeleton.test.ts'='F51AC6CF9652E8B5094EFB83760D55DF7DD55A4F5A5D3A77039D6739A81F9729';
+    'tests/helpers/m105-walking-skeleton-harness.ts'='C58B1428D96452FD3CE131C710CD955DA5895BAB3B6450D3956F5ED3690C4001';
+    'package.json'='C2C8718FA44813288ABBA5792FACB3D39400446912EC73DE2A8C93E2A6D92C98';
+    'package-lock.json'='ECE19CD10739D5C4139E4700B5A712B89FEFE1F898BE29C4FBF18DD54682C553';
+    'tsconfig.json'='3957F80AF41B23DC4CCEFAA6B24823C367E6984980420B596275B8692DF5ABDE';
+    'vite.config.ts'='8D75B9863C86A8ECA2267C74D8875BE46061C288F5EAEF6BEA93C427D3DACD07';
+    'index.html'='91BEF948D015F0E084708FDECFB79F765437B439D76B1ED70AF55580D815DC88'
+  }) 'Correction accepted files'
+  Assert-M105TreeRecord (Join-Path $m105Repo 'src') ([pscustomobject]@{Entries=52;Files=40;Directories=12;Bytes=156106;Digest='168E3847A44D4AEB3A9E142991ED27363FFBF0ACD434D3CC96B3718FDF3F5848'}) 'Correction source'
+  Assert-M105TreeRecord (Join-Path $m105Repo 'tests') ([pscustomobject]@{Entries=11;Files=10;Directories=1;Bytes=352774;Digest='66AE699D6A4984048F97FE057B794BD481312C6FF3FCE25E636EF076FC33EAA6'}) 'Correction tests'
+  Assert-M105TreeRecord (Join-Path $m105Repo 'evaluation') ([pscustomobject]@{Entries=1;Files=1;Directories=0;Bytes=16029;Digest='3048E8A9F4412437116513F830CF4317C87F5A00C5C3FFD8675474BD173FD4AE'}) 'Frozen evaluation'
+  Assert-M105TreeRecord (Join-Path $m105Repo 'fixtures/rd003') ([pscustomobject]@{Entries=9;Files=6;Directories=3;Bytes=2806;Digest='7E0554E767DA4995045C1235FEF0E8AE1C4BE681B73D0BB6EF7312AA912317AC'}) 'Frozen fixtures'
+  Assert-M105TreeRecord $m105Runtime ([pscustomobject]@{Entries=332;Files=318;Directories=14;Bytes=451193922;Digest='4FDF9490EDBA2FC4662FF487C591F769F682D8031B3E59FC26C0C35AEE8371CC'}) 'Retained browser'
+  if ((Get-FileHash -LiteralPath $m105Node -Algorithm SHA256).Hash -cne '5C976096E04E5C2C1F091938926234CC9FBEBFE9787DDD149351B3B0ECC707B5') { throw 'Node drift' }
+  if ((Get-M105RunSetDigest) -cne 'E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855') { throw 'Run sibling drift' }
+  foreach ($cache in @('.vite-temp','node_modules/.vite-temp')) {
+    $null = Assert-M105OrdinaryPath (Join-Path $m105Repo $cache) -AllowMissing
+    if (Test-Path -LiteralPath (Join-Path $m105Repo $cache)) { throw 'Vite cache residue' }
+  }
+  if ($AfterCleanup) {
+    foreach ($absent in @($m105Build,$m105ScanTemp,$m105UiTemp,$m105IntegrationTemp)) {
+      $null = Assert-M105OrdinaryPath $absent -AllowMissing
+      if (Test-Path -LiteralPath $absent) { throw 'Correction cleanup residue' }
+    }
+  } else {
+    Assert-M105TreeRecord $m105Build ([pscustomobject]@{Entries=4;Files=3;Directories=1;Bytes=225483;Digest='1D1198338F4C1E267737F5F9D8F5540854A33A7C7E52BFC3EDC36C35164A503F'}) 'Correction build'
+    foreach ($scratch in @($m105ScanTemp,$m105UiTemp,$m105IntegrationTemp)) { Assert-M105EmptyDirectory $scratch }
+  }
+  $receipts = @(
+    @{Id='M1-05-20260903-08-postclosure-red-01';Contract='eda28cccf51326f4203dc97fab9b0e3e83048b38dc93a198de0724df0ec0e38a';Digest='fe96da0b301fc87f8ea5cebbf6146a58195cf75b56c4f72e23ce4d62bc7e850d';ContractHash='410597490A27AE71204B9185F88198B5BC49384DABE8FAD6BDAF83B3DBBABF07';Hash='19D401784D26E9BAA844E9C94CD1F048F160D6AD6D47DBC9B85671B33F7B29C4';Paths=@('tests/helpers/m105-walking-skeleton-harness.ts','tests/walking-skeleton.test.ts')},
+    @{Id='M1-05-20260903-08-postclosure-green-01';Contract='950c6a47267f193470e3919317c6ccb93a1fdb90ca4f43524a2df47545a7e7c8';Digest='3670dac391a923b6af5e2875cbb6650d6c0dd69f1cee6ba2b98cd6e8c9930681';ContractHash='4B99A228E432C53BC8AD0624EC9D9DAE2018CD844FA20D8ED0ED554640647356';Hash='131B0982586737E8E5B6117CFAF244A7A2BF3CA5132E88801EFD18AD340A9323';Paths=@('src/server/local-service/client-assets.ts')}
+  )
+  foreach ($expected in $receipts) {
+    $root = Join-Path $m105Repo ('logs/agent-flow-leases/v2/' + $expected.Id)
+    $file = Assert-M105OrdinaryPath (Join-Path $root 'receipt.json')
+    $contract = Assert-M105OrdinaryPath (Join-Path $root 'contract.json')
+    if ((Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash -cne $expected.Hash -or
+        (Get-FileHash -LiteralPath $contract -Algorithm SHA256).Hash -cne $expected.ContractHash) { throw 'Correction lease identity drift' }
+    $receipt = Get-Content -Raw -LiteralPath $file | ConvertFrom-Json
+    if ($receipt.schema_version -ne 2 -or $receipt.lease_id -cne $expected.Id -or
+        $receipt.contract_digest -cne $expected.Contract -or $receipt.digest -cne $expected.Digest -or
+        $receipt.outcome -cne 'compliant' -or $receipt.verified_head -cne '1f92fe89e28fb2e645a97875ee38390d4744a858' -or
+        $receipt.verified_head_ref -cne 'refs/heads/codex/m1-05-walking-skeleton-integration' -or
+        @($receipt.changes.forbidden).Count -ne 0 -or @($receipt.changes.unleased).Count -ne 0 -or
+        ((@($receipt.changes.allowed.path | Sort-Object) -join '|') -cne ($expected.Paths -join '|'))) { throw 'Correction receipt mismatch' }
+  }
+}
+```
+
+### M105-CMD-CORRECTION-CLEANUP — after both accepted reviews
+
+Run only after both fresh reviews pass and all follow-ups are resolved. Both services and browsers must already be settled by the accepted tests. Remove no run, retained browser, dependency, shared cache, or parent directory.
+
+```powershell
+Assert-M105CorrectionIdentity
+$null = Assert-M105OrdinaryPath $m105Build
+Remove-Item -LiteralPath $m105Build -Recurse -Force -ErrorAction Stop
+foreach ($scratch in @($m105ScanTemp,$m105UiTemp,$m105IntegrationTemp)) {
+  Assert-M105EmptyDirectory $scratch
+  Remove-Item -LiteralPath $scratch -ErrorAction Stop
+}
+Assert-M105CorrectionIdentity -AfterCleanup
+```
+
+### M105-CMD-CORRECTION-CLOSURE — final archived-state validation
+
+After both accepted reviews and exact cleanup, reconcile all current-status owners and archive this same plan with repaired links. Load the first PREP definitions and the correction identity function from the archive, then run this block. It reuses only the historical validator's status, Markdown/fragment, UTF-8, PowerShell, and required-heading checks; its old Git/tuple/receipt/cleanup assertions are excluded. The progress heading check explicitly accepts CRLF. Run again after the last documentation mutation. Expected final totals are 28 roadmap tasks: eight Complete and 20 Not started, with no active task.
+
+```powershell
+Assert-M105CorrectionIdentity -AfterCleanup
+$m105ActivePlan = Join-Path $m105Repo 'docs/plans/m1-05-walking-skeleton-integration.md'
+$m105ArchivedPlan = Assert-M105OrdinaryPath (Join-Path $m105Repo 'docs/plans/completed/m1-05-walking-skeleton-integration.md')
+if (Test-Path -LiteralPath $m105ActivePlan) { throw 'Correction plan remains active' }
+$m105ChangedPaths = @(@(& git diff --name-only) + @(& git ls-files --others --exclude-standard) | Sort-Object -Unique)
+if ($m105ChangedPaths.Count -ne 16) { throw 'Correction closure path set changed' }
+$m105ArchivedText = Get-Content -Raw -LiteralPath $m105ArchivedPlan
+$historical = [regex]::Match($m105ArchivedText,
+  '(?ms)^### M105-CMD-DOCUMENTATION-CLOSURE [^\r\n]*\r?\n.*?^```powershell\r?\n(.*?)^```').Groups[1].Value
+$start = $historical.IndexOf('$m105RoadmapText =')
+$stop = $historical.IndexOf('git diff --check')
+if ($start -lt 0 -or $stop -le $start) { throw 'Shared documentation checks unavailable' }
+# Reuse only status, Markdown, fragment, UTF-8, PowerShell, and heading checks.
+# Never execute historical commit, tuple, receipt, or cleanup checks.
+$shared = $historical.Substring($start,$stop-$start).Replace(
+  '(?m)^- \*\*Mirrored roadmap status:\*\* Complete$',
+  '(?m)^- \*\*Mirrored roadmap status:\*\* Complete\r?$')
+. ([scriptblock]::Create($shared))
+foreach ($owner in $m105CurrentOwners) {
+  $current = Get-Content -Raw -LiteralPath (Join-Path $m105Repo $owner)
+  if ($current -match '(?i)M1-05[^\r\n]*(?:is In progress again|is reopened|closure (?:is superseded|are pending))') {
+    throw ('Stale correction current status: ' + $owner)
+  }
+}
+git -c core.safecrlf=false diff --check
+if ($LASTEXITCODE -ne 0) { throw 'Correction closure whitespace failed' }
+[pscustomobject]@{MarkdownFiles=$m105Markdown.Count;Links=$m105LinkCount;Fragments=$m105FragmentCount;
+  PowerShellBlocks=$m105PowerShellCount;ChangedPaths=$m105ChangedPaths.Count;Complete=8;NotStarted=20}
+```
 
 ### M105-CMD-PREP — exact shell literals and environment restoration
 
@@ -2013,3 +2218,17 @@ The completed integration extends the existing service rather than adding a seco
 2026-09-03: Resolved and validated the final review's sole Minor, accepted PASS WITH FOLLOW-UPS, and executed the unchanged exact cleanup successfully. Reconciled all affected current-status and operational documentation, recorded final review and cleanup evidence, and completed M1-05 through the documentation gate. Archived this plan with corrected relative links; preserved source/test/protected/runtime identities, seven receipts, all earlier stops and process findings, and the unselected M2 boundary. Final post-archive validation must run after the last documentation mutation.
 
 2026-09-03: The first post-archive closure run passed identity, residue, roadmap, navigation, encoding, and PowerShell checks, then falsely rejected the existing Progress heading because its required-section regex accepted LF only while archival retained CRLF. Primary verified the exact heading and made the documentation-only regex accept an optional carriage return, consistent with the other closure patterns; no required heading or gate was removed. The full exact closure rerun passed after this bounded validator correction: 86 Markdown files, 1,892 links, 529 fragments, 21 parsed PowerShell blocks, 24 changed paths, 8 Complete tasks and 20 Not started tasks. Final source/test/protected/runtime/receipt identities, absent generated residue, empty index, and unchanged Git endpoint passed; the final command is rerun after recording this result.
+
+2026-09-03: The owner authorized two reproduced post-closure P2 corrections at committed baseline 1f92fe8. Reopened the same M1-05 task and plan, preserved all previous evidence and stops, reconciled current status, and added the bounded startup/intake correction contract and fresh verification route. The old commit-pinned capture, cleanup, and closure blocks remain historical and must not be replayed; only their explicitly reused read-only PREP definitions apply. No public smoke or dependent task is authorized.
+
+2026-09-03: Accepted correction preflight PARTIAL, isolating missing stylesheet recognition from existing-but-uncovered stream settlement. Strict/syntax and exact baseline checks passed; primary completed the unchanged README build setup with the original deterministic build identity and empty owned scratch. The next bounded test Red also supplies real abort characterization; only the stylesheet behavior may require production Green.
+
+2026-09-03: Accepted the correction Red and real abort characterization after fresh compliant test-lease closure and primary diff/identity inspection. All four original cases and the quoted CSS control passed; only ten intended stylesheet cases failed. Froze the corrected two-test identities and 15-case boundary for one-file production Green. Historical test counts remain historical; no production or external-page behavior changed in this test turn.
+
+2026-09-03: Separate one-file Green reproduced Red, then passed all 15 unchanged integration cases and strict/syntax checks. Primary closed the Green lease compliant, accepted RETAINED responsibility fit, and ran the complete replacement barrier: 335 tests passed with unchanged runtime/build and empty owned scratch. Recorded both immutable correction receipts, frozen corrected source/test identities, evaluation/fixture preservation, and exact post-review cleanup; updated developer test counts and current progress before fresh review. No public smoke or provider call was repeated.
+
+2026-09-03: Fresh correction S3 review `M105-PC08-S3-01` returned PASS WITH FOLLOW-UPS with no Blocker/Major and RETAINED cohesion. Primary consolidated the sole Minor duplicate progress checkpoint, preserving one chronological replacement-verification entry. The read-only review independently verified 25 tokenizer cases, three real HTTP aborts, timeout failure and hook restoration, strict/syntax, and the frozen tuple. Added the exact new-baseline archived-state validator before different final integrated review; no implementation, test, receipt, or generated-artifact identity changed.
+
+2026-09-03: Different fresh final review `M105-PC08-FINAL-01` returned PASS with no remaining findings and RETAINED cohesion. Independent identity, strict/syntax, Green-start test hashes, integrated asset/HTTP/abort/control checks, and closure isolation passed. Primary accepted the verdict, executed exact build/empty-scratch cleanup with no run deletion, and reconciled current-status owners. The retained runtime and all frozen correction/evaluation/receipt identities remain unchanged. Final archival and post-mutation documentation validation follow; no next task, commit, or push is authorized.
+
+2026-09-03: Archived the same corrected M1-05 plan and repaired every affected navigation link. The new-baseline archived-state validator passed exact identities, both correction receipts, generated-state absence, retained browser, empty run siblings/index, unchanged Git endpoint, 16 changed paths, eight Complete and 20 Not started tasks, 86 Markdown files, 1,892 links, 529 fragments, 26 PowerShell examples, required headings, UTF-8 and whitespace. Recorded this outcome in the progress owner and reran validation after the final documentation mutation. M1-05 is Complete again; original evidence and failures remain historical, with no requirement/ADR change, public-smoke repetition, next-task authorization, commit, or push.

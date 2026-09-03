@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import http from 'node:http';
 import path from 'node:path';
 import nodeTest from 'node:test';
 import type { TestContext } from 'node:test';
@@ -208,8 +209,15 @@ test('configured transport is closed, exact and lifecycle-safe while API-only co
     const response = await requestJson(harness.service.url, 'POST', '/api/runs', body, contentType);
     assert.equal(response.status, 400);
   }
-  await abortPartialRequest(harness.service.url);
+  const beforeAbortCalls = [...calls];
+  await abortPartialRequest(t, harness.service.url);
+  assert.deepEqual(calls, beforeAbortCalls, 'Aborted intake must not launch a scanner or contact a provider');
   assert.deepEqual(fs.readdirSync(harness.runRoot), ['sibling.canary']);
+  assert.equal(fs.readFileSync(path.join(harness.runRoot, 'sibling.canary'), 'utf8'), 'preserve');
+  const afterAbortHealth = await requestJson(harness.service.url, 'GET', '/api/health');
+  assert.equal(afterAbortHealth.status, 200);
+  assert.deepEqual(afterAbortHealth.body, { status: 'ready', busy: false,
+    capabilities: { readRuns: true, scan: true } });
 
   const first = requestJson(harness.service.url, 'POST', '/api/runs',
     JSON.stringify({ requestedUrl: targetUrl, mode: 'local' }), ' Application/JSON ')
@@ -238,3 +246,71 @@ test('configured transport is closed, exact and lifecycle-safe while API-only co
     clientRoot: path.join(repo, 'temp/m105-integration/missing-client') });
   assert.deepEqual(missing, { ok: false, error: 'client-unavailable' });
 });
+
+const stylesheetCases = [
+  { name: 'quoted with boolean Vite attributes', link: '<link rel="stylesheet" crossorigin href="/assets/app.css">', accepted: true },
+  { name: 'unquoted relation', link: '<link rel=stylesheet href="/assets/app.css">', accepted: true },
+  { name: 'unquoted href', link: '<link rel="stylesheet" href=/assets/app.css>', accepted: true },
+  { name: 'fully unquoted with boolean Vite attributes', link: '<link rel=stylesheet crossorigin href=/assets/app.css>', accepted: true },
+  { name: 'external unquoted stylesheet', link: '<link rel=stylesheet href=https://example.invalid/app.css>', accepted: false },
+  { name: 'missing unquoted stylesheet', link: '<link rel=stylesheet href=/assets/missing.css>', accepted: false },
+  { name: 'absent stylesheet href', link: '<link rel=stylesheet>', accepted: false },
+  { name: 'malformed nested stylesheet', link: '<link rel=stylesheet href=/assets/nested/app.css>', accepted: false },
+  { name: 'duplicate mixed relation attribute', link: '<link rel=alternate rel="stylesheet" href="/assets/app.css">', accepted: false },
+  { name: 'duplicate mixed href attribute', link: '<link rel="stylesheet" href=/assets/app.css href="/assets/app.css">', accepted: false },
+  { name: 'duplicate stylesheet references', link: '<link rel=stylesheet href=/assets/app.css><link rel="stylesheet" href="/assets/app.css">', accepted: false },
+] as const;
+
+for (const [index, scenario] of stylesheetCases.entries()) {
+  test(`configured startup validates ${scenario.name}`, async t => {
+    const scratch = path.join(repo, 'temp/m105-integration');
+    assert.deepEqual(fs.readdirSync(scratch), []);
+    const fixture = path.join(scratch, `stylesheet-${index}`);
+    const root = path.join(fixture, 'client');
+    const runRoot = path.join(fixture, 'runs');
+    const css = Buffer.from('body { color: rgb(1, 2, 3); }\n');
+    let started: Awaited<ReturnType<typeof startLocalService>> | undefined;
+    let listenerConstructions = 0;
+    const originalCreateServer = http.createServer;
+    const listener = t.mock.method(http, 'createServer', (...args: unknown[]) => {
+      listenerConstructions++;
+      return Reflect.apply(originalCreateServer, http, args);
+    });
+    try {
+      fs.mkdirSync(path.join(root, 'assets'), { recursive: true });
+      fs.writeFileSync(path.join(root, 'index.html'),
+        '<!doctype html><script type="module" crossorigin src="/assets/app.js"></script>' + scenario.link);
+      fs.writeFileSync(path.join(root, 'assets/app.js'), 'export {};');
+      fs.writeFileSync(path.join(root, 'assets/app.css'), css);
+      fs.writeFileSync(path.join(fixture, 'sibling.canary'), 'preserve');
+      started = await startLocalService({ runRoot, applicationRevision: revision, clientRoot: root });
+      if (scenario.accepted) {
+        assert.ok(started.ok, 'Ordinary local stylesheet syntax must start');
+        const response = await requestBytes(started.service.url, '/assets/app.css');
+        assert.equal(response.status, 200);
+        assert.equal(response.headers['content-type'], 'text/css;charset=utf-8');
+        assert.deepEqual(response.body, css);
+        assert.deepEqual(Object.keys(loadClientResponses(root)).sort(),
+          ['/', '/assets/app.css', '/assets/app.js', '/index.html']);
+        assert.equal((await requestJson(started.service.url, 'GET', '/assets/unlisted.css')).status, 404);
+      } else {
+        assert.deepEqual({ result: started.ok ? 'ready' : started.error,
+          storageCreated: fs.existsSync(runRoot), listenerConstructions },
+        { result: 'client-unavailable', storageCreated: false, listenerConstructions: 0 });
+      }
+      assert.equal(fs.readFileSync(path.join(fixture, 'sibling.canary'), 'utf8'), 'preserve');
+    } finally {
+      if (started?.ok) {
+        assert.deepEqual(await started.service.stop(), { ok: true, status: 'stopped' });
+        await portClosed(started.service.url);
+      }
+      listener.mock.restore();
+      if (fs.existsSync(fixture)) {
+        assert.equal(path.dirname(fixture), scratch);
+        assert.ok(fs.lstatSync(fixture).isDirectory() && !fs.lstatSync(fixture).isSymbolicLink());
+        fs.rmSync(fixture, { recursive: true });
+      }
+      assert.deepEqual(fs.readdirSync(scratch), []);
+    }
+  });
+}

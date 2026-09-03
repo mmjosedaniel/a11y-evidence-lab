@@ -8,8 +8,7 @@ None.
 
 ## Completed plans
 
-- [M1-05 — Walking-skeleton integration](completed/m1-05-walking-skeleton-integration.md) — **Complete** on 2026-09-03 (UTC). Five internal slices, controlled same-origin integration, 324 passing tests, strict TypeScript, the authorized public-page smoke, required reviews, exact disposable-artifact cleanup, and documentation closure passed. Browser runtime retained; later roadmap work remains unselected.
-
+- [M1-05 — Walking-skeleton integration](completed/m1-05-walking-skeleton-integration.md) — **Complete** again on 2026-09-03 after both post-closure corrections, 335 passing tests, strict TypeScript, fresh S3 and different final integrated reviews, exact cleanup, and renewed documentation closure. Original implementation, failed evidence, and public-smoke history are preserved.
 - [M1-04 — Target and results UI](completed/m1-04-target-and-results-ui.md) — **Complete** on 2026-09-02 (UTC). The accepted OD-027 presentation, purpose-named component extraction, integrated-review correction, complete regression, independent reviews, exact cleanup, and documentation closure passed.
 - [M1-03 — Real scan and evidence](completed/m1-03-real-scan-and-evidence.md) — **Complete** on 2026-08-31 (UTC). Both scanner slices and their S3 reviews are accepted. All 290 integrated tests and independent strict typechecking pass, including the failed-launch residue regression. The different final integrated critical review, exact task-owned runtime cleanup and documentation closure passed. At M1-03 closure, M1-04 and M1-05 were unselected.
 

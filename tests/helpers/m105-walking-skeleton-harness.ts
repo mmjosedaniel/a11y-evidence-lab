@@ -249,16 +249,87 @@ export function readOnlyRun(runRoot: string, siblings: readonly string[] = []): 
   return checked.value;
 }
 
-export async function abortPartialRequest(origin: string): Promise<void> {
-  await new Promise<void>(resolve => {
-    const request = http.request(new URL('/api/runs', origin), { method: 'POST', headers: {
-      'Content-Type': 'application/json', 'Content-Length': '1024',
-    } });
-    request.once('error', () => resolve());
-    request.write('{');
-    request.destroy();
-    setTimeout(resolve, 50);
+export async function abortPartialRequest(t: TestContext, origin: string): Promise<void> {
+  const originalEmit = http.Server.prototype.emit;
+  const received = deferred();
+  const closed = deferred();
+  const clientClosed = deferred();
+  const events: string[] = [];
+  const chunks: Buffer[] = [];
+  let incoming: http.IncomingMessage | undefined;
+  let intakeDispatches = 0;
+  let responseEnds = 0;
+  let restoreIntake: (() => void) | undefined;
+  let restoreResponse: (() => void) | undefined;
+  const onData = (chunk: Buffer) => { chunks.push(Buffer.from(chunk)); received.resolve(); };
+  const onAborted = () => { events.push('aborted'); };
+  const onError = () => { events.push('error'); };
+  const onClose = () => { events.push('close'); closed.resolve(); };
+  const interception = t.mock.method(http.Server.prototype, 'emit', function (this: http.Server,
+    event: string | symbol, ...args: unknown[]): boolean {
+    if (event !== 'request') return Reflect.apply(originalEmit, this, [event, ...args]);
+    const request = args[0] as http.IncomingMessage;
+    const response = args[1] as http.ServerResponse;
+    if (request.url !== '/api/runs' || request.socket.localPort !== Number(new URL(origin).port)) {
+      return Reflect.apply(originalEmit, this, [event, ...args]);
+    }
+    assert.equal(incoming, undefined, 'Exactly one partial request reaches the owned server');
+    incoming = request;
+    const originalOnce = request.once;
+    const intake = t.mock.method(request, 'once', function (this: http.IncomingMessage,
+      name: string | symbol, listener: (...values: unknown[]) => void) {
+      const observed = name === 'end' ? (...values: unknown[]) => {
+        intakeDispatches++;
+        Reflect.apply(listener, this, values);
+      } : listener;
+      return Reflect.apply(originalOnce, this, [name, observed]);
+    });
+    restoreIntake = () => intake.mock.restore();
+    const originalEnd = response.end;
+    const ending = t.mock.method(response, 'end', function (this: http.ServerResponse, ...values: unknown[]) {
+      responseEnds++;
+      return Reflect.apply(originalEnd, this, values);
+    });
+    restoreResponse = () => ending.mock.restore();
+    const result = Reflect.apply(originalEmit, this, [event, ...args]);
+    request.on('data', onData);
+    request.on('aborted', onAborted);
+    request.on('error', onError);
+    request.on('close', onClose);
+    return result;
   });
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const deadline = new Promise<never>((_resolve, reject) => {
+    timer = setTimeout(() => reject(new Error('Real partial-request settlement timed out')), 5000);
+  });
+  const request = http.request(new URL('/api/runs', origin), { method: 'POST', agent: false, headers: {
+    'Content-Type': 'application/json', 'Content-Length': '1024',
+  } });
+  request.on('error', () => { /* Expected client reset is not server-settlement evidence. */ });
+  request.once('close', clientClosed.resolve);
+  try {
+    request.write('{');
+    await Promise.race([received.promise, deadline]);
+    assert.equal(Buffer.concat(chunks).toString('utf8'), '{');
+    assert.ok(incoming && !incoming.complete, 'The server has received an incomplete body');
+    request.destroy();
+    await Promise.race([Promise.all([closed.promise, clientClosed.promise]), deadline]);
+    assert.ok(events.includes('aborted') && events.includes('error'), 'Real server abort and error must settle');
+    assert.equal(events.filter(event => event === 'close').length, 1);
+    assert.equal(intakeDispatches, 0, 'No real completed-body intake callback may prepare or scan a run');
+    assert.ok(responseEnds <= 1, 'Abort and error must not send duplicate outcomes');
+  } finally {
+    if (timer) clearTimeout(timer);
+    request.destroy();
+    incoming?.destroy();
+    incoming?.removeListener('data', onData);
+    incoming?.removeListener('aborted', onAborted);
+    incoming?.removeListener('error', onError);
+    incoming?.removeListener('close', onClose);
+    restoreIntake?.();
+    restoreResponse?.();
+    interception.mock.restore();
+  }
 }
 
 export function deferred(): { promise: Promise<void>; resolve(): void } {

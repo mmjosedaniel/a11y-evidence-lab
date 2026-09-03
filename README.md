@@ -58,7 +58,7 @@ Development ready. The [development roadmap](docs/DEVELOPMENT_ROADMAP.md) owns i
 
 [M1-03 — Real scan and evidence](docs/plans/completed/m1-03-real-scan-and-evidence.md) is Complete after owner-authorized execution and verified closure. Both scanner slices and their S3 reviews are accepted. All 290 integrated tests and independent strict typechecking pass, including the failed-launch residue regression. The different final integrated critical review, exact task-owned runtime cleanup and documentation closure passed. At M1-03 closure, M1-04 and M1-05 were unselected.
 
-[M1-04 — Target and results UI](docs/plans/completed/m1-04-target-and-results-ui.md) is Complete after the OD-027 [Analyze and results presentation](docs/ui/ANALYZE_AND_RESULTS_PRESENTATION.md), purpose-named component extraction, integrated-review correction, complete regression, independent reviews, exact cleanup, and documentation closure. [M1-05](docs/plans/completed/m1-05-walking-skeleton-integration.md) is Complete. Its same-origin scan-to-disk integration passes 324 tests, strict TypeScript, and one authorized public-page smoke. Final independent review, exact cleanup, and documentation closure passed. M2-01 remains Not started until explicitly selected.
+[M1-04 — Target and results UI](docs/plans/completed/m1-04-target-and-results-ui.md) is Complete after the OD-027 [Analyze and results presentation](docs/ui/ANALYZE_AND_RESULTS_PRESENTATION.md), purpose-named component extraction, integrated-review correction, complete regression, independent reviews, exact cleanup, and documentation closure. [M1-05](docs/plans/completed/m1-05-walking-skeleton-integration.md) is Complete again. Both post-closure corrections pass 335 tests and strict TypeScript; fresh independent reviews, exact cleanup, and renewed documentation closure passed. The earlier public-page smoke remains historical and was not repeated. M2-01 remains Not started until explicitly selected.
 
 ## Development toolchain
 
@@ -106,7 +106,7 @@ Invoke-M105Command {
 }
 ```
 
-The complete current suite has seven files and passed 324 tests. Run them sequentially, with no running application service or concurrent browser test. The production-entry tests also require the built client. The scanner and walking-skeleton suites use scanner scratch; the UI suite uses separate UI scratch:
+The complete current suite has seven files and passed 335 tests after the post-closure correction. Run them sequentially, with no running application service or concurrent browser test. The production-entry tests also require the built client. The scanner and walking-skeleton suites use scanner scratch; the UI suite uses separate UI scratch:
 
 ```powershell
 foreach ($m105Test in @('run-contract','run-repository','local-service','scan-normalization')) {
