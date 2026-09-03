@@ -2,7 +2,7 @@
 
 This ExecPlan is a living document. Maintain `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` as work proceeds. This document must be maintained in accordance with `PLANS.md`.
 
-This plan owns only [M1-05 — Integrate and verify the walking skeleton](../DEVELOPMENT_ROADMAP.md#m1-05--integrate-and-verify-the-walking-skeleton). The owner explicitly selected M1-05 and approved the structural slices described below. The first preserved the existing loopback-service behavior while giving its stateless responsibilities focused modules. The second preserved scanner behavior while extracting stateless request preparation, native capture, value reading, and rule-evidence projection from its two ordering-sensitive coordinators. The third preserves the `run-contract.ts` public boundary while separating its contract model, fixed policy, hostile-value reader, finding validation, scan validation, and parent-run validation. The fourth preserves the `run-repository.ts` public boundary while extracting its public contracts, bounded errors, Windows path protection, and transition validation from the ordering-sensitive repository coordinator. The fifth removes one unused client state value while retaining `App.tsx` as the cohesive stateful parent. None of these slices connects the HTTP Analyze path to the real scanner, completes the milestone integration checkpoint, authorizes M2 work, or authorizes a commit or push.
+This plan owns only [M1-05 — Integrate and verify the walking skeleton](../DEVELOPMENT_ROADMAP.md#m1-05--integrate-and-verify-the-walking-skeleton). The owner explicitly selected M1-05. Preserve the accepted history of its four behavior-preserving module refactors and bounded App dead-state cleanup below. The remaining work is one coherent HTTP/browser integration slice that joins the existing UI, loopback service, real scanner, and single-file repository, followed by one owner-authorized public-page smoke and the task-closure gate. This plan does not authorize M2 work, a provider call, a hostile-target hardening subsystem, a commit, or a push.
 
 ## Progress
 
@@ -36,7 +36,11 @@ This plan owns only [M1-05 — Integrate and verify the walking skeleton](../DEV
 - [x] (2026-09-02) Accepted independent read-only `EXISTING_AND_COVERED` preflight: all 30 browser cases passed under the pinned Chromium environment with exact baseline identities, no failure, skip, test change, external request, or retained test-owned residue.
 - [x] (2026-09-02) Completed the guarded one-file Green, focused and complete verification, exact generated-output cleanup, and fresh S1 PASS with no finding. The production diff is exactly three deletions in `App.tsx`; public interfaces and observable behavior remain unchanged, and cohesion is accepted as `RETAINED`.
 - [x] (2026-09-02) Completed the owner-requested documentation follow-up: reconciled the public overview, documentation index, roadmap, plan index, and progress index to include the accepted App cleanup, linked each applicable navigation surface to this owning slice, and confirmed that the unchanged UI contract and historical M1-04 plan need no amendment.
-- [ ] Implement the separately planned HTTP scan integration and complete M1-05's browser/build integration checkpoint before task closure.
+- [x] (2026-09-02) Reconciled the complete current task state at clean HEAD `a9ccb01f19db386e82c5a00f163c6525b66cb9c0`: all three dependencies are Complete, the five earlier M1-05 slices remain accepted, strict TypeScript passes, and the fresh browser-free contract/repository/service baseline passes 182/182.
+- [x] (2026-09-02) Accepted fresh final readiness review `M105-REMAINING-WORK-PLAN-REVIEW-05` as PASS with no Blocker, Major, or Minor finding against candidate SHA-256 `6258258BB57F571EE3AD3E2223461963D1A4251F08305E9F803C1D7C902B3797`. The reviewer independently confirmed task routing, authority coverage, worker/lease/TDD ownership, exact commands, evidence continuity through post-archive closure, capability gating, full browser-to-disk lanes, owner-gated smoke, cleanup ordering, and YAGNI/KISS scope. Planning remains R0 repository-local synthesis; no comparative decision or Decision Review Contract is triggered.
+- [ ] Execute `M105-WALKING-SKELETON-INTEGRATION-06` through read-only preflight, one guarded test-owned Red, one separate guarded standard-profile Green/Refactor, complete validation, and fresh S3 review.
+- [ ] Run `M105-TRUSTED-PUBLIC-SMOKE-07` only after the owner supplies one exact public HTTPS URL they are permitted and willing to trust and declares the generated smoke run disposable.
+- [ ] Complete the different fresh integrated critical review, documentation closure, exact task-owned cleanup, and M1-05 roadmap/plan archival updates before marking the task Complete.
 
 ## Surprises & Discoveries
 
@@ -54,6 +58,12 @@ This plan owns only [M1-05 — Integrate and verify the walking skeleton](../DEV
 - Observation: Atomic publication and cleanup share descriptor, staged-path, directory-identity, canonical-identity, and commit-point state. Evidence: the `publish` closure performs exclusive stage creation, identity checks, short-write completion, flush, close, topology revalidation, rename, and verified cleanup in one sequence; extracting it would require a new one-consumer transaction abstraction and weaken auditability.
 - Observation: The first repository-slice cleanup probe checked repository-root `.vite-temp` but not Vite's actual `node_modules/.vite-temp` cache location. Evidence: an owner-supplied read-only review found the latter ordinary empty directory still present, and primary inspection confirmed its resolved workspace path, ordinary directory attributes, absent link type, and zero children before exact non-recursive removal.
 - Observation: Current `App.tsx` already delegates form presentation, result presentation, and response-envelope admission; its remaining reservation, settlement, accepted-run, selection, announcement, and focus responsibilities form one cohesive UI coordinator. Evidence: `pendingAnalysis` is the only state value never read, while its setter is called at operation start and settlement solely to cause redundant renders.
+- Observation: The remaining product gap is visible at both composition boundaries. Evidence: `src/server/local-service/loopback-api.ts` advertises `scan: false` and accepts only GET health/read requests, while `src/client/main.tsx` renders `<App />` without the `analyze` callback, so the shipped build disables Analyze and reports that service integration is pending.
+- Observation: All required product capabilities already exist behind stable entry points. Evidence: `prepareScanRequest` and `executeScan` are exported through `src/server/scan/scan-page.ts`; `startLocalService().service.runScan` already owns reservation, persistence, terminal validation, and shutdown; `App` already owns unknown-response admission and every accepted visible state. No package, second service, UI state model, provider adapter, or persisted field is needed.
+- Observation: The current Vite build emits a browser client to `dist/client`, but the production loopback entry does not serve it. Evidence: `vite.config.ts`, root `index.html`, `src/server/main.ts`, and the current developer instructions. The smallest ADR-0015-compliant topology is for the existing service to expose only that built entry and its generated direct assets from the same origin.
+- Observation: Exact request, transfer, DOM, and result ceilings are explicitly Deferred for the trusted-input portfolio MVP. Evidence: `REQ-QUAL-014`, `REQ-QUAL-017`, and the deferred-bounds clarification under `REQ-QUAL-020`. The integration must not invent a resource-limit framework or present ordinary JSON parsing as hostile-request hardening.
+- Observation: A changing public page cannot be reusable deterministic evidence. Evidence: ADR-0018 keeps synthetic project-owned states as the evaluation baseline and treats public-page results as observations. The public smoke therefore needs an owner-selected target at execution time, records no page content, and cannot substitute for the controlled integration matrix.
+- Observation: The first independent review of this remaining-work revision returned `REVISE`, not execution approval. Evidence: it found that the draft did not preserve API-only POST/health behavior explicitly, referred to command variables without defining an executable wrapper, omitted slice-local authority anchors, allowed controlled success cases to bypass the browser form, and deleted the public aggregate before the final reviewer could inspect it. This revision addresses all five findings and the review's residual request-stream and asset-topology questions before seeking a different fresh review.
 
 ## Decision Log
 
@@ -93,16 +103,39 @@ This plan owns only [M1-05 — Integrate and verify the walking skeleton](../DEV
 - Decision: Keep all current analysis orchestration in `App.tsx` and remove only the unused `pendingAnalysis` state declaration and setter calls.
   Rationale: The owner selected cleanup only. A custom hook, reducer, controller, or further component would move one already cohesive lifecycle without creating a clearer current responsibility boundary.
   Date/Author: 2026-09-02 / project owner and primary coordinator.
+- Decision: Implement the remaining product behavior as one coherent standard-profile slice, `M105-WALKING-SKELETON-INTEGRATION-06`, rather than separate route, static-file, client-fetch, and scanner-wiring micro-slices.
+  Rationale: Those changes jointly create one falsifiable user outcome and no subset is independently useful. One Red/Green pair keeps the accepted client/server boundary visible without turning M1-05 into another task graph.
+  Date/Author: 2026-09-02 / primary coordinator from Accepted authorities and current repository state.
+- Decision: Use the existing loopback origin for both the built client and API. Add `POST /api/runs` with the exact JSON input `{ "requestedUrl": string, "mode": "local" | "groq" }`; let the service derive the fixed provider/model and scan context through `prepareScanRequest`, invoke `executeScan` through its existing `runScan` owner, and return the existing `ScanOutcome` JSON envelope.
+  Rationale: ADR-0015 selects one local application service and keeps filesystem and managed-browser authority out of browser code. Sending only URL plus mode prevents the client from becoming authoritative for scanner policy, provider identity, run identity, or persistence.
+  Date/Author: 2026-09-02 / primary coordinator from ADR-0015, ADR-0018, ADR-0021, and the accepted M1 interfaces.
+- Decision: Gate the new scan route and truthful health capability on successful configured-client loading. With no own `clientRoot` field, `startLocalService` remains the existing API-only service: health reports `scan: false`, every POST remains 405, and the existing read behavior is unchanged. A valid configured client root enables the closed client routes, exact scan POST, and `scan: true`; an invalid configured root returns `client-unavailable` before a listener or run repository is opened.
+  Rationale: Focused M1-02/service construction intentionally has no client build. Capability gating preserves that accepted contract while making the developer-started production composition truthful; an unconditional POST would silently invalidate the existing 69-case boundary.
+  Date/Author: 2026-09-02 / primary coordinator after independent plan review.
+- Decision: Map a successful completed outcome to HTTP 200, malformed or rejected input to 400, busy to 409, stopping or shutdown to 503, and scan/create/validation/persistence failure to 500 while preserving the existing bounded outcome body. Keep unsupported methods at 405 and unknown paths at 404 under the current route-precedence contract.
+  Rationale: This is the smallest transport projection that preserves the domain outcome consumed by `App`, distinguishes admission conditions, and adds no retry, queue, alternate error model, or framework.
+  Date/Author: 2026-09-02 / primary coordinator.
+- Decision: Add one focused `client-assets.ts` module that loads the Vite-generated `index.html` and its direct `.js`/`.css` assets from the configured build root into a closed response table at service startup. Serve only `/`, `/index.html`, and those exact table keys; report missing or invalid build output as bounded `client-unavailable` startup failure when a client root is configured.
+  Rationale: A closed startup-built map makes readiness truthful and avoids a generic static-file server, traversal resolution, dynamic directory serving, a second Vite process, CORS, or runtime build tooling. One current consumer is sufficient because asset loading is a distinct current responsibility, not a speculative shared abstraction.
+  Date/Author: 2026-09-02 / primary coordinator.
+- Decision: Extend only `src/client/main.tsx` to provide the same-origin Analyze callback and reuse `App`, every M1-04 component, its admission validator, markup, CSS, copy, focus behavior, and state ownership as-is.
+  Rationale: Service calling and composition plumbing are standard-profile nonvisual frontend work under the project workflow. A hook, client API layer, store, router, visual redesign, or component change is not justified by one fixed request.
+  Date/Author: 2026-09-02 / primary coordinator with the frontend-quality reuse audit.
+- Decision: Treat plan preparation as R0 and omit a Decision Review Contract.
+  Rationale: The current task needs no external evidence, candidate ranking, ADR, or owner-controlled architectural choice; Accepted authorities already select the topology and the remaining literals are reversible task-owned implementation details. The owner-controlled public URL remains a later smoke input, not an architecture decision.
+  Date/Author: 2026-09-02 / primary coordinator.
 
 ## Outcomes & Retrospective
 
-The local-service, scanner, run-contract, and run-repository structural extractions and their verification barriers are complete. The App dead-state cleanup is also complete: the unread state and its two setter calls are gone, while the existing coordinator, public interfaces, rendered behavior, and browser contract remain unchanged. M1-05 remains In progress because real HTTP scanner integration and its milestone-level end-to-end browser/build checkpoint remain outstanding.
+The local-service, scanner, run-contract, and run-repository structural extractions and their verification barriers are complete. The App dead-state cleanup is also complete: the unread state and its two setter calls are gone, while the existing coordinator, public interfaces, rendered behavior, and browser contract remain unchanged. This revision freezes the remaining integration and public-smoke execution boundary; it is planning evidence only. M1-05 remains In progress because no HTTP scan route, same-origin production client, integrated controlled-case evidence, or trusted public-page smoke exists yet.
 
 ## Purpose / Big Picture
 
-The current local service behavior is well tested, but its public contracts, input parsing, terminal-record construction, HTTP policy, and lifecycle protocol all live in one file. This slice makes the file easier to read and review while preserving every external import and runtime result. A reviewer should see a smaller `service.ts` whose remaining code is the lifecycle coordinator, four focused internal modules, and unchanged behavior across all 69 local-service cases and the complete 290-case backend/scanner regression.
+The remaining outcome is one honest walking skeleton: a developer builds and starts one local service, opens its enumerated URL in Chrome or Edge, enters one trusted public HTTPS target, selects Local or Groq, and receives the accepted complete or failed Analyze/Results presentation. The browser sends only target plus mode to its own loopback origin; the service derives the fixed scan request, executes the real exact-three-rule scanner, durably publishes one validated `run.json`, and returns the existing bounded outcome. Scanning invokes no provider.
 
-The later M1-05 integration work will connect the already implemented service, scanner, persistence, and UI. This structural slice prepares that work without adding the missing route or changing a public result.
+The completed first slice made the local service easier to read and review while preserving every external import and runtime result. A reviewer now sees `service.ts` as the lifecycle coordinator plus four focused internal modules, with unchanged behavior across the accepted service and backend/scanner regressions.
+
+The new integration slice connects those already implemented boundaries without changing the run aggregate, scanner policy, Results presentation, or provider lifecycle. Its controlled test matrix proves populated, valid-zero, native-incomplete, malformed-input, failure, one-operation, persistence/read, sibling-preservation, cleanup, and no-provider behavior. A separate public smoke is observational and cannot replace those controlled checks.
 
 The third slice makes the central unknown-data and persisted-aggregate boundary easier to inspect without weakening it. A reviewer should see a small stable `run-contract.ts` façade, focused internal modules with acyclic dependencies, and the same accepted results across all 30 contract cases and every current consumer.
 
@@ -112,15 +145,15 @@ The fifth slice removes misleading dead state from the already purpose-composed 
 
 ## Context and Orientation
 
-`src/server/service.ts` is the stable service entry point. `src/server/domain/run-contract.ts` is the shared stable contract entry point used by server, scanner, persistence, client admission, UI types, helpers, and tests; it currently owns the aggregate model and all runtime validation in one file. `src/server/persistence/run-repository.ts` owns aggregate create/read/finish behavior. `src/server/scan/scan-page.ts` owns prepared real scan execution but remains disconnected from the HTTP service until a later M1-05 slice.
+`src/server/service.ts` is the stable service entry point and owns the one-operation lifecycle around `runScan`. `src/server/domain/run-contract.ts`, `src/server/persistence/run-repository.ts`, and `src/server/scan/scan-page.ts` are stable façades over their accepted focused modules. The scanner exports `prepareScanRequest` and `executeScan`, but no production callback joins them to `runScan`. `src/server/local-service/loopback-api.ts` exposes only health and validated run reads and advertises `scan: false`. `src/client/main.tsx` renders `<App />` without its optional `analyze` callback, so the current production build is intentionally unavailable for analysis even though the accepted M1-04 presentation can render every required outcome under its test harness.
 
 The applicable authority boundary is the M1-05 roadmap row and its Accepted requirements: one trusted public HTTPS target, exact-three-rule complete scanning, visible failure, durable validated aggregate reads, one-operation admission, clean stop, and accessible Analyze/Results behavior. ADR-0015 owns the developer-started loopback topology, ADR-0021 owns the single-file aggregate, ADR-0018 owns the trusted-input scan boundary, and ADR-0024 owns this worker-first behavior-preserving implementation method. The fixed RD-003 evaluation boundary remains unchanged.
 
-The baseline is the clean `codex/m1-04-target-and-results-ui` worktree at `696042e664d27de83f65a7d8a680f0388b541486`. Node 24.20.0, npm 11.19.0, TypeScript 7.0.2, and the existing package graph remain controlling. No new dependency, runtime, route, field, or stored-data shape is needed.
+The current planning baseline is the clean `codex/m1-05-walking-skeleton-integration` worktree at `a9ccb01f19db386e82c5a00f163c6525b66cb9c0`. Node 24.20.0, npm 11.19.0, TypeScript 7.0.2, React 19.2.8, Vite 8.0.16, Playwright 1.62.1, and axe integration 4.13.0 remain pinned by `package-lock.json`. Strict TypeScript and the fresh 182-case browser-free contract/repository/service baseline pass. The prior exact-identity 290 backend/scanner and 30 UI evidence remains historical input, but mutable browser or filesystem evidence must be rerun for the integration barrier. No new dependency, runtime, provider, persisted field, schema version, or product state is needed.
 
 ## Scope and Non-Goals
 
-This structural slice includes:
+The completed local-service structural slice included:
 
 - re-exporting the existing public service types from `src/server/service.ts`;
 - effect-free configuration and initial-running-record validation;
@@ -128,14 +161,25 @@ This structural slice includes:
 - exact HTTP headers, route precedence, status mapping, health/read responses, and CONNECT/upgrade rejection; and
 - the unchanged lifecycle coordinator in `service.ts`.
 
+The remaining integration slice includes:
+
+- one exact same-origin `POST /api/runs` JSON boundary from target-plus-mode input to the existing `ScanOutcome`;
+- service-owned preparation and real scanner invocation through the existing `runScan` persistence/lifecycle owner;
+- closed serving of the already built Vite entry and its direct generated JavaScript/CSS assets from the loopback origin;
+- composition-root wiring that supplies `App`'s existing optional Analyze callback without changing M1-04 components or presentation;
+- controlled full-path evidence plus one separately authorized public-page smoke; and
+- developer instructions for build, retained managed-browser prerequisite, start, manual Chrome/Edge opening, stop, evidence location, and exact task-owned cleanup.
+
 It excludes:
 
-- an HTTP scan route or wiring `executeScan` into the service;
-- UI, CSS, browser behavior, or provider changes;
-- changes to public unions, error text, routes, headers, response bodies, persisted records, or method signatures;
+- any rendered component, CSS, visual hierarchy, copy, focus, ARIA, or accepted M1-04 presentation change;
+- retrieval, generation, provider invocation or probing, review, comparison, retained-run reopening, Run ID UI, reload restoration, retry/resume/cancel, or automatic browser launch;
+- another server, Vite development/preview process, CORS layer, proxy, router, client store, hook, API framework, dependency container, or generic static-file abstraction;
+- a request/transfer/DOM/result limit framework, SSRF defense, DNS/address/redirect classification, egress proxy, or hostile-page claim;
+- changes to the accepted run schema, scanner/evidence policy, repository format, runtime pins, dependency graph, controlled fixtures, or evaluation manifest;
 - a lifecycle class, generic state machine, event bus, context/dependency container, shared persistence transition abstraction, generic HTTP framework, barrel file, or compatibility wrapper;
-- test changes unless read-only preflight discovers a real uncovered observable behavior and the coordinator reconciles the slice before any write; and
-- M1-05 completion, M2 work, commit, or push.
+- any test change outside the new M1-05 integration test and its one purpose-named helper; and
+- M2 work, release claims, commit, or push.
 
 The run-contract slice includes only declaration moves into the six named modules, frozen internal policy tuples, the minimum internal exports needed by the next validation layer, and stable type/function re-exports from `run-contract.ts`. It excludes persistence-format changes, new accepted values, error or precedence changes, scanner-policy consolidation, one-file-per-rule decomposition, generic schema/reader abstractions, JSON Schema, validation libraries, UI behavior, and new public helpers.
 
@@ -319,24 +363,1066 @@ Risk is `S1`: this is ordinary bounded application cleanup with no rendered or c
 
 Post-Green validation runs the unchanged 30 browser cases under the retained pinned Chromium and isolated UI scratch environment, strict TypeScript, the native production build, and the complete sequential 290 backend/scanner plus 30 UI regression. The harness's deterministic client inventory must include the changed App identity without harness modification. After verification, remove only verified owned `dist/client`, UI/scanner scratch, repository-root `.vite-temp`, and `node_modules/.vite-temp`; prove both Vite cache locations absent and the pinned browser runtime unchanged. Existing human Chrome 200% and Narrator evidence remains applicable because no rendered node, text, relationship, focus rule, or style changes.
 
+### M105-WALKING-SKELETON-INTEGRATION-06 — one same-origin Analyze-to-disk path
+
+After this slice, the production entry point serves the built React client and its closed generated asset set from the enumerated loopback origin. The ready client posts exactly one normalized target and selected mode to `POST /api/runs`. The service validates that boundary, derives the fixed provider/model plus scan context through `prepareScanRequest`, reserves the existing single operation, calls `executeScan`, publishes the resulting terminal aggregate through the existing repository, and returns the existing `ScanOutcome`. The same response is admitted by `App`; no browser code receives filesystem, managed-browser, scanner, or provider authority. API-only callers remain read-only and do not acquire this production capability implicitly.
+
+The binding authority anchors for this slice are the M1-05 [Objective, Expected output, User-visible outcome, and Verification](../DEVELOPMENT_ROADMAP.md#m1-05--integrate-and-verify-the-walking-skeleton); `REQ-AUTH-007` and `REQ-AUTH-008`, `REQ-SCAN-001` and `REQ-SCAN-005`–`REQ-SCAN-007`, plus `REQ-EVID-003` and `REQ-EVID-007`–`REQ-EVID-011` in [Target authorization, scanning, evidence, and provenance](../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#target-authorization-and-scanning); `REQ-LLM-002`, `REQ-LLM-003`, and `REQ-LLM-021` in [LLM provider selection and generation execution](../requirements/generation-provider-and-model-lifecycle/GENERATION_PROVIDER_EXECUTION.md#llm-provider-selection-and-generation-execution); `REQ-INST-002` and `REQ-INST-004` in [MVP startup and model lifecycle](../requirements/generation-provider-and-model-lifecycle/INSTALLATION_AND_MODEL_LIFECYCLE.md#mvp-startup-model-setup-and-deferred-packaging); `REQ-SEC-005` and `REQ-SEC-006` in [Privacy and security](../requirements/quality-security-and-operations/PRIVACY_AND_SECURITY.md#privacy-and-security); `REQ-UX-002`–`REQ-UX-005` and `REQ-UX-010`–`REQ-UX-014` in [Evidence-oriented interface and export](../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#evidence-oriented-interface-and-export); and `REQ-QUAL-011`, `REQ-QUAL-012`, and `REQ-QUAL-020` in [Reliability, reproducibility, and operations](../requirements/quality-security-and-operations/RELIABILITY_REPRODUCIBILITY_AND_OPERATIONS.md#reliability-reproducibility-and-operations). The scenario anchors are `BHV-01`/`SPEC-001`, `BHV-07`/`SPEC-007`, `HS-001`, `HS-004`, and `HS-006` in [`SPEC.feature`](../specs/SPEC.feature) and [`HARD_SPEC.feature`](../specs/HARD_SPEC.feature). ADR-0015, ADR-0018, ADR-0021, and ADR-0024 remain controlling, together with [OD-021](../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-021--trusted-operator-url-boundary-for-the-portfolio-mvp), [OD-024](../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-024--minimum-complete-mvp-behavior-contracts), [OD-026](../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-026--defer-user-facing-retained-run-reopening), and [OD-027](../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-027--simplify-analysis-and-results-presentation).
+
+The HTTP literal is fixed for this task. Only a configured-client service has this route. It accepts exact `POST /api/runs` with a `Content-Type` value which, after outer whitespace trimming and ASCII case folding, is exactly `application/json`; parameters, comma-separated values, missing values, and alternatives are rejected. The JSON value must be an ordinary parsed object with exactly `requestedUrl` and `mode`, and `mode` is only `local` or `groq`. No quantitative body ceiling is invented because the Accepted trusted-loopback MVP explicitly defers exhaustive request bounds; this is not a hostile-request hardening claim. A request-stream `aborted` or `error` event must settle once, must not prepare, create, persist, or scan a run, and returns the existing invalid-request outcome at 400 only if the response remains writable; otherwise the connection is closed without an unbounded diagnostic.
+
+The service does not accept client-supplied run IDs, revisions, provider/model strings, scan context, scanner options, evidence, file paths, headers, or destinations. Successful completion returns 200; invalid media type, request stream, JSON, keys, URL, embedded credentials, or mode returns the existing rejected `ScanOutcome` at 400; busy returns 409; stopping or shutdown returns 503; and create, scan, result-validation, or initial-persistence failure returns 500. API-only construction preserves the current health value `capabilities.scan: false` and rejects every POST at 405 without consuming its body. Configured-client construction reports `scan: true`. For both modes, all responses retain `Cache-Control: no-store` and `X-Content-Type-Options: nosniff`; API responses retain `application/json;charset=utf-8`. Method selection retains precedence over query checking for unsupported methods. For GET, a literal query or fragment is 400, health precedes the stopping gate, the stopping gate precedes read/static/unknown dispatch, exact API routes precede client routes, and unknown paths remain 404. CONNECT and upgrade sockets remain rejected.
+
+An own `clientRoot` field must be a non-empty absolute string; an accessor, explicit `undefined`, relative path, or extra configuration key is `invalid-configuration`. If the field is absent, startup follows the existing API-only path with no client filesystem read. If present, startup validates and loads the client before opening the run repository or listener. The configured root, `index.html`, and every selected asset must resolve to their literal absolute locations through ordinary non-link ancestors; the root must be an ordinary directory, and every entry must be an ordinary file whose real path remains beneath that root. Startup reads only `index.html`, the one or more root-absolute module-script `src` references matching `/assets/<single-basename>.js`, and any root-absolute stylesheet `href` references matching `/assets/<single-basename>.css`; duplicate, encoded, query-bearing, fragment-bearing, nested, escaping, external, missing, unreadable, linked, non-file, or other script/stylesheet references fail as `client-unavailable`. At least one JavaScript entry is required. The loader reads those finite bytes once and returns a closed immutable table for `/`, `/index.html`, and the exact asset keys, with `text/html;charset=utf-8`, `text/javascript;charset=utf-8`, or `text/css;charset=utf-8` as applicable. No request-derived filesystem join, directory listing, fallback file, SPA rewrite, or runtime reload is permitted. `src/server/main.ts` supplies the absolute repository `dist/client` root, so the production command requires a successful build and reports `client-unavailable` rather than readiness for absent or invalid output.
+
+TDD is applicable because the slice adds missing application behavior. One persistent `test_worker` first performs read-only preflight against the exact current source, existing 182 browser-free cases, 88 scanner cases, and 30 UI cases without a repository edit. The primary—not the test worker—first runs the explicitly recorded no-lease `M105-CMD-PREFLIGHT-SETUP` to create the three empty ignored scratch roots. The test worker may then run only `M105-CMD-PREFLIGHT`; those commands may use the owned roots and managed browser but must leave zero net generated residue. It must not create setup paths, build, start the production listener, or write a tracked file. `MISSING` is expected only after it cites the absent production callback, route, configured-client composition, and static-serving behavior plus the existing seams that will carry them; `PARTIAL` may advance only after the primary records the exact already-covered versus missing boundary. `EXISTING_AND_COVERED`, `EXISTING_BUT_UNCOVERED`, `REGRESSION`, `CONFLICTING`, or `UNKNOWN` stops for reconciliation. Search absence alone is not accepted evidence.
+
+The Red lease permits only `tests/walking-skeleton.test.ts` and `tests/helpers/m105-walking-skeleton-harness.ts`. The test file owns behavior-oriented full-path cases; the helper may own only repeated test-side service/UI-browser/managed-scan interception, isolated run-root creation under exact `temp/m105-integration`, request observation, and exact task-owned teardown. Build creation belongs to the frozen command, not the helper. The helper must not duplicate a production validator or normalize a scanner result. It may embed only the minimum project-owned HTML needed for the controlled page; no new fixture or captured external content is created.
+
+The controlled lanes are exact and sequential:
+
+| Lane | Required entry and observable result |
+| --- | --- |
+| Local populated/incomplete | In the actually served production client, verify no mode is selected; an invalid Analyze attempt shows only the accepted validation and sends no request. Then select Local and submit the target through the browser form. The same-origin fetch must cross exact HTTP intake, service preparation/reservation, real `executeScan` with an intercepted project-owned `https://m105.test/` page, atomic publication, response admission, and the existing Results UI. Assert multiple Findings, at least one distinct native incomplete observation, validated HTTP/disk reread, exact run identity, and zero provider request. |
+| Groq valid zero | Submit Groq through the same served browser form and the same complete production path. The exact three-rule native result has zero Findings, complete coverage, no incomplete observation, durable validated publication, truthful zero presentation, and zero provider request or probe. |
+| Visible scan failure | Submit one target through the same served browser form; fail navigation inside the real `executeScan` path, persist the bounded failed terminal record when required by the existing service contract, admit the response, and show the existing failure presentation without presenting zero or partial success. |
+| Direct transport/lifecycle | Exercise configured health/static and asset closure, exact/invalid content type, malformed JSON, wrong keys, aborted/error request settlement, busy contention, stopping/clean stop, invalid/missing client build startup, validated API read, exact disposable run-directory deletion, and sibling preservation directly at their owning HTTP/service/filesystem boundaries. |
+| Existing presentation regression | The unchanged 30-case `tests/target-results-ui.test.ts` remains the authority for both modes, initially unselected state, validation-only feedback, known Local/Groq configuration messages that do not probe or block scanning, response hardening, complete evidence presentation, keyboard operation, announcements, focus retention/replacement, zoom, and default axe checks. The new integration file must not duplicate those permutations. |
+
+The expected Red is the new focused command failing on the current production's missing configured-client static and `POST /api/runs` capabilities—not a broken runtime, wrong import, unconditional assertion, skipped case, unrelated existing failure, or a test that calls the service method instead of traversing each browser lane above.
+
+The separate Green lease uses one `code_worker` and forbids both accepted test paths. Its exact allowed production paths are:
+
+| Path | Current primary responsibility | Slice addition and fit |
+| --- | --- | --- |
+| `src/server/service.ts` | Public service entry and one-operation lifecycle/persistence coordinator | Reuse the existing reservation owner to prepare one admitted request and call the real scanner; scanner execution must not move into HTTP code. |
+| `src/server/main.ts` | Developer-started composition root and bounded lifecycle diagnostics | Supply the fixed built-client root; retain manual browser opening, environment validation, stop handling, and content-safe diagnostics. |
+| `src/server/local-service/contracts.ts` | Public local-service types | Add only optional `clientRoot` configuration and bounded `client-unavailable` startup result needed by the current production composition. |
+| `src/server/local-service/input-validation.ts` | Descriptor-safe service and run-input preparation | Add exact target-plus-mode admission and delegate fixed scan-policy construction to `prepareScanRequest`; do not create another URL or provider policy. |
+| `src/server/local-service/loopback-api.ts` | Loopback HTTP routing, headers, transport parsing, and callback dispatch | Add the one POST route, bounded status projection, and exact closed client-response dispatch while retaining current route and socket precedence. |
+| `src/server/local-service/client-assets.ts` | Planned closed startup loading of the current built client | `CREATE` one focused module for exact entry/direct-asset loading and MIME-bearing response-table construction; it is not a generic file server or future packaging layer. |
+| `src/client/main.tsx` | Browser composition root | Extend the existing root with one same-origin `fetch` callback that sends only URL plus mode and returns parsed unknown data to `App` admission. |
+
+The dependency direction is `main.ts -> service.ts -> input-validation/client-assets/loopback-api/repository/scan-page`; `input-validation.ts -> scan-page.prepareScanRequest`; `service.ts -> scan-page.executeScan`; `loopback-api.ts -> narrow callback and response-table types`; and `client/main.tsx -> App`. `service.ts` loads the finite client table before repository/listener effects and passes it to the transport; the transport never asks the filesystem to resolve a request. The browser calls only its loopback API. No server module imports client components, no client module imports a server runtime value, and no transport module owns scanner, persistence, or lifecycle state. The reuse disposition is: retain the four stable server façades and all M1-04 UI components; extend the five existing composition/transport/configuration files above; create only `client-assets.ts`; create no other production file. Permitted Refactor is limited to a small purpose-named private function inside an allowed file when the final changed surface otherwise mixes one of these declared responsibilities. A need for another production path, a generic abstraction, or a different dependency edge is `RECONCILE`, not implicit permission.
+
+The standard profile is controlling. Although `main.tsx` changes and Analyze becomes available in the production composition, the accepted UI already implements that state; no rendered component, CSS, hierarchy, copy, focus, or ARIA contract changes. The frontend-quality reuse audit therefore selects no `frontend-visual` capsule and no `frontend_code_worker`. If Green needs any component or style change, close the lease and reclassify the changed contract before writing.
+
+Risk is `S3` because the new boundary joins HTTP parsing, operation admission, managed-browser cleanup, terminal-result identity, atomic publication, and a closed filesystem asset map. A fresh `critical_reviewer` must inspect the actual Red/Green order, terminal lease receipts, status/body mapping, unknown-data validation, same-origin privilege boundary, scanner and provider call graph, one-operation and shutdown behavior, publication/read/deletion evidence, asset path containment, absence of raw content, changed-surface cohesion, and complete validation. One unresolved finding stops advancement.
+
+Use workflow ID `M1-05-20260902-06` and work-slice ID `M105-WALKING-SKELETON-INTEGRATION-06`. Default budget is one preflight, one Red turn, one Green turn, at most one same-contract correction per role using attempt 2 and its terminal parent lease, and one review correction loop. Stop after the same decisive failure twice, two no-diff write handoffs, any changed binding field, unexpected path, active lease ambiguity, dependency/runtime drift, public contract conflict, or need for more than this one coherent TDD cycle. After Green the implementation worker reports exactly `RETAINED`, `REFACTORED`, or `RECONCILE` with path-and-symbol evidence; the primary independently accepts behavior and structure.
+
+No implementation branch is parallelizable in this worktree. Preflight, Red, Green/optional behavior-preserving Refactor, primary inspection, complete verification, slice review, public smoke, final review, and cleanup remain sequential; read-only review never overlaps a writer or an owned browser/service command.
+
+The exact command preparation, entry/preflight identity, focused Red/Green command, accepted evidence tuple, sequential verification barrier, public smoke, generated boundaries, final cleanup, documentation closure, and restoration rules are frozen below under `M105-CMD-*`; a setup packet may copy them but may not invent replacements. Record build and test exit codes separately and record exact final test counts rather than predicting how many cases the new Red will add.
+
+### M105-TRUSTED-PUBLIC-SMOKE-07 — observational public-page checkpoint
+
+This is external verification after the controlled slice passes, not another production change. TDD is not applicable because it observes the already implemented workflow against a mutable external page. No worker or write lease is needed unless the observation exposes a new, separately reconciled product defect. Before execution, the project owner must provide one exact public HTTPS URL they are permitted and willing to trust, confirm that its requested and ordinary redirect destination are non-sensitive enough for local run provenance, and declare the one generated smoke run disposable. Do not choose a target on the owner's behalf, scan more than that one page, or publish its URL, page content, Findings, or evidence in tracked documentation.
+
+The binding anchors for this checkpoint are the M1-05 [Expected output, User-visible outcome, and Verification](../DEVELOPMENT_ROADMAP.md#m1-05--integrate-and-verify-the-walking-skeleton); `REQ-AUTH-007`, `REQ-AUTH-008`, `REQ-SCAN-001`, `REQ-SCAN-005`–`REQ-SCAN-007`, `REQ-EVID-003`, and `REQ-EVID-007`–`REQ-EVID-011` in [Target authorization, scanning, evidence, and provenance](../requirements/EVIDENCE_AND_REVIEW_WORKFLOW.md#target-authorization-and-scanning); `REQ-INST-002`, `REQ-INST-004`, `REQ-SEC-005`, `REQ-SEC-006`, `REQ-QUAL-011`, `REQ-QUAL-012`, and `REQ-QUAL-020` in their requirement modules linked above; the Analyze/Results portions of `REQ-LLM-002`, `REQ-LLM-003`, `REQ-LLM-021`, `REQ-UX-002`–`REQ-UX-005`, and `REQ-UX-010`–`REQ-UX-014`; `BHV-01`/`SPEC-001`, the retention/deletion portion of `BHV-07`/`SPEC-007`, and `HS-001`, `HS-004`, and `HS-006`; ADR-0015, ADR-0018, ADR-0021, and the OD-021/OD-024/OD-026/OD-027 boundaries. It is observational corroboration only and cannot qualify the frozen RD-003 evaluation baseline.
+
+Using the exact `M105-CMD-PUBLIC-SMOKE` block below with the already accepted build identity, retained managed-browser identity, and production `npm run start` entry, capture the bounded `service-ready` line. Open only that enumerated loopback URL manually in installed Chrome or Edge, confirm no mode is preselected, select one mode, and activate Analyze once. Acceptance requires a completed exact-three-rule result—not a particular finding count—whose normalized target identity and concise limitation render through the accepted UI; the corresponding one newly created `data/runs/<run-id>/run.json` must validate both through the running application read boundary and the application-owned validator and contain no prohibited raw material. Confirm the service cleanly stops, all managed browser resources close, scanner scratch is empty, and no provider is invoked.
+
+Before the smoke, snapshot the exact immediate child names under `data/runs`; afterward require exactly one new ordinary non-link run directory. Pin its run ID, canonical `run.json` SHA-256, accepted source/build/browser identities, application revision, process-environment name set, selected mode, date, bounded completion/coverage result, validation result, and clean-stop/scratch result. The URL remains a private execution input and no page content, Finding, evidence value, redirect identity, or provider secret enters tracked documentation. Public network evidence remains `Non-reusable`; a mutable-page or network failure does not justify code change or automatic retry, and one owner-directed replacement target is the maximum before stopping for direction.
+
+Keep that exact aggregate intact through the different fresh final integrated `critical_reviewer` inspection. Preserve and fingerprint every pre-existing sibling if any exists, but do not manufacture a durable sibling merely for this smoke; the controlled transport/lifecycle lane owns the mandatory sibling-preservation proof. The reviewer must read the pinned canonical bytes and independently reconcile their identity, minimized shape, publication/read evidence, surrounding directory state, and exact deletion preconditions. Only after that review returns PASS may the primary resolve the literal smoke-run path beneath `data/runs`, recheck ordinary non-link topology and hash, remove only the declared smoke run directory, prove it absent, and confirm every pre-existing sibling identity is unchanged. This final deterministic cleanup does not authorize another scan or source change and does not require another full integrated review; its exact command result belongs to the documentation closure gate. It demonstrates the manual deletion boundary without adding a deletion UI, backup, recycle bin, cascade, tombstone, or provider-erasure claim.
+
+### M105-CMD-PREP — exact shell literals and environment restoration
+
+All commands run in PowerShell from `C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab`. They reuse Node `C:/nvm4w/nodejs/node.exe`, adjacent npm 11.19.0, installed packages, the existing npm cache at `temp/rd002-npm-cache`, and the retained browser at `m104-browser-runtime/browsers`. Bootstrap, dependency restore, package/configuration mutation, browser acquisition, another cache, and a repository helper script are `None`. The generated locations are exactly `dist/client`, `temp/m103-scan`, `temp/m104-ui`, and `temp/m105-integration`; repository-root `.vite-temp` and `node_modules/.vite-temp` must remain absent. Run this preparation text in every new command shell; it defines values and functions but creates or removes nothing.
+
+```powershell
+$ErrorActionPreference = 'Stop'
+$m105Repo = [IO.Path]::GetFullPath('C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab')
+if ((Resolve-Path -LiteralPath '.').Path -ine $m105Repo) { throw 'Wrong M1-05 working directory' }
+$m105Node = 'C:/nvm4w/nodejs/node.exe'
+$m105Npm = 'C:/nvm4w/nodejs/npm.cmd'
+$m105Runtime = Join-Path $m105Repo 'm104-browser-runtime'
+$m105Browsers = Join-Path $m105Runtime 'browsers'
+$m105ScanTemp = Join-Path $m105Repo 'temp/m103-scan'
+$m105UiTemp = Join-Path $m105Repo 'temp/m104-ui'
+$m105IntegrationTemp = Join-Path $m105Repo 'temp/m105-integration'
+$m105Build = Join-Path $m105Repo 'dist/client'
+$m105RunRoot = Join-Path $m105Repo 'data/runs'
+$m105ActiveLease = Join-Path $m105Repo 'logs/agent-flow-leases/v2/active.json'
+$m105ProductionPaths = @('src/server/service.ts','src/server/main.ts',
+  'src/server/local-service/contracts.ts','src/server/local-service/input-validation.ts',
+  'src/server/local-service/loopback-api.ts','src/server/local-service/client-assets.ts',
+  'src/client/main.tsx')
+$m105AcceptedTestPaths = @('tests/walking-skeleton.test.ts',
+  'tests/helpers/m105-walking-skeleton-harness.ts')
+$m105ProtectedPaths = @('package.json','package-lock.json','tsconfig.json','vite.config.ts','index.html')
+$m105PreArchiveDocumentationPaths = @('README.md','docs/README.md','docs/DEVELOPMENT_ROADMAP.md',
+  'docs/PROJECT_CONCEPT.md','docs/PROJECT_CONTEXT.md','docs/architecture/README.md',
+  'docs/architecture/CANDIDATE_ARCHITECTURE.md',
+  'docs/requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md',
+  'docs/requirements/INFORMATION_AND_WORKFLOW_LIFECYCLE.md','docs/plans/README.md',
+  'docs/plans/m1-05-walking-skeleton-integration.md','docs/progress/README.md',
+  'docs/progress/m1-05-walking-skeleton-integration.md')
+$toolchainOptions = @('--global=false','--prefix',$m105Repo,'--cache',
+  (Join-Path $m105Repo 'temp/rd002-npm-cache'),'--ignore-scripts=true',
+  '--audit=false','--fund=false','--update-notifier=false','--logs-max=0',
+  '--registry=https://registry.npmjs.org/','--strict-ssl=true',
+  '--package-lock=true','--include=dev','--include=optional')
+$m105FixedReject = @('NODE_OPTIONS','NODE_DEBUG','NODE_DEBUG_NATIVE',
+  'NODE_COMPILE_CACHE','NODE_V8_COVERAGE','NODE_REDIRECT_WARNINGS',
+  'DEBUG','DEBUG_FILE','PWDEBUG','PWDEBUGIMPL','SELENIUM_REMOTE_URL',
+  'SELENIUM_REMOTE_CAPABILITIES','SELENIUM_REMOTE_HEADERS')
+$m105Controlled = @('PLAYWRIGHT_BROWSERS_PATH','PLAYWRIGHT_SKIP_BROWSER_GC',
+  'PLAYWRIGHT_DOWNLOAD_CONNECTION_TIMEOUT')
+$m105Rejected = @(Get-ChildItem Env: | Where-Object {
+  $m105Name = $_.Name
+  $m105Alias = $m105Name -match '^(?i:npm_config_|npm_package_config_)'
+  $m105Base = $m105Name -replace '^(?i:npm_config_|npm_package_config_)',''
+  ($m105FixedReject -contains $m105Base) -or
+    (($m105Base -match '^(?i:PLAYWRIGHT_|PWTEST_|PW_)') -and
+      ($m105Alias -or $m105Controlled -notcontains $m105Base))
+} | Select-Object -ExpandProperty Name)
+if ($m105Rejected.Count) { throw ('Unsupported environment names: ' + ($m105Rejected -join ', ')) }
+
+function Invoke-M105Command([scriptblock]$Command, [string]$Scratch = '') {
+  $m105Names = @('NODE_DISABLE_COMPILE_CACHE')
+  if ($Scratch) {
+    if (@($m105ScanTemp,$m105UiTemp) -notcontains $Scratch) { throw 'Unknown M1-05 command scratch' }
+    $m105Names += @('PLAYWRIGHT_BROWSERS_PATH','PLAYWRIGHT_SKIP_BROWSER_GC',
+      'PLAYWRIGHT_DOWNLOAD_CONNECTION_TIMEOUT','TEMP','TMP')
+  }
+  $m105Saved = @{}
+  foreach ($m105Name in $m105Names) {
+    $m105Saved[$m105Name] = [Environment]::GetEnvironmentVariable($m105Name,'Process')
+  }
+  try {
+    [Environment]::SetEnvironmentVariable('NODE_DISABLE_COMPILE_CACHE','1','Process')
+    if ($Scratch) {
+      [Environment]::SetEnvironmentVariable('PLAYWRIGHT_BROWSERS_PATH',$m105Browsers,'Process')
+      [Environment]::SetEnvironmentVariable('PLAYWRIGHT_SKIP_BROWSER_GC','1','Process')
+      [Environment]::SetEnvironmentVariable('PLAYWRIGHT_DOWNLOAD_CONNECTION_TIMEOUT','30000','Process')
+      [Environment]::SetEnvironmentVariable('TEMP',$Scratch,'Process')
+      [Environment]::SetEnvironmentVariable('TMP',$Scratch,'Process')
+    }
+    & $Command
+  } finally {
+    foreach ($m105Name in $m105Names) {
+      $m105Prior = $m105Saved[$m105Name]
+      [Environment]::SetEnvironmentVariable($m105Name,
+        $(if ($null -eq $m105Prior) { [NullString]::Value } else { $m105Prior }),'Process')
+    }
+    foreach ($m105Name in $m105Names) {
+      if ([Environment]::GetEnvironmentVariable($m105Name,'Process') -cne $m105Saved[$m105Name]) {
+        throw ('Environment restore mismatch: ' + $m105Name)
+      }
+    }
+  }
+}
+
+function Assert-M105OrdinaryPath([string]$Candidate, [switch]$AllowMissing) {
+  $m105Full = [IO.Path]::GetFullPath($Candidate)
+  $m105Prefix = $m105Repo.TrimEnd([IO.Path]::DirectorySeparatorChar,[IO.Path]::AltDirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
+  if (-not $m105Full.StartsWith($m105Prefix,[StringComparison]::OrdinalIgnoreCase)) { throw 'M1-05 path escapes repository' }
+  $m105Parts = [IO.Path]::GetRelativePath($m105Repo,$m105Full) -split '[\\/]'
+  $m105Cursor = $m105Repo
+  for ($m105Index = 0; $m105Index -lt $m105Parts.Count; $m105Index++) {
+    $m105Cursor = Join-Path $m105Cursor $m105Parts[$m105Index]
+    if (-not (Test-Path -LiteralPath $m105Cursor)) {
+      if ($AllowMissing) { return $m105Full }
+      throw ('Missing M1-05 path: ' + $m105Cursor)
+    }
+    $m105Item = Get-Item -LiteralPath $m105Cursor -Force
+    if (($m105Item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw ('Linked M1-05 path: ' + $m105Cursor) }
+    if ($m105Index -lt $m105Parts.Count - 1 -and -not $m105Item.PSIsContainer) { throw 'Non-directory M1-05 ancestor' }
+    if ([IO.Path]::GetFullPath((Resolve-Path -LiteralPath $m105Cursor).Path) -ine [IO.Path]::GetFullPath($m105Cursor)) {
+      throw ('Aliased M1-05 path: ' + $m105Cursor)
+    }
+  }
+  return $m105Full
+}
+
+function Assert-M105EmptyDirectory([string]$Candidate) {
+  $m105Full = Assert-M105OrdinaryPath $Candidate
+  if (-not (Get-Item -LiteralPath $m105Full -Force).PSIsContainer) { throw 'M1-05 scratch is not a directory' }
+  if (@(Get-ChildItem -LiteralPath $m105Full -Force).Count -ne 0) { throw ('M1-05 scratch is not empty: ' + $m105Full) }
+}
+
+function Get-M105TreeIdentity([string]$Candidate) {
+  $m105Root = Assert-M105OrdinaryPath $Candidate
+  if (-not (Get-Item -LiteralPath $m105Root -Force).PSIsContainer) { throw 'M1-05 tree root is not a directory' }
+  $m105Rows = [Collections.Generic.List[string]]::new()
+  $m105Queue = [Collections.Generic.Queue[string]]::new()
+  $m105Queue.Enqueue($m105Root)
+  [int]$m105Files = 0; [int]$m105Directories = 0; [long]$m105Bytes = 0
+  while ($m105Queue.Count) {
+    $m105Current = $m105Queue.Dequeue()
+    foreach ($m105Child in @(Get-ChildItem -LiteralPath $m105Current -Force | Sort-Object Name)) {
+      if (($m105Child.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'Linked M1-05 tree entry' }
+      $m105Relative = [IO.Path]::GetRelativePath($m105Root,$m105Child.FullName).Replace('\','/')
+      if ($m105Child.PSIsContainer) {
+        $m105Directories++; $m105Rows.Add("D`t$m105Relative"); $m105Queue.Enqueue($m105Child.FullName)
+      } elseif ($m105Child -is [IO.FileInfo]) {
+        $m105Files++; $m105Bytes += $m105Child.Length
+        $m105Hash = (Get-FileHash -Algorithm SHA256 -LiteralPath $m105Child.FullName).Hash
+        $m105Rows.Add("F`t$m105Relative`t$($m105Child.Length)`t$m105Hash")
+      } else { throw 'Unsupported M1-05 tree entry' }
+    }
+  }
+  $m105Payload = [Text.Encoding]::UTF8.GetBytes(($m105Rows -join "`n"))
+  [pscustomobject]@{ Entries = $m105Files + $m105Directories; Files = $m105Files;
+    Directories = $m105Directories; Bytes = $m105Bytes;
+    Digest = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($m105Payload)) }
+}
+
+function Get-M105FileHashes([string[]]$RelativePaths) {
+  $m105Hashes = [ordered]@{}
+  foreach ($m105Relative in $RelativePaths) {
+    $m105File = Assert-M105OrdinaryPath (Join-Path $m105Repo $m105Relative)
+    $m105Item = Get-Item -LiteralPath $m105File -Force
+    if ($m105Item.PSIsContainer -or $m105Item -isnot [IO.FileInfo]) { throw ('Expected ordinary file: ' + $m105Relative) }
+    $m105Hashes[$m105Relative] = (Get-FileHash -Algorithm SHA256 -LiteralPath $m105File).Hash
+  }
+  return $m105Hashes
+}
+
+function Assert-M105FileHashes($Expected, [string]$Label) {
+  $m105Actual = Get-M105FileHashes @($Expected.Keys)
+  if ($m105Actual.Count -ne $Expected.Count) { throw ($Label + ' file-set count changed') }
+  foreach ($m105Relative in $Expected.Keys) {
+    if ($m105Actual[$m105Relative] -cne $Expected[$m105Relative]) {
+      throw ($Label + ' changed: ' + $m105Relative)
+    }
+  }
+}
+
+function Assert-M105TreeRecord([string]$Candidate, $Expected, [string]$Label) {
+  $m105Actual = Get-M105TreeIdentity $Candidate
+  foreach ($m105Field in @('Entries','Files','Directories','Bytes','Digest')) {
+    if ($m105Actual.$m105Field -cne $Expected.$m105Field) { throw ($Label + ' changed at ' + $m105Field) }
+  }
+}
+
+function Assert-M105GitEndpoint([string[]]$RequiredPaths, [string[]]$AllowedPaths = @()) {
+  $m105Head = (& git rev-parse HEAD).Trim()
+  if ($LASTEXITCODE -ne 0 -or $m105Head -cne 'a9ccb01f19db386e82c5a00f163c6525b66cb9c0') { throw 'M1-05 HEAD changed' }
+  $m105Branch = (& git branch --show-current).Trim()
+  if ($LASTEXITCODE -ne 0 -or $m105Branch -cne 'codex/m1-05-walking-skeleton-integration') { throw 'M1-05 branch changed' }
+  $m105Staged = @(& git diff --cached --name-only)
+  if ($LASTEXITCODE -ne 0 -or $m105Staged.Count -ne 0) { throw 'M1-05 Git index is not empty' }
+  $m105Status = @(& git -c status.renames=false status --porcelain=v1 --untracked-files=all)
+  if ($LASTEXITCODE -ne 0) { throw 'Cannot inspect M1-05 worktree state' }
+  $m105ActualPaths = @($m105Status | ForEach-Object {
+    if ($_.Length -lt 4) { throw 'Malformed Git status row' }
+    $_.Substring(3).Replace('\','/')
+  } | Sort-Object)
+  if ($AllowedPaths.Count -eq 0) {
+    $m105ExpectedPaths = @($RequiredPaths | Sort-Object)
+    if (($m105ActualPaths -join "`n") -cne ($m105ExpectedPaths -join "`n")) {
+      throw ('Unexpected M1-05 worktree paths: ' + ($m105ActualPaths -join ', '))
+    }
+  } else {
+    foreach ($m105ActualPath in $m105ActualPaths) {
+      if ($AllowedPaths -notcontains $m105ActualPath) { throw ('Unexpected M1-05 worktree path: ' + $m105ActualPath) }
+    }
+    foreach ($m105RequiredPath in $RequiredPaths) {
+      if ($m105ActualPaths -notcontains $m105RequiredPath) { throw ('Missing required M1-05 worktree path: ' + $m105RequiredPath) }
+    }
+  }
+  $null = Assert-M105OrdinaryPath $m105ActiveLease -AllowMissing
+  if (Test-Path -LiteralPath $m105ActiveLease) { throw 'A write lease is active' }
+}
+
+function Assert-M105PlanningIdentity {
+  Assert-M105GitEndpoint @('docs/plans/m1-05-walking-skeleton-integration.md')
+  Assert-M105TreeRecord (Join-Path $m105Repo 'src') ([pscustomobject]@{
+    Entries=51; Files=39; Directories=12; Bytes=147831;
+    Digest='8960366EC4E34C2C3649C44D7FDED9077AA28EFA90E456FE350988FA735C7A21'
+  }) 'Planning source tree'
+  Assert-M105TreeRecord (Join-Path $m105Repo 'tests') ([pscustomobject]@{
+    Entries=9; Files=8; Directories=1; Bytes=317970;
+    Digest='B96EC7A3DB35396475C5485180D880BB5F36DCC3F19DA475E9D811BFE1216840'
+  }) 'Planning test tree'
+  Assert-M105FileHashes ([ordered]@{
+    'package.json'='C2C8718FA44813288ABBA5792FACB3D39400446912EC73DE2A8C93E2A6D92C98'
+    'package-lock.json'='ECE19CD10739D5C4139E4700B5A712B89FEFE1F898BE29C4FBF18DD54682C553'
+    'tsconfig.json'='3957F80AF41B23DC4CCEFAA6B24823C367E6984980420B596275B8692DF5ABDE'
+    'vite.config.ts'='8D75B9863C86A8ECA2267C74D8875BE46061C288F5EAEF6BEA93C427D3DACD07'
+    'index.html'='91BEF948D015F0E084708FDECFB79F765437B439D76B1ED70AF55580D815DC88'
+  }) 'Planning protected input'
+  Assert-M105TreeRecord $m105Runtime ([pscustomobject]@{
+    Entries=332; Files=318; Directories=14; Bytes=451193922;
+    Digest='4FDF9490EDBA2FC4662FF487C591F769F682D8031B3E59FC26C0C35AEE8371CC'
+  }) 'Planning retained browser'
+  $m105PlanningMarker = Get-Item -LiteralPath (Join-Path $m105Browsers 'chromium-1234/DEPENDENCIES_VALIDATED') -Force
+  if ($m105PlanningMarker.LastWriteTimeUtc -gt [DateTime]::UtcNow -or
+      $m105PlanningMarker.LastWriteTimeUtc -lt [DateTime]::UtcNow.AddDays(-30) -or
+      (Get-FileHash -Algorithm SHA256 -LiteralPath $m105PlanningMarker.FullName).Hash -cne
+        'E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855' -or
+      (Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $m105Browsers 'chromium-1234/chrome-win64/chrome.exe')).Hash -cne
+        '409805A16D6416087E6B2F778DF1CF8F7BBB267D6B99F6B5BB0A618EACE234F2') {
+    throw 'Planning browser executable or marker drifted'
+  }
+}
+
+function Get-M105LeaseReceiptEvidence([string]$LeaseId, [string]$ContractDigest, [string[]]$ExpectedPaths) {
+  if ($ContractDigest -notmatch '^[0-9a-f]{64}$') { throw ('Invalid guard digest slot for ' + $LeaseId) }
+  $m105ReceiptPath = Assert-M105OrdinaryPath (Join-Path $m105Repo ('logs/agent-flow-leases/v2/' + $LeaseId + '/receipt.json'))
+  $m105Receipt = Get-Content -Raw -LiteralPath $m105ReceiptPath | ConvertFrom-Json
+  if ($m105Receipt.schema_version -ne 2 -or $m105Receipt.lease_id -cne $LeaseId -or
+      $m105Receipt.contract_digest -cne $ContractDigest -or $m105Receipt.outcome -cne 'compliant' -or
+      $m105Receipt.verified_head -cne 'a9ccb01f19db386e82c5a00f163c6525b66cb9c0' -or
+      $m105Receipt.verified_head_ref -cne 'refs/heads/codex/m1-05-walking-skeleton-integration' -or
+      @($m105Receipt.changes.forbidden).Count -ne 0 -or @($m105Receipt.changes.unleased).Count -ne 0) {
+    throw ('Noncompliant terminal receipt: ' + $LeaseId)
+  }
+  $m105ActualPaths = @($m105Receipt.changes.allowed.path | ForEach-Object { $_.ToLowerInvariant() } | Sort-Object)
+  $m105ExpectedPaths = @($ExpectedPaths | ForEach-Object { $_.ToLowerInvariant() } | Sort-Object)
+  if (($m105ActualPaths -join "`n") -cne ($m105ExpectedPaths -join "`n")) {
+    throw ('Terminal receipt path mismatch: ' + $LeaseId)
+  }
+  return [pscustomobject]@{ Digest=$m105Receipt.digest;
+    FileHash=(Get-FileHash -Algorithm SHA256 -LiteralPath $m105ReceiptPath).Hash }
+}
+
+function Get-M105RunSetDigest([string]$ExcludeRunId = '') {
+  $null = Assert-M105OrdinaryPath $m105RunRoot
+  $m105Rows = [Collections.Generic.List[string]]::new()
+  foreach ($m105Entry in @(Get-ChildItem -LiteralPath $m105RunRoot -Force | Sort-Object Name)) {
+    if ($ExcludeRunId -and $m105Entry.Name -ceq $ExcludeRunId) { continue }
+    if (-not $m105Entry.PSIsContainer -or ($m105Entry.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+      throw 'Unsafe run-root sibling'
+    }
+    $m105Identity = Get-M105TreeIdentity $m105Entry.FullName
+    $m105Rows.Add("$($m105Entry.Name)`t$($m105Identity.Entries)`t$($m105Identity.Bytes)`t$($m105Identity.Digest)")
+  }
+  $m105Payload = [Text.Encoding]::UTF8.GetBytes(($m105Rows -join "`n"))
+  return [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($m105Payload))
+}
+```
+
+### M105-CMD-PREFLIGHT-SETUP — retained runtime and clean generated state
+
+At the current baseline the retained runtime identity under the exact function above is 332 entries, 318 files, 14 directories, 451,193,922 bytes, digest `4FDF9490EDBA2FC4662FF487C591F769F682D8031B3E59FC26C0C35AEE8371CC`; `chromium-1234/chrome-win64/chrome.exe` is SHA-256 `409805A16D6416087E6B2F778DF1CF8F7BBB267D6B99F6B5BB0A618EACE234F2`; and `chromium-1234/DEPENDENCIES_VALIDATED` is the empty-file SHA-256 `E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855`, UTC mtime `2026-09-01T19:46:51.6545663Z`. Require the same tree identity before and after every managed-browser command and a marker no more than 30 days old and not future-dated. Drift, a stale marker, a missing runtime, or a reparse point stops for explicit setup reconciliation; it never triggers incidental download or deletion.
+
+With no active lease and before the read-only test-worker turn, the primary runs this one explicitly safe coordinator setup. Require `dist/client`, repository-root `.vite-temp`, `node_modules/.vite-temp`, `temp/m103-scan`, `temp/m104-ui`, and `temp/m105-integration` absent, then create only the three scratch directories as declared ignored diagnostic effects and require them empty. This is not application source, a test contract, setup behavior, or a worker write turn. Record the created paths and keep them as empty owned roots through Red, Green, verification, smoke, and final cleanup. A pre-existing path is preserved and stops execution until its ownership is reconciled; it is not deleted to satisfy this check.
+
+Vite never runs over an existing `dist/client` in this plan. Each build requires that path absent. After Red evidence and its generated build identity are inspected, the primary removes only that exact recognized Red build before Green. The accepted Green build is retained unchanged through complete verification, both reviews, and the public smoke; a same-contract Green correction must first reconcile and remove only its recorded failed-attempt build. Before and after each test/start command, require its named scratch and `temp/m105-integration` empty. The integration helper may create descendants only under `temp/m105-integration` and must remove them before returning.
+
+```powershell
+Assert-M105PlanningIdentity
+$m105RuntimeIdentity = Get-M105TreeIdentity $m105Runtime
+if ($m105RuntimeIdentity.Entries -ne 332 -or $m105RuntimeIdentity.Files -ne 318 -or
+    $m105RuntimeIdentity.Directories -ne 14 -or $m105RuntimeIdentity.Bytes -ne 451193922 -or
+    $m105RuntimeIdentity.Digest -cne '4FDF9490EDBA2FC4662FF487C591F769F682D8031B3E59FC26C0C35AEE8371CC') {
+  throw 'Retained browser identity drifted'
+}
+$m105Marker = Get-Item -LiteralPath (Join-Path $m105Browsers 'chromium-1234/DEPENDENCIES_VALIDATED') -Force
+if ($m105Marker.LastWriteTimeUtc -gt [DateTime]::UtcNow -or $m105Marker.LastWriteTimeUtc -lt [DateTime]::UtcNow.AddDays(-30) -or
+    (Get-FileHash -Algorithm SHA256 -LiteralPath $m105Marker.FullName).Hash -cne 'E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855' -or
+    (Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $m105Browsers 'chromium-1234/chrome-win64/chrome.exe')).Hash -cne
+      '409805A16D6416087E6B2F778DF1CF8F7BBB267D6B99F6B5BB0A618EACE234F2') { throw 'Retained browser prerequisite is invalid' }
+foreach ($m105Absent in @($m105Build,(Join-Path $m105Repo '.vite-temp'),
+    (Join-Path $m105Repo 'node_modules/.vite-temp'),$m105ScanTemp,$m105UiTemp,$m105IntegrationTemp)) {
+  $null = Assert-M105OrdinaryPath $m105Absent -AllowMissing
+  if (Test-Path -LiteralPath $m105Absent) { throw ('Expected absent at M1-05 entry: ' + $m105Absent) }
+}
+New-Item -ItemType Directory -Path $m105ScanTemp,$m105UiTemp,$m105IntegrationTemp | Out-Null
+Assert-M105EmptyDirectory $m105ScanTemp
+Assert-M105EmptyDirectory $m105UiTemp
+Assert-M105EmptyDirectory $m105IntegrationTemp
+```
+
+### M105-CMD-PREFLIGHT — exact no-lease characterization commands
+
+After the coordinator setup above, the persistent `test_worker` runs this block without a lease or repository edit. It records each invocation's exit and TAP counts separately, verifies all scratch roots empty after the applicable process, and compares the runtime with the entry identity. The browser-free boundary must pass 182/182. The scanner boundary must retain its accepted 20 normalization and 68 execution leaf cases, with its existing TAP parent groups; the UI boundary must pass 30/30. Strict TypeScript must exit 0. Any source/test/configuration hash drift, generated residue, external UI request, browser/runtime mutation, failed command, or different case inventory returns `UNKNOWN` or `REGRESSION` as applicable rather than advancing to Red.
+
+```powershell
+Assert-M105PlanningIdentity
+Assert-M105EmptyDirectory $m105ScanTemp
+Assert-M105EmptyDirectory $m105UiTemp
+Assert-M105EmptyDirectory $m105IntegrationTemp
+Invoke-M105Command {
+  & $m105Node --test --test-timeout=120000 tests/run-contract.test.ts tests/run-repository.test.ts tests/local-service.test.ts
+  $m105Exit = $LASTEXITCODE; Write-Output "M1-05 preflight browser-free exit: $m105Exit"
+  if ($m105Exit -ne 0) { throw 'M1-05 browser-free preflight failed' }
+}
+Assert-M105EmptyDirectory $m105ScanTemp
+Invoke-M105Command {
+  & $m105Node --test --test-timeout=120000 tests/scan-normalization.test.ts tests/scan-page.test.ts
+  $m105Exit = $LASTEXITCODE; Write-Output "M1-05 preflight scanner exit: $m105Exit"
+  if ($m105Exit -ne 0) { throw 'M1-05 scanner preflight failed' }
+} $m105ScanTemp
+Assert-M105EmptyDirectory $m105ScanTemp
+Invoke-M105Command {
+  & $m105Node --test --test-timeout=120000 tests/target-results-ui.test.ts
+  $m105Exit = $LASTEXITCODE; Write-Output "M1-05 preflight UI exit: $m105Exit"
+  if ($m105Exit -ne 0) { throw 'M1-05 UI preflight failed' }
+} $m105UiTemp
+Assert-M105EmptyDirectory $m105UiTemp
+Assert-M105EmptyDirectory $m105IntegrationTemp
+Invoke-M105Command {
+  & $m105Node node_modules/typescript/bin/tsc --project tsconfig.json
+  $m105Exit = $LASTEXITCODE; Write-Output "M1-05 preflight typecheck exit: $m105Exit"
+  if ($m105Exit -ne 0) { throw 'M1-05 preflight typecheck failed' }
+}
+if (Test-Path -LiteralPath $m105Build) { throw 'Preflight created unexpected client build output' }
+if (Test-Path -LiteralPath (Join-Path $m105Repo '.vite-temp')) { throw 'Preflight created unexpected repository Vite cache' }
+if (Test-Path -LiteralPath (Join-Path $m105Repo 'node_modules/.vite-temp')) { throw 'Preflight created unexpected node_modules Vite cache' }
+$m105PreflightRuntimeIdentity = Get-M105TreeIdentity $m105Runtime
+if ($m105PreflightRuntimeIdentity.Entries -ne 332 -or $m105PreflightRuntimeIdentity.Files -ne 318 -or
+    $m105PreflightRuntimeIdentity.Directories -ne 14 -or $m105PreflightRuntimeIdentity.Bytes -ne 451193922 -or
+    $m105PreflightRuntimeIdentity.Digest -cne '4FDF9490EDBA2FC4662FF487C591F769F682D8031B3E59FC26C0C35AEE8371CC') {
+  throw 'Retained browser changed during preflight'
+}
+Assert-M105PlanningIdentity
+```
+
+### M105-CMD-FOCUSED — exact Red and Green commands
+
+Red and Green use the same frozen preparation and effects. Run the syntax checks and native build first. For Red, the focused test command must exit nonzero only on the absent configured-client/static/POST behavior described above; an exit 0, environment/runtime failure, or unrelated failure is rejected. After the accepted Red file identities are frozen, Green reruns the same build and test command without changing either test path and requires exit 0.
+
+```powershell
+# Run this common prefix once immediately before Red and again immediately before Green.
+if (Test-Path -LiteralPath $m105Build) { throw 'M1-05 build must be absent before Vite runs' }
+Invoke-M105Command {
+  & $m105Node --check tests/walking-skeleton.test.ts
+  if ($LASTEXITCODE -ne 0) { throw 'Walking-skeleton test syntax failed' }
+  & $m105Node --check tests/helpers/m105-walking-skeleton-harness.ts
+  if ($LASTEXITCODE -ne 0) { throw 'Walking-skeleton helper syntax failed' }
+}
+Invoke-M105Command {
+  & $m105Node node_modules/vite/bin/vite.js build --configLoader native
+  $m105Exit = $LASTEXITCODE; Write-Output "M1-05 focused build exit: $m105Exit"
+  if ($m105Exit -ne 0) { throw 'M1-05 focused build failed' }
+}
+Assert-M105EmptyDirectory $m105ScanTemp
+Assert-M105EmptyDirectory $m105IntegrationTemp
+```
+
+The exact Red invocation is:
+
+```powershell
+Invoke-M105Command {
+  & $m105Node --test --test-timeout=120000 tests/walking-skeleton.test.ts
+  $m105Exit = $LASTEXITCODE; Write-Output "M1-05 focused test exit: $m105Exit"
+  if ($m105Exit -eq 0) { throw 'M1-05 Red unexpectedly passed' }
+} $m105ScanTemp
+Assert-M105EmptyDirectory $m105ScanTemp
+Assert-M105EmptyDirectory $m105IntegrationTemp
+```
+
+The Red lease ID is exactly `M1-05-20260902-06-integration-red-01`. The primary records the exit and decisive assertion names, terminally closes that lease, replaces the digest slot below with the returned contract digest, and runs this exact identity check before any plan maintenance or Green lease. The two emitted hashes become the accepted Red boundary; a wrong receipt, path set, HEAD/ref, staged change, active lease, or other worktree path stops.
+
+```powershell
+$m105RedLeaseId = 'M1-05-20260902-06-integration-red-01'
+$m105RedContractDigest = '<M105-RED-CONTRACT-DIGEST returned by guard start>'
+Assert-M105GitEndpoint @('docs/plans/m1-05-walking-skeleton-integration.md',
+  'tests/walking-skeleton.test.ts','tests/helpers/m105-walking-skeleton-harness.ts')
+$m105RedReceipt = Get-M105LeaseReceiptEvidence $m105RedLeaseId $m105RedContractDigest $m105AcceptedTestPaths
+$m105RedTestHashes = Get-M105FileHashes $m105AcceptedTestPaths
+[pscustomobject]@{ LeaseId=$m105RedLeaseId; ContractDigest=$m105RedContractDigest;
+  ReceiptDigest=$m105RedReceipt.Digest; ReceiptFileHash=$m105RedReceipt.FileHash;
+  TestHashes=$m105RedTestHashes } | ConvertTo-Json -Depth 5
+```
+
+After freezing those literal values in this living plan, the primary fingerprints the recognized Red build and removes only that exact generated directory before the Green lease:
+
+```powershell
+$m105RedBuildIdentity = Get-M105TreeIdentity $m105Build
+if ($m105RedBuildIdentity.Files -lt 2 -or $m105RedBuildIdentity.Bytes -lt 1) { throw 'Unexpected Red build inventory' }
+Remove-Item -LiteralPath (Assert-M105OrdinaryPath $m105Build) -Recurse -Force -ErrorAction Stop
+if (Test-Path -LiteralPath $m105Build) { throw 'Red build cleanup failed' }
+```
+
+The Green lease ID is exactly `M1-05-20260902-06-integration-green-01`. After the separate Green lease starts, rerun the common prefix above and then run the exact Green invocation:
+
+```powershell
+Invoke-M105Command {
+  & $m105Node --test --test-timeout=120000 tests/walking-skeleton.test.ts
+  $m105Exit = $LASTEXITCODE; Write-Output "M1-05 focused test exit: $m105Exit"
+  if ($m105Exit -ne 0) { throw 'M1-05 focused Green failed' }
+} $m105ScanTemp
+Assert-M105EmptyDirectory $m105ScanTemp
+Assert-M105EmptyDirectory $m105IntegrationTemp
+$m105AcceptedGreenBuildIdentity = Get-M105TreeIdentity $m105Build
+```
+
+The test invocation and arguments are byte-for-byte identical between phases; only the expected exit assertion differs. Green requires zero failure, cancellation, skip, todo, or focused-only marker. Do not rebuild or delete it unless a same-contract Green correction is accepted; in that case fingerprint and remove only the exact failed-attempt build before attempt 2.
+
+### M105-CMD-GREEN-EVIDENCE — one frozen source/test/build/runtime/guard tuple
+
+Immediately after the primary terminally closes the Green lease—and before changing this plan or running complete verification—replace the Red and Green guard slots below with the already accepted Red literals and the fresh Green closure values. Run this block once. It requires fresh `closed-compliant` Green status with no post-close drift, unchanged accepted Red tests, exact protected inputs, the expected ten worktree paths, no active lease, and one simultaneous snapshot of the whole source tree, whole test tree, seven production paths, two accepted tests, five protected build inputs, retained build, retained browser, and both terminal receipts. Record the emitted object in this plan as `M105-ACCEPTED-GREEN-TUPLE-001`.
+
+```powershell
+$m105RedLeaseId = 'M1-05-20260902-06-integration-red-01'
+$m105RedContractDigest = '<M105-RED-CONTRACT-DIGEST>'
+$m105AcceptedRedReceiptDigest = '<M105-RED-RECEIPT-DIGEST>'
+$m105AcceptedRedReceiptFileHash = '<M105-RED-RECEIPT-FILE-SHA256>'
+$m105AcceptedRedTestHashes = [ordered]@{
+  'tests/walking-skeleton.test.ts'='<M105-ACCEPTED-RED-TEST-SHA256>'
+  'tests/helpers/m105-walking-skeleton-harness.ts'='<M105-ACCEPTED-RED-HELPER-SHA256>'
+}
+$m105GreenLeaseId = 'M1-05-20260902-06-integration-green-01'
+$m105GreenContractDigest = '<M105-GREEN-CONTRACT-DIGEST returned by guard start>'
+$m105GreenStatusText = (& python -B .codex/leases/lease_guard.py status `
+  --lease-id $m105GreenLeaseId --contract-digest $m105GreenContractDigest) -join "`n"
+$m105GreenStatusExit = $LASTEXITCODE
+$m105GreenStatus = $m105GreenStatusText | ConvertFrom-Json
+if ($m105GreenStatusExit -ne 0 -or $m105GreenStatus.status -cne 'closed-compliant' -or
+    $m105GreenStatus.post_close_drift -ne $false) { throw 'Green lease is not freshly closed and stable' }
+Assert-M105GitEndpoint (@('docs/plans/m1-05-walking-skeleton-integration.md') + $m105AcceptedTestPaths + $m105ProductionPaths)
+Assert-M105FileHashes $m105AcceptedRedTestHashes 'Accepted Red boundary'
+$m105RedReceipt = Get-M105LeaseReceiptEvidence $m105RedLeaseId $m105RedContractDigest $m105AcceptedTestPaths
+if ($m105RedReceipt.Digest -cne $m105AcceptedRedReceiptDigest -or
+    $m105RedReceipt.FileHash -cne $m105AcceptedRedReceiptFileHash) { throw 'Accepted Red receipt changed' }
+$m105GreenReceipt = Get-M105LeaseReceiptEvidence $m105GreenLeaseId $m105GreenContractDigest $m105ProductionPaths
+$m105GreenTuple = [ordered]@{
+  ProductionHashes=(Get-M105FileHashes $m105ProductionPaths)
+  AcceptedTestHashes=(Get-M105FileHashes $m105AcceptedTestPaths)
+  ProtectedHashes=(Get-M105FileHashes $m105ProtectedPaths)
+  SourceTree=(Get-M105TreeIdentity (Join-Path $m105Repo 'src'))
+  TestTree=(Get-M105TreeIdentity (Join-Path $m105Repo 'tests'))
+  Build=(Get-M105TreeIdentity $m105Build)
+  Runtime=(Get-M105TreeIdentity $m105Runtime)
+  RedLease=[ordered]@{ Id=$m105RedLeaseId; ContractDigest=$m105RedContractDigest;
+    ReceiptDigest=$m105RedReceipt.Digest; ReceiptFileHash=$m105RedReceipt.FileHash }
+  GreenLease=[ordered]@{ Id=$m105GreenLeaseId; ContractDigest=$m105GreenContractDigest;
+    ReceiptDigest=$m105GreenReceipt.Digest; ReceiptFileHash=$m105GreenReceipt.FileHash }
+}
+$m105GreenTuple | ConvertTo-Json -Depth 7
+```
+
+Before complete verification, replace every slot in the following block with that single emitted object. Thereafter run `M105-CMD-PREP`, this entire block, and its final assertion in every new complete-verification, review-evidence, public-smoke, or pre-cleanup shell. The block is the one reusable tuple; later recapture is forbidden. Its slots are primary-accepted evidence, not worker discretion.
+
+```powershell
+$m105AcceptedProductionHashes = [ordered]@{
+  'src/server/service.ts'='<M105-ACCEPTED-GREEN-SHA256>'
+  'src/server/main.ts'='<M105-ACCEPTED-GREEN-SHA256>'
+  'src/server/local-service/contracts.ts'='<M105-ACCEPTED-GREEN-SHA256>'
+  'src/server/local-service/input-validation.ts'='<M105-ACCEPTED-GREEN-SHA256>'
+  'src/server/local-service/loopback-api.ts'='<M105-ACCEPTED-GREEN-SHA256>'
+  'src/server/local-service/client-assets.ts'='<M105-ACCEPTED-GREEN-SHA256>'
+  'src/client/main.tsx'='<M105-ACCEPTED-GREEN-SHA256>'
+}
+$m105AcceptedTestHashes = [ordered]@{
+  'tests/walking-skeleton.test.ts'='<M105-ACCEPTED-RED-TEST-SHA256>'
+  'tests/helpers/m105-walking-skeleton-harness.ts'='<M105-ACCEPTED-RED-HELPER-SHA256>'
+}
+$m105AcceptedProtectedHashes = [ordered]@{
+  'package.json'='C2C8718FA44813288ABBA5792FACB3D39400446912EC73DE2A8C93E2A6D92C98'
+  'package-lock.json'='ECE19CD10739D5C4139E4700B5A712B89FEFE1F898BE29C4FBF18DD54682C553'
+  'tsconfig.json'='3957F80AF41B23DC4CCEFAA6B24823C367E6984980420B596275B8692DF5ABDE'
+  'vite.config.ts'='8D75B9863C86A8ECA2267C74D8875BE46061C288F5EAEF6BEA93C427D3DACD07'
+  'index.html'='91BEF948D015F0E084708FDECFB79F765437B439D76B1ED70AF55580D815DC88'
+}
+$m105AcceptedSourceTree = [pscustomobject]@{ Entries=[int]'<M105-SOURCE-ENTRIES>'; Files=[int]'<M105-SOURCE-FILES>';
+  Directories=[int]'<M105-SOURCE-DIRECTORIES>'; Bytes=[long]'<M105-SOURCE-BYTES>'; Digest='<M105-SOURCE-DIGEST>' }
+$m105AcceptedTestTree = [pscustomobject]@{ Entries=[int]'<M105-TEST-ENTRIES>'; Files=[int]'<M105-TEST-FILES>';
+  Directories=[int]'<M105-TEST-DIRECTORIES>'; Bytes=[long]'<M105-TEST-BYTES>'; Digest='<M105-TEST-DIGEST>' }
+$m105AcceptedBuild = [pscustomobject]@{ Entries=[int]'<M105-BUILD-ENTRIES>'; Files=[int]'<M105-BUILD-FILES>';
+  Directories=[int]'<M105-BUILD-DIRECTORIES>'; Bytes=[long]'<M105-BUILD-BYTES>'; Digest='<M105-BUILD-DIGEST>' }
+$m105AcceptedRuntime = [pscustomobject]@{ Entries=332; Files=318; Directories=14; Bytes=451193922;
+  Digest='4FDF9490EDBA2FC4662FF487C591F769F682D8031B3E59FC26C0C35AEE8371CC' }
+$m105AcceptedRedLease = [pscustomobject]@{ Id='M1-05-20260902-06-integration-red-01';
+  ContractDigest='<M105-RED-CONTRACT-DIGEST>'; ReceiptDigest='<M105-RED-RECEIPT-DIGEST>';
+  ReceiptFileHash='<M105-RED-RECEIPT-FILE-SHA256>' }
+$m105AcceptedGreenLease = [pscustomobject]@{ Id='M1-05-20260902-06-integration-green-01';
+  ContractDigest='<M105-GREEN-CONTRACT-DIGEST>'; ReceiptDigest='<M105-GREEN-RECEIPT-DIGEST>';
+  ReceiptFileHash='<M105-GREEN-RECEIPT-FILE-SHA256>' }
+function Assert-M105AcceptedGreenTuple {
+  $m105RequiredGreenPaths = @('docs/plans/m1-05-walking-skeleton-integration.md') +
+    $m105AcceptedTestPaths + $m105ProductionPaths
+  $m105AllowedGreenPaths = $m105PreArchiveDocumentationPaths + $m105AcceptedTestPaths + $m105ProductionPaths
+  Assert-M105GitEndpoint $m105RequiredGreenPaths $m105AllowedGreenPaths
+  Assert-M105FileHashes $m105AcceptedProductionHashes 'Accepted Green production'
+  Assert-M105FileHashes $m105AcceptedTestHashes 'Accepted Red tests'
+  Assert-M105FileHashes $m105AcceptedProtectedHashes 'Accepted protected input'
+  Assert-M105TreeRecord (Join-Path $m105Repo 'src') $m105AcceptedSourceTree 'Accepted source tree'
+  Assert-M105TreeRecord (Join-Path $m105Repo 'tests') $m105AcceptedTestTree 'Accepted test tree'
+  Assert-M105TreeRecord $m105Build $m105AcceptedBuild 'Accepted Green build'
+  Assert-M105TreeRecord $m105Runtime $m105AcceptedRuntime 'Accepted retained browser'
+  $m105RedReceipt = Get-M105LeaseReceiptEvidence $m105AcceptedRedLease.Id `
+    $m105AcceptedRedLease.ContractDigest $m105AcceptedTestPaths
+  $m105GreenReceipt = Get-M105LeaseReceiptEvidence $m105AcceptedGreenLease.Id `
+    $m105AcceptedGreenLease.ContractDigest $m105ProductionPaths
+  if ($m105RedReceipt.Digest -cne $m105AcceptedRedLease.ReceiptDigest -or
+      $m105RedReceipt.FileHash -cne $m105AcceptedRedLease.ReceiptFileHash -or
+      $m105GreenReceipt.Digest -cne $m105AcceptedGreenLease.ReceiptDigest -or
+      $m105GreenReceipt.FileHash -cne $m105AcceptedGreenLease.ReceiptFileHash) {
+    throw 'Accepted terminal lease identity changed'
+  }
+  $m105Marker = Get-Item -LiteralPath (Join-Path $m105Browsers 'chromium-1234/DEPENDENCIES_VALIDATED') -Force
+  if ($m105Marker.LastWriteTimeUtc -gt [DateTime]::UtcNow -or $m105Marker.LastWriteTimeUtc -lt [DateTime]::UtcNow.AddDays(-30) -or
+      (Get-FileHash -Algorithm SHA256 -LiteralPath $m105Marker.FullName).Hash -cne
+        'E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855' -or
+      (Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $m105Browsers 'chromium-1234/chrome-win64/chrome.exe')).Hash -cne
+        '409805A16D6416087E6B2F778DF1CF8F7BBB267D6B99F6B5BB0A618EACE234F2' -or
+      (Test-Path -LiteralPath (Join-Path $m105Repo '.vite-temp')) -or
+      (Test-Path -LiteralPath (Join-Path $m105Repo 'node_modules/.vite-temp'))) {
+    throw 'Accepted browser/build environment changed'
+  }
+}
+Assert-M105AcceptedGreenTuple
+```
+
+### M105-CMD-COMPLETE — exact sequential verification barrier
+
+Each of the six backend/scanner/integration files runs in its own process and in the listed order; do not combine or parallelize them. The unchanged UI file then runs separately with its own scratch. Strict TypeScript and all changed server-file syntax checks are separate checks; the native production build was created by the exact Green common prefix and is accepted here only if its frozen identity is unchanged. Require the retained runtime identity unchanged, all three scratch roots empty, both `.vite-temp` paths absent, and the exact accepted build identity afterward.
+
+```powershell
+Assert-M105AcceptedGreenTuple
+Invoke-M105Command { & $m105Node --test --test-timeout=120000 tests/run-contract.test.ts; if ($LASTEXITCODE -ne 0) { throw 'run-contract suite failed' } }
+Invoke-M105Command { & $m105Node --test --test-timeout=120000 tests/run-repository.test.ts; if ($LASTEXITCODE -ne 0) { throw 'run-repository suite failed' } }
+Invoke-M105Command { & $m105Node --test --test-timeout=120000 tests/local-service.test.ts; if ($LASTEXITCODE -ne 0) { throw 'local-service suite failed' } }
+Invoke-M105Command { & $m105Node --test --test-timeout=120000 tests/scan-normalization.test.ts; if ($LASTEXITCODE -ne 0) { throw 'scan-normalization suite failed' } }
+Assert-M105EmptyDirectory $m105ScanTemp
+Invoke-M105Command { & $m105Node --test --test-timeout=120000 tests/scan-page.test.ts; if ($LASTEXITCODE -ne 0) { throw 'scan-page suite failed' } } $m105ScanTemp
+Assert-M105EmptyDirectory $m105ScanTemp
+Assert-M105EmptyDirectory $m105IntegrationTemp
+Invoke-M105Command { & $m105Node --test --test-timeout=120000 tests/walking-skeleton.test.ts; if ($LASTEXITCODE -ne 0) { throw 'walking-skeleton suite failed' } } $m105ScanTemp
+Assert-M105EmptyDirectory $m105ScanTemp
+Assert-M105EmptyDirectory $m105IntegrationTemp
+Invoke-M105Command { & $m105Node --test --test-timeout=120000 tests/target-results-ui.test.ts; if ($LASTEXITCODE -ne 0) { throw 'target/results UI suite failed' } } $m105UiTemp
+Assert-M105EmptyDirectory $m105UiTemp
+Invoke-M105Command { & $m105Node node_modules/typescript/bin/tsc --project tsconfig.json; if ($LASTEXITCODE -ne 0) { throw 'Strict TypeScript failed' } }
+Invoke-M105Command {
+  foreach ($m105Source in @('src/server/service.ts','src/server/main.ts','src/server/local-service/contracts.ts',
+      'src/server/local-service/input-validation.ts','src/server/local-service/loopback-api.ts',
+      'src/server/local-service/client-assets.ts')) {
+    & $m105Node --check $m105Source
+    if ($LASTEXITCODE -ne 0) { throw ('Syntax failed: ' + $m105Source) }
+  }
+}
+if (Test-Path -LiteralPath (Join-Path $m105Repo '.vite-temp')) { throw 'Unexpected repository Vite cache' }
+if (Test-Path -LiteralPath (Join-Path $m105Repo 'node_modules/.vite-temp')) { throw 'Unexpected node_modules Vite cache' }
+Assert-M105EmptyDirectory $m105ScanTemp
+Assert-M105EmptyDirectory $m105UiTemp
+Assert-M105EmptyDirectory $m105IntegrationTemp
+Assert-M105AcceptedGreenTuple
+```
+
+### M105-CMD-PUBLIC-SMOKE — exact start, observation, validation, and stop
+
+This command has two PowerShell shells because the production entry intentionally waits for `stop` on stdin. In both shells run `M105-CMD-PREP`, the populated `M105-CMD-GREEN-EVIDENCE` reusable-tuple block, and its final assertion before continuing. This proves that the exact accepted source, tests, protected inputs, build, runtime, browser executable/marker, terminal receipts, Git endpoint, and Vite-cache state still match; no later source recapture may replace that tuple. Then run the following scratch check. No write lease may be active.
+
+```powershell
+Assert-M105EmptyDirectory $m105ScanTemp
+Assert-M105EmptyDirectory $m105UiTemp
+Assert-M105EmptyDirectory $m105IntegrationTemp
+```
+
+In shell A, run the following block; copy only the emitted loopback `service-ready` URL. Do not use `Start-Process`, background the service, redirect output to a tracked file, or launch the user browser automatically.
+
+```powershell
+$m105ApplicationRevision = (& git rev-parse HEAD).Trim()
+if ($LASTEXITCODE -ne 0 -or $m105ApplicationRevision -notmatch '^[0-9a-f]{40}$') { throw 'Invalid application revision' }
+$m105SavedRevision = [Environment]::GetEnvironmentVariable('A11Y_APPLICATION_REVISION','Process')
+$m105SavedPort = [Environment]::GetEnvironmentVariable('A11Y_PORT','Process')
+try {
+  [Environment]::SetEnvironmentVariable('A11Y_APPLICATION_REVISION',$m105ApplicationRevision,'Process')
+  [Environment]::SetEnvironmentVariable('A11Y_PORT','0','Process')
+  Invoke-M105Command {
+    $m105ServerEnvironmentNames = @((Get-ChildItem Env: | Select-Object -ExpandProperty Name | Sort-Object))
+    $m105ServerEnvironmentNameDigest = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData(
+      [Text.Encoding]::UTF8.GetBytes(($m105ServerEnvironmentNames -join "`n"))))
+    Write-Output "M1-05 server environment-name digest: $m105ServerEnvironmentNameDigest"
+    & $m105Npm @toolchainOptions run start
+    $m105Exit = $LASTEXITCODE; Write-Output "M1-05 production service exit: $m105Exit"
+    if ($m105Exit -ne 0) { throw 'M1-05 production service failed' }
+  } $m105ScanTemp
+} finally {
+  [Environment]::SetEnvironmentVariable('A11Y_APPLICATION_REVISION',
+    $(if ($null -eq $m105SavedRevision) { [NullString]::Value } else { $m105SavedRevision }),'Process')
+  [Environment]::SetEnvironmentVariable('A11Y_PORT',
+    $(if ($null -eq $m105SavedPort) { [NullString]::Value } else { $m105SavedPort }),'Process')
+  if ([Environment]::GetEnvironmentVariable('A11Y_APPLICATION_REVISION','Process') -cne $m105SavedRevision -or
+      [Environment]::GetEnvironmentVariable('A11Y_PORT','Process') -cne $m105SavedPort) { throw 'Production environment restore mismatch' }
+}
+```
+
+In shell B, take the before snapshot before touching the browser, enter the owner-approved URL only at the private prompt, and type `DISPOSABLE` only if the owner has made that declaration. The script does not persist or print the target. Supply the exact service-ready URL and selected mode. Open that URL manually in Chrome or Edge, enter the same approved target, select the same mode, activate Analyze once, inspect the result, and then continue the script.
+
+```powershell
+$m105ServiceUrl = Read-Host 'Exact emitted loopback service URL'
+try { $m105ServiceUri = [Uri]$m105ServiceUrl } catch { throw 'Invalid enumerated service URL' }
+if ($m105ServiceUrl -notmatch '^http://127\.0\.0\.1:[1-9][0-9]{0,4}$' -or
+    $m105ServiceUri.Scheme -cne 'http' -or $m105ServiceUri.Host -cne '127.0.0.1' -or
+    $m105ServiceUri.Port -lt 1 -or $m105ServiceUri.Port -gt 65535 -or $m105ServiceUri.AbsolutePath -cne '/') {
+  throw 'Invalid enumerated service URL'
+}
+$m105Mode = Read-Host 'Selected mode: local or groq'
+if ($m105Mode -cne 'local' -and $m105Mode -cne 'groq') { throw 'Invalid selected mode' }
+$m105ApprovedTarget = Read-Host 'Owner-approved trusted public HTTPS target'
+try { $m105TargetUri = [Uri]$m105ApprovedTarget } catch { throw 'Invalid approved target' }
+if ($m105TargetUri.Scheme -cne 'https' -or -not $m105TargetUri.Host -or $m105TargetUri.UserInfo) { throw 'Target is outside trusted HTTPS admission' }
+if ((Read-Host 'Type DISPOSABLE to authorize deletion after final review') -cne 'DISPOSABLE') { throw 'Disposable-run declaration missing' }
+$null = Assert-M105OrdinaryPath $m105RunRoot
+$m105SiblingSetDigest = Get-M105RunSetDigest
+$m105Before = @{}
+foreach ($m105Entry in @(Get-ChildItem -LiteralPath $m105RunRoot -Force)) {
+  if (-not $m105Entry.PSIsContainer -or ($m105Entry.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'Unsafe pre-smoke run-root entry' }
+  $m105Before[$m105Entry.Name] = Get-M105TreeIdentity $m105Entry.FullName
+}
+$null = Read-Host 'After the one browser Analyze action has visibly completed, press ENTER'
+$m105After = @(Get-ChildItem -LiteralPath $m105RunRoot -Force)
+$m105New = @($m105After | Where-Object { -not $m105Before.ContainsKey($_.Name) })
+if ($m105New.Count -ne 1 -or -not $m105New[0].PSIsContainer -or
+    ($m105New[0].Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'Expected exactly one new ordinary smoke run' }
+$m105SmokeRunId = $m105New[0].Name
+if ((Get-M105RunSetDigest $m105SmokeRunId) -cne $m105SiblingSetDigest) { throw 'Pre-existing run set changed during smoke' }
+$m105SmokeRunPath = Assert-M105OrdinaryPath $m105New[0].FullName
+$m105SmokeChildren = @(Get-ChildItem -LiteralPath $m105SmokeRunPath -Force)
+if ($m105SmokeChildren.Count -ne 1 -or $m105SmokeChildren[0].Name -cne 'run.json' -or
+    $m105SmokeChildren[0].PSIsContainer -or ($m105SmokeChildren[0].Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+  throw 'Smoke run is not the one-file aggregate'
+}
+$m105RunJson = $m105SmokeChildren[0].FullName
+$m105Validation = @'
+import fs from 'node:fs';
+import { isDeepStrictEqual } from 'node:util';
+import { validateRun } from './src/server/domain/run-contract.ts';
+const [serviceUrl, runId, file, mode] = process.argv.slice(1);
+const disk = validateRun(JSON.parse(fs.readFileSync(file, 'utf8')));
+if (!disk.ok || disk.value.status !== 'completed' || disk.value.providerContext.mode !== mode) throw Error('invalid disk aggregate');
+const response = await fetch(`${serviceUrl}/api/runs/${runId}`);
+const envelope = await response.json();
+const read = validateRun(envelope?.run);
+if (!response.ok || envelope?.ok !== true || !read.ok || !isDeepStrictEqual(read.value, disk.value)) throw Error('validated application read mismatch');
+console.log(JSON.stringify({ status: disk.value.status, rules: disk.value.scan.coverage.rules,
+  findings: disk.value.scan.findings.length, scannerReviewObservations: disk.value.scan.scannerReviewObservations.length }));
+'@
+Invoke-M105Command { & $m105Node --input-type=module --eval $m105Validation $m105ServiceUrl $m105SmokeRunId $m105RunJson $m105Mode; if ($LASTEXITCODE -ne 0) { throw 'Smoke aggregate validation failed' } }
+$m105SmokeHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $m105RunJson).Hash
+$m105BuildIdentity = Get-M105TreeIdentity $m105Build
+$m105BrowserIdentity = Get-M105TreeIdentity $m105Runtime
+[pscustomobject]@{ RunId=$m105SmokeRunId; RunJsonSha256=$m105SmokeHash; Mode=$m105Mode;
+  BuildDigest=$m105BuildIdentity.Digest; BrowserDigest=$m105BrowserIdentity.Digest;
+  SiblingSetDigest=$m105SiblingSetDigest }
+```
+
+Now type `stop` followed by Enter in shell A. Require exactly one `service-stopped` event and exit 0, then in shell B run `Assert-M105EmptyDirectory $m105ScanTemp`, `Assert-M105EmptyDirectory $m105IntegrationTemp`, and `Assert-M105AcceptedGreenTuple`. Rehash the smoke aggregate and all pre-existing run directories, freeze the content-safe values in this living plan as `M105-SMOKE-RETAINED-001`, and retain them through the final integrated review. This post-stop tuple assertion proves that the source, accepted tests, protected inputs, build, runtime, and receipts remain the same as Green rather than merely recapturing a new state. Do not retain `$m105ApprovedTarget` or terminal history in tracked evidence.
+
+### M105-CMD-FINAL-CLEANUP — post-review deletion and generated-output cleanup
+
+Before final integrated review, the plan must replace the following execution-populated slots with literal values: `M105-SMOKE-RUN-ID`, `M105-SMOKE-RUN.JSON-SHA256`, `M105-SMOKE-BUILD-DIGEST`, `M105-SMOKE-BROWSER-DIGEST`, and `M105-SMOKE-SIBLING-SET-DIGEST`. The reviewer verifies those values while the aggregate and build still exist. After PASS, a new shell runs `M105-CMD-PREP`, the populated reusable Green-tuple block, and then the frozen smoke literals below before performing this deterministic cleanup. Any mismatch preserves the tree and stops.
+
+```powershell
+Assert-M105AcceptedGreenTuple
+$m105SmokeRunId = '<M105-SMOKE-RUN-ID frozen before final review>'
+$m105SmokeHash = '<M105-SMOKE-RUN.JSON-SHA256 frozen before final review>'
+$m105SiblingSetDigest = '<M105-SMOKE-SIBLING-SET-DIGEST frozen before final review>'
+$m105SmokeBuildDigest = '<M105-SMOKE-BUILD-DIGEST frozen before final review>'
+$m105SmokeBrowserDigest = '<M105-SMOKE-BROWSER-DIGEST frozen before final review>'
+if ($m105SmokeBuildDigest -cne $m105AcceptedBuild.Digest -or
+    $m105SmokeBrowserDigest -cne $m105AcceptedRuntime.Digest) { throw 'Smoke identity differs from accepted Green tuple' }
+$m105SmokeRunPath = Assert-M105OrdinaryPath (Join-Path $m105RunRoot $m105SmokeRunId)
+$m105RunJson = Assert-M105OrdinaryPath (Join-Path $m105SmokeRunPath 'run.json')
+if (@(Get-ChildItem -LiteralPath $m105SmokeRunPath -Force).Count -ne 1 -or
+    (Get-FileHash -Algorithm SHA256 -LiteralPath $m105RunJson).Hash -cne $m105SmokeHash) { throw 'Smoke aggregate changed before deletion' }
+Remove-Item -LiteralPath $m105SmokeRunPath -Recurse -Force -ErrorAction Stop
+if (Test-Path -LiteralPath $m105SmokeRunPath) { throw 'Smoke run deletion failed' }
+if ((Get-M105RunSetDigest) -cne $m105SiblingSetDigest) { throw 'Pre-existing run set changed during smoke cleanup' }
+foreach ($m105Scratch in @($m105ScanTemp,$m105UiTemp,$m105IntegrationTemp)) {
+  Assert-M105EmptyDirectory $m105Scratch
+  Remove-Item -LiteralPath $m105Scratch -ErrorAction Stop
+  if (Test-Path -LiteralPath $m105Scratch) { throw ('Scratch cleanup failed: ' + $m105Scratch) }
+}
+$m105OwnedBuildIdentity = Get-M105TreeIdentity $m105Build
+if ($m105OwnedBuildIdentity.Digest -cne $m105SmokeBuildDigest) { throw 'Build changed before cleanup' }
+Remove-Item -LiteralPath $m105Build -Recurse -Force -ErrorAction Stop
+if (Test-Path -LiteralPath $m105Build) { throw 'Build cleanup failed' }
+if (Test-Path -LiteralPath (Join-Path $m105Repo '.vite-temp')) { throw 'Unexpected repository Vite cache' }
+if (Test-Path -LiteralPath (Join-Path $m105Repo 'node_modules/.vite-temp')) { throw 'Unexpected node_modules Vite cache' }
+if ((Get-M105TreeIdentity $m105Runtime).Digest -cne $m105SmokeBrowserDigest) {
+  throw 'Retained browser changed during cleanup'
+}
+```
+
+The angle-bracket slots are not worker discretion: they can be filled only from the single accepted smoke execution and must be frozen before the final review. No parent root, shared npm cache, dependency tree, retained browser, unrelated run, or user data may be removed.
+
+### M105-CMD-DOCUMENTATION-CLOSURE — exact post-mutation validation
+
+Before the final integrated review, replace the smoke slots below from `M105-SMOKE-RETAINED-001` and replace every executable-identity slot by byte-for-byte copying the corresponding value from `M105-ACCEPTED-GREEN-TUPLE-001`; recapturing later state is forbidden. The reviewer checks those duplicates against the retained tuple while the build still exists. Run this command only after that review passes, `M105-CMD-FINAL-CLEANUP` deletes the reviewed build and smoke run, all authority/status/developer-instruction updates are made, and the plan moves. In a fresh PowerShell shell, first run `M105-CMD-PREP` from the archived plan to define its read-only helpers and then run this whole block. It is intentionally after every documentation mutation. It reasserts the frozen executable state without requiring the intentionally deleted build, and it neither repairs nor stages anything; any failure leaves M1-05 visibly incomplete for correction.
+
+```powershell
+$m105ArchivedPlan = Join-Path $m105Repo 'docs/plans/completed/m1-05-walking-skeleton-integration.md'
+$m105ActivePlan = Join-Path $m105Repo 'docs/plans/m1-05-walking-skeleton-integration.md'
+$m105FinalSmokeRunId = '<M105-SMOKE-RUN-ID frozen before final review>'
+$m105FinalSiblingSetDigest = '<M105-SMOKE-SIBLING-SET-DIGEST frozen before final review>'
+if (Test-Path -LiteralPath $m105ActivePlan) { throw 'Active M1-05 plan still exists after archive move' }
+$null = Assert-M105OrdinaryPath $m105ArchivedPlan
+if ((Get-Item -LiteralPath $m105ArchivedPlan -Force).PSIsContainer) { throw 'Archived M1-05 plan is not a file' }
+$null = Assert-M105OrdinaryPath $m105ActiveLease -AllowMissing
+if (Test-Path -LiteralPath $m105ActiveLease) { throw 'A write lease remains active at closure' }
+foreach ($m105Absent in @($m105Build,$m105ScanTemp,$m105UiTemp,$m105IntegrationTemp,
+    (Join-Path $m105Repo '.vite-temp'),(Join-Path $m105Repo 'node_modules/.vite-temp'),
+    (Join-Path $m105RunRoot $m105FinalSmokeRunId))) {
+  $null = Assert-M105OrdinaryPath $m105Absent -AllowMissing
+  if (Test-Path -LiteralPath $m105Absent) { throw ('Unexpected M1-05 closure residue: ' + $m105Absent) }
+}
+if ((Get-M105RunSetDigest) -cne $m105FinalSiblingSetDigest) { throw 'Run siblings changed after final cleanup' }
+Assert-M105TreeRecord $m105Runtime ([pscustomobject]@{
+  Entries=332; Files=318; Directories=14; Bytes=451193922;
+  Digest='4FDF9490EDBA2FC4662FF487C591F769F682D8031B3E59FC26C0C35AEE8371CC'
+}) 'Closure retained browser'
+$m105ClosureMarker = Get-Item -LiteralPath (Join-Path $m105Browsers 'chromium-1234/DEPENDENCIES_VALIDATED') -Force
+if ($m105ClosureMarker.LastWriteTimeUtc -gt [DateTime]::UtcNow -or
+    $m105ClosureMarker.LastWriteTimeUtc -lt [DateTime]::UtcNow.AddDays(-30) -or
+    (Get-FileHash -Algorithm SHA256 -LiteralPath $m105ClosureMarker.FullName).Hash -cne
+      'E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855' -or
+    (Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $m105Browsers 'chromium-1234/chrome-win64/chrome.exe')).Hash -cne
+      '409805A16D6416087E6B2F778DF1CF8F7BBB267D6B99F6B5BB0A618EACE234F2') {
+  throw 'Closure browser executable or marker changed'
+}
+
+$m105ClosureProductionHashes = [ordered]@{
+  'src/server/service.ts'='<M105-ACCEPTED-GREEN-SHA256 copied from tuple>'
+  'src/server/main.ts'='<M105-ACCEPTED-GREEN-SHA256 copied from tuple>'
+  'src/server/local-service/contracts.ts'='<M105-ACCEPTED-GREEN-SHA256 copied from tuple>'
+  'src/server/local-service/input-validation.ts'='<M105-ACCEPTED-GREEN-SHA256 copied from tuple>'
+  'src/server/local-service/loopback-api.ts'='<M105-ACCEPTED-GREEN-SHA256 copied from tuple>'
+  'src/server/local-service/client-assets.ts'='<M105-ACCEPTED-GREEN-SHA256 copied from tuple>'
+  'src/client/main.tsx'='<M105-ACCEPTED-GREEN-SHA256 copied from tuple>'
+}
+$m105ClosureTestHashes = [ordered]@{
+  'tests/walking-skeleton.test.ts'='<M105-ACCEPTED-RED-TEST-SHA256 copied from tuple>'
+  'tests/helpers/m105-walking-skeleton-harness.ts'='<M105-ACCEPTED-RED-HELPER-SHA256 copied from tuple>'
+}
+$m105ClosureProtectedHashes = [ordered]@{
+  'package.json'='C2C8718FA44813288ABBA5792FACB3D39400446912EC73DE2A8C93E2A6D92C98'
+  'package-lock.json'='ECE19CD10739D5C4139E4700B5A712B89FEFE1F898BE29C4FBF18DD54682C553'
+  'tsconfig.json'='3957F80AF41B23DC4CCEFAA6B24823C367E6984980420B596275B8692DF5ABDE'
+  'vite.config.ts'='8D75B9863C86A8ECA2267C74D8875BE46061C288F5EAEF6BEA93C427D3DACD07'
+  'index.html'='91BEF948D015F0E084708FDECFB79F765437B439D76B1ED70AF55580D815DC88'
+}
+$m105ClosureSourceTree = [pscustomobject]@{
+  Entries=[int]'<M105-SOURCE-ENTRIES copied from tuple>'; Files=[int]'<M105-SOURCE-FILES copied from tuple>';
+  Directories=[int]'<M105-SOURCE-DIRECTORIES copied from tuple>'; Bytes=[long]'<M105-SOURCE-BYTES copied from tuple>';
+  Digest='<M105-SOURCE-DIGEST copied from tuple>'
+}
+$m105ClosureTestTree = [pscustomobject]@{
+  Entries=[int]'<M105-TEST-ENTRIES copied from tuple>'; Files=[int]'<M105-TEST-FILES copied from tuple>';
+  Directories=[int]'<M105-TEST-DIRECTORIES copied from tuple>'; Bytes=[long]'<M105-TEST-BYTES copied from tuple>';
+  Digest='<M105-TEST-DIGEST copied from tuple>'
+}
+$m105ClosureRedLease = [pscustomobject]@{
+  Id='M1-05-20260902-06-integration-red-01'; ContractDigest='<M105-RED-CONTRACT-DIGEST copied from tuple>';
+  ReceiptDigest='<M105-RED-RECEIPT-DIGEST copied from tuple>';
+  ReceiptFileHash='<M105-RED-RECEIPT-FILE-SHA256 copied from tuple>'
+}
+$m105ClosureGreenLease = [pscustomobject]@{
+  Id='M1-05-20260902-06-integration-green-01'; ContractDigest='<M105-GREEN-CONTRACT-DIGEST copied from tuple>';
+  ReceiptDigest='<M105-GREEN-RECEIPT-DIGEST copied from tuple>';
+  ReceiptFileHash='<M105-GREEN-RECEIPT-FILE-SHA256 copied from tuple>'
+}
+Assert-M105FileHashes $m105ClosureProductionHashes 'Post-archive production'
+Assert-M105FileHashes $m105ClosureTestHashes 'Post-archive accepted tests'
+Assert-M105FileHashes $m105ClosureProtectedHashes 'Post-archive protected inputs'
+Assert-M105TreeRecord (Join-Path $m105Repo 'src') $m105ClosureSourceTree 'Post-archive source tree'
+Assert-M105TreeRecord (Join-Path $m105Repo 'tests') $m105ClosureTestTree 'Post-archive test tree'
+$m105ClosureRedReceipt = Get-M105LeaseReceiptEvidence $m105ClosureRedLease.Id `
+  $m105ClosureRedLease.ContractDigest $m105AcceptedTestPaths
+$m105ClosureGreenReceipt = Get-M105LeaseReceiptEvidence $m105ClosureGreenLease.Id `
+  $m105ClosureGreenLease.ContractDigest $m105ProductionPaths
+if ($m105ClosureRedReceipt.Digest -cne $m105ClosureRedLease.ReceiptDigest -or
+    $m105ClosureRedReceipt.FileHash -cne $m105ClosureRedLease.ReceiptFileHash -or
+    $m105ClosureGreenReceipt.Digest -cne $m105ClosureGreenLease.ReceiptDigest -or
+    $m105ClosureGreenReceipt.FileHash -cne $m105ClosureGreenLease.ReceiptFileHash) {
+  throw 'Post-archive terminal receipt identity changed'
+}
+
+$m105ClosureAllowedPaths = @(
+  'README.md','docs/README.md','docs/DEVELOPMENT_ROADMAP.md','docs/PROJECT_CONCEPT.md',
+  'docs/PROJECT_CONTEXT.md','docs/architecture/README.md','docs/architecture/CANDIDATE_ARCHITECTURE.md',
+  'docs/requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md',
+  'docs/requirements/INFORMATION_AND_WORKFLOW_LIFECYCLE.md','docs/plans/README.md',
+  'docs/plans/m1-05-walking-skeleton-integration.md',
+  'docs/plans/completed/m1-05-walking-skeleton-integration.md','docs/progress/README.md',
+  'docs/progress/m1-05-walking-skeleton-integration.md'
+) + $m105ProductionPaths + $m105AcceptedTestPaths
+$m105ClosureRequiredPaths = @(
+  'README.md','docs/README.md','docs/DEVELOPMENT_ROADMAP.md','docs/plans/README.md',
+  'docs/plans/m1-05-walking-skeleton-integration.md',
+  'docs/plans/completed/m1-05-walking-skeleton-integration.md','docs/progress/README.md',
+  'docs/progress/m1-05-walking-skeleton-integration.md'
+) + $m105ProductionPaths + $m105AcceptedTestPaths
+$m105Head = (& git rev-parse HEAD).Trim()
+$m105Branch = (& git branch --show-current).Trim()
+if ($m105Head -cne 'a9ccb01f19db386e82c5a00f163c6525b66cb9c0' -or
+    $m105Branch -cne 'codex/m1-05-walking-skeleton-integration') { throw 'Closure Git endpoint changed' }
+$m105Staged = @(& git diff --cached --name-only)
+if ($LASTEXITCODE -ne 0 -or $m105Staged.Count -ne 0) { throw 'Closure Git index is not empty' }
+$m105Status = @(& git -c status.renames=false status --porcelain=v1 --untracked-files=all)
+if ($LASTEXITCODE -ne 0) { throw 'Cannot inspect closure worktree' }
+$m105ChangedPaths = @($m105Status | ForEach-Object {
+  if ($_.Length -lt 4) { throw 'Malformed closure Git status row' }
+  $_.Substring(3).Replace('\','/')
+} | Sort-Object -Unique)
+foreach ($m105Changed in $m105ChangedPaths) {
+  if ($m105ClosureAllowedPaths -notcontains $m105Changed) { throw ('Unexpected closure path: ' + $m105Changed) }
+}
+foreach ($m105Required in $m105ClosureRequiredPaths) {
+  if ($m105ChangedPaths -notcontains $m105Required) { throw ('Missing required closure path: ' + $m105Required) }
+}
+
+$m105RoadmapText = [IO.File]::ReadAllText((Join-Path $m105Repo 'docs/DEVELOPMENT_ROADMAP.md'))
+$m105TaskStatuses = @([regex]::Matches($m105RoadmapText,
+  '(?m)^- \*\*Parent (?:milestone|gate) / role / status:\*\* [^\r\n]* / \*\*(Not started|In progress|Blocked|Complete)\*\*\.\r?$') |
+  ForEach-Object { $_.Groups[1].Value })
+if ($m105TaskStatuses.Count -ne 28 -or @($m105TaskStatuses | Where-Object { $_ -ceq 'Complete' }).Count -ne 8 -or
+    @($m105TaskStatuses | Where-Object { $_ -ceq 'Not started' }).Count -ne 20 -or
+    @($m105TaskStatuses | Where-Object { $_ -ceq 'In progress' -or $_ -ceq 'Blocked' }).Count -ne 0) {
+  throw 'Roadmap task-status totals are not the M1-05 closure state'
+}
+$m105M105Block = [regex]::Match($m105RoadmapText,
+  '(?ms)^### M1-05 — Integrate and verify the walking skeleton\r?\n.*?(?=^### |\z)').Value
+if ($m105M105Block -notmatch '(?m)^- \*\*Parent milestone / role / status:\*\* M1 / integration and verification / \*\*Complete\*\*\.\r?$' -or
+    $m105M105Block -notmatch 'plans/completed/m1-05-walking-skeleton-integration\.md') {
+  throw 'Roadmap M1-05 block is not Complete with the archived plan'
+}
+$m105PlanIndex = [IO.File]::ReadAllText((Join-Path $m105Repo 'docs/plans/README.md'))
+if ($m105PlanIndex -notmatch '\(completed/m1-05-walking-skeleton-integration\.md\).*\*\*Complete\*\*' -or
+    $m105PlanIndex -match '\]\(m1-05-walking-skeleton-integration\.md\)') { throw 'Plan index is not archived/Complete' }
+$m105ProgressIndex = [IO.File]::ReadAllText((Join-Path $m105Repo 'docs/progress/README.md'))
+if ($m105ProgressIndex -notmatch '\.\./plans/completed/m1-05-walking-skeleton-integration\.md\) \| Complete \|') {
+  throw 'Progress index does not mirror M1-05 Complete'
+}
+$m105ProgressRecord = [IO.File]::ReadAllText((Join-Path $m105Repo 'docs/progress/m1-05-walking-skeleton-integration.md'))
+if ($m105ProgressRecord -notmatch '(?m)^- \*\*Mirrored roadmap status:\*\* Complete$' -or
+    $m105ProgressRecord -notmatch '\.\./plans/completed/m1-05-walking-skeleton-integration\.md') {
+  throw 'M1-05 progress record is not closed against the archived plan'
+}
+$m105CurrentOwners = @('README.md','docs/README.md','docs/DEVELOPMENT_ROADMAP.md',
+  'docs/PROJECT_CONCEPT.md','docs/PROJECT_CONTEXT.md','docs/architecture/README.md',
+  'docs/architecture/CANDIDATE_ARCHITECTURE.md',
+  'docs/requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md',
+  'docs/requirements/INFORMATION_AND_WORKFLOW_LIFECYCLE.md','docs/plans/README.md','docs/progress/README.md')
+$m105StalePattern = '(?i)M1-05 is In progress|HTTP (?:scan )?integration remains unimplemented|' +
+  'service/scanner/UI wiring remains unimplemented|durable scan-to-disk integration; that remains M1-05|' +
+  'Public HTTP/scan-to-disk integration and the public-page smoke remain M1-05|' +
+  'wiring this callback into the service remains M1-05|M1-05 must preserve'
+foreach ($m105Owner in $m105CurrentOwners) {
+  $m105OwnerText = [IO.File]::ReadAllText((Join-Path $m105Repo $m105Owner))
+  if ($m105OwnerText -match $m105StalePattern) { throw ('Stale M1-05 current-status text: ' + $m105Owner) }
+}
+
+function Get-M105MarkdownAnchors([string]$Path) {
+  $m105Anchors = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+  $m105Counts = @{}; $m105Fence = ''
+  foreach ($m105Line in [IO.File]::ReadAllLines($Path)) {
+    if ($m105Line -match '^\s*(```+|~~~+)') {
+      $m105Mark = $Matches[1].Substring(0,3)
+      if (-not $m105Fence) { $m105Fence = $m105Mark } elseif ($m105Fence -eq $m105Mark) { $m105Fence = '' }
+      continue
+    }
+    if ($m105Fence) { continue }
+    foreach ($m105IdMatch in [regex]::Matches($m105Line,
+        '<a\s+(?:[^>]*?\s)?(?:id|name)=["'']([^"'']+)["'']','IgnoreCase')) {
+      [void]$m105Anchors.Add($m105IdMatch.Groups[1].Value)
+    }
+    if ($m105Line -notmatch '^\s{0,3}#{1,6}\s+(.+?)\s*#*\s*$') { continue }
+    $m105Heading = [regex]::Replace($Matches[1],'!\[([^\]]*)\]\([^)]*\)','$1')
+    $m105Heading = [regex]::Replace($m105Heading,'\[([^\]]+)\]\([^)]*\)','$1')
+    $m105Heading = [regex]::Replace($m105Heading,'<[^>]+>','').ToLowerInvariant()
+    $m105Slug = ([regex]::Replace($m105Heading,'[^\p{L}\p{M}\p{Nd}_\- ]','') -replace ' ','-')
+    if (-not $m105Counts.ContainsKey($m105Slug)) { $m105Counts[$m105Slug]=0; $m105Anchor=$m105Slug }
+    else { $m105Counts[$m105Slug]++; $m105Anchor="$m105Slug-$($m105Counts[$m105Slug])" }
+    [void]$m105Anchors.Add($m105Anchor)
+  }
+  return ,$m105Anchors
+}
+$m105Markdown = @(@(& git ls-files -- '*.md') + @(& git ls-files --others --exclude-standard -- '*.md') |
+  Sort-Object -Unique | Where-Object { Test-Path -LiteralPath (Join-Path $m105Repo $_) })
+$m105AnchorCache = @{}; $m105Broken = [Collections.Generic.List[string]]::new()
+[int]$m105LinkCount=0; [int]$m105FragmentCount=0; [int]$m105PowerShellCount=0
+$m105StrictUtf8 = [Text.UTF8Encoding]::new($false,$true)
+foreach ($m105Relative in $m105Markdown) {
+  $m105Source = Join-Path $m105Repo $m105Relative
+  $m105Bytes = [IO.File]::ReadAllBytes($m105Source)
+  try { $m105Text = $m105StrictUtf8.GetString($m105Bytes) } catch { throw ('Invalid UTF-8: ' + $m105Relative) }
+  if (-not $m105Text.EndsWith("`n") -or $m105Text -match '(?m)[ \t]+\r?$') {
+    throw ('Markdown newline or trailing-whitespace failure: ' + $m105Relative)
+  }
+  if ($m105ChangedPaths -contains $m105Relative) {
+    foreach ($m105Block in [regex]::Matches($m105Text,'(?ms)^```powershell[^\r\n]*\r?\n(.*?)^```\s*$')) {
+      $m105Tokens=$null; $m105Errors=$null
+      [void][Management.Automation.Language.Parser]::ParseInput($m105Block.Groups[1].Value,
+        [ref]$m105Tokens,[ref]$m105Errors)
+      if ($m105Errors.Count) { throw ('PowerShell example parse failure: ' + $m105Relative) }
+      $m105PowerShellCount++
+    }
+  }
+  $m105Fence=''; $m105LineNumber=0
+  foreach ($m105Line in [IO.File]::ReadAllLines($m105Source)) {
+    $m105LineNumber++
+    if ($m105Line -match '^\s*(```+|~~~+)') {
+      $m105Mark=$Matches[1].Substring(0,3)
+      if (-not $m105Fence) { $m105Fence=$m105Mark } elseif ($m105Fence -eq $m105Mark) { $m105Fence='' }
+      continue
+    }
+    if ($m105Fence) { continue }
+    foreach ($m105Link in [regex]::Matches($m105Line,
+        '!?\[[^\]]*\]\((?<target><[^>]+>|[^)\s]+)(?:\s+["''][^"'']*["''])?\)')) {
+      $m105Target=$m105Link.Groups['target'].Value.Trim('<','>')
+      if ($m105Target -match '^[A-Za-z][A-Za-z0-9+.-]*:') { continue }
+      $m105LinkCount++; $m105Parts=$m105Target -split '#',2
+      $m105PathPart=[Uri]::UnescapeDataString($m105Parts[0])
+      $m105Fragment=$(if($m105Parts.Count -eq 2){[Uri]::UnescapeDataString($m105Parts[1])}else{''})
+      $m105TargetPath=$(if([string]::IsNullOrEmpty($m105PathPart)){$m105Source}else{
+        [IO.Path]::GetFullPath((Join-Path (Split-Path $m105Source -Parent) $m105PathPart))})
+      $m105RepoPrefix=$m105Repo.TrimEnd('\')+'\'
+      if (-not $m105TargetPath.StartsWith($m105RepoPrefix,[StringComparison]::OrdinalIgnoreCase) -or
+          -not (Test-Path -LiteralPath $m105TargetPath)) {
+        $m105Broken.Add("$m105Relative`:$m105LineNumber missing $m105Target"); continue
+      }
+      if ($m105Fragment) {
+        $m105FragmentCount++; $m105Key=$m105TargetPath.ToLowerInvariant()
+        if (-not $m105AnchorCache.ContainsKey($m105Key)) {
+          $m105AnchorCache[$m105Key]=Get-M105MarkdownAnchors $m105TargetPath
+        }
+        if (-not $m105AnchorCache[$m105Key].Contains($m105Fragment)) {
+          $m105Broken.Add("$m105Relative`:$m105LineNumber fragment $m105Target")
+        }
+      }
+    }
+  }
+}
+if ($m105Broken.Count) { throw ('Broken Markdown targets: ' + ($m105Broken -join '; ')) }
+$m105RequiredSections = @('Progress','Surprises & Discoveries','Decision Log','Outcomes & Retrospective',
+  'Purpose / Big Picture','Context and Orientation','Scope and Non-Goals','Plan of Work','Concrete Steps',
+  'Validation and Acceptance','Idempotence and Recovery','Artifacts and Notes','Interfaces and Dependencies','Revision Note')
+$m105ArchivedText = [IO.File]::ReadAllText($m105ArchivedPlan)
+foreach ($m105Section in $m105RequiredSections) {
+  if ($m105ArchivedText -notmatch ('(?m)^## ' + [regex]::Escape($m105Section) + '$')) {
+    throw ('Archived plan missing section: ' + $m105Section)
+  }
+}
+git diff --check
+if ($LASTEXITCODE -ne 0) { throw 'git diff --check failed at documentation closure' }
+[pscustomobject]@{ MarkdownFiles=$m105Markdown.Count; Links=$m105LinkCount;
+  Fragments=$m105FragmentCount; ParsedPowerShellBlocks=$m105PowerShellCount;
+  ChangedPaths=$m105ChangedPaths.Count; RoadmapComplete=8; RoadmapNotStarted=20 }
+```
+
 ## Concrete Steps
 
 Work from `C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab`.
 
-The four structural slices, their corrections, and the App dead-state cleanup are complete. Execute the separately planned HTTP scan-integration boundary next.
+The four structural slices, their corrections, and the App dead-state cleanup are complete. Execute only the two remaining checkpoints above.
 
-1. Confirm the task is In progress, the worktree/index baseline, no active lease, and the exact allowed Green paths.
-2. Send Milestone Assignment Packet v2 for read-only preflight to one persistent `test_worker`.
-3. If preflight returns `EXISTING_AND_COVERED`, record the focused evidence and add no test. Any other classification stops for coordinator reconciliation.
-4. Start a Green lease for the exact allowed production path, insert its digest into the packet, and assign one `code_worker` to perform only the dead-state removal and focused validation without touching tests.
-5. Terminally close the lease. Inspect the actual diff, exports, import graph, lifecycle placement, and focused result before accepting Green.
-6. Run strict typechecking, production build, and the complete sequential 290 backend/scanner plus 30 UI regression under the required scanner/browser environments.
-7. Complete exact generated-output cleanup and obtain fresh S1 milestone review. Any finding stops for reconciliation.
-8. Update this plan and the M1-05 progress record with accepted evidence and documentation impact. Keep M1-05 In progress for its later integration slices.
+1. Recheck M1-05 `In progress`, M1-02/M1-03/M1-04 `Complete`, and the plan-review verdict. After PASS only, the primary runs `M105-CMD-PREP` and `Assert-M105PlanningIdentity`; that executable gate requires the exact HEAD, branch, plan-only worktree path, empty index, absent active lease, whole source/test tree identities, five protected build inputs, retained runtime/executable/marker identities, and generated-path absence. The primary then runs `M105-CMD-PREFLIGHT-SETUP`, records the three created ignored empty roots, and stops on drift or an unresolved finding.
+2. Create Milestone Assignment Packet v2 for `M105-WALKING-SKELETON-INTEGRATION-06`, filling every field including the responsibility/cohesion map, exact two-file Red scope, exact seven-file Green scope, forbidden test/component/style/configuration paths, commands, side effects, evidence identities, budget, and stops.
+3. Send the packet with `Lease ID: None` to one persistent `test_worker` for read-only preflight. In a fresh shell it runs `M105-CMD-PREP` and exactly `M105-CMD-PREFLIGHT`; the block asserts the planning identity before and after, records separate counts/exits/identities, and proves zero net build/cache/scratch residue. Accept only `MISSING`, or a primary-reconciled `PARTIAL` whose missing boundary remains exactly the frozen same-origin integration outcome.
+4. Start attempt-1 Red lease `M1-05-20260902-06-integration-red-01` for only `tests/walking-skeleton.test.ts` and `tests/helpers/m105-walking-skeleton-harness.ts`, insert and verify the guard digest, and let the same test worker add the smallest complete controlled matrix. Terminally close the lease and accept Red only when the failure is caused by the absent production route/static/client wiring and all existing environment checks pass. Before any other write, run the exact Red receipt/path/test-hash block, freeze its literals in this plan, fingerprint the Red build, and remove only that recognized build.
+5. Freeze the accepted two-file test boundary. Start separate attempt-1 Green lease `M1-05-20260902-06-integration-green-01` for only the seven named production paths, explicitly forbid the accepted tests plus all UI components/styles and executable configuration, insert and verify the digest, and assign one `code_worker` to reach minimum Green. The worker may perform only the permitted local Refactor and must return a cohesion disposition.
+6. Terminally close the Green lease. Inspect the actual diff, request/result boundaries, static response table, imports, runtime calls, lifecycle and persistence ownership, unchanged tests, absence of provider paths, focused result, and cohesion disposition before accepting Green. Before plan maintenance or another command, run `M105-CMD-GREEN-EVIDENCE`; require fresh guard status and freeze its single source/test/protected-input/build/runtime/receipt object as `M105-ACCEPTED-GREEN-TUPLE-001`. Populate the one reusable assertion block from that object without recapturing later state.
+7. In a fresh shell run `M105-CMD-PREP`, the populated reusable tuple block, and `M105-CMD-COMPLETE`: strict TypeScript, changed-file syntax, each of the six backend/scanner/integration files sequentially, the unchanged 30-case UI suite separately, asset-route checks, test-relevance audit, and the same tuple assertion before and after. Record exact commands and counts. Retain the identity-frozen build and empty scratch roots for the later smoke; any failure or stale/mutable evidence stops.
+8. Obtain a fresh S3 `critical_reviewer` verdict for the slice. Apply at most one supported same-contract correction through the original role, scope, phase, and attempt-2 lineage; a changed contract or unresolved finding stops.
+9. Update this plan and the M1-05 progress record only after the controlled integration checkpoint is accepted. Copy the already frozen tuple literals; do not recapture or replace its seven production, two test, protected-input, build, runtime, or receipt identities. Primary-owned documentation changes occur between leases; no worker edits evidence or authority documents.
+10. Obtain the exact owner-authorized public target and disposable-run declaration, then run `M105-TRUSTED-PUBLIC-SMOKE-07` once through `M105-CMD-PUBLIC-SMOKE`. Both shells assert the same accepted Green tuple before execution; after clean stop, assert it again. Record only content-safe observational evidence, validate the aggregate through HTTP and disk, freeze the exact smoke/build/runtime/sibling-set identities, and retain the aggregate and build.
+11. Audit every test/helper/mock/fixture/skip/focus marker; reconcile README developer instructions and every affected authority/status/navigation statement into a review-ready, still-`In progress` state; and recheck source, build, aggregate, sibling-set, browser, scratch, Git, and guard identities. Populate the documentation-closure production, test, protected-input, source-tree, test-tree, and Red/Green receipt literals by byte-for-byte copy from `M105-ACCEPTED-GREEN-TUPLE-001`, and populate its smoke literals from `M105-SMOKE-RETAINED-001`; do not recapture later state. Do not remove any reviewed artifact yet.
+12. Obtain a different fresh integrated `critical_reviewer` verdict because critical HTTP/persistence/identity/deletion surfaces remain in the final state. The reviewer must inspect the actual retained smoke aggregate, controlled evidence, build, current worktree, documentation, and exact final-cleanup literals. An unresolved finding stops; a source/test correction invalidates the affected evidence and requires the applicable workflow replay.
+13. Only after PASS, run the accepted Green tuple assertion and `M105-CMD-FINAL-CLEANUP`: delete the one declared smoke run, verify all pre-existing run identities unchanged, remove only the exact owned build and empty scratch roots, and verify the retained browser and both forbidden Vite-cache paths. Next update every affected README/developer instruction and authority/status statement, set the roadmap row to Complete, move this plan to `docs/plans/completed/`, repair the plan/progress/documentation links, and record the final progress closure. Only after those mutations, run `M105-CMD-PREP` from the archived plan and exact `M105-CMD-DOCUMENTATION-CLOSURE`; it reasserts the frozen seven production files, two accepted test files, whole source/test trees, five protected inputs, and both terminal receipt identities while requiring the reviewed build to remain absent, then validates the archived path, generated state, sibling/runtime identity, allowed/required Git paths, empty index, 8/20 roadmap totals, status mirrors, stale current prose, all current Markdown links/fragments/UTF-8/newlines/whitespace, every changed PowerShell example, required plan sections, and `git diff --check`. Declare M1-05 closed only when that post-change block passes; otherwise preserve the visible incomplete closure diff for correction. Commit and push remain separate owner-authorized actions.
 
 ## Validation and Acceptance
 
-Accept the slice only when:
+Accept `M105-LOCAL-SERVICE-MODULE-REFACTOR-01` only when:
 
 - the test worker independently classifies the behavior as `EXISTING_AND_COVERED` and the exact 69 cases pass;
 - `src/server/service.ts` still exports `startLocalService`, `ReadResult`, `ScanOutcome`, `StopResult`, `LocalService`, `StartResult`, and `ServiceOptions` with unchanged signatures and discriminants;
@@ -400,6 +1486,36 @@ Accept `M105-APP-DEAD-STATE-CLEANUP-05` only when:
 - scanner/UI scratch, `dist/client`, repository-root `.vite-temp`, and `node_modules/.vite-temp` are absent after exact cleanup;
 - the worker and primary report cohesion `RETAINED`, fresh S1 review returns PASS with no unresolved finding, and documentation records that M1-05 remains In progress.
 
+Accept `M105-WALKING-SKELETON-INTEGRATION-06` only when:
+
+- read-only preflight returns `MISSING`, or primary-reconciled `PARTIAL`, for exactly the absent same-origin production integration while the current toolchain, existing source, 182 browser-free cases, scanner boundary, and UI boundary remain healthy;
+- the guarded two-file Red proves the complete controlled matrix and fails specifically on missing production behavior before any Green write;
+- the guarded Green changes only the seven named production paths, leaves the accepted test boundary byte-identical, and introduces no dependency, executable-configuration, fixture, schema, scanner-policy, repository-format, component, style, or product-copy change;
+- API-only construction preserves the current read-only behavior byte-for-byte at the JSON value boundary—health `scan: false`, every POST 405, no body consumption, and unchanged read routing—while only a successfully loaded configured client enables `POST /api/runs` and truthful health `scan: true`;
+- configured `POST /api/runs` admits only the exact media type and target-plus-mode JSON, settles aborted/error streams once without a run effect, derives all other context on the service side, maps the frozen statuses and existing outcome body, and preserves method/query/health/stopping/API/static/socket precedence;
+- the production start path validates the absolute ordinary closed client root before repository/listener effects, reports `client-unavailable` rather than readiness for every frozen invalid build topology, and serves only the exact built entry and finite direct asset table with fixed MIME types and no request-path filesystem access;
+- the built client enables the existing Analyze path through same-origin fetch while every M1-04 component, visible state, focus rule, announcement, validation message, omission, and responsive/accessibility contract remains unchanged;
+- controlled Local nonzero/multi-finding/native-incomplete, Groq valid-zero, and visible navigation-failure lanes each traverse the actually served browser form, same-origin fetch, exact HTTP intake, real intercepted `executeScan`, service-owned persistence, response admission, and the existing Results/failure presentation; representative malformed input, request-stream failure, contention, startup failure, stop, validated reads, cleanup, sibling preservation, and exact deletion pass at their direct owning boundaries;
+- scan execution makes no provider request, browser code gains no privileged authority, raw page/native/network content enters neither the aggregate nor tracked evidence, and the exact-three-rule/fresh-context/top-level/no-interaction/no-download boundaries remain true;
+- strict TypeScript, changed-file syntax, native production build, the complete backend/scanner/integration suite, and all 30 unchanged UI cases pass with zero failure, cancellation, skip, todo, or focused-only marker; final exact counts are recorded;
+- the implementation worker reports `RETAINED` or `REFACTORED` with exact responsibility-fit evidence, primary inspection accepts both behavior and placement, and a fresh S3 review returns PASS with no unresolved finding; and
+- scanner/UI/integration scratch is empty, both `.vite-temp` paths remain absent, and exact build/runtime identities are retained unchanged through the slice review and public smoke; final task cleanup later removes only the reviewed build and empty scratch while preserving the retained browser runtime, dependencies, fixtures, manifests, unrelated data, and user work; and
+- after every final authority, status, navigation, progress, and archive mutation, the closure command reasserts the frozen production/test/protected-input/tree/lease-receipt identities without the intentionally deleted build before M1-05 may be marked closed.
+
+The test-relevance audit must confirm that the new integration tests prove only cross-boundary behavior, while the existing contract, repository, service, scanner, and UI suites continue owning their lower-level matrices. Do not duplicate all validation permutations in the browser, assert private module layout, snapshot native payloads, weaken existing cases, or retain a helper that merely wraps one call.
+
+Accept `M105-TRUSTED-PUBLIC-SMOKE-07` only when:
+
+- the owner supplied exactly one permitted, trusted, non-sensitive public HTTPS target and declared the generated smoke run disposable before execution;
+- the native production build and developer-started service report readiness, the developer opens the enumerated loopback URL manually in installed Chrome or Edge, and one Analyze action completes through the real managed scanner with all three rules covered;
+- the accepted UI visibly presents normalized page identity, result overview/details as applicable, native incomplete items separately when present, and the non-certification limitation without exposing run/scanner/provider internals, a Run ID, or reopen control;
+- the canonical `run.json` validates through the application-owned boundary, contains the complete minimized result and no prohibited raw material, and no provider is invoked;
+- the service and managed browser resources stop cleanly and all owned scratch is empty;
+- the exact aggregate, build, browser, application-revision, environment-name, and pre-existing-run-set identities are frozen and remain present and unchanged through the different final integrated review; and
+- only after that review returns PASS, the exact declared run directory is removed and absent, every pre-existing run identity remains unchanged, and the controlled integration lane remains the mandatory sibling-preservation proof. No target content or private result is copied into tracked documentation.
+
+Mark M1-05 Complete only when both remaining checkpoints pass, every earlier accepted slice remains valid, the full closure suite passes from clean owned state, a different fresh integrated critical review inspects the retained aggregate/build and returns PASS, post-review exact deletion/generated cleanup passes, and the documentation gate reconciles the roadmap, README developer instructions and status, plan/progress indexes, this plan, and affected authority navigation. M2-01 remains blocked until that exact closure.
+
 ## Idempotence and Recovery
 
 Read-only inspection and verification commands are safe to repeat after confirming no owned processes or test residue remain. The extraction is additive except for moved declarations inside `service.ts`; a stopped worker must not be reset or reverted automatically. Close the lease, inspect the actual five-path state, preserve unrelated work, and issue at most one fresh attempt-2 packet with the same scope and terminal attempt-1 parent when the correction remains inside the frozen contract.
@@ -408,11 +1524,23 @@ For the run-contract slice, the extraction is additive except for declarations m
 
 For the run-repository slice, the extraction is additive except for declarations moved from the façade. A stopped worker must preserve the five-path state; the primary closes the lease, inspects exact exports, filesystem imports, publication placement, and focused behavior, and may issue one attempt-2 packet only for the same frozen contract. Public-boundary drift, changed error or cleanup precedence, movement of publication state, or need for another path requires reconciliation rather than automatic continuation.
 
-An unexpected file, changed test, Git mutation, public API drift, behavior difference, active-resource leak, or need for shared lifecycle state outside `service.ts` freezes writes. The primary reconciles the tree and this plan before any new assignment. No worker stages, commits, pushes, changes refs, stashes, worktrees, remotes, repository configuration, or hooks.
+For `M105-WALKING-SKELETON-INTEGRATION-06`, every Red or Green write stops at lease closure. Preserve a compliant partial tree and inspect it; never reset or revert user or worker changes automatically. A same-contract correction is permitted once per role only with the identical work-slice contract, phase, path scope, commands, responsibility map, and terminal attempt-1 parent. A new route, status model, component/style change, dependency, asset-serving strategy, request-bound framework, persisted field, scanner policy, or production path changes a binding field and requires a reconciled packet before any write.
+
+Build output and integration scratch are disposable, but cleanup is exact and evidence-backed. Before removing anything, resolve its absolute path inside this workspace, verify ordinary non-link topology and task ownership, and use the narrowest target. Never remove `node_modules`, `m104-browser-runtime`, a shared Playwright cache, `data/runs` as a root, an unrecognized run, or any pre-existing sibling. If a test or smoke leaves a browser/service process, uncertain cleanup, staged file, active lease pointer, or unclassified run directory, stop; preserve the evidence and obtain owner direction rather than hiding it.
+
+The public smoke is not retried automatically. A target/network mutation failure is recorded as non-reusable observation, the service is stopped and task-owned residue is reconciled, and the primary requests one owner-directed target replacement at most. A product defect returns to the already bounded implementation correction route only if the accepted contract and path scope remain unchanged; otherwise execution stops for replanning.
+
+An unexpected file, changed accepted test during Green, Git mutation, public API drift outside the frozen additions, behavior difference, active-resource leak, or need for shared lifecycle state outside `service.ts` freezes writes. The primary reconciles the tree and this plan before any new assignment. No worker stages, commits, pushes, changes refs, stashes, worktrees, remotes, repository configuration, or hooks.
 
 ## Artifacts and Notes
 
-Retain in this plan only the accepted preflight identity and result, Green lease/digest/receipt, exact changed paths, focused/strict/syntax/full results, cohesion disposition, reviewer verdict, and any bounded correction lineage. Guard runtime records remain ignored workflow state and are not copied into tracked documentation.
+Retain in this plan only the accepted preflight identity and result, Red and Green lease/digest/receipt identities, the single accepted Green tuple, exact changed paths, focused/strict/syntax/full results, cohesion disposition, reviewer verdict, and any bounded correction lineage. Guard runtime records remain ignored workflow state and are not copied into tracked documentation.
+
+For the controlled integration checkpoint, retain the exact two test hashes, seven production hashes, complete source/test-tree identities, five protected inputs, both terminal receipt identities, focused and sequential command/count results, build/runtime identities, request/asset boundary audit, empty-scratch proof, cohesion disposition, and S3 verdict as the single `M105-ACCEPTED-GREEN-TUPLE-001`. For `M105-SMOKE-RETAINED-001`, retain only the content-safe run ID and `run.json` hash, application/source/build/browser/environment-name identities, mode, date, terminal status, exact rule-coverage names, item counts, validator/read/stop/cleanup results, pre-existing-run-set digest, and final-review verdict. Never retain the public target, redirect, page title/content, Finding/evidence values, raw response, terminal transcript, or secret. The aggregate itself remains local and reviewable only until the post-review exact deletion.
+
+Planning baseline `M105-INTEGRATION-PLAN-BASELINE-002` was captured before this documentation edit at clean HEAD `a9ccb01f19db386e82c5a00f163c6525b66cb9c0` on branch `codex/m1-05-walking-skeleton-integration`. Node reported `v24.20.0`; independent strict TypeScript passed; and `node --test --test-timeout=120000 tests/run-contract.test.ts tests/run-repository.test.ts tests/local-service.test.ts` passed 182/182 with zero failure, cancellation, skip, or todo. The whole source tree was 51 entries / 147,831 bytes / `8960366EC4E34C2C3649C44D7FDED9077AA28EFA90E456FE350988FA735C7A21`; the whole test tree was nine entries / 317,970 bytes / `B96EC7A3DB35396475C5485180D880BB5F36DCC3F19DA475E9D811BFE1216840`. `dist/client`, `temp/m103-scan`, `temp/m104-ui`, `temp/m105-integration`, repository-root `.vite-temp`, and `node_modules/.vite-temp` were absent; `data/runs` was an ordinary empty directory. The retained `m104-browser-runtime` exact command identity was 332 entries, 318 files, 14 directories, 451,193,922 bytes, digest `4FDF9490EDBA2FC4662FF487C591F769F682D8031B3E59FC26C0C35AEE8371CC`, with the marker and executable identities frozen under `M105-CMD-PREFLIGHT-SETUP`. Protected identities were `package.json` `c2c8718fa44813288abba5792facb3d39400446912ec73de2a8c93e2a6d92c98`, `package-lock.json` `ece19cd10739d5c4139e4700b5a712b89fefe1f898be29c4fbf18dd54682c553`, `tsconfig.json` `3957f80af41b23dc4ccefaa6b24823c367e6984980420b596275b8692df5abde`, `vite.config.ts` `8d75b9863c86a8eca2267c74d8875be46061c288f5eaef6bea93c427d3dacd07`, and `index.html` `91bef948d015f0e084708fdecfb79f765437b439d76b1ed70af55580d815dc88`. This proves planning readiness only; it is not Red, Green, browser, public-network, or task-completion evidence.
+
+Current integration-surface identities at that baseline were `service.ts` `5f36e64d1abd7605625778599e05bff1291c72f624652f4ab093b2244a262bdf`, `contracts.ts` `11658bf1dfb290aebb7badb5de4e2fd1c720799e58663705040db999dbc9a017`, `input-validation.ts` `797f39aad74860cc4b8e4ce632ca7e90ff3d629b5a744ece376cd50b599fb8ee`, `loopback-api.ts` `d8a7f50102a992fa5a9d3847d87563f2f213e3aa005cde24934f27c35b5a73d1`, `scan-page.ts` `ae5a1885f2fbe3579ca8fb5172d43f0543e849bd662747f0e0fa9c4a52307e1d`, `main.tsx` `e06da9c28bcb3c3a27254a21031d312ef217c10c53bb152edeea7975a27a666a`, `App.tsx` `ccad5872446bdcc9099b9e527ee6c162c3c52a6bf87e26eb766db557fc1ff7be`, `local-service.test.ts` `b9aa1dc1fb6ec5c9dba3e5937de761eb91edeb913cdc93a5989e934ef79aab89`, and `target-results-ui.test.ts` `997f1fcce1c51ca74637ae74ff84dbe4b05786a26c897dc0cbef687c5c48914e`. Preflight must reassert the exact relevant tree and environment before and after its commands; the planning hashes do not waive fresh evidence.
 
 Accepted preflight `M105-RUN-REPOSITORY-MODULE-REFACTOR-04-PREFLIGHT-01` ran `node --test --test-timeout=120000 tests/run-repository.test.ts` at HEAD `d30c5616342cb92999772250b36f31fb0341f657`: 55 tests passed with zero failures, cancellations, skips, or todos. Source and test identities remained `run-repository.ts` `58ced192be1386e8052f370a12d0bd3b68858dab7127a2843b1652cda74c0625` and `run-repository.test.ts` `20629f51635028cad097831e2d653c41a25aaadfd79458232d8b2dea45263e73`; the domain façade, service, package, lockfile, and TypeScript configuration also retained their recorded identities. The worker independently mapped stable exports and consumers, immutable round trips, schema/ID/transition/error precedence, Windows root and topology protection, repeated identity checks, short-write and flush/close/rename ordering, every staged-write and cleanup fault, canonical-byte preservation, commit-point behavior, and actual child interruption immediately before and after rename. No test write or artificial Red is needed. Two initial fingerprint probes guessed absent paths and exited without changing repository state; corrected inspection used the actual domain façade and npm lockfile.
 
@@ -474,6 +1602,8 @@ The run-repository slice preserves `src/server/persistence/run-repository.ts` as
 
 The App cleanup preserves `src/client/App.tsx` as the stateful client coordinator and public owner of `App`, `AppProps`, and the `AnalyzeIntent` re-export. It continues to depend on the analysis and results feature components plus `run-admission.ts`; no dependency direction changes. The deletion removes an unread state value and redundant state updates without adding a module, hook, controller, route, package, interface, rendered node, or client/server interaction.
 
+The remaining integration extends the existing service rather than adding a second runtime. `ServiceOptions.clientRoot` is the only new configuration field and is optional for API-only focused construction; production `main.ts` supplies the fixed `dist/client` path. `StartResult` adds only `client-unavailable`. `POST /api/runs` accepts URL plus mode and returns the existing `ScanOutcome`; it creates no second domain DTO or persisted contract. `service.ts` calls the stable scan façade, while `loopback-api.ts` sees only narrow callbacks and a closed client-response table. `client/main.tsx` uses same-origin fetch and passes unknown response data to the existing `App` admission boundary. No new package, environment variable, provider interface, browser-to-filesystem edge, or public scan-policy control is introduced.
+
 ## Revision Note
 
 2026-09-02: Created the M1-05 ExecPlan after the owner explicitly selected the task and its first structural slice. Recorded completed dependencies, the conservative module boundary, existing characterization route, S3 risk, guarded worker ownership, exact verification commands, and the later integration work that remains before task completion.
@@ -523,3 +1653,17 @@ The App cleanup preserves `src/client/App.tsx` as the stateful client coordinato
 2026-09-02: Added and completed owner-approved `M105-APP-DEAD-STATE-CLEANUP-05`. Independent preflight returned `EXISTING_AND_COVERED`; the compliant one-file lease removed exactly the unread state declaration and two setter calls; focused and complete regressions, strict TypeScript, production build, cleanup, and fresh S1 review passed. `App.tsx` remains the orchestration coordinator with cohesion `RETAINED`, and M1-05 remains In progress for HTTP integration.
 
 2026-09-02: Completed the owner-requested post-implementation documentation audit. Updated the public overview, documentation authority index, roadmap status, plan index, and progress index to include and link the accepted App cleanup. The accepted Analyze/Results presentation and completed M1-04 plan remain unchanged because rendered behavior and the historical deferral record are still accurate.
+
+2026-09-02: Reconciled the full current M1-05 state and revised this living plan in place for the remaining walking-skeleton outcome. Recorded clean HEAD and fresh 182-case/typecheck planning evidence; one coherent standard-profile HTTP/browser integration Red-Green slice; exact request, response, asset, responsibility, path, dependency, command, risk, review, recovery, and closure boundaries; and a separate owner-gated public smoke. Preserved all five accepted prior slices. No Decision Review Contract, dependency, product authority, source, test, or task-status change is introduced by this planning revision.
+
+2026-09-02: The first independent remaining-work review returned `REVISE` with five Major findings. This correction preserves API-only health/POST behavior through configured-client capability gating; freezes exact request-stream, media-type, asset-topology, environment, build, sequential-test, production-start/stop, and cleanup literals; adds slice-local authority anchors; requires Local, Groq-zero, and visible-failure browser-form paths; and retains the public aggregate and build through the different final integrated review before exact deletion. The review checkpoint remains open until a different fresh reviewer returns PASS.
+
+2026-09-02: The different fresh re-review accepted the product boundary, workflow ownership, authority mapping, full browser lanes, public-evidence retention, and YAGNI scope but returned `REVISE` on three command/closure gaps. This correction adds primary-owned no-lease scratch preparation and an exact no-write preflight command; makes every Vite build require an absent owned output, removes the recognized Red build before Green, retains one hash-frozen Green build, and asserts all seven production, build, runtime, executable, marker, and protected-input identities before public startup; and moves terminal documentation validation after status, archive, navigation, and progress mutations. The review checkpoint remains open for another fresh verdict.
+
+2026-09-02: The third fresh reviewer again accepted readiness, authorities, capability gating, ownership, full browser paths, public-smoke boundaries, and YAGNI scope but returned `REVISE` on three remaining mechanical gaps. This correction adds an exact plan-only Git/lease/source/test/configuration/runtime identity gate before and after preflight; freezes Red receipt and test identities, then one inseparable Green source/test/protected-input/build/runtime/receipt tuple before plan maintenance and reasserts it through complete verification, smoke, review, and pre-cleanup; and adds a self-contained post-archive documentation command covering status totals/mirrors, allowed and required paths, generated state, links, fragments, encoding, whitespace, PowerShell syntax, required sections, and `git diff --check`. No product, dependency, path scope, test behavior, or architecture boundary changed. A new fresh verdict remains required.
+
+2026-09-02: Primary command validation interrupted the next review before verdict after finding that the new roadmap-total expression targeted a nonexistent standalone `Status` field. The corrected literal parses both existing `Parent milestone / role / status` and `Parent gate / role / status` rows and reproduces the current 28-task baseline as seven Complete, one In progress, and 20 Not started; closure requires exactly eight Complete and 20 Not started. This command-only correction changed no execution scope or product contract, so a fresh review starts against the stable corrected candidate.
+
+2026-09-02: The next fresh reviewer accepted readiness, authorities, scope, capability gating, browser and smoke paths, the preflight gate, the Red/Green evidence tuple, YAGNI boundaries, PowerShell syntax, and the corrected roadmap parser, but returned `REVISE` on one remaining closure-integrity gap. The post-archive command now reasserts byte-for-byte copied values for all seven production files, both accepted tests, the whole source and test trees, five protected inputs, and both terminal lease receipts after every documentation mutation, while deliberately requiring the already reviewed build to be absent. This command-only correction prevents a second edit to an already dirty executable path from escaping closure validation and changes no product contract, path scope, dependency, test behavior, or architecture boundary. A different fresh verdict remains required.
+
+2026-09-02: Fresh final readiness review `M105-REMAINING-WORK-PLAN-REVIEW-05` returned PASS with no Blocker, Major, or Minor finding against candidate SHA-256 `6258258BB57F571EE3AD3E2223461963D1A4251F08305E9F803C1D7C902B3797`. It independently confirmed the closure-integrity correction and regression-checked readiness, routed authorities, exact commands, Red/Green and lease ownership, evidence continuity, capability gating, controlled browser-to-disk lanes, owner-gated public smoke, cleanup/recovery, documentation timing, and YAGNI/KISS scope. Only this result record changed after the reviewed candidate; implementation remains pending.
