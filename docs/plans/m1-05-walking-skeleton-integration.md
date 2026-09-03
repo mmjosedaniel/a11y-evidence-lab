@@ -35,6 +35,7 @@ This plan owns only [M1-05 — Integrate and verify the walking skeleton](../DEV
 - [x] (2026-09-02) Received explicit owner approval of `M105-APP-DEAD-STATE-CLEANUP-05`. Repository analysis found `App.tsx` already cohesive at its accepted orchestration boundary; the selected cleanup removes only unread `pendingAnalysis` state and its two setter calls without creating a hook, reducer, controller, component, or module.
 - [x] (2026-09-02) Accepted independent read-only `EXISTING_AND_COVERED` preflight: all 30 browser cases passed under the pinned Chromium environment with exact baseline identities, no failure, skip, test change, external request, or retained test-owned residue.
 - [x] (2026-09-02) Completed the guarded one-file Green, focused and complete verification, exact generated-output cleanup, and fresh S1 PASS with no finding. The production diff is exactly three deletions in `App.tsx`; public interfaces and observable behavior remain unchanged, and cohesion is accepted as `RETAINED`.
+- [x] (2026-09-02) Completed the owner-requested documentation follow-up: reconciled the public overview, documentation index, roadmap, plan index, and progress index to include the accepted App cleanup, linked each applicable navigation surface to this owning slice, and confirmed that the unchanged UI contract and historical M1-04 plan need no amendment.
 - [ ] Implement the separately planned HTTP scan integration and complete M1-05's browser/build integration checkpoint before task closure.
 
 ## Surprises & Discoveries
@@ -322,7 +323,7 @@ Post-Green validation runs the unchanged 30 browser cases under the retained pin
 
 Work from `C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab`.
 
-The first four structural slices and their corrections are complete. Execute the selected App dead-state cleanup before the separately planned HTTP scan-integration boundary.
+The four structural slices, their corrections, and the App dead-state cleanup are complete. Execute the separately planned HTTP scan-integration boundary next.
 
 1. Confirm the task is In progress, the worktree/index baseline, no active lease, and the exact allowed Green paths.
 2. Send Milestone Assignment Packet v2 for read-only preflight to one persistent `test_worker`.
@@ -520,3 +521,5 @@ The App cleanup preserves `src/client/App.tsx` as the stateful client coordinato
 2026-09-02: Corrected the owner-supplied P3 generated-output evidence finding without changing production code. Verified and removed only the ordinary empty `node_modules/.vite-temp` directory, confirmed both cache paths are absent, and superseded the earlier incomplete cleanup claims. M1-05 remains In progress for real HTTP scan integration and its browser/build checkpoint.
 
 2026-09-02: Added and completed owner-approved `M105-APP-DEAD-STATE-CLEANUP-05`. Independent preflight returned `EXISTING_AND_COVERED`; the compliant one-file lease removed exactly the unread state declaration and two setter calls; focused and complete regressions, strict TypeScript, production build, cleanup, and fresh S1 review passed. `App.tsx` remains the orchestration coordinator with cohesion `RETAINED`, and M1-05 remains In progress for HTTP integration.
+
+2026-09-02: Completed the owner-requested post-implementation documentation audit. Updated the public overview, documentation authority index, roadmap status, plan index, and progress index to include and link the accepted App cleanup. The accepted Analyze/Results presentation and completed M1-04 plan remain unchanged because rendered behavior and the historical deferral record are still accurate.
