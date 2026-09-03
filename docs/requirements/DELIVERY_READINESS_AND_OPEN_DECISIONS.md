@@ -8,7 +8,7 @@ This document is part of the authoritative requirements baseline indexed by [Pro
 
 **Latest fully closed task:** [M1-05](../plans/completed/m1-05-walking-skeleton-integration.md). Both post-closure corrections, 335 tests, strict TypeScript, fresh independent reviews, exact cleanup, and renewed documentation closure passed. The prior public smoke remains historical evidence.
 
-**Current task (2026-09-03 UTC):** None. M2-01 remains Not started until explicitly selected. No requirement, ADR, or evaluation-baseline semantics changed.
+**Current task (2026-09-03 UTC):** [M2-01 — Closed corpus snapshot](../plans/m2-01-closed-corpus-snapshot.md), In progress for owner-selected planning only. The request authorizes its ExecPlan and planning/status documentation, not execution or W3C source acquisition. Both remain explicitly gated under ADR-0022. No requirement, ADR, or evaluation-baseline semantics changed.
 
 The owner first selected [M1-02](../plans/completed/m1-02-local-service-and-aggregate.md) for planning, then authorized exact-task execution. It is now Complete: all 182 product tests, independent strict typechecking, actual startup/reopen/stop and exact synthetic-run deletion passed. Both slice S3 reviews and the different final integrated critical review passed; documentation closure is accepted. The earlier completion history below remains unchanged.
 

@@ -4,7 +4,7 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-None.
+- [M2-01 — Closed corpus snapshot](m2-01-closed-corpus-snapshot.md) — **In progress** for planning only. The owner selected this dependency-ready task on 2026-09-03; execution and eight-source acquisition remain separately gated. No corpus or application behavior has been created.
 
 ## Completed plans
 
