@@ -1,17 +1,25 @@
 import type { Server } from 'node:http';
 import { openRunRepository } from './persistence/run-repository.ts';
 import type { RunningRun, FailedRun } from './persistence/run-repository.ts';
-import { parseServiceConfiguration, prepareRunningRun } from './local-service/input-validation.ts';
+import { parseServiceConfiguration, prepareRunningRun, prepareServiceScan } from './local-service/input-validation.ts';
 import { createFailedRun, createRejectedScanOutcome, matchTerminalRun } from './local-service/scan-run-records.ts';
 import type { ScanFailure } from './local-service/scan-run-records.ts';
 import { createLoopbackApiServer } from './local-service/loopback-api.ts';
+import { loadClientResponses } from './local-service/client-assets.ts';
+import type { ClientResponseTable } from './local-service/client-assets.ts';
 import type { ReadResult, ScanOutcome, ServiceOptions, StartResult, StopResult } from './local-service/contracts.ts';
+import { executeScan } from './scan/scan-page.ts';
 
 export type { ReadResult, ScanOutcome, StopResult, LocalService, StartResult, ServiceOptions } from './local-service/contracts.ts';
 
 export async function startLocalService(options: ServiceOptions): Promise<StartResult> {
   const config = parseServiceConfiguration(options);
   if (!config) return { ok: false, error: 'invalid-configuration' };
+  let clientResponses: ClientResponseTable | undefined;
+  if (config.clientRoot) {
+    try { clientResponses = loadClientResponses(config.clientRoot); }
+    catch { return { ok: false, error: 'client-unavailable' }; }
+  }
   const opened = openRunRepository(config.runRoot);
   if (!opened.ok) return { ok: false, error: 'storage-unavailable' };
   const repository = opened.value;
@@ -163,7 +171,11 @@ export async function startLocalService(options: ServiceOptions): Promise<StartR
 
   let server: Server;
   try {
-    server = createLoopbackApiServer({ isStopping: () => admissionClosed, isBusy: busy, readRun });
+    server = createLoopbackApiServer({ isStopping: () => admissionClosed, isBusy: busy, readRun,
+      ...(clientResponses ? { clientResponses, runScan: (input: unknown) => {
+        const prepared = prepareServiceScan(input);
+        return prepared ? runScan(prepared, executeScan) : Promise.resolve(createRejectedScanOutcome('invalid-request'));
+      } } : {}) });
   } catch { return { ok: false, error: 'listen-failed' }; }
   return new Promise<StartResult>(resolve => {
     let startupSettled = false;

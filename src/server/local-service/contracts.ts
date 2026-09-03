@@ -27,11 +27,12 @@ export interface LocalService {
 
 export type StartResult =
   | { ok: true; service: LocalService }
-  | { ok: false; error: 'invalid-configuration' | 'storage-unavailable' | 'listen-failed' };
+  | { ok: false; error: 'invalid-configuration' | 'client-unavailable' | 'storage-unavailable' | 'listen-failed' };
 
 export interface ServiceOptions {
   runRoot: string;
   applicationRevision: string;
+  clientRoot?: string;
   port?: number;
   stopTimeoutMs?: number;
 }

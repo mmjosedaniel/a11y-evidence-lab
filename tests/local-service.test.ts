@@ -131,8 +131,8 @@ function failure(result: ScanOutcome, error: string, persisted: boolean, cleanup
 function noRun(error: string, cleanupFailed = false) {
   return { ok: false, error, run: null, persisted: false, cleanupFailed };
 }
-function health(status: 'ready' | 'stopping', busy: boolean) {
-  return { status, busy, capabilities: { readRuns: true, scan: false } };
+function health(status: 'ready' | 'stopping', busy: boolean, scan = false) {
+  return { status, busy, capabilities: { readRuns: true, scan } };
 }
 type Reply = { status: number; headers: http.IncomingHttpHeaders; text: string; body: unknown };
 function get(url: string, target = '/api/health', method = 'GET'): Promise<Reply> {
@@ -1074,7 +1074,7 @@ test('M102 entry-point reopen and exact deletion', serial, async () => {
         await withEntry(box, async record => {
           const url = await childReady(record);
           assert.equal(new URL(url).hostname, '127.0.0.1');
-          assert.deepEqual(await fetchEntry(url, '/api/health'), health('ready', false));
+          assert.deepEqual(await fetchEntry(url, '/api/health'), health('ready', false, true));
           assert.deepEqual(await fetchEntry(url, '/api/runs/' + ids[0]), { ok: true, run: completedRun(ids[0]), interrupted: false });
           sendStop(record);
           await childExit(record, 0);
@@ -1108,7 +1108,7 @@ test('real entry ignores non-stop lines without echo, accepts CRLF stop, and sup
       await withEntry(box, async record => {
         const url = await childReady(record);
         record.child.stdin.write(canary + '\r\n stop\nstop \r\n');
-        assert.deepEqual(await fetchEntry(url, '/api/health'), health('ready', false));
+        assert.deepEqual(await fetchEntry(url, '/api/health'), health('ready', false, true));
         if (channel === 'line') sendStop(record, 'stop\r\n');
         else { record.stopSent = true; record.child.stdin.end(); }
         await childExit(record, 0);

@@ -54,11 +54,11 @@ Public comparison always starts from a baseline Finding. For binary `image-alt` 
 
 Development ready. The [development roadmap](docs/DEVELOPMENT_ROADMAP.md) owns implementation order and status. [RD-002](docs/plans/completed/rd-002-minimum-development-toolchain-literals.md) completed the pinned toolchain, and [RD-003](docs/plans/completed/rd-003-scan-evaluation-boundary.md) completed the six controlled fixtures and scan-only evaluation manifest, including reviewed reproducibility and cleanup corrections. [M1-01](docs/plans/completed/m1-01-run-and-scan-contracts.md) completed the pure run/scan validators and 58 contract tests.
 
-[M1-02 — Local service and aggregate](docs/plans/completed/m1-02-local-service-and-aggregate.md) is Complete. At its closure, all 182 product tests, independent strict typechecking, actual startup/reopen/stop and exact synthetic-run deletion passed. Both slice S3 reviews and the different final integrated critical review passed; documentation closure is accepted. The service is runnable with the instructions below. HTTP scanning, retrieval, generation, provider calls and later workflows are not implemented; the internal M1-03 scanner is Complete as described below.
+[M1-02 — Local service and aggregate](docs/plans/completed/m1-02-local-service-and-aggregate.md) is Complete. At its closure, all 182 product tests, independent strict typechecking, actual startup/reopen/stop and exact synthetic-run deletion passed. Both slice S3 reviews and the different final integrated critical review passed; documentation closure is accepted. The service is runnable with the instructions below. M1-05 now connects HTTP scanning to the completed internal scanner and Results UI. Retrieval, generation, provider calls, review, and comparison remain unimplemented.
 
 [M1-03 — Real scan and evidence](docs/plans/completed/m1-03-real-scan-and-evidence.md) is Complete after owner-authorized execution and verified closure. Both scanner slices and their S3 reviews are accepted. All 290 integrated tests and independent strict typechecking pass, including the failed-launch residue regression. The different final integrated critical review, exact task-owned runtime cleanup and documentation closure passed. At M1-03 closure, M1-04 and M1-05 were unselected.
 
-[M1-04 — Target and results UI](docs/plans/completed/m1-04-target-and-results-ui.md) is Complete after the OD-027 [Analyze and results presentation](docs/ui/ANALYZE_AND_RESULTS_PRESENTATION.md), purpose-named component extraction, integrated-review correction, complete regression, independent reviews, exact cleanup, and documentation closure. M1-05 is In progress after four accepted internal module refactors and the accepted [App dead-state cleanup](docs/plans/m1-05-walking-skeleton-integration.md#m105-app-dead-state-cleanup-05--retain-the-app-coordinator); HTTP scan integration remains unimplemented.
+[M1-04 — Target and results UI](docs/plans/completed/m1-04-target-and-results-ui.md) is Complete after the OD-027 [Analyze and results presentation](docs/ui/ANALYZE_AND_RESULTS_PRESENTATION.md), purpose-named component extraction, integrated-review correction, complete regression, independent reviews, exact cleanup, and documentation closure. [M1-05](docs/plans/completed/m1-05-walking-skeleton-integration.md) is Complete. Its same-origin scan-to-disk integration passes 324 tests, strict TypeScript, and one authorized public-page smoke. Final independent review, exact cleanup, and documentation closure passed. M2-01 remains Not started until explicitly selected.
 
 ## Development toolchain
 
@@ -76,49 +76,93 @@ npm.cmd @toolchainOptions run typecheck
 
 Retain optional dependencies: they supply the platform-specific compiler and build binaries. Do not enable install scripts to work around a failure, regenerate the lock during a restore, or introduce another package manager. The independent `typecheck` runs strict `tsc` with no emitted JavaScript; native Node TypeScript execution does not replace it.
 
-The focused runner is Node's built-in test runner. The browser-free core subset contains the domain, repository and service tests. Run these three files and the independent strict typecheck inside the nonbrowser wrapper; the complete five-file suite is described below:
+The focused runner is Node's built-in test runner. Server modules and tests use erasable TypeScript and explicit `.ts` imports; `.tsx` is client-bundled code, not native Node input. Native execution and the Vite build do not replace strict typechecking.
+
+## Build and verify the walking skeleton
+
+The production entry now serves the built React client and its enumerated assets from the same loopback origin as the API. Vite uses `--configLoader native`, emits only `dist/client`, and needs no React plugin. Missing or invalid client output fails startup as `client-unavailable`; the service does not fall back to a dev server or arbitrary files.
+
+For this verified Windows checkout, first run only the read-only definitions in [M105-CMD-PREP](docs/plans/completed/m1-05-walking-skeleton-integration.md#m105-cmd-prep--exact-shell-literals-and-environment-restoration). They define the pinned Node path, retained browser path, environment-restoring `Invoke-M105Command`, and ordinary-path checks. Do not replay the historical planning, lease, evidence-capture, or task-cleanup blocks. The preparation block contains this checkout's absolute path; it is not a portable installer.
+
+The retained browser is full Playwright-managed Chromium revision 1234 / version 151.0.7922.34 under `m104-browser-runtime/browsers`. It remains a developer prerequisite, not a general support claim. If absent, use the reviewed [RD-003 acquisition procedure](docs/plans/completed/rd-003-scan-evaluation-boundary.md#current-reproduction--rd003-procedure-003) and reconcile the resulting browser path before running anything; the application never downloads a browser. The seven frozen evaluation artifacts retain their LF policy and original native outcomes.
+
+In the same prepared shell, create only missing task scratch directories, reject unexpected contents, and build only when the generated output is absent:
 
 ```powershell
-npm.cmd @toolchainOptions run test:focused -- tests/run-contract.test.ts tests/run-repository.test.ts tests/local-service.test.ts
-npm.cmd @toolchainOptions run typecheck
+foreach ($m105Scratch in @($m105ScanTemp,$m105UiTemp,$m105IntegrationTemp)) {
+  $null = Assert-M105OrdinaryPath $m105Scratch -AllowMissing
+  if (-not (Test-Path -LiteralPath $m105Scratch)) {
+    New-Item -ItemType Directory -Path $m105Scratch -ErrorAction Stop | Out-Null
+  }
+  Assert-M105EmptyDirectory $m105Scratch
+}
+$null = Assert-M105OrdinaryPath $m105Build -AllowMissing
+if (Test-Path -LiteralPath $m105Build) { throw 'Inspect existing client output before rebuilding.' }
+Invoke-M105Command {
+  & $m105Node node_modules/typescript/bin/tsc --project tsconfig.json
+  if ($LASTEXITCODE -ne 0) { throw 'Strict TypeScript failed.' }
+  & $m105Node node_modules/vite/bin/vite.js build --configLoader native
+  if ($LASTEXITCODE -ne 0) { throw 'Client build failed.' }
+}
 ```
 
-No test is retained solely to make the runner pass: RD-002 proved an intentional assertion failure and corrected pass, then removed its disposable probe. Server modules and tests use erasable TypeScript and explicit `.ts` imports; `.tsx` is client-bundled code, not native Node input.
-
-Vite 8 builds the React client without a React plugin and emits only the client bundle to `dist/client`. The M1-04 HTML/client entries pass strict typechecking and `build -- --configLoader native` under the archived plan's environment and output-ownership controls. The `start` script (`node src/server/main.ts`) runs the local service described below; it does not serve the UI. The M1-04 tests render the actual UI through a disposable Vite transport; no production dev-server topology or service integration is added. RD-003 has verified full Playwright-managed Chromium revision 1234 / version 151.0.7922.34 against the [scan-only manifest](evaluation/rd003-scan-v1.json). Its [evaluation procedure and native evidence](docs/plans/completed/rd-003-scan-evaluation-boundary.md#accepted-setup-and-native-observations--rd003-observations-001) use the pinned Node/npm and libraries directly over six authored static states; that evaluation created no permanent probe or application scanner. The original task-local runtime/browser was removed after its review and verified cleanup; global installations and shared browser caches remain unchanged. This is an evaluation result, not a support claim. M1-03 now exercises these same inputs through its application capture/normalization modules; its distinct native capture profile and task status are recorded above.
-
-For RD-003 reproduction after task-local cleanup, use the reviewed [current clean-start procedure](docs/plans/completed/rd-003-scan-evaluation-boundary.md#current-reproduction--rd003-procedure-003), after restoring the RD-002 dependencies above. The scoped [.gitattributes](.gitattributes) preserves the seven frozen artifacts' LF bytes; all 21 checkout-filter comparisons pass. The single owner-authorized network-enabled retry passed acquisition, binary/package identity checks, and strict typechecking. The independently reviewed task-local files were removed after verified cleanup; the first attempt's socket-permission failure is preserved. The original failed bootstrap and preserved-cache resume command remain historical.
-
-## Verify the real scanner
-
-M1-03 adds an internal backend capability. It does not add an Analyze route, UI, provider call or scan-to-disk wiring. The production entry still needs no browser because it exposes only the existing service capabilities.
-
-The internal API in [scan-page.ts](src/server/scan/scan-page.ts) separates input preparation from execution. `prepareScanRequest(url, mode)` validates and normalizes the target and mode without creating a run or contacting a browser or provider. After successful preparation and service-owned run creation, `executeScan(run, signal)` consumes the validated running record and returns a completed or failed terminal record. It does not publish that record to disk; wiring this callback into the service remains M1-05.
-
-The M1-03 task-local runtime and both scratch directories were removed after accepted review. To reproduce browser verification, provision the pinned Playwright-managed Chromium again and use exclusive ownership of the exact task scratch roots. Follow [L3.8 setup, environment and cleanup](docs/plans/completed/m1-03-real-scan-and-evidence.md#l38-exact-commands-environment-and-effects) from this checkout: provision the task-local cache, verify its inventory and dependency marker, and create ordinary empty setup/scan scratch directories. Set both TEMP and TMP to the exact scan scratch path **before starting Node**, using the reviewed browser wrapper; per-run application code neither changes the environment nor installs a browser. M1-05 must preserve this process-start prerequisite when wiring the callback.
-
-Inside that browser wrapper, the complete suite command is:
+The complete current suite has seven files and passed 324 tests. Run them sequentially, with no running application service or concurrent browser test. The production-entry tests also require the built client. The scanner and walking-skeleton suites use scanner scratch; the UI suite uses separate UI scratch:
 
 ```powershell
-npm.cmd @toolchainOptions run test:focused -- tests/run-contract.test.ts tests/run-repository.test.ts tests/local-service.test.ts tests/scan-normalization.test.ts tests/scan-page.test.ts
+foreach ($m105Test in @('run-contract','run-repository','local-service','scan-normalization')) {
+  Invoke-M105Command {
+    & $m105Node --test --test-timeout=120000 ("tests/" + $m105Test + ".test.ts")
+    if ($LASTEXITCODE -ne 0) { throw 'Browser-free suite failed.' }
+  }
+}
+foreach ($m105Test in @('scan-page','walking-skeleton')) {
+  Assert-M105EmptyDirectory $m105ScanTemp
+  Assert-M105EmptyDirectory $m105IntegrationTemp
+  Invoke-M105Command {
+    & $m105Node --test --test-timeout=120000 ("tests/" + $m105Test + ".test.ts")
+    if ($LASTEXITCODE -ne 0) { throw 'Scanner or integration suite failed.' }
+  } $m105ScanTemp
+}
+Invoke-M105Command {
+  & $m105Node --test --test-timeout=120000 tests/target-results-ui.test.ts
+  if ($LASTEXITCODE -ne 0) { throw 'UI suite failed.' }
+} $m105UiTemp
+foreach ($m105Scratch in @($m105ScanTemp,$m105UiTemp,$m105IntegrationTemp)) {
+  Assert-M105EmptyDirectory $m105Scratch
+}
 ```
 
-Run the independent typecheck separately inside the nonbrowser wrapper. The accepted run passes 290 tests and strict typechecking. Tests load all six unchanged gold states offline with truthful about:blank identity and use intercepted project-owned HTTPS responses for navigation. They do not qualify public DNS, TLS, redirects, arbitrary hostile pages or other platforms. The application capture profile m103-native-dom-v1 is distinct from RD-003's scan-only reporter profile. Work/cleanup deadlines are cooperative, not an OS process-kill guarantee.
+The controlled tests use the six project-owned states and intercepted project-owned HTTPS responses. They are not live-public-site qualification. The separate authorized public-page smoke passed only after the production service and managed browser ran outside a network-restricted sandbox; `net::ERR_NETWORK_ACCESS_DENIED` in that sandbox was an environment failure, not a valid zero result. Do not disable browser isolation or broaden target scope to work around it. Work and cleanup deadlines remain cooperative, not an OS process-kill guarantee.
 
 ## Run the local service
 
-After the prerequisite checks and locked restore above, start from the repository root in PowerShell:
+After the build and scratch checks above, run this in the prepared shell. It supplies the scanner's process-start environment before Node starts, restores it afterward, and makes no model or provider call:
 
 ```powershell
-$env:A11Y_APPLICATION_REVISION = (git rev-parse HEAD).Trim()
-npm.cmd @toolchainOptions run start
+$m105PriorRevision = [Environment]::GetEnvironmentVariable('A11Y_APPLICATION_REVISION','Process')
+$m105PriorPort = [Environment]::GetEnvironmentVariable('A11Y_PORT','Process')
+try {
+  $env:A11Y_APPLICATION_REVISION = (git rev-parse HEAD).Trim()
+  $env:A11Y_PORT = '0'
+  Assert-M105EmptyDirectory $m105ScanTemp
+  Invoke-M105Command {
+    & $m105Node src/server/main.ts
+    if ($LASTEXITCODE -ne 0) { throw 'Local service did not stop successfully.' }
+  } $m105ScanTemp
+  Assert-M105EmptyDirectory $m105ScanTemp
+} finally {
+  [Environment]::SetEnvironmentVariable('A11Y_APPLICATION_REVISION',$m105PriorRevision,'Process')
+  [Environment]::SetEnvironmentVariable('A11Y_PORT',$m105PriorPort,'Process')
+}
 ```
 
-The revision must be exactly 40 lowercase hexadecimal characters. Optional `A11Y_PORT` accepts decimal 0 through 65535 without spaces, signs, or leading zeroes; absent or zero asks Windows for an available port. The entry point reads no provider credentials, model settings, or arbitrary data-root setting. It needs no browser or model setup. Run only one service instance against this working copy: separate processes are not coordinated.
+The revision must be exactly 40 lowercase hexadecimal characters. Optional `A11Y_PORT` accepts decimal 0 through 65535 without spaces, signs, or leading zeroes; absent or zero asks Windows for an available port. The entry reads no provider credentials, model settings, or arbitrary data-root setting. No Ollama installation or model is needed for scanning. Run only one service instance against this checkout; separate processes are not coordinated.
 
-A successful start prints one JSON `service-ready` event containing the actual `http://127.0.0.1:<port>` URL. Use that URL for `GET /api/health` or `GET /api/runs/<run-id>`. Health reports service readiness, current reservation, and capabilities `readRuns: true`, `scan: false`. Run reads validate the retained aggregate and mark historical `running` records as `interrupted: true`; they do not resume work. There is no Analyze, aggregate-upload, configuration, shutdown, static-file, or UI route. The internal `runScan` collaborator handoff is reserved for later scanner integration and is exercised only with synthetic collaborators in these tests.
+A successful start prints one JSON `service-ready` event with the actual `http://127.0.0.1:<port>` URL. Open that exact URL in Chrome or Edge, enter one permitted trusted public HTTPS target, explicitly select Local or Groq, and activate Analyze once. The service owns a separate fresh managed Chromium context; it does not use your UI browser profile. Keep the target and ordinary redirect destination non-sensitive. Local/Groq selection records context only and makes no provider call.
 
-Type exactly `stop` and press Enter in the service terminal, then wait for `service-stopped` and exit 0. The entry also handles stdin EOF, SIGINT, and SIGBREAK. Tests exercise LF/CRLF stop and EOF; forced Windows process termination is not evidence of a clean stop. Startup errors emit only `service-startup-failed` with a closed error code and exit 1. A failed stop emits `service-stop-failed` and exits 1; do not interpret that process exit as proof of resource cleanup.
+Production health reports `readRuns: true`, `scan: true`. The built client posts only target and mode to `POST /api/runs`; the service validates, scans, and publishes one minimized `run.json` before returning a completed result. `GET /api/runs/<run-id>` remains a validated internal read, not a UI reopen/history action. API-only programmatic construction without `clientRoot` still reports `scan: false`, serves no UI, and rejects POST with 405. Neither service exposes configuration, upload, shutdown, or arbitrary-file routes.
+
+Type exactly `stop` and press Enter in the service terminal, then require `service-stopped` and exit 0. EOF, SIGINT, and SIGBREAK also request stop. Forced Windows termination is not proof of clean cleanup. Startup errors emit only `service-startup-failed` with a closed error code and exit 1; failed stop emits `service-stop-failed` and exit 1.
 
 The service refuses overlapping operations without a queue. Cleanup uncertainty closes admission, and a stop deadline permanently forbids late publication. Publication writes the complete validated JSON to an exclusive same-directory staging file, flushes and closes it, then renames it to `run.json`. A failed update preserves prior canonical bytes. This is verified on the local Windows filesystem for the specified single-writer boundary; it is not a universal power-loss, OS-crash, filesystem-filter, malicious-race, or hard OS-call deadline guarantee.
 
@@ -134,11 +178,11 @@ The repeatable synthetic demonstration creates exactly two exclusive `m102-demo-
 npm.cmd @toolchainOptions run test:focused -- --test-name-pattern='M102 entry-point reopen and exact deletion' tests/local-service.test.ts
 ```
 
-This filtered demonstration does not replace either the core subset or the complete five-file suite. Tests use only project-owned synthetic records, isolated `temp/m102-*` roots, and bounded owned child processes; they never acquire or delete a real corpus or user run.
+This filtered demonstration does not replace either the core subset or the complete seven-file suite. Tests use only project-owned synthetic records, isolated `temp/m102-*` roots, and bounded owned child processes; they never acquire or delete a real corpus or user run.
 
 ## Current scope
 
-This repository contains the Accepted planning baseline, frozen scan evaluation inputs, pinned toolchain, pure run/scan validators, concrete run repository, loopback service, entry point, focused tests, and the completed M1-04 target/results UI narrowed by OD-026 and OD-027. The [M1-02 plan](docs/plans/completed/m1-02-local-service-and-aggregate.md) records ordinary literals, implementation evidence, review state and limitations. The [domain contract](src/server/domain/run-contract.ts) still owns record validation; [storage](src/server/persistence/run-repository.ts) and the [service](src/server/service.ts) reuse it without adding later workflow fields. [Real scanning](src/server/scan/scan-page.ts) and [minimization](src/server/scan/normalize-scan.ts) pass 88 scan tests, 20 normalization tests and both S3 reviews. M1-04's final evidence-first interface passed its controlling 290-plus-30 regression, strict, build, review, browser/accessibility, cleanup and documentation gates. M1-05 has accepted four internal module refactors and one bounded App cleanup; HTTP integration, retrieval, generation, review and comparison remain their separately selected roadmap work.
+This repository contains the Accepted planning baseline, frozen scan evaluation inputs, pinned toolchain, pure run/scan validators, concrete run repository, loopback service, entry point, focused tests, and the completed M1-04 target/results UI narrowed by OD-026 and OD-027. The [M1-02 plan](docs/plans/completed/m1-02-local-service-and-aggregate.md) records ordinary literals, implementation evidence, review state and limitations. The [domain contract](src/server/domain/run-contract.ts) still owns record validation; [storage](src/server/persistence/run-repository.ts) and the [service](src/server/service.ts) reuse it without adding later workflow fields. [Real scanning](src/server/scan/scan-page.ts) and [minimization](src/server/scan/normalize-scan.ts) pass 88 scan tests, 20 normalization tests and both S3 reviews. M1-04's final evidence-first interface passed its controlling 290-plus-30 regression, strict, build, review, browser/accessibility, cleanup and documentation gates. M1-05 now verifies same-origin HTTP integration, real scan-to-disk publication, and one authorized public-page smoke. All 324 tests, strict TypeScript, final independent review, exact cleanup, and documentation closure passed. Retrieval, generation, review, and comparison remain separately selected roadmap work.
 
 ## Documentation
 
