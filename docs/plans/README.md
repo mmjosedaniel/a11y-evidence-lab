@@ -4,10 +4,11 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-- [M1-05 — Walking-skeleton integration](m1-05-walking-skeleton-integration.md) — **In progress** after four accepted behavior-preserving module refactors and the accepted [App dead-state cleanup](m1-05-walking-skeleton-integration.md#m105-app-dead-state-cleanup-05--retain-the-app-coordinator). HTTP scan integration remains a later M1-05 slice.
+None.
 
 ## Completed plans
 
+- [M1-05 — Walking-skeleton integration](completed/m1-05-walking-skeleton-integration.md) — **Complete** again on 2026-09-03 after both post-closure corrections, 335 passing tests, strict TypeScript, fresh S3 and different final integrated reviews, exact cleanup, and renewed documentation closure. Original implementation, failed evidence, and public-smoke history are preserved.
 - [M1-04 — Target and results UI](completed/m1-04-target-and-results-ui.md) — **Complete** on 2026-09-02 (UTC). The accepted OD-027 presentation, purpose-named component extraction, integrated-review correction, complete regression, independent reviews, exact cleanup, and documentation closure passed.
 - [M1-03 — Real scan and evidence](completed/m1-03-real-scan-and-evidence.md) — **Complete** on 2026-08-31 (UTC). Both scanner slices and their S3 reviews are accepted. All 290 integrated tests and independent strict typechecking pass, including the failed-launch residue regression. The different final integrated critical review, exact task-owned runtime cleanup and documentation closure passed. At M1-03 closure, M1-04 and M1-05 were unselected.
 

@@ -11,7 +11,8 @@ if (typeof applicationRevision !== 'string' || applicationRevision.length !== 40
   result = { ok: false, error: 'invalid-configuration' };
 } else {
   result = await startLocalService({ runRoot: fileURLToPath(new URL('../../data/runs/', import.meta.url)),
-    applicationRevision, port: portText === undefined ? 0 : Number(portText) });
+    clientRoot: fileURLToPath(new URL('../../dist/client/', import.meta.url)), applicationRevision,
+    port: portText === undefined ? 0 : Number(portText) });
 }
 
 function diagnostic(stream: NodeJS.WriteStream, event: object, exitCode: number): void {
