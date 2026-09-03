@@ -23,7 +23,6 @@ function countText(count: number, singular: string): string {
 
 export function App(props: AppProps): ReactElement {
   const [busy, setBusy] = useState(false);
-  const [pendingAnalysis, setPendingAnalysis] = useState<AnalyzeIntent | null>(null);
   const [announcement, setAnnouncement] = useState('');
   const [error, setError] = useState<AnalysisError | null>(null);
   const [complete, setComplete] = useState<CompleteRun | null>(null);
@@ -83,7 +82,6 @@ export function App(props: AppProps): ReactElement {
     held.current = { complete: known.complete, failed: null };
     reservation.current = token;
     setBusy(true);
-    setPendingAnalysis(intent);
     setError(null);
     setFailed(null);
     setAnnouncement('Analysis started.');
@@ -109,7 +107,6 @@ export function App(props: AppProps): ReactElement {
       if (mounted.current && reservation.current === token) {
         reservation.current = null;
         setBusy(false);
-        setPendingAnalysis(null);
       }
     }
   }

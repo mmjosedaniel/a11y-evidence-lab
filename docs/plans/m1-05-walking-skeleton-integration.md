@@ -2,7 +2,7 @@
 
 This ExecPlan is a living document. Maintain `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` as work proceeds. This document must be maintained in accordance with `PLANS.md`.
 
-This plan owns only [M1-05 — Integrate and verify the walking skeleton](../DEVELOPMENT_ROADMAP.md#m1-05--integrate-and-verify-the-walking-skeleton). The owner explicitly selected M1-05 and approved the structural slices described below. The first preserved the existing loopback-service behavior while giving its stateless responsibilities focused modules. The second preserved scanner behavior while extracting stateless request preparation, native capture, value reading, and rule-evidence projection from its two ordering-sensitive coordinators. The third preserves the `run-contract.ts` public boundary while separating its contract model, fixed policy, hostile-value reader, finding validation, scan validation, and parent-run validation. The fourth preserves the `run-repository.ts` public boundary while extracting its public contracts, bounded errors, Windows path protection, and transition validation from the ordering-sensitive repository coordinator. None of these slices connects the HTTP Analyze path to the real scanner, completes the milestone integration checkpoint, authorizes M2 work, or authorizes a commit or push.
+This plan owns only [M1-05 — Integrate and verify the walking skeleton](../DEVELOPMENT_ROADMAP.md#m1-05--integrate-and-verify-the-walking-skeleton). The owner explicitly selected M1-05 and approved the structural slices described below. The first preserved the existing loopback-service behavior while giving its stateless responsibilities focused modules. The second preserved scanner behavior while extracting stateless request preparation, native capture, value reading, and rule-evidence projection from its two ordering-sensitive coordinators. The third preserves the `run-contract.ts` public boundary while separating its contract model, fixed policy, hostile-value reader, finding validation, scan validation, and parent-run validation. The fourth preserves the `run-repository.ts` public boundary while extracting its public contracts, bounded errors, Windows path protection, and transition validation from the ordering-sensitive repository coordinator. The fifth removes one unused client state value while retaining `App.tsx` as the cohesive stateful parent. None of these slices connects the HTTP Analyze path to the real scanner, completes the milestone integration checkpoint, authorizes M2 work, or authorizes a commit or push.
 
 ## Progress
 
@@ -32,6 +32,9 @@ This plan owns only [M1-05 — Integrate and verify the walking skeleton](../DEV
 - [x] (2026-09-02) Completed the guarded five-path repository Green/Refactor without changing tests. The lease closed fresh and compliant; focused 55-case, complete 290-case, strict TypeScript, five syntax, stable-export/import, identity, and cleanup checks pass.
 - [x] (2026-09-02) Accepted fresh S3 PASS with no Blocker, Major, or Minor finding. The reviewer independently validated Windows path and identity protection, publication and interruption ordering, cleanup truthfulness, error precedence, stable exports, dependency direction, and cohesion as `REFACTORED`; completed documentation reconciliation while keeping M1-05 In progress.
 - [x] (2026-09-02) Accepted the owner-supplied P3 cleanup-evidence correction: independently verified `node_modules/.vite-temp` as an ordinary, non-link, empty directory inside the workspace; removed only that exact directory without recursion; verified both it and repository-root `.vite-temp` are absent; and corrected the overstated earlier evidence without changing production code or tests.
+- [x] (2026-09-02) Received explicit owner approval of `M105-APP-DEAD-STATE-CLEANUP-05`. Repository analysis found `App.tsx` already cohesive at its accepted orchestration boundary; the selected cleanup removes only unread `pendingAnalysis` state and its two setter calls without creating a hook, reducer, controller, component, or module.
+- [x] (2026-09-02) Accepted independent read-only `EXISTING_AND_COVERED` preflight: all 30 browser cases passed under the pinned Chromium environment with exact baseline identities, no failure, skip, test change, external request, or retained test-owned residue.
+- [x] (2026-09-02) Completed the guarded one-file Green, focused and complete verification, exact generated-output cleanup, and fresh S1 PASS with no finding. The production diff is exactly three deletions in `App.tsx`; public interfaces and observable behavior remain unchanged, and cohesion is accepted as `RETAINED`.
 - [ ] Implement the separately planned HTTP scan integration and complete M1-05's browser/build integration checkpoint before task closure.
 
 ## Surprises & Discoveries
@@ -49,6 +52,7 @@ This plan owns only [M1-05 — Integrate and verify the walking skeleton](../DEV
 - Observation: `src/server/persistence/run-repository.ts` has 270 lines and five responsibility clusters: public contracts, bounded store errors, Windows identifier/path and filesystem-identity checks, immutable transition validation, and the stateful repository/publication coordinator. Evidence: complete source and consumer inspection plus 55 passing repository cases covering real filesystem topology, staged-write faults, cleanup ownership, and process interruption around rename.
 - Observation: Atomic publication and cleanup share descriptor, staged-path, directory-identity, canonical-identity, and commit-point state. Evidence: the `publish` closure performs exclusive stage creation, identity checks, short-write completion, flush, close, topology revalidation, rename, and verified cleanup in one sequence; extracting it would require a new one-consumer transaction abstraction and weaken auditability.
 - Observation: The first repository-slice cleanup probe checked repository-root `.vite-temp` but not Vite's actual `node_modules/.vite-temp` cache location. Evidence: an owner-supplied read-only review found the latter ordinary empty directory still present, and primary inspection confirmed its resolved workspace path, ordinary directory attributes, absent link type, and zero children before exact non-recursive removal.
+- Observation: Current `App.tsx` already delegates form presentation, result presentation, and response-envelope admission; its remaining reservation, settlement, accepted-run, selection, announcement, and focus responsibilities form one cohesive UI coordinator. Evidence: `pendingAnalysis` is the only state value never read, while its setter is called at operation start and settlement solely to cause redundant renders.
 
 ## Decision Log
 
@@ -85,10 +89,13 @@ This plan owns only [M1-05 — Integrate and verify the walking skeleton](../DEV
 - Decision: Reuse the existing 55 repository cases and add no private-layout test if independent preflight returns `EXISTING_AND_COVERED`.
   Rationale: The suite already exercises the observable persistence and failure contract. A file-placement assertion would add coupling without improving data-integrity evidence.
   Date/Author: 2026-09-02 / project owner and primary coordinator.
+- Decision: Keep all current analysis orchestration in `App.tsx` and remove only the unused `pendingAnalysis` state declaration and setter calls.
+  Rationale: The owner selected cleanup only. A custom hook, reducer, controller, or further component would move one already cohesive lifecycle without creating a clearer current responsibility boundary.
+  Date/Author: 2026-09-02 / project owner and primary coordinator.
 
 ## Outcomes & Retrospective
 
-The local-service, scanner, run-contract, and run-repository structural extractions and their verification barriers are complete. M1-05 remains In progress because real HTTP scanner integration and the milestone-level end-to-end browser/build checkpoint remain outstanding.
+The local-service, scanner, run-contract, and run-repository structural extractions and their verification barriers are complete. The App dead-state cleanup is also complete: the unread state and its two setter calls are gone, while the existing coordinator, public interfaces, rendered behavior, and browser contract remain unchanged. M1-05 remains In progress because real HTTP scanner integration and its milestone-level end-to-end browser/build checkpoint remain outstanding.
 
 ## Purpose / Big Picture
 
@@ -99,6 +106,8 @@ The later M1-05 integration work will connect the already implemented service, s
 The third slice makes the central unknown-data and persisted-aggregate boundary easier to inspect without weakening it. A reviewer should see a small stable `run-contract.ts` façade, focused internal modules with acyclic dependencies, and the same accepted results across all 30 contract cases and every current consumer.
 
 The fourth slice makes the filesystem repository easier to audit without separating its commit protocol. A reviewer should see a stable `run-repository.ts` entry point, four focused internal modules, the complete publication sequence still locally visible, and unchanged results across all 55 repository cases and every current consumer.
+
+The fifth slice removes misleading dead state from the already purpose-composed client. A reviewer should see the same public `App` boundary, rendered tree, asynchronous ownership, focus behavior, and browser results, with no `pendingAnalysis` declaration or setter remaining.
 
 ## Context and Orientation
 
@@ -130,6 +139,8 @@ It excludes:
 The run-contract slice includes only declaration moves into the six named modules, frozen internal policy tuples, the minimum internal exports needed by the next validation layer, and stable type/function re-exports from `run-contract.ts`. It excludes persistence-format changes, new accepted values, error or precedence changes, scanner-policy consolidation, one-file-per-rule decomposition, generic schema/reader abstractions, JSON Schema, validation libraries, UI behavior, and new public helpers.
 
 The run-repository slice includes only declaration moves into four named modules, the minimum internal exports needed by the coordinator, and stable type/callable re-exports from `run-repository.ts`. It excludes persistence-format or API changes, recovery, locking, retries, staging-file sweeping or promotion, a filesystem adapter, repository class, transaction framework, generic path library, dependency, migration, UI behavior, and changes to completed M1-02 authorities or tests.
+
+The App cleanup includes only deletion of the unread `pendingAnalysis` state declaration and its operation-start and settlement setter calls in `src/client/App.tsx`. It excludes module extraction, hooks, reducers, controllers, components, CSS, markup, copy, ARIA, focus rules, admission behavior, public interfaces, test changes, service integration, dependencies, and any M1-04 authority change.
 
 ## Plan of Work
 
@@ -295,19 +306,31 @@ Risk is `S3` because path identity, reparse/hard-link rejection, write atomicity
 
 Post-Green validation includes the exact 55-case repository suite, strict TypeScript, syntax checks for all five resulting modules, stable runtime/type export and external-consumer inspection, and the complete 290-case backend/scanner regression under the required scanner environment. Verification must show unchanged tests, fixtures, dependencies, package metadata, TypeScript configuration, persisted format, retained browser runtime, and absent generated output; scanner scratch must be empty and removed after use. Browser UI and production-build verification remain deferred to the real HTTP integration checkpoint because this slice changes no UI, browser runtime, or client import.
 
+### M105-APP-DEAD-STATE-CLEANUP-05 — retain the App coordinator
+
+The observable contract is exact behavior preservation. `App`, `AppProps`, and the `AnalyzeIntent` type re-export remain unchanged. URL/mode validation, synchronous reservation, busy presentation, stale/unmounted settlement guards, response admission, completed-result retention, failed-run presentation, selection identity, announcements, Results-heading node stability, and conditional focus restoration remain identical. The rendered DOM, text, IDs, classes, semantics, ARIA relationships, CSS, and client/server boundaries do not change.
+
+TDD is applicable because application source changes. Independent read-only `test_worker` preflight must classify the unchanged 30-case `tests/target-results-ui.test.ts` boundary. `EXISTING_AND_COVERED` is expected; any other outcome stops for reconciliation, and no implementation-shaped or dead-state-layout assertion may be added.
+
+The standard nonvisual Green uses one `code_worker` turn under a lease allowing only `src/client/App.tsx`. The worker removes the `pendingAnalysis` state declaration, `setPendingAnalysis(intent)`, and `setPendingAnalysis(null)`, and makes no other source or test change. The accepted cohesion disposition is `RETAINED`; any need for a new path, abstraction, behavior correction, test change, or public-interface adjustment stops the slice.
+
+Risk is `S1`: this is ordinary bounded application cleanup with no rendered or cross-boundary behavior change. A fresh `milestone_reviewer` must confirm exact three-line removal, unchanged public interfaces and lifecycle ownership, absence of the dead symbols, accepted behavior evidence, generated-output cleanup, and documentation truthfulness.
+
+Post-Green validation runs the unchanged 30 browser cases under the retained pinned Chromium and isolated UI scratch environment, strict TypeScript, the native production build, and the complete sequential 290 backend/scanner plus 30 UI regression. The harness's deterministic client inventory must include the changed App identity without harness modification. After verification, remove only verified owned `dist/client`, UI/scanner scratch, repository-root `.vite-temp`, and `node_modules/.vite-temp`; prove both Vite cache locations absent and the pinned browser runtime unchanged. Existing human Chrome 200% and Narrator evidence remains applicable because no rendered node, text, relationship, focus rule, or style changes.
+
 ## Concrete Steps
 
 Work from `C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab`.
 
-The first four structural slices and their corrections are complete. The next implementation must use the separately planned HTTP scan-integration boundary and its integration-specific verification contract.
+The first four structural slices and their corrections are complete. Execute the selected App dead-state cleanup before the separately planned HTTP scan-integration boundary.
 
 1. Confirm the task is In progress, the worktree/index baseline, no active lease, and the exact allowed Green paths.
 2. Send Milestone Assignment Packet v2 for read-only preflight to one persistent `test_worker`.
 3. If preflight returns `EXISTING_AND_COVERED`, record the focused evidence and add no test. Any other classification stops for coordinator reconciliation.
-4. Start a Green lease for the allowed production paths, insert its digest into the packet, and assign one `code_worker` to perform the extraction and focused validation without touching tests.
+4. Start a Green lease for the exact allowed production path, insert its digest into the packet, and assign one `code_worker` to perform only the dead-state removal and focused validation without touching tests.
 5. Terminally close the lease. Inspect the actual diff, exports, import graph, lifecycle placement, and focused result before accepting Green.
-6. Run strict typechecking, syntax checks, and the complete 290-case backend/scanner regression under the required scanner environment.
-7. Obtain fresh S3 critical review. Any finding routes through the one bounded correction allowance only when the contract remains unchanged.
+6. Run strict typechecking, production build, and the complete sequential 290 backend/scanner plus 30 UI regression under the required scanner/browser environments.
+7. Complete exact generated-output cleanup and obtain fresh S1 milestone review. Any finding stops for reconciliation.
 8. Update this plan and the M1-05 progress record with accepted evidence and documentation impact. Keep M1-05 In progress for its later integration slices.
 
 ## Validation and Acceptance
@@ -366,6 +389,16 @@ Accept `M105-RUN-REPOSITORY-MODULE-REFACTOR-04` only when:
 
 The repository tests receive the same relevance audit. The expected outcome is no change: all 55 cases remain behavior-oriented through the stable façade, with real filesystem and process-interruption coverage and no file-layout assertions, snapshots, skipped cases, todos, or focused-only markers added.
 
+Accept `M105-APP-DEAD-STATE-CLEANUP-05` only when:
+
+- independent preflight returns `EXISTING_AND_COVERED` for all 30 unchanged browser cases;
+- the only production diff removes the declaration and two setter calls for `pendingAnalysis`;
+- `App`, `AppProps`, `AnalyzeIntent`, orchestration state, lifecycle ordering, rendered output, focus, announcements, and accessibility behavior remain unchanged;
+- all 30 focused browser cases, strict TypeScript, production build, and the complete sequential 290 plus 30 regression pass;
+- tests, harness, components, admission, styles, dependencies, configuration, and retained browser runtime remain unchanged;
+- scanner/UI scratch, `dist/client`, repository-root `.vite-temp`, and `node_modules/.vite-temp` are absent after exact cleanup;
+- the worker and primary report cohesion `RETAINED`, fresh S1 review returns PASS with no unresolved finding, and documentation records that M1-05 remains In progress.
+
 ## Idempotence and Recovery
 
 Read-only inspection and verification commands are safe to repeat after confirming no owned processes or test residue remain. The extraction is additive except for moved declarations inside `service.ts`; a stopped worker must not be reset or reverted automatically. Close the lease, inspect the actual five-path state, preserve unrelated work, and issue at most one fresh attempt-2 packet with the same scope and terminal attempt-1 parent when the correction remains inside the frozen contract.
@@ -422,6 +455,14 @@ Correction assignment `M105-SCANNER-MODULE-REFACTOR-02-GREEN-02` used attempt-2 
 
 Renewed review `M105-SCANNER-MODULE-REFACTOR-02-S3-REVIEW-02` returned PASS with no Blocker, Major, or Minor finding and accepted cohesion as `REFACTORED`. It independently verified frozen descriptors and rejection of generic `push`, `pop`, `splice`, `fill`, and `reverse` calls for all six tuples, exact values and readonly tuple inference, detached factory results after hostile mutation attempts, and end-to-end withholding of an injected unknown native message key. It also confirmed unchanged hashes for the five untouched scanner modules and both tests, stable public exports, strict TypeScript, seven syntax checks, the pure 20-case normalization suite, compliant lease scope, and documentation truthfulness. The earlier scanner S3 review remains historical evidence for the original extraction and is superseded by this renewed review as the final correction acceptance. No requirement, ADR, product, public contract, dependency, or M1-03 authority changed. M1-05 remains In progress for HTTP integration and its browser/build checkpoint.
 
+Accepted preflight `M105-APP-DEAD-STATE-CLEANUP-05-PREFLIGHT-01` ran the unchanged `tests/target-results-ui.test.ts` boundary under pinned Chromium `151.0.7922.34` at HEAD `7353f986bf27d56a8a5d4ce5e91d1c318b4f71fe`: all 30 cases passed with zero failure, cancellation, skip, or todo. It classified `EXISTING_AND_COVERED` after confirming that the suite exercises reservation, duplicate admission, captured intent, stale-response rejection, unmount ownership, announcements, and conditional focus replacement without asserting private hook layout. Baseline identities were `App.tsx` `00db6d28f84f3dab9b533a32ffa177db97b58bb99111312a161079fbc0e2c0e2`, UI test `44097b9b35e8c46ad7cf6d64af91489c8884044c1c5ecd008ce19ba811916e39`, harness `6d6809f8647c9bfa48b6c7dfbd46fb7a4a027f5ea51fcd195c1032e9fe9d1357`, and admission helper `8fb8ebdebf0ee90aa2163876042878ec585b37d37a863748252c60f1fcfd89a1`. Browser teardown settled, no external request or page error occurred, and no test-owned residue remained.
+
+Green assignment `M105-APP-DEAD-STATE-CLEANUP-05-GREEN-01` used lease `M1-05-20260902-05-app-dead-state-green-01`, guard digest `2931c96eb4e335b58646e2ac201ef5831bb763cc2390a0d4aec7677f6dc1de9c`, and fresh compliant receipt `764e8ca2141b89e67aa6a0fdf3965580559785b95aae5699668ce72afbf499f5`. It modified only `src/client/App.tsx`, with zero additions and exactly three deletions: the unread `pendingAnalysis` state declaration and its two setter calls. No forbidden, unleased, generated, index, HEAD, reference, or ignore-control drift occurred. Worker and primary accepted cohesion as `RETAINED`; all existing orchestration responsibilities and public exports remain in `App.tsx`. Its new identity is `59c53fd9ced217c4b432f94ef8fbccafd4294f34494e00e8768f1c567acd4ca5`, while the UI test, harness, and admission helper retain their preflight identities.
+
+Post-Green verification passed the focused browser boundary twice—once under the worker and once under primary coordination—with 30 of 30 cases each. The complete backend/scanner regression passed 290 of 290, strict TypeScript passed, and the native Vite production build transformed 32 modules successfully. The primary browser run reported the new App identity through the deterministic full client inventory, owned-origin requests only, no page errors, and settled teardown. Exact cleanup verified `dist/client`, `temp/m103-scan`, `temp/m104-ui`, repository-root `.vite-temp`, and `node_modules/.vite-temp` absent; `temp/m104-setup` remains ordinary and empty, and the retained pinned browser runtime remains at 331 descendants.
+
+Fresh review `M105-APP-DEAD-STATE-CLEANUP-05-S1-REVIEW-01` returned PASS with no Blocker, Major, or Minor finding and independently accepted cohesion as `RETAINED`. The reviewer reproduced strict TypeScript and exact diff, export, hash, guard, cleanup, and dependency inspection; it accepted the exact-identity browser, complete-regression, and build evidence. No requirement, ADR, roadmap status, public interface, UI contract, test, dependency, fixture, or executable-configuration change is required because this slice removes only unread state and preserves observable behavior. M1-05 remains In progress for HTTP integration and its browser/build checkpoint.
+
 ## Interfaces and Dependencies
 
 The completed slice preserves the public `src/server/service.ts` import boundary. `contracts.ts` contains types only. `input-validation.ts` depends on domain validation and Node UUID generation only as needed to prepare a running record. `scan-run-records.ts` depends on domain validation, deep equality, and persistence record types. `loopback-api.ts` depends on the default `node:http` object and narrow lifecycle/read callbacks. `service.ts` depends on those internal modules plus the existing repository. No new package, route, environment variable, stored field, build setting, browser runtime, or external service is introduced.
@@ -429,6 +470,8 @@ The completed slice preserves the public `src/server/service.ts` import boundary
 The run-contract slice preserves `src/server/domain/run-contract.ts` as the sole public import boundary. Internally, fixed policy and model types are the lowest layers; hostile-value readers depend on them; finding validation depends on readers; scan validation depends on finding validation; and parent-run validation depends on scan validation. The browser receives only the existing validator through the façade. Scanner-native readers and policies remain separate trust-boundary implementations. No public export, persisted field, package, schema dialect, code generator, or runtime service is introduced.
 
 The run-repository slice preserves `src/server/persistence/run-repository.ts` as the sole public import boundary. Internally, contracts are the type foundation; bounded store errors depend on those contracts; Windows path protection depends on bounded rejection; transition validation depends on contracts and bounded rejection; and the façade/coordinator depends on all four. Filesystem-calling modules use the shared default `node:fs` object. No public export, route, persisted field, format version, package, recovery mechanism, or runtime service is introduced.
+
+The App cleanup preserves `src/client/App.tsx` as the stateful client coordinator and public owner of `App`, `AppProps`, and the `AnalyzeIntent` re-export. It continues to depend on the analysis and results feature components plus `run-admission.ts`; no dependency direction changes. The deletion removes an unread state value and redundant state updates without adding a module, hook, controller, route, package, interface, rendered node, or client/server interaction.
 
 ## Revision Note
 
@@ -475,3 +518,5 @@ The run-repository slice preserves `src/server/persistence/run-repository.ts` as
 2026-09-02: Closed the run-repository structural slice after fresh S3 PASS with no finding, exact cleanup, status/navigation reconciliation, formatting validation, and documentation closure. All four approved M1-05 structural slices are accepted; M1-05 remains In progress for real HTTP scan integration and its browser/build checkpoint.
 
 2026-09-02: Corrected the owner-supplied P3 generated-output evidence finding without changing production code. Verified and removed only the ordinary empty `node_modules/.vite-temp` directory, confirmed both cache paths are absent, and superseded the earlier incomplete cleanup claims. M1-05 remains In progress for real HTTP scan integration and its browser/build checkpoint.
+
+2026-09-02: Added and completed owner-approved `M105-APP-DEAD-STATE-CLEANUP-05`. Independent preflight returned `EXISTING_AND_COVERED`; the compliant one-file lease removed exactly the unread state declaration and two setter calls; focused and complete regressions, strict TypeScript, production build, cleanup, and fresh S1 review passed. `App.tsx` remains the orchestration coordinator with cohesion `RETAINED`, and M1-05 remains In progress for HTTP integration.
