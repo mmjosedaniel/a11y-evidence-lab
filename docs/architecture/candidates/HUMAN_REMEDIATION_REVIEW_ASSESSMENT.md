@@ -112,7 +112,7 @@ One Finding needs at most one review record:
 | Edited result | Present only for `edit and accept`: the complete final reviewer-authored proposal text. |
 | Result | `accepted` for approve or edit-and-accept; `rejected` for reject. |
 
-The service validates and writes this one record atomically. A reload reconstructs the view from the original proposal and final decision. This is ordinary local persistence, not an audit log or event-sourced workflow.
+The service validates and writes this one record atomically, and application-owned readback validates the aggregate before later use. User-facing reload reconstruction is Deferred until after the portfolio MVP through `REQ-UX-014` and OD-026. This remains ordinary local persistence, not an audit log or event-sourced workflow.
 
 ## Feedback, privacy, and public demonstrations
 

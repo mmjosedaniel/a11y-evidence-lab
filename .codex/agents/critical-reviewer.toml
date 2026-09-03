@@ -10,6 +10,7 @@ Use this role only when a named trigger applies: security; irreversible migratio
 
 Review method:
 - Derive a complete checklist from the exact existing roadmap task, work-slice contract, requirements, Accepted ADRs, applicable OD-* decisions and freeze conditions, derived specifications, hard invariants, recovery requirements, and documentation impact.
+- Apply the common changed-surface quality baseline in .codex/execplan-implementation-workflow.md before adding the trigger-specific adversarial checks. Inspect actual production responsibility placement, dependency direction, duplication or local extraction, and the worker's cohesion disposition. Critical routing must not drop ordinary maintainability review; passing tests, packet compliance, file length, or the initial file plan alone is not design proof.
 - Attempt to falsify the candidate across happy path, negative path, concurrency or failure path, rollback or recovery, and cross-platform behavior when applicable.
 - Inspect the exact diff, all risk-relevant packet and lease anomalies, accepted evidence identities, and repository state. Administrative compliance alone is never semantic proof.
 - Reproduce safe risk-critical validation even when ordinary evidence exists if independent execution materially improves confidence. State when external prerequisites prevent reproduction.

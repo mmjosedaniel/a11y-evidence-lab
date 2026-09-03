@@ -9,12 +9,11 @@ Feature: Non-negotiable boundaries for the portfolio MVP
   demonstrate deterministic scanning, minimized evidence, curated retrieval,
   structured generation, human review, and conservative comparison.
 
-  @HS-001 @REQ-AUTH-007 @REQ-AUTH-008 @REQ-SEC-026 @OD-021 @ADR-0018
+  @HS-001 @REQ-AUTH-007 @REQ-AUTH-008 @REQ-SEC-026 @OD-021 @OD-027 @ADR-0018
   Rule: One trusted page never becomes a crawler
 
     Scenario: Keep analysis to one fresh scan of the top-level document
-      Given the target-entry view states that only a non-authenticated public HTTPS page the developer is permitted and willing to trust is supported, and that hostile, private, or authenticated targets are unsupported
-      And the developer supplies one valid public HTTPS URL they are permitted and willing to trust
+      Given the developer supplies one valid public HTTPS URL they are permitted and willing to trust
       When the user starts one PageAnalysisRun
       Then the entire top-level document in its current rendered state at the configured readiness condition is the scan target and iframe documents are not scanned
       And a fresh non-persistent browser context imports no personal profile, cookies, credentials, or authentication state
@@ -22,7 +21,8 @@ Feature: Non-negotiable boundaries for the portfolio MVP
       And a finite timeout applies
       And the temporary page, context, and managed browser close after success or failure
       And the product makes no hostile-target, SSRF, or private-network safety claim
-      And the result view repeats the trusted-input, unsupported-target, exact-three-rule, and non-certification limitations
+      And project documentation retains the trusted-input and unsupported-target limitations without requiring ready-state or Results repetition
+      And the result view states only the exact-three-check and non-certification limitation
 
     Scenario: Reject unsupported target input before analysis
       Given the submitted target is malformed, contains embedded URL credentials, or uses an unsupported scheme
@@ -75,12 +75,12 @@ Feature: Non-negotiable boundaries for the portfolio MVP
       And required input that cannot fit without truncation fails before invocation with a content-safe reason and is not recorded as abstention
       And no sibling Finding is included or changed
 
-  @HS-009 @REQ-GEN-008 @REQ-LLM-002 @REQ-LLM-003 @REQ-LLM-004 @REQ-LLM-005 @REQ-LLM-007 @REQ-LLM-009 @REQ-LLM-019 @REQ-LLM-020 @REQ-SEC-004 @REQ-SEC-016 @ADR-0014 @ADR-0020 @ADR-0023
+  @HS-009 @REQ-GEN-008 @REQ-LLM-002 @REQ-LLM-003 @REQ-LLM-004 @REQ-LLM-005 @REQ-LLM-007 @REQ-LLM-009 @REQ-LLM-019 @REQ-LLM-021 @REQ-SEC-004 @REQ-SEC-016 @ADR-0014 @ADR-0020 @ADR-0023
   Rule: Provider mode never mixes, batches, or falls back
 
     Scenario Outline: Keep one immutable provider mode
-      Given the PageAnalysisRun began in "<mode>" mode after its one run-level disclosure
-      And the selected provider and exact model remain visibly labeled
+      Given the PageAnalysisRun began in "<mode>" mode
+      And provider disclosure and the selected provider and exact model become visible when generation becomes relevant
       And the run context records that immutable mode, provider, and exact model without treating the configuration as a ProviderInvocation
       When the user explicitly invokes one eligible selected Finding
       Then only the "<adapter>" adapter and selected provider receive the permitted minimized package for that one Finding

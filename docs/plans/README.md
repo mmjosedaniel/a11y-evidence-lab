@@ -4,11 +4,12 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-No active ExecPlan.
+- [M1-05 — Walking-skeleton integration](m1-05-walking-skeleton-integration.md) — **In progress** after four accepted behavior-preserving module refactors and the accepted [App dead-state cleanup](m1-05-walking-skeleton-integration.md#m105-app-dead-state-cleanup-05--retain-the-app-coordinator). HTTP scan integration remains a later M1-05 slice.
 
 ## Completed plans
 
-- [M1-03 — Real scan and evidence](completed/m1-03-real-scan-and-evidence.md) — **Complete** on 2026-08-31 (UTC). Both scanner slices and their S3 reviews are accepted. All 290 integrated tests and independent strict typechecking pass, including the failed-launch residue regression. The different final integrated critical review, exact task-owned runtime cleanup and documentation closure passed. M1-04 and M1-05 remain unselected.
+- [M1-04 — Target and results UI](completed/m1-04-target-and-results-ui.md) — **Complete** on 2026-09-02 (UTC). The accepted OD-027 presentation, purpose-named component extraction, integrated-review correction, complete regression, independent reviews, exact cleanup, and documentation closure passed.
+- [M1-03 — Real scan and evidence](completed/m1-03-real-scan-and-evidence.md) — **Complete** on 2026-08-31 (UTC). Both scanner slices and their S3 reviews are accepted. All 290 integrated tests and independent strict typechecking pass, including the failed-launch residue regression. The different final integrated critical review, exact task-owned runtime cleanup and documentation closure passed. At M1-03 closure, M1-04 and M1-05 were unselected.
 
 - [M1-02 — Establish the loopback service and single-file aggregate](completed/m1-02-local-service-and-aggregate.md) — **Complete** on 2026-08-30. Guarded storage/service TDD, 182 passing tests, independent strict typechecking, both R3 checkpoints, both S3 reviews, different final integrated review, exact cleanup and documentation closure. Preserves the service correction and earlier planning history.
 

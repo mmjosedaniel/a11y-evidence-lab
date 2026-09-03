@@ -10,6 +10,10 @@ A11y Evidence Lab needs a truthful meaning for `Local` mode. Local generation an
 
 Earlier wording in ADR-0005 called for disabling or isolating update checks, analytics, cloud features, and unrelated networking during local inference. ADR-0012 required verification that Local-mode operations produced no unapproved non-loopback egress and described Groq generation as the one external operation. Read literally, those clauses require system-wide network control or a zero-egress proof that conflicts with the trusted-page workflow and adds security infrastructure unrelated to the portfolio goal.
 
+### Analyze/Results presentation clarification recorded 2026-09-01
+
+[OD-027](../../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-027--simplify-analysis-and-results-presentation) moves the Local/Groq data-boundary disclosure out of the ready Analyze form and provider-independent scan Results. This changes presentation timing only: the same disclosure and exact provider/model context remain required when a later selected-Finding workflow makes provider use relevant. A concise already-known missing-configuration message is not proof of provider availability and triggers no probe or request.
+
 ## Considered options
 
 1. Enforce and qualify system-wide zero egress during Local-mode analysis.
@@ -49,7 +53,7 @@ This is a planning decision. It does not authorize implementation, prove that an
 - `Local` has a precise, testable product meaning: generation prompts and responses use only the approved loopback runtime, while embedding computation and vectors remain local in either generation mode.
 - The MVP avoids building a system-wide egress-control or runtime-telemetry qualification subsystem that does not demonstrate RAG.
 - A local analysis can still make external page requests, so documentation and the interface must not use `Local`, `local-first`, and `offline` as synonyms.
-- Groq's egress, privacy, credential, and failure requirements remain separate and visible.
+- Groq's egress, privacy, credential, and failure requirements remain separate and visible in the later provider-relevant workflow.
 - A future distribution, hostile-target, or strict offline requirement would need a new threat model and architecture decision.
 
 ## Primary references
@@ -69,5 +73,6 @@ This is a planning decision. It does not authorize implementation, prove that an
 - [ADR-0018: Trusted operator URL boundary](ADR-0018-trusted-operator-url-boundary.md)
 - [ADR-0019: In-process exact vector search](ADR-0019-in-process-exact-vector-search.md)
 - [ADR-0020: Manual developer-managed local model setup](ADR-0020-manual-developer-managed-local-model-setup.md)
+- [OD-027: Simplify Analysis and Results presentation](../../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-027--simplify-analysis-and-results-presentation)
 - [Generation provider execution requirements](../../requirements/generation-provider-and-model-lifecycle/GENERATION_PROVIDER_EXECUTION.md): `REQ-LLM-*`
 - [Privacy and security requirements](../../requirements/quality-security-and-operations/PRIVACY_AND_SECURITY.md): `REQ-SEC-*`

@@ -6,7 +6,7 @@
 
 ## Context
 
-The portfolio MVP must preserve enough local evidence to reopen one page analysis, inspect its RAG inputs and result, record at most one current human decision per generated proposal and exactly one only after review completes, and compare a finding with one later scan. ADR-0016 correctly selected local filesystem persistence instead of a database, but its later parent/child amendments introduced independently identified and versioned workflow records, optional child files, and an optional Markdown report. That structure is larger than the bounded single-user demonstration requires.
+The portfolio MVP must preserve enough local evidence to inspect its RAG inputs and result, record at most one current human decision per generated proposal and exactly one only after review completes, and compare a finding with one later scan. ADR-0016 correctly selected local filesystem persistence instead of a database, but its later parent/child amendments introduced independently identified and versioned workflow records, optional child files, and an optional Markdown report. That structure is larger than the bounded single-user demonstration requires.
 
 The application has no concurrent writers, accounts, collaboration, synchronization, migration framework, audit platform, or production recovery requirement. The complete three-rule scan, every selected-finding workflow, and the independent scan-evidence comparison path can therefore remain one small application-owned aggregate without losing the traceability that demonstrates deterministic evidence and curated retrieval, then either a terminal application-authored abstention or a validated proposal with human review. Comparison may start from any retained baseline Finding and does not require those downstream steps.
 
@@ -17,6 +17,10 @@ This clarification preserves the accepted persistence decision and OD-019's cont
 ### Provider-context clarification recorded 2026-08-27
 
 The selected mode, provider, and exact model belong to immutable run context from creation so a no-call or abstained run remains interpretable. `ProviderInvocation` remains call-only and records actual-call provenance. This clarification adds no record family, identity, or provider workflow.
+
+### Retained-run navigation clarification recorded 2026-09-01
+
+[OD-026](../../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-026--defer-user-facing-retained-run-reopening) defers the browser workflow for reopening a previously persisted run, including manual Run ID entry, reload restoration, deep links, and recent-run history. The storage decision is unchanged: validated aggregate reads remain necessary for safe application-owned updates, inspection during active workflow work, and comparison. Persistence capability does not require an MVP reopen control.
 
 ## Considered options
 
@@ -49,7 +53,7 @@ Use one application-owned, versioned JSON aggregate for each MVP PageAnalysisRun
 
 ## Consequences
 
-- One file is enough to inspect the complete evidence-first demonstration and reconstruct the React view after reload.
+- One file is enough to retain and validate the complete evidence-first demonstration without requiring a browser reopen or reload-restoration workflow in the MVP.
 - Run and finding identity remain stable without assigning IDs and versions to every nested one-to-one artifact.
 - The original scan evidence and either terminal abstention or generated proposal remain traceable; a pending proposal has no decision, and a completed review needs exactly one current decision rather than an audit workflow.
 - There is no independent child-file lifecycle, cross-file commit protocol, schema migration system, event log, or report generator in the MVP.
@@ -59,6 +63,7 @@ Use one application-owned, versioned JSON aggregate for each MVP PageAnalysisRun
 ## Related decisions and requirements
 
 - [OD-022: Portfolio MVP YAGNI simplification](../../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-022--portfolio-mvp-yagni-simplification)
+- [OD-026: Defer user-facing retained-run reopening](../../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-026--defer-user-facing-retained-run-reopening)
 - [ADR-0011: TypeScript as the initial application language](ADR-0011-typescript-as-initial-application-language.md)
 - [ADR-0012: React as the initial user-interface library](ADR-0012-react-as-initial-user-interface-library.md)
 - [ADR-0015: Localhost browser MVP execution](ADR-0015-localhost-browser-mvp-execution.md)

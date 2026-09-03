@@ -1,12 +1,13 @@
 # UI visual foundations
 
-- **Status:** Defined reversible design intent; not implemented
-- **Last reviewed:** 2026-08-29
+- **Status:** Reversible visual guidance; apply the accepted M1-04 Analyze/Results contract before this general guidance
+- **Last reviewed:** 2026-09-01
 - **UI documentation index:** [UI design documentation](README.md)
+- **M1-04 presentation contract:** [Analyze and results presentation](ANALYZE_AND_RESULTS_PRESENTATION.md)
 
 ## Document role
 
-This document defines the minimum visual direction for planning and future implementation. It does not create a product requirement, accept an architecture or dependency, define a component library, or prove that these styles have been implemented. The applicable requirements, ADRs, roadmap task, and derived specifications remain controlling.
+This document defines the minimum visual direction for planning and implementation. It does not create a product requirement, accept an architecture or dependency, define a component library, or prove that these styles have been implemented. For the Analyze and Results interface, the exact content and hierarchy in [Analyze and results presentation](ANALYZE_AND_RESULTS_PRESENTATION.md) control. The applicable requirements, decisions, roadmap task, and derived specifications remain authoritative.
 
 ## Visual direction
 

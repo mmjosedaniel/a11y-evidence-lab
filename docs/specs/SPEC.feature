@@ -16,27 +16,28 @@ Feature: Evidence-first accessibility analysis for one trusted public page
   alone enters human review. Any retained baseline Finding may later be
   compared without first completing either downstream branch.
 
-  @SPEC-001 @BHV-01 @REQ-AUTH-007 @REQ-AUTH-008 @REQ-SCAN-005 @REQ-SCAN-006 @REQ-SCAN-007 @REQ-QUAL-001 @REQ-QUAL-012 @REQ-UX-004 @REQ-UX-005 @REQ-UX-010 @REQ-UX-012 @OD-021 @ADR-0018
+  @SPEC-001 @BHV-01 @REQ-AUTH-007 @REQ-AUTH-008 @REQ-SCAN-005 @REQ-SCAN-006 @REQ-SCAN-007 @REQ-QUAL-001 @REQ-QUAL-012 @REQ-LLM-021 @REQ-UX-003 @REQ-UX-004 @REQ-UX-005 @REQ-UX-010 @REQ-UX-012 @REQ-A11Y-009 @REQ-A11Y-010 @OD-021 @OD-027 @ADR-0018
   Rule: Analyze one trusted page and show the complete supported result
 
     Scenario: Complete one provider-independent page analysis
       Given the developer-started local application is ready
-      And the target-entry view states that only a non-authenticated public HTTPS page the developer is permitted and willing to trust is supported, and that hostile, private, or authenticated targets are unsupported
       And the developer chose one public HTTPS page they are permitted and willing to trust
       And the user selected one global Local-or-Groq generation mode
       When the user activates Analyze once
       Then one fresh non-persistent browser context inspects the entire top-level document in its current rendered state at the configured readiness condition and excludes iframe documents from the scan scope
       And the scan executes exactly "image-alt", "label", and "color-contrast"
       And one complete visible results list groups every returned violation-node Finding by those three rules
-      And where results are interpreted, the interface shows the normalized analyzed page identity, exact three-rule scan configuration and coverage, trusted-input and unsupported-hostile-page limitations, selected provider and exact model context, and the non-certification limitation
-      And every Finding shows a stable label, rule, target summary, workflow status, and detail action
-      And native incomplete observations appear in a clearly distinct group rather than as Findings
+      And where results are interpreted, the interface shows the normalized analyzed page identity, one concise exact-three-check and non-certification limitation, and one overview derived from the complete Finding and ScannerReviewObservation collections
+      And every Finding uses its whole card as the evidence-selection button and shows a stable human-readable label, concise affected-element summary, programmatic selected state, and direct complete rule-specific evidence without a redundant action label
+      And native incomplete observations appear in the same three check groups as Findings with a visible "Needs manual review" tag, a plain-language task, and relevant retained evidence while remaining distinct from Findings
+      And the complete three-group Findings collection is presented in one named, visibly bounded, keyboard-focusable panel with a deterministic maximum height and its own vertical scrolling at wide, narrow, and 200-percent zoom presentations
+      And deterministic scan Results omit run context, scan context, lifecycle fields, mode, provider, model, no-call text, raw coverage tables, internal Finding IDs, and native check-group names while preserving their canonical data internally
       And a complete zero result is shown only after all three rules complete
       And the parent scan fails visibly, without a completed zero or partial success, when page loading fails, a timeout occurs, a fatal top-level failure in scanner execution, coverage validation, result validation, or evidence capture prevents the complete bounded collection, or the initial complete aggregate cannot be durably written
       And a missing, invalid, or withheld individual allowlisted fact preserves its Finding or ScannerReviewObservation with the concise category or sufficiency reason required by REQ-SCAN-005 instead of failing the parent scan or dropping the item
       And the temporary page, context, and managed browser are closed
       And no provider is invoked by scanning
-      And the interface states that crawling, authenticated targets, hostile targets, and whole-page conformance claims are unsupported
+      And the interface states that the three checks do not establish accessibility, compliance, or certification
 
     Scenario: Reject unsupported target input before analysis
       Given the submitted target is malformed, contains embedded URL credentials, or uses an unsupported scheme
@@ -44,6 +45,16 @@ Feature: Evidence-first accessibility analysis for one trusted public page
       Then the local service rejects the input with a bounded reason before creating a PageAnalysisRun or starting browser navigation
       And no scan, retrieval, or provider call begins
       And the rejection makes no hostile-target or private-network safety claim
+
+    Scenario: Require an explicit generation mode without ready-state explanation
+      Given the Analyze form has no generation mode selected
+      And the form shows no selected-mode, model, provider, endpoint, or egress explanation
+      When the user activates Analyze with a valid HTTPS target
+      Then the form shows "Choose Local or Groq." associated with the generation-mode group
+      And no PageAnalysisRun, scan, retrieval, probe, or provider call begins
+      When the user selects Local or Groq
+      Then the mode validation is removed
+      And a known missing Local model or fixed Groq-adapter API URL may show only its nonblocking configuration message
 
   @SPEC-002 @BHV-02 @REQ-EVID-004 @REQ-EVID-007 @REQ-RETR-001 @REQ-RETR-002 @REQ-RETR-005 @ADR-0022
   Rule: Inspect one Finding and its retrieved guidance
@@ -98,12 +109,12 @@ Feature: Evidence-first accessibility analysis for one trusted public page
       And the result is not recorded as an evidence-sufficiency abstention
       And the completed scan, minimized evidence, and sibling Finding states remain unchanged
 
-  @SPEC-004 @BHV-04 @REQ-GEN-008 @REQ-LLM-002 @REQ-LLM-003 @REQ-LLM-004 @REQ-LLM-005 @REQ-LLM-007 @REQ-LLM-009 @REQ-LLM-019 @REQ-LLM-020 @REQ-SEC-004 @REQ-SEC-016 @ADR-0014 @ADR-0020 @ADR-0023
+  @SPEC-004 @BHV-04 @REQ-GEN-008 @REQ-LLM-002 @REQ-LLM-003 @REQ-LLM-004 @REQ-LLM-005 @REQ-LLM-007 @REQ-LLM-009 @REQ-LLM-019 @REQ-LLM-021 @REQ-SEC-004 @REQ-SEC-016 @ADR-0014 @ADR-0020 @ADR-0023
   Rule: One explicit provider mode applies to the whole analysis
 
     Scenario: Use one mode without mixing or fallback
-      Given the PageAnalysisRun began in an explicitly selected Local or Groq mode after its one run-level disclosure
-      And the selected provider and exact model remain visibly labeled
+      Given the PageAnalysisRun began in an explicitly selected Local or Groq mode
+      And provider disclosure and the selected provider and exact model become visible when generation becomes relevant
       And the run context records that immutable mode, provider, and exact model without treating the configuration as a ProviderInvocation
       And one selected Finding is eligible for generation
       When the user explicitly starts that Finding's invocation
@@ -180,17 +191,18 @@ Feature: Evidence-first accessibility analysis for one trusted public page
         | the later target is missing or changed, or the rule-and-locator match is duplicate or otherwise ambiguous | inconclusive |
         | the page or scan profiles differ materially                                                       | not comparable |
 
-  @SPEC-007 @BHV-07 @REQ-EVID-011 @REQ-COMP-006 @REQ-QUAL-002 @REQ-QUAL-010 @ADR-0021
+  @SPEC-007 @BHV-07 @REQ-EVID-011 @REQ-COMP-006 @REQ-QUAL-002 @REQ-QUAL-010 @REQ-UX-014 @ADR-0021 @OD-026
   Rule: Preserve earlier local evidence
 
-    Scenario: Preserve and reopen completed evidence after downstream work
+    Scenario: Preserve completed evidence after downstream work
       Given a completed PageAnalysisRun is stored in one local "run.json" with a top-level format version
       When retrieval, generation, review, comparison, or bounded failure data is recorded
       Then the completed scan evidence and every sibling Finding's data remain unchanged
-      And the completed scan, minimized evidence, and downstream state remain available when the user reopens that PageAnalysisRun
-      And reading "run.json" validates it before presenting the stored work
+      And the completed scan, minimized evidence, and downstream state remain durable
+      And every application-owned read of "run.json" validates it before the stored work is used
       And another analysis uses an independent run identifier
       And an intentional rescan may reference the baseline run identifier
+      And the MVP exposes no manual Run ID, retained-run reopen, deep-link load, or automatic reload-restoration action
 
   @SPEC-008 @BHV-08 @REQ-EVID-004 @REQ-GEN-003 @REQ-GEN-004 @REQ-GEN-005 @REQ-GEN-006 @REQ-COMP-005 @REQ-UX-002
   Rule: Keep evidence layers and limitations understandable
