@@ -1,0 +1,136 @@
+{
+  "version": "m201-corpus-v1",
+  "scanManifest": "rd003-scan-v1",
+  "corpusVersion": "wcag22-mvp-v1",
+  "evidencePolicyVersion": "m1-public-v1",
+  "cases": [
+    {
+      "profile": "informative-image-alt",
+      "fixtureRevision": "informative-image-alt-v1-failing",
+      "targetKey": "rd3-image",
+      "ruleId": "image-alt",
+      "successCriterion": "1.1.1",
+      "expectedMinimizedEvidence": {
+        "elementKind": {
+          "value": "img"
+        },
+        "altState": {
+          "value": "absent"
+        }
+      },
+      "goldPassageIds": [
+        "wcag22-sc111",
+        "understanding111-intent",
+        "h37-text-alternative"
+      ],
+      "rationale": "The frozen fixture asks the reader to identify the pictured shape; its image is meaningful and lacks alt. SC 1.1.1 supplies the equivalent-purpose requirement and exceptions, Understanding explains access to conveyed information, and H37 supports a short alt alternative conveying the same meaning. The fixture's corrected 'Blue square' wording is an authored example, not a fact available in minimized evidence. Human review must confirm purpose and wording. H67 and the decorative interpretation are retained for distinguishing ignored images, but are not acceptable remediation gold for this informative-image case.",
+      "observationReference": {
+        "scanManifest": "evaluation/rd003-scan-v1.json",
+        "nativeObservations": "docs/plans/completed/rd-003-scan-evaluation-boundary.md#accepted-setup-and-native-observations--rd003-observations-001",
+        "implementedContract": "src/server/domain/run-contract/run-types.ts",
+        "normalization": "src/server/scan/normalization/native-rule-evidence.ts",
+        "regression": "tests/scan-page.test.ts: six frozen states execute production capture once each, including native corrected same-target passes",
+        "evidenceStatus": "Human-authored expected subset of M1 minimized rule evidence, grounded in the frozen fixture and historical native observation. Not a newly executed scan, runtime Finding, retrieval result or model output. Paths are repository-relative."
+      }
+    },
+    {
+      "profile": "form-input-label",
+      "fixtureRevision": "form-input-label-v1-failing",
+      "targetKey": "rd3-email",
+      "ruleId": "label",
+      "successCriterion": "4.1.2",
+      "expectedMinimizedEvidence": {
+        "elementKind": {
+          "value": "input"
+        },
+        "inputType": {
+          "value": "email"
+        },
+        "nameSources": {
+          "explicitLabel": {
+            "value": false
+          },
+          "implicitLabel": {
+            "value": false
+          },
+          "ariaLabel": {
+            "value": "absent"
+          },
+          "ariaLabelledby": {
+            "value": "absent"
+          },
+          "title": {
+            "value": "absent"
+          },
+          "placeholder": {
+            "value": "absent"
+          },
+          "presentationalRole": {
+            "value": false
+          }
+        }
+      },
+      "goldPassageIds": [
+        "wcag22-sc412",
+        "wcag22-name-definition",
+        "understanding412-intent",
+        "h44-explicit-label",
+        "h44-label-applicability"
+      ],
+      "rationale": "The native email input has no captured naming source; the adjacent 'Email address' span in the controlled fixture is not an associated label. SC 4.1.2 and Understanding require a programmatically determinable name; the glossary distinguishes that name from visible labeling and the HTML name attribute. H44 supports a label whose for matches the control's unique id, and explicitly includes email inputs. The fixed case maps only to 4.1.2; other criteria mentioned verbatim in H44 are not new profile tags. Association does not prove that label wording is useful or visible; those remain human judgments.",
+      "observationReference": {
+        "scanManifest": "evaluation/rd003-scan-v1.json",
+        "nativeObservations": "docs/plans/completed/rd-003-scan-evaluation-boundary.md#accepted-setup-and-native-observations--rd003-observations-001",
+        "implementedContract": "src/server/domain/run-contract/run-types.ts",
+        "normalization": "src/server/scan/normalization/native-rule-evidence.ts",
+        "regression": "tests/scan-page.test.ts: six frozen states execute production capture once each, including native corrected same-target passes",
+        "evidenceStatus": "Human-authored expected subset of M1 minimized rule evidence, grounded in the frozen fixture and historical native observation. Not a newly executed scan, runtime Finding, retrieval result or model output. Paths are repository-relative."
+      }
+    },
+    {
+      "profile": "text-contrast",
+      "fixtureRevision": "text-contrast-v1-failing",
+      "targetKey": "rd3-text",
+      "ruleId": "color-contrast",
+      "successCriterion": "1.4.3",
+      "expectedMinimizedEvidence": {
+        "foregroundColor": {
+          "value": "#888888"
+        },
+        "backgroundColor": {
+          "value": "#ffffff"
+        },
+        "contrastRatio": {
+          "value": 3.54
+        },
+        "expectedContrastRatio": {
+          "value": 4.5
+        },
+        "fontSize": {
+          "value": "12.0pt (16px)"
+        },
+        "fontWeight": {
+          "value": "normal"
+        },
+        "measurementSource": "axe-core"
+      },
+      "goldPassageIds": [
+        "wcag22-sc143",
+        "wcag22-large-scale-definition",
+        "wcag22-contrast-ratio-definition",
+        "understanding143-intent",
+        "understanding143-threshold-measurement",
+        "g18-contrast-remediation"
+      ],
+      "rationale": "RD-003 retained axe-core's 3.54 ratio for #888888 text on #ffffff, 12.0pt (16px), normal weight, against 4.5:1. This is ordinary meaningful body text in the controlled fixture, not large text, incidental text or a logo. Preserve the observed 3.54 without recomputing it; the expected 4.5:1 native string is represented as numeric 4.5 by the M1 normalizer. SC 1.4.3 and its definitions supply the threshold, exceptions and measurement context; Understanding preserves non-rounding and anti-aliasing qualifications; G18 supports adjusting text/background contrast. The subset does not invent unretained shadow color, a new contrast measurement or a full runtime Finding.",
+      "observationReference": {
+        "scanManifest": "evaluation/rd003-scan-v1.json",
+        "nativeObservations": "docs/plans/completed/rd-003-scan-evaluation-boundary.md#accepted-setup-and-native-observations--rd003-observations-001",
+        "implementedContract": "src/server/domain/run-contract/run-types.ts",
+        "normalization": "src/server/scan/normalization/native-rule-evidence.ts",
+        "regression": "tests/scan-page.test.ts: six frozen states execute production capture once each, including native corrected same-target passes",
+        "evidenceStatus": "Human-authored expected subset of M1 minimized rule evidence, grounded in the frozen fixture and historical native observation. Not a newly executed scan, runtime Finding, retrieval result or model output. Paths are repository-relative."
+      }
+    }
+  ]
+}
