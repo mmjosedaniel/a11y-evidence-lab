@@ -1,0 +1,186 @@
+{
+  "corpusVersion": "wcag22-mvp-v1",
+  "sources": [
+    {
+      "title": "Web Content Accessibility Guidelines (WCAG) 2.2",
+      "type": "recommendation",
+      "url": "https://www.w3.org/TR/2024/REC-WCAG22-20241212/",
+      "publisher": "World Wide Web Consortium (W3C)",
+      "status": "W3C Recommendation",
+      "version": "12 December 2024; errata reviewed 2026-09-03 through 17 August 2026; no errata incorporated.",
+      "accessedAt": "2026-09-03",
+      "headings": [
+        "Success Criterion 1.1.1 Non-text Content",
+        "Success Criterion 4.1.2 Name, Role, Value",
+        "Success Criterion 1.4.3 Contrast (Minimum)",
+        "6. Glossary"
+      ],
+      "copyright": "Copyright © 2020-2024 World Wide Web Consortium.",
+      "attribution": "W3C Accessibility Guidelines Working Group (AG WG) and contributors; source title and original URL above.",
+      "useConditions": {
+        "url": "https://www.w3.org/copyright/document-license-2023/",
+        "reviewedUse": "Reviewed 2026-09-03 for the authorized local exact-excerpt catalog. Complete manually selected units; HTML entities decoded and layout whitespace represented as spaces and paragraph/list newlines. Wording unchanged. Source status, copyright and attribution accompany the catalog in this manifest; full applicable notices accompany it in README.md#closed-corpus-notices. Preserve these notices with every copied or displayed portion. No W3C endorsement or public-distribution clearance."
+      }
+    },
+    {
+      "title": "Understanding Success Criterion 1.1.1: Non-text Content",
+      "type": "understanding",
+      "url": "https://www.w3.org/WAI/WCAG22/Understanding/non-text-content.html",
+      "publisher": "World Wide Web Consortium (W3C)",
+      "status": "Informative Understanding document",
+      "version": "Updated 10 August 2026",
+      "accessedAt": "2026-09-03",
+      "headings": [
+        "Intent",
+        "Additional information"
+      ],
+      "copyright": "Copyright © 2026 World Wide Web Consortium.",
+      "attribution": "W3C Accessibility Guidelines Working Group (AG WG) and contributors; source title and original URL above.",
+      "useConditions": {
+        "url": "https://www.w3.org/copyright/software-license-2023/",
+        "reviewedUse": "Reviewed 2026-09-03 for the authorized local exact-excerpt catalog. Complete manually selected units; HTML entities decoded and layout whitespace represented as spaces and paragraph/list newlines. Wording unchanged. Source status, copyright and attribution accompany the catalog in this manifest; full applicable notices accompany it in README.md#closed-corpus-notices. Preserve these notices with every copied or displayed portion. No W3C endorsement or public-distribution clearance."
+      }
+    },
+    {
+      "title": "H37: Using alt attributes on img elements",
+      "type": "technique",
+      "url": "https://www.w3.org/WAI/WCAG22/Techniques/html/H37",
+      "publisher": "World Wide Web Consortium (W3C)",
+      "status": "Informative technique; examples are not required for WCAG conformance",
+      "version": "Updated 12 January 2026",
+      "accessedAt": "2026-09-03",
+      "headings": [
+        "Description"
+      ],
+      "copyright": "Copyright © 2026 World Wide Web Consortium.",
+      "attribution": "W3C Accessibility Guidelines Working Group (AG WG) and contributors; source title and original URL above.",
+      "useConditions": {
+        "url": "https://www.w3.org/copyright/software-license-2023/",
+        "reviewedUse": "Reviewed 2026-09-03 for the authorized local exact-excerpt catalog. Complete manually selected units; HTML entities decoded and layout whitespace represented as spaces and paragraph/list newlines. Wording unchanged. Source status, copyright and attribution accompany the catalog in this manifest; full applicable notices accompany it in README.md#closed-corpus-notices. Preserve these notices with every copied or displayed portion. No W3C endorsement or public-distribution clearance."
+      }
+    },
+    {
+      "title": "H67: Using null alt text and no title attribute on img elements for images that assistive technology should ignore",
+      "type": "technique",
+      "url": "https://www.w3.org/WAI/WCAG22/Techniques/html/H67",
+      "publisher": "World Wide Web Consortium (W3C)",
+      "status": "Informative technique; examples are not required for WCAG conformance",
+      "version": "Updated 12 January 2026",
+      "accessedAt": "2026-09-03",
+      "headings": [
+        "Description"
+      ],
+      "copyright": "Copyright © 2026 World Wide Web Consortium.",
+      "attribution": "W3C Accessibility Guidelines Working Group (AG WG) and contributors; source title and original URL above.",
+      "useConditions": {
+        "url": "https://www.w3.org/copyright/software-license-2023/",
+        "reviewedUse": "Reviewed 2026-09-03 for the authorized local exact-excerpt catalog. Complete manually selected units; HTML entities decoded and layout whitespace represented as spaces and paragraph/list newlines. Wording unchanged. Source status, copyright and attribution accompany the catalog in this manifest; full applicable notices accompany it in README.md#closed-corpus-notices. Preserve these notices with every copied or displayed portion. No W3C endorsement or public-distribution clearance."
+      }
+    },
+    {
+      "title": "Understanding Success Criterion 4.1.2: Name, Role, Value",
+      "type": "understanding",
+      "url": "https://www.w3.org/WAI/WCAG22/Understanding/name-role-value.html",
+      "publisher": "World Wide Web Consortium (W3C)",
+      "status": "Informative Understanding document",
+      "version": "Updated 12 July 2026",
+      "accessedAt": "2026-09-03",
+      "headings": [
+        "Intent"
+      ],
+      "copyright": "Copyright © 2026 World Wide Web Consortium.",
+      "attribution": "W3C Accessibility Guidelines Working Group (AG WG) and contributors; source title and original URL above.",
+      "useConditions": {
+        "url": "https://www.w3.org/copyright/software-license-2023/",
+        "reviewedUse": "Reviewed 2026-09-03 for the authorized local exact-excerpt catalog. Complete manually selected units; HTML entities decoded and layout whitespace represented as spaces and paragraph/list newlines. Wording unchanged. Source status, copyright and attribution accompany the catalog in this manifest; full applicable notices accompany it in README.md#closed-corpus-notices. Preserve these notices with every copied or displayed portion. No W3C endorsement or public-distribution clearance."
+      }
+    },
+    {
+      "title": "H44: Using label elements to associate text labels with form controls",
+      "type": "technique",
+      "url": "https://www.w3.org/WAI/WCAG22/Techniques/html/H44",
+      "publisher": "World Wide Web Consortium (W3C)",
+      "status": "Informative technique; examples are not required for WCAG conformance",
+      "version": "Updated 12 January 2026",
+      "accessedAt": "2026-09-03",
+      "headings": [
+        "Description"
+      ],
+      "copyright": "Copyright © 2026 World Wide Web Consortium.",
+      "attribution": "W3C Accessibility Guidelines Working Group (AG WG) and contributors; source title and original URL above.",
+      "useConditions": {
+        "url": "https://www.w3.org/copyright/software-license-2023/",
+        "reviewedUse": "Reviewed 2026-09-03 for the authorized local exact-excerpt catalog. Complete manually selected units; HTML entities decoded and layout whitespace represented as spaces and paragraph/list newlines. Wording unchanged. Source status, copyright and attribution accompany the catalog in this manifest; full applicable notices accompany it in README.md#closed-corpus-notices. Preserve these notices with every copied or displayed portion. No W3C endorsement or public-distribution clearance."
+      }
+    },
+    {
+      "title": "Understanding Success Criterion 1.4.3: Contrast (Minimum)",
+      "type": "understanding",
+      "url": "https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html",
+      "publisher": "World Wide Web Consortium (W3C)",
+      "status": "Informative Understanding document",
+      "version": "Updated 01 June 2026",
+      "accessedAt": "2026-09-03",
+      "headings": [
+        "Intent"
+      ],
+      "copyright": "Copyright © 2026 World Wide Web Consortium.",
+      "attribution": "W3C Accessibility Guidelines Working Group (AG WG) and contributors; source title and original URL above.",
+      "useConditions": {
+        "url": "https://www.w3.org/copyright/software-license-2023/",
+        "reviewedUse": "Reviewed 2026-09-03 for the authorized local exact-excerpt catalog. Complete manually selected units; HTML entities decoded and layout whitespace represented as spaces and paragraph/list newlines. Wording unchanged. Source status, copyright and attribution accompany the catalog in this manifest; full applicable notices accompany it in README.md#closed-corpus-notices. Preserve these notices with every copied or displayed portion. No W3C endorsement or public-distribution clearance."
+      }
+    },
+    {
+      "title": "G18: Ensuring that a contrast ratio of at least 4.5:1 exists between text (and images of text) and background behind the text",
+      "type": "technique",
+      "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G18",
+      "publisher": "World Wide Web Consortium (W3C)",
+      "status": "Informative technique; examples are not required for WCAG conformance",
+      "version": "Updated 10 August 2026",
+      "accessedAt": "2026-09-03",
+      "headings": [
+        "Description"
+      ],
+      "copyright": "Copyright © 2026 World Wide Web Consortium.",
+      "attribution": "W3C Accessibility Guidelines Working Group (AG WG) and contributors; source title and original URL above.",
+      "useConditions": {
+        "url": "https://www.w3.org/copyright/software-license-2023/",
+        "reviewedUse": "Reviewed 2026-09-03 for the authorized local exact-excerpt catalog. Complete manually selected units; HTML entities decoded and layout whitespace represented as spaces and paragraph/list newlines. Wording unchanged. Source status, copyright and attribution accompany the catalog in this manifest; full applicable notices accompany it in README.md#closed-corpus-notices. Preserve these notices with every copied or displayed portion. No W3C endorsement or public-distribution clearance."
+      }
+    }
+  ],
+  "profiles": [
+    {
+      "id": "informative-image-alt",
+      "ruleId": "image-alt",
+      "successCriterion": "1.1.1",
+      "requiredGuidanceRoles": [
+        "criterion",
+        "interpretation",
+        "remediation"
+      ]
+    },
+    {
+      "id": "form-input-label",
+      "ruleId": "label",
+      "successCriterion": "4.1.2",
+      "requiredGuidanceRoles": [
+        "criterion",
+        "interpretation",
+        "remediation"
+      ]
+    },
+    {
+      "id": "text-contrast",
+      "ruleId": "color-contrast",
+      "successCriterion": "1.4.3",
+      "requiredGuidanceRoles": [
+        "criterion",
+        "interpretation",
+        "remediation"
+      ]
+    }
+  ],
+  "unresolvedConflicts": []
+}

@@ -58,7 +58,7 @@ Development ready. The [development roadmap](docs/DEVELOPMENT_ROADMAP.md) owns i
 
 [M1-03 — Real scan and evidence](docs/plans/completed/m1-03-real-scan-and-evidence.md) is Complete after owner-authorized execution and verified closure. Both scanner slices and their S3 reviews are accepted. All 290 integrated tests and independent strict typechecking pass, including the failed-launch residue regression. The different final integrated critical review, exact task-owned runtime cleanup and documentation closure passed. At M1-03 closure, M1-04 and M1-05 were unselected.
 
-[M1-04 — Target and results UI](docs/plans/completed/m1-04-target-and-results-ui.md) is Complete after the OD-027 [Analyze and results presentation](docs/ui/ANALYZE_AND_RESULTS_PRESENTATION.md), purpose-named component extraction, integrated-review correction, complete regression, independent reviews, exact cleanup, and documentation closure. [M1-05](docs/plans/completed/m1-05-walking-skeleton-integration.md) is Complete again. Both post-closure corrections pass 335 tests and strict TypeScript; fresh independent reviews, exact cleanup, and renewed documentation closure passed. The earlier public-page smoke remains historical and was not repeated. M2-01 remains Not started until explicitly selected.
+[M1-04 — Target and results UI](docs/plans/completed/m1-04-target-and-results-ui.md) is Complete after the OD-027 [Analyze and results presentation](docs/ui/ANALYZE_AND_RESULTS_PRESENTATION.md), purpose-named component extraction, integrated-review correction, complete regression, independent reviews, exact cleanup, and documentation closure. [M1-05](docs/plans/completed/m1-05-walking-skeleton-integration.md) is Complete again. Both post-closure corrections pass 335 tests and strict TypeScript; fresh independent reviews, exact cleanup, and renewed documentation closure passed. The earlier public-page smoke remains historical and was not repeated. [M2-01 — Closed corpus snapshot](docs/plans/completed/m2-01-closed-corpus-snapshot.md) is Complete. The frozen `wcag22-mvp-v1` snapshot contains exactly eight sources, 16 canonical passages and three gold mappings. Structural, reconstruction, five-negative and manual checks, fresh S0 and integrated reviews, exact capture cleanup and documentation closure passed. M2-02 remains Not started; no retrieval behavior exists.
 
 ## Development toolchain
 
@@ -190,4 +190,68 @@ Start with the [project documentation index](docs/README.md) for the recommended
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+Project-authored code and documentation are licensed under the [MIT License](LICENSE). The W3C text in the closed corpus retains its source-specific terms below.
+
+## Closed corpus snapshot
+
+The accepted M2-01 snapshot consists of the [source manifest](corpus/wcag22-mvp-v1/manifest.json), [canonical passages](corpus/wcag22-mvp-v1/passages.json), and [three-profile gold mappings](evaluation/m201-corpus-v1.json). It contains 16 manually selected, complete paragraph/list units from exactly eight W3C artifacts for `image-alt` / 1.1.1, `label` / 4.1.2, and `color-contrast` / 1.4.3. The dated 12 December 2024 Recommendation is normative; Understanding and Techniques are informative. Techniques are examples, not mandatory methods. No unresolved material conflict remains in the selected units after curator review with normative precedence.
+
+Read the manifest, catalog, gold mappings and these notices together. Paragraph/list line breaks represent HTML layout; entities are decoded and wording is preserved. Definition terms retain their exact glossary locator. Source references inside quoted units do not expand the closed source pack or its supported profile tags. Stable passage IDs are manual labels, not ranks. Required roles and conflict declarations are inputs for later support evaluation; gold IDs are acceptable direct-support targets for the fixed cases, not a required ordering or instruction to return all targets.
+
+The catalog is the sole canonical selected-text snapshot. Reconstruct it from its existing JSON without refetching sources or changing IDs, headings, boundaries, text, roles or mappings. A source or passage change needs a new corpus version and affected gold/evaluation evidence. The [M2-01 plan](docs/plans/completed/m2-01-closed-corpus-snapshot.md#m201-cmd-validate--future-static-candidate-read-only) records the read-only structural, reconstruction, negative and semantic checks. No loader, model, embedding, ranking, support-state execution or UI consumer exists yet; M2-02 remains Not started. Gold evidence is an expected subset grounded in frozen RD-003 fixtures and historical observations, not a newly scanned Finding or a model result.
+
+To repeat the static checks in the documented development environment, run the plan's read-only PREP block and then VALIDATE in the same PowerShell session from the repository root. PREP initializes the fixed source table and scan manifest used by VALIDATE. Do not run ACQUIRE or CLEANUP: the eight temporary full-page captures were verified and removed at closure. Source-semantic review is preserved in the [curation record](docs/plans/completed/m2-01-closed-corpus-snapshot.md#m201-corpus-candidate-01--primary-curation-and-verification), and accepted artifact identities and final status are in the [freeze record](docs/plans/completed/m2-01-closed-corpus-snapshot.md#m201-closure-01--final-freeze-and-documentation-impact).
+
+### Closed corpus notices
+
+The manifest identifies every original title, URL, status, observed version, copyright and attribution. This catalog includes material copied from **Web Content Accessibility Guidelines (WCAG) 2.2**, [W3C Recommendation, 12 December 2024](https://www.w3.org/TR/2024/REC-WCAG22-20241212/), Copyright © 2020-2024 World Wide Web Consortium. It also includes material copied from the seven informative Understanding/Technique documents individually identified and linked in the [manifest](corpus/wcag22-mvp-v1/manifest.json), Copyright © 2026 World Wide Web Consortium. Authorship is attributed to the W3C Accessibility Guidelines Working Group and contributors. Selection and plain-text layout are described above; quoted wording is unchanged. No W3C endorsement is implied.
+
+The actual Recommendation footer links to the [W3C Document License](https://www.w3.org/copyright/document-license/), [liability](https://www.w3.org/policies/#Legal_Disclaimer) and [trademark](https://www.w3.org/policies/#W3C_Trademarks) notices. The seven supporting-page footers link to the [W3C Software and Document License](https://www.w3.org/copyright/software-license/), [liability](https://www.w3.org/policies/#disclaimers) and [trademark](https://www.w3.org/policies/#trademarks) notices. Both license links resolved to their 2023 versions when reviewed on 2026-09-03. These are accompanying source notices, not additional retrieval sources. Keep the source metadata and applicable full notice viewable with every later copied or displayed portion; a later UI, package or public distribution requires its own presentation review. M2-01 authorizes local preparation only.
+
+#### W3C Document License — 2023
+
+The following license and disclaimers are reproduced from the [2023 Document License](https://www.w3.org/copyright/document-license-2023/), in effect since 1 January 2023.
+
+> By using and/or copying this document, or the W3C document from which this statement is linked, you (the licensee) agree that you have read, understood, and will comply with the following terms and conditions:
+>
+> Permission to copy, and distribute the contents of this document, or the W3C document from which this statement is linked, in any medium for any purpose and without fee or royalty is hereby granted, provided that you include the following on ALL copies of the document, or portions thereof, that you use:
+>
+> - A link or URL to the original W3C document.
+> - The pre-existing copyright notice of the original author, or if it doesn't exist, a notice (hypertext is preferred, but a textual representation is permitted) of the form: "Copyright © [$date-of-document] World Wide Web Consortium. https://www.w3.org/copyright/document-license-2023/"
+> - If it exists, the STATUS of the W3C document.
+>
+> When space permits, inclusion of the full text of this NOTICE should be provided. We request that authorship attribution be provided in any software, documents, or other items or products that you create pursuant to the implementation of the contents of this document, or any portion thereof.
+>
+> No right to create modifications or derivatives of W3C documents is granted pursuant to this license, except as follows: To facilitate implementation of the technical specifications set forth in this document, anyone may prepare and distribute derivative works and portions of this document in software, in supporting materials accompanying software, and in documentation of software, PROVIDED that all such works include the notice below.
+>
+> HOWEVER, the publication of derivative works of this document for use as a technical specification is expressly prohibited.
+>
+> In addition, "Code Components" —Web IDL in sections clearly marked as Web IDL; and W3C-defined markup (HTML, CSS, etc.) and computer programming language code clearly marked as code examples— are licensed under the W3C Software License.
+>
+> The notice is:
+>
+> "Copyright © 2023 W3C®. This software or document includes material copied from or derived from [title and URI of the W3C document]."
+>
+> THIS DOCUMENT IS PROVIDED "AS IS," AND COPYRIGHT HOLDERS MAKE NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, OR TITLE; THAT THE CONTENTS OF THE DOCUMENT ARE SUITABLE FOR ANY PURPOSE; NOR THAT THE IMPLEMENTATION OF SUCH CONTENTS WILL NOT INFRINGE ANY THIRD PARTY PATENTS, COPYRIGHTS, TRADEMARKS OR OTHER RIGHTS.
+>
+> COPYRIGHT HOLDERS WILL NOT BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF ANY USE OF THE DOCUMENT OR THE PERFORMANCE OR IMPLEMENTATION OF THE CONTENTS THEREOF.
+>
+> The name and trademarks of copyright holders may NOT be used in advertising or publicity pertaining to this document or its contents without specific, written prior permission. Title to copyright in this document will at all times remain with copyright holders.
+
+#### W3C Software and Document License — 2023
+
+The following license and disclaimers are reproduced from the [2023 Software and Document License](https://www.w3.org/copyright/software-license-2023/), in effect since 1 January 2023.
+
+> By obtaining and/or copying this work, you (the licensee) agree that you have read, understood, and will comply with the following terms and conditions.
+>
+> Permission to copy, modify, and distribute this work, with or without modification, for any purpose and without fee or royalty is hereby granted, provided that you include the following on ALL copies of the work or portions thereof, including modifications:
+>
+> - The full text of this NOTICE in a location viewable to users of the redistributed or derivative work.
+> - Any pre-existing intellectual property disclaimers, notices, or terms and conditions. If none exist, the W3C software and document short notice should be included.
+> - Notice of any changes or modifications, through a copyright statement on the new code or document such as "This software or document includes material copied from or derived from [title and URI of the W3C document]. Copyright © [$year-of-document] World Wide Web Consortium. https://www.w3.org/copyright/software-license-2023/"
+>
+> THIS WORK IS PROVIDED "AS IS," AND COPYRIGHT HOLDERS MAKE NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF THE SOFTWARE OR DOCUMENT WILL NOT INFRINGE ANY THIRD PARTY PATENTS, COPYRIGHTS, TRADEMARKS OR OTHER RIGHTS.
+>
+> COPYRIGHT HOLDERS WILL NOT BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF ANY USE OF THE SOFTWARE OR DOCUMENT.
+>
+> The name and trademarks of copyright holders may NOT be used in advertising or publicity pertaining to the work without specific, written prior permission. Title to copyright in this work will at all times remain with copyright holders.

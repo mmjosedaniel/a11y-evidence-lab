@@ -22,6 +22,14 @@ Apply these principles to application code, tests, configuration, documentation,
 - **Clean Code:** Use intention-revealing names, focused and cohesive functions and modules, explicit boundaries and error handling, behavior-oriented tests, and comments that explain why rather than restating what the code does. Keep each change locally understandable; remove duplication only when it represents the same proven concept.
 - These principles do not authorize skipping an Accepted requirement, accessibility behavior, evidence traceability, validation, error handling, or an explicit privacy or security boundary. Simplify the implementation, not the contract.
 
+### Small, cohesive modules from the start
+
+- Implement the selected task as small, purpose-named modules, functions, and components from the first production change. Do not deliver a monolithic implementation with the expectation that the owner or a later task will split it. Identify the current responsibility boundaries in the existing assignment packet before coding; this is not a new planning artifact or permission to write production code before accepted Red.
+- Give each module one coherent primary responsibility. Put independently understandable responsibilities in separate focused files when combining them would mix reasons to change. One current consumer is enough to justify such a module; future reuse is not required. Keep closely related details together when splitting them would add indirection without clarity.
+- For React, keep application and page components focused on composition and necessary shared coordination. Implement meaningful forms, result lists, cards, and detail regions as named components when they have distinct current responsibilities. Keep local state with its owner and shared state at the nearest common owner; separate non-rendering logic when it has its own responsibility. Do not extract every wrapper, invent generic components, or add hooks merely to shorten JSX.
+- For backend code, keep entry points and request handlers focused on boundary handling and coordination. Separate substantive validation, transformations, domain behavior, and persistence or external I/O when these responsibilities are present; do not invent empty layers, repositories, or services for future use.
+- Before handoff, inspect the actual decomposition and resolve material responsibility mixing within the authorized scope. Passing tests alone do not establish clean structure. File length is a review signal, not a limit or an extraction target; never split code solely to satisfy a number or use a generic `utils` file as a catch-all.
+
 ## Required context and task routing
 
 Before making changes:
