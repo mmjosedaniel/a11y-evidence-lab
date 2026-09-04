@@ -245,7 +245,7 @@ M5 is semantically dependent only on completed scan evidence from M1. It is sequ
 - **User-visible outcome:** Enables exact, attributable guidance inspection; no runtime behavior by itself.
 - **Authorities:** `REQ-CORP-001`, `REQ-CORP-003`–`REQ-CORP-007`, `REQ-EVAL-003`–`REQ-EVAL-005`, and ADR-0022.
 - **Verification:** Exactly eight approved artifacts are represented; URLs, publisher, status/version, section, attribution, copyright/use conditions, corpus version, and stable passage identities resolve; no automatic crawl, refresh, or generic splitting occurs.
-- **Likely surfaces:** Future corpus manifest, permitted local source snapshot, deterministic passage data, and evaluation gold mapping.
+- **Delivered artifacts:** [Source manifest](../corpus/wcag22-mvp-v1/manifest.json), [canonical passage catalog](../corpus/wcag22-mvp-v1/passages.json), and [three-profile gold mappings](../evaluation/m201-corpus-v1.json), with [usage and source notices](../README.md#closed-corpus-snapshot). Temporary full-page captures were removed after verification.
 - **Out of scope:** Web search, corpus crawling, arbitrary uploads, automatic refresh, broad WCAG corpus, generic document ingestion, legal conclusion, reranking, or vector database.
 
 ### M2-02 — Implement and capacity-screen lazy local exact-vector retrieval

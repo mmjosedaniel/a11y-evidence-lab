@@ -49,7 +49,7 @@ RD-003 now supplies the [scan-only literal manifest](../../../evaluation/rd003-s
 
 ### Controlled profiles
 
-M2-01 supplies a frozen [closed source manifest](../../../corpus/wcag22-mvp-v1/manifest.json), [16 canonical passages](../../../corpus/wcag22-mvp-v1/passages.json) and [three-profile gold mapping](../../../evaluation/m201-corpus-v1.json), with [verification and freeze status](../../plans/completed/m2-01-closed-corpus-snapshot.md#m201-corpus-candidate-01--primary-curation-and-verification). The gold maps historical native observations into expected subsets of the implemented M1 evidence contract. It is not a new scanner observation, retrieved result, model output or complete generation package. Full generation-input packages, output/rubric freeze and provider execution remain M3-01 work. No requirement row or earlier observation changes.
+M2-01 supplies a frozen [closed source manifest](../../../corpus/wcag22-mvp-v1/manifest.json), [16 canonical passages](../../../corpus/wcag22-mvp-v1/passages.json) and [three-profile gold mapping](../../../evaluation/m201-corpus-v1.json), with [final verification and freeze evidence](../../plans/completed/m2-01-closed-corpus-snapshot.md#m201-closure-01--final-freeze-and-documentation-impact). The gold maps historical native observations into expected subsets of the implemented M1 evidence contract. It is not a new scanner observation, retrieved result, model output or complete generation package. Full generation-input packages, output/rubric freeze and provider execution remain M3-01 work. No requirement row or earlier observation changes.
 
 | Profile | Rule and primary mapping | Expected controlled transition |
 | --- | --- | --- |
