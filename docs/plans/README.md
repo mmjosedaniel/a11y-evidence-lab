@@ -4,11 +4,11 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-No active task plan.
+- [M2-02 — Embedding retrieval and capacity gate](m2-02-embedding-retrieval-capacity-gate.md) — **In progress**, planning only. The plan preserves the frozen corpus and bounds future work to local lazy retrieval, selected-Finding provenance and one capacity smoke. Execution authorization, literal/command review and runtime evidence remain pending.
 
 ## Completed plans
 
-- [M2-01 — Closed corpus snapshot](completed/m2-01-closed-corpus-snapshot.md) — **Complete** on 2026-09-03. The frozen `wcag22-mvp-v1` snapshot contains exactly eight sources, 16 canonical passages and three gold mappings. Structural, reconstruction, five-negative and manual checks, fresh S0 and integrated reviews, exact capture cleanup and documentation closure passed. M2-02 remains Not started; no retrieval behavior exists.
+- [M2-01 — Closed corpus snapshot](completed/m2-01-closed-corpus-snapshot.md) — **Complete** on 2026-09-03. The frozen `wcag22-mvp-v1` snapshot contains exactly eight sources, 16 canonical passages and three gold mappings. Structural, reconstruction, five-negative and manual checks, fresh S0 and integrated reviews, exact capture cleanup and documentation closure passed. M2-02's subsequent planning activation adds no retrieval behavior.
 
 - [M1-05 — Walking-skeleton integration](completed/m1-05-walking-skeleton-integration.md) — **Complete** again on 2026-09-03 after both post-closure corrections, 335 passing tests, strict TypeScript, fresh S3 and different final integrated reviews, exact cleanup, and renewed documentation closure. Original implementation, failed evidence, and public-smoke history are preserved.
 - [M1-04 — Target and results UI](completed/m1-04-target-and-results-ui.md) — **Complete** on 2026-09-02 (UTC). The accepted OD-027 presentation, purpose-named component extraction, integrated-review correction, complete regression, independent reviews, exact cleanup, and documentation closure passed.
