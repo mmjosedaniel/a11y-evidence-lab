@@ -1,6 +1,7 @@
 export type {
   Fact,
   Finding,
+  NativeFinding,
   PageAnalysisRun,
   ProviderContext,
   ScannerReviewObservation,

@@ -1,5 +1,5 @@
 import { isDeepStrictEqual } from 'node:util';
-import { validateRun } from '../domain/run-contract.ts';
+import { validateRun, validateScan } from '../domain/run-contract.ts';
 import type { FailedRun, RunningRun, TerminalRun } from '../persistence/run-repository.ts';
 import type { ScanOutcome } from './contracts.ts';
 
@@ -9,6 +9,7 @@ export function matchTerminalRun(running: RunningRun, input: unknown): TerminalR
   const checked = validateRun(input);
   if (!checked.ok || checked.value.status === 'running') return;
   const terminal = checked.value;
+  if (terminal.status === 'completed' && !validateScan(terminal.scan).ok) return;
   for (const key of ['formatVersion', 'runId', 'createdAt', 'applicationRevision', 'requestedUrl', 'providerContext'] as const) {
     if (!isDeepStrictEqual(running[key], terminal[key])) return;
   }

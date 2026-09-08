@@ -31,7 +31,7 @@ import type {
   Available,
   Checks,
   ContrastEvidence,
-  Finding,
+  NativeFinding,
   ImageEvidence,
   LabelEvidence,
   Locator,
@@ -128,7 +128,7 @@ function readRuleDetails(record: Record<string, unknown>): RuleDetails {
   }
 }
 
-export function readFinding(input: unknown): Finding {
+export function readFinding(input: unknown): NativeFinding {
   const record = readObject(input, ['findingId', 'ruleId', 'nativeResult', 'state', 'checks', 'locator', 'evidence']);
   return Object.freeze({
     ...readRuleDetails(record), findingId: readId(record.findingId),

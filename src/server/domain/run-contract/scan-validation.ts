@@ -14,11 +14,13 @@ import {
   requireValid,
 } from './contract-value-reader.ts';
 import { readFinding, readObservation } from './finding-validation.ts';
+import { readStoredFinding } from './retrieval-validation.ts';
 import type {
   CompleteScanContext,
   RuleCoverage,
   ScanContext,
   ScanResult,
+  NativeScanResult,
   ValidationResult,
 } from './run-types.ts';
 
@@ -63,11 +65,11 @@ function readRuleCoverage(input: unknown, findingCount: number, observationCount
   return Object.freeze({ violations, incomplete, passes, inapplicable });
 }
 
-export function readScan(input: unknown): ScanResult {
+function readScanWith(input: unknown, readFindingValue: (input: unknown) => ScanResult['findings'][number]): ScanResult {
   const record = readObject(input, ['context', 'coverage', 'findings', 'scannerReviewObservations']);
   const context = readContext(record.context);
   requireCompleteContext(context);
-  const findings = readArray(record.findings, readFinding);
+  const findings = readArray(record.findings, readFindingValue);
   const scannerReviewObservations = readArray(record.scannerReviewObservations, readObservation);
   requireValid(new Set(findings.map(finding => finding.findingId)).size === findings.length);
   const coverage = readObject(record.coverage, rules);
@@ -78,6 +80,14 @@ export function readScan(input: unknown): ScanResult {
     context, coverage: Object.freeze({ 'image-alt': forRule('image-alt'), label: forRule('label'), 'color-contrast': forRule('color-contrast') }),
     findings, scannerReviewObservations,
   });
+}
+
+export function readScan(input: unknown): NativeScanResult {
+  return readScanWith(input, readFinding) as NativeScanResult;
+}
+
+export function readStoredScan(input: unknown, parentFinishedAt: string): ScanResult {
+  return readScanWith(input, finding => readStoredFinding(finding, parentFinishedAt));
 }
 
 export function validateScan(input: unknown): ValidationResult<ScanResult> {

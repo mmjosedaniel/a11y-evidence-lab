@@ -1,0 +1,115 @@
+import { EventEmitter } from 'node:events';
+import { expectedEmbeddingIdentity } from './m202-retrieval-fixture.ts';
+
+export const DOCUMENT_PREFIX = 'title: none | text: ';
+export const QUERY_PREFIX = 'task: search result | query: ';
+
+export const finiteRows = Object.freeze([
+  ['D','B60519DDD699D3812C248E2D72615B57DACFF7BCB3256847920D807A7B61F3AE',323,325],['D','5D65265EFAAAE2639B0432D243CCF22AFC07D00873690431B668C5A7946853C1',117,119],
+  ['D','8CA8B412290DD9CF248B712A9C0AAF82506D7C2A6AFAEF7660EA08784BAB853E',135,137],['D','A3F7310A3B7F712716A4D245775289FD5BA9A2BCD19E7691E2A639D4DAF395D7',81,83],
+  ['D','F224D517A65B9145CC30C2165E83E196F1A9642619AF968D7FEBC8B27C3C6523',438,440],['D','C32E5198D8AA77E6C6593F63F039E056E4165BCA35866582B978F35DF1A77043',402,404],
+  ['D','CFDBE4487CA12275765D858EB360B9976D04247FA7BCF24805A913E8F7E2DE3F',157,159],['D','3C9465C55386F6002A72652BF580D74AE490B4775AD1AB309C71E6A110354926',169,171],
+  ['D','0F66A58E40B716161FC4D9A825086818439931CE4F4A6F7CA499CB09DD388C6B',101,103],['D','F63A641FA843BD99CBDCD05B6B84819BECDF511425E9DB36545613F96C7DB380',85,87],
+  ['D','1123E866F932AF9202567A8EC5C4920A3FD7694FC0AC788AA83A7FEC8F9FCE43',377,379],['D','2C5D546CB3E49E7ED9FFD95C87B29B08135044F470DA69BD7C1D7D2AB971DE6F',200,202],
+  ['D','53239F60DF9BB29A3BDF4FAED73B268B588A586D402FA7C039FEEF9F359335CE',236,238],['D','0B87FA3922B1B0472C1F349E098A45ACDB375997AA97C6F36518A0A48FE91000',229,231],
+  ['D','3CE1C9DF5A7D7B07156629285431F86694F0CA9C83ADAFE3E04E91D4190FEBC0',238,240],['D','006B7B26BCF4736D87056199AB20257462307008335CA378377076E7ACDA57AA',548,550],
+  ['Q','9A6DC6ED8B8457E01ACA8E8E44A9F7D0ADE0658F3FDBD5F4539413842547C62F',71,73],['Q','A20D0F1B2293C831D4329DE68BB270891E1A6CCEF68062522D74B963E7EDC50D',71,73],
+  ['Q','6E72B30F96D688584C01901E45E5A7A5B808223116FCB4F2600D2BAEEA2A5B6D',73,75],['Q','4BF8A55A8B93DF24084C6415D5354BF2BA99FA66454EECB0420010F142D53DA1',86,88],
+  ['Q','A944E9AF3952AD4D5312270DC8BB9571A83E6FB684A280805909BDF83196168A',74,76],['Q','D5F66C202AA574FE826D9ABB1E028D91B3E1E0A558F627DEED7E1957D8D71CFB',74,76],
+  ['Q','D08602DFDD0A581F1A92FFBAA1034D1DF2CAA7998526CCD3D7EA030551710015',74,76],['Q','D686A4ED9ED11CBEE071228DA98CB5DE5C3F1417E4CA28FF041BB8B960E67A71',75,77],
+  ['Q','8531273846C4A09F81F7003199C38EA8E0653E4638C2F05DE3CB326CEA977DF8',75,77],['Q','067B8D617D9FBEA32853923B56C47C31146B02291C2080284E30E8E55676486C',77,79],
+  ['Q','15BD669DEC7A0380B1F8657A9FADC0E6E03A5A92976612475573FB41C78483AE',90,92],['Q','6177E536D80348118E9954F3DB67F320A7AC114BC456E17730904264ECA6CC96',78,80],
+  ['Q','2D928FA28C3422D52B5C57242C5E3CD8461004B97024BCFFD7A45F9F3F42815A',78,80],['Q','6C9828628F348A4AA2C8A09486FCF4E2EFEF06A4619399C3526AC4CC5BBBBD53',78,80],
+  ['Q','4F9D726A3F786EC8C835C60C00C5C585EF6011437011EE3717F553CB34698005',75,77],['Q','A0CDCF8CAEB7CC07257EA416890DD9E7BBF19E2513436DE4566AC6BB9E44EE05',75,77],
+  ['Q','117ABC40B958ABA21B0F0D4C2DB3E69F7F60DE6BFDD00B6030B627805C366C41',77,79],['Q','27E5F7C708E27738745DE81F62D3CA039B794E2555197F7AFA6174655A533039',90,92],
+  ['Q','BD7BEE4CCAD6980F419CC581AF7F7B21506A85A535A10D7A0F5E1CE0D5037849',78,80],['Q','C4791ED5218365D0894655F4486F83EE817C1E8E25D05A40F6BA2594EF17D0EA',78,80],
+  ['Q','95FEF7E642F3FE40012820BC55D04C8499D2CBC3375B44E120573FA6411D47B3',78,80],['Q','7D1926BB5739DC573EB6CF8EA364BB6A548F474BC6025316C80C289F480AAFB2',75,77],
+  ['Q','61243E05FE47CC410CDD9560637E414AFAF925BAAE78D50B7EDD386CA8C8AC6D',75,77],['Q','E30BA937095B0B8C59D0CE31AA0E11C6BB4260A53ADFA572A8708E98E25E3E44',77,79],
+  ['Q','3C8603C47A2F5087122669C40117C630892EC0C0F4713AFC3962AF1B6EFFACC7',90,92],['Q','F88C049C1FA8B14EC36F5ACE1854E3E5B07265BBD5EEA764E8D72BB60DCFD884',78,80],
+  ['Q','96FA0D54FBC01FD26CF1189591BEC60331AAFECEC5E617E0EB36B4C087DA7EF3',78,80],['Q','8BCE7D6F9B7A16E3ADE1DDE285FB18EB7B3D5BD795D232844138C1DDA5F10F53',78,80],
+  ['Q','CA6265B600F7C3C793E43E6864B2A0926345E7FE8992A67CD7350B8414DC2A27',84,86],['Q','7F73FAF256E0C93C75491A3DE89C44A268D9CF9C410771EEAEA927C6CFCFDA44',85,87],
+  ['Q','DC01970D7EA43C26D4D29251996ABDD9851F4B692FAB70E70BA0D79833BBEA6B',83,85],['Q','743CDFD1DA66250CEE5D075441468CC1507C8199E829DA7058BBA61DF57B0E3E',84,86],
+  ['Q','1BE163759796E41E45253B4F3372FAF7791C8316DCA96BDB4B1FC1FE1F4B59C6',85,87],['Q','623ACF578F813539A170EEA6D0DE7C089F46DEC93B9E9A8D66DF888A97919CFC',83,85],
+  ['Q','30B5652159876E5053FE7270B05A9E543C8FB9ECD650DCD5AB965A8C1EA13F2B',88,90],['Q','11E61A1DDA60EE8B5894079C593FEA0767BA42C9C31B471425A388394E10CED8',89,91],
+  ['Q','8D72479389D11772972A8186CA281A3D6556D215CC021E412C1E77DDF62FCB25',87,89],['Q','D76F64C26601EBA2A9DDA0B98229452842E1E95247E3823DF3BFD825A70BAC22',88,90],
+  ['Q','14D64838D967EA6EDEC35086ABD2F6D88A49D74AF2AFA658AA9584AEA5694881',89,91],['Q','8E4929A6E3A02743807CCA9A9465E1D603D732EA2E5CE4F89CF9009396DEE91D',87,89],
+  ['Q','B0D60A0CBD30982D663759F721D3EE55CAF519976831086DE211F936866DFEF3',88,90],['Q','4CC98222A55B7A779E0A35B012F8809F74272E5534752BC8B657857669C34475',89,91],
+  ['Q','FA95501C8DD1E095557E90FE624ED3CDEFED30E544EDF6D51B7B473B86559A44',87,89],['Q','B6554BBD5EBF85FB98E7A56F6D864FD05CAA8192B8051A8997CEA1421CF093C1',80,82],
+  ['Q','69022BCA0324670D3821718BB886D89A133D016BD14D6A02781724205308D725',79,81],['Q','B5E800FADAF495BA9A1D5F9D0EB81A92A4F63769BB9A1E4E7556D28A981BEDE5',91,93],
+  ['Q','262BEA433254C8CAEB33187470E7AA2D36C0C5632A691783F23EDD822A289E41',77,79],
+].map(([kind, sha256, R, E]) => Object.freeze({ kind, sha256, R, E }))) as readonly Readonly<{kind:'D'|'Q';sha256:string;R:number;E:number}>[];
+
+export const vector = (axis = 0, sign = 1): number[] => Array.from({ length: 768 }, (_, index) => index === axis ? sign : 0);
+
+export const metadata = Object.freeze({
+  version: () => ({ version: expectedEmbeddingIdentity.runtimeVersion }),
+  tags: () => ({ models: [{ name: expectedEmbeddingIdentity.resolvedModel, model: expectedEmbeddingIdentity.resolvedModel, digest: expectedEmbeddingIdentity.manifestDigest, remote_model: '', remote_host: '' }] }),
+  show: () => ({ details: { quantization_level: 'BF16' }, model_info: { 'general.architecture': 'gemma3', 'gemma3.context_length': 2048, 'gemma3.embedding_length': 768 }, remote_model: '', remote_host: '' }),
+  ps: (loaded = true) => ({ models: loaded ? [{ name: expectedEmbeddingIdentity.resolvedModel, model: expectedEmbeddingIdentity.resolvedModel, digest: expectedEmbeddingIdentity.manifestDigest, context_length: 2048, remote_model: '', remote_host: '' }] : [] }),
+  embed: (value = vector(), prompt_eval_count: number | undefined = 1) => ({ model: expectedEmbeddingIdentity.resolvedModel, embeddings: [value], ...(prompt_eval_count === undefined ? {} : { prompt_eval_count }), remote_model: '', remote_host: '' }),
+});
+
+export type RecordedOllamaRequest = { readonly kind: string; readonly input?: string };
+
+export function requesterHarness(responder?: (request: RecordedOllamaRequest, index: number) => unknown | Promise<unknown>) {
+  const calls: RecordedOllamaRequest[] = [];
+  const request = async (value: RecordedOllamaRequest, signal: AbortSignal): Promise<unknown> => {
+    if (signal.aborted) throw Object.assign(new Error('shutdown'), { code: 'shutdown', cleanupFailed: false });
+    const snapshot = Object.freeze({ ...value });
+    calls.push(snapshot);
+    if (responder) return responder(snapshot, calls.length - 1);
+    if (value.kind === 'version') return metadata.version();
+    if (value.kind === 'tags') return metadata.tags();
+    if (value.kind === 'show') return metadata.show();
+    if (value.kind === 'ps') return metadata.ps();
+    return metadata.embed(vector(calls.length % 32));
+  };
+  return { calls, request };
+}
+
+type NativeReply = { status?: number; body?: string | Buffer; headers?: Record<string,string> } | { error: Error } | { timeout: true } | { hold: true };
+
+export function nativeRequestHarness(replies: NativeReply[]) {
+  const calls: { url: unknown; options: Record<string, unknown>; body: string; timeout: number | undefined; destroyed: boolean }[] = [];
+  const request = (...args: unknown[]) => {
+    const callback = args.at(-1) as (response: EventEmitter & Record<string, unknown>) => void;
+    const options = (typeof args[0] === 'object' && !(args[0] instanceof URL) ? args[0] : args[1]) as Record<string, unknown>;
+    const call = { url: args.length === 3 ? args[0] : undefined, options, body: '', timeout: undefined as number | undefined, destroyed: false };
+    calls.push(call);
+    const emitter = new EventEmitter() as EventEmitter & Record<string, unknown>;
+    emitter.write = (chunk: unknown) => { call.body += Buffer.isBuffer(chunk) ? chunk.toString('utf8') : String(chunk); return true; };
+    emitter.setTimeout = (milliseconds: number, handler: () => void) => { call.timeout = milliseconds; emitter.once('test-timeout', handler); return emitter; };
+    emitter.destroy = () => { call.destroyed = true; return emitter; };
+    emitter.end = (chunk?: unknown) => {
+      if (chunk !== undefined) call.body += Buffer.isBuffer(chunk) ? chunk.toString('utf8') : String(chunk);
+      const reply = replies.shift() ?? { hold: true };
+      queueMicrotask(() => {
+        if ('hold' in reply || call.destroyed) return;
+        if ('timeout' in reply) { emitter.emit('test-timeout'); return; }
+        if ('error' in reply) { emitter.emit('error', reply.error); return; }
+        const response = new EventEmitter() as EventEmitter & Record<string, unknown>;
+        response.statusCode = reply.status ?? 200;
+        response.headers = reply.headers ?? { 'content-type': 'application/json' };
+        response.destroy = () => { call.destroyed = true; return response; };
+        response.resume = () => response;
+        let encoding: BufferEncoding | undefined;
+        response.setEncoding = (value: BufferEncoding) => { encoding = value; return response; };
+        callback(response);
+        const body = reply.body ?? '{}';
+        const bytes = Buffer.isBuffer(body) ? body : Buffer.from(body);
+        response.emit('data', encoding && !Buffer.isBuffer(body) ? bytes.toString(encoding) : bytes);
+        response.emit('end');
+      });
+      return emitter;
+    };
+    return emitter;
+  };
+  return { calls, request };
+}
+
+export function deferred<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((yes, no) => { resolve = yes; reject = no; });
+  return { promise, resolve, reject };
+}

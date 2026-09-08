@@ -5,6 +5,14 @@ import type {
   PageAnalysisRun, ScanResult, Finding, ScannerReviewObservation, ProviderContext,
   Fact, ValidationResult,
 } from '../src/server/domain/run-contract.ts';
+import {
+  completedRetrievalRun,
+  failedRetrievalRun,
+  retrievalStartedAt,
+  runningRetrievalRun,
+  selectedFinding,
+  replaceAt,
+} from './helpers/m202-retrieval-service-fixture.ts';
 
 // M101-CONTRACT-01: synthetic records prove the frozen L1 contract only.
 // They do not prove native capture, DOM correspondence, persistence, or provider execution.
@@ -1124,3 +1132,58 @@ for (const path of reportedArrayCases) {
     }
   }
 }
+
+// M202-C-01: persisted selected-Finding retrieval is additive; native scan input stays scan-only.
+test('accepts each exact persisted retrieval state while native validateScan rejects workflow-bearing findings', () => {
+  for (const run of [runningRetrievalRun(), completedRetrievalRun(), failedRetrievalRun()]) {
+    accept(validateRun, run);
+    reject(validateScan, (run as RecordValue).scan, 'invalid-scan');
+  }
+  accept(validateRun, completeRun());
+  accept(validateScan, scanFixture());
+});
+
+test('persisted retrieval validation is strict, relationship-aware and permits at most one active finding', () => {
+  const malformed: unknown[] = [
+    replaceAt(runningRetrievalRun(), ['scan', 'findings', 0, 'state'], 'unprocessed'),
+    replaceAt(runningRetrievalRun(), ['scan', 'findings', 0, 'retrieval', 'startedAt'], scannedAt),
+    replaceAt(completedRetrievalRun(), ['scan', 'findings', 0, 'retrieval', 'finishedAt'], finishedAt),
+    replaceAt(completedRetrievalRun(), ['scan', 'findings', 0, 'retrieval', 'result', 'query', 'ruleId'], 'label'),
+    replaceAt(completedRetrievalRun(), ['scan', 'findings', 0, 'retrieval', 'unexpected'], true),
+    replaceAt(failedRetrievalRun(), ['scan', 'findings', 0, 'retrieval', 'error'], 'initial-persistence'),
+    replaceAt(failedRetrievalRun(), ['scan', 'findings', 0, 'state'], 'active'),
+  ];
+  const twoActive = runningRetrievalRun();
+  Object.assign(selectedFinding(twoActive, 1), {
+    state: 'active', retrieval: { status: 'running', startedAt: retrievalStartedAt },
+  });
+  malformed.push(twoActive);
+  const inherited = runningRetrievalRun();
+  const retrieval = selectedFinding(inherited).retrieval as RecordValue;
+  selectedFinding(inherited).retrieval = Object.assign(Object.create({ secret }), retrieval);
+  malformed.push(inherited);
+  const accessor = runningRetrievalRun();
+  Object.defineProperty(selectedFinding(accessor).retrieval, 'status', { enumerable: true, get: () => 'running' });
+  malformed.push(accessor);
+  for (const run of malformed) rejectRun(run);
+  const equalParent = runningRetrievalRun();
+  (selectedFinding(equalParent).retrieval as RecordValue).startedAt = finishedAt;
+  accept(validateRun, equalParent);
+  const equalRetrieval = completedRetrievalRun();
+  const equalRecord = selectedFinding(equalRetrieval).retrieval as RecordValue;
+  equalRecord.finishedAt = equalRecord.startedAt;
+  accept(validateRun, equalRetrieval);
+});
+
+test('all nine bounded retrieval failures round trip without raw provider or support fields', () => {
+  const errors = [
+    'corpus-integrity', 'missing-prerequisite', 'model-identity', 'input-fit',
+    'embedding-failed', 'embedding-response', 'timeout', 'shutdown', 'result-validation',
+  ];
+  for (const error of errors) accept(validateRun, failedRetrievalRun('run-01', error));
+  for (const key of ['providerInvocation', 'support', 'proposal', 'rawProviderBody']) {
+    const run = completedRetrievalRun();
+    selectedFinding(run)[key] = { secret };
+    rejectRun(run);
+  }
+});

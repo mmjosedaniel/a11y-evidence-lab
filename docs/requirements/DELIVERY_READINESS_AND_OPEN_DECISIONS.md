@@ -8,7 +8,9 @@ This document is part of the authoritative requirements baseline indexed by [Pro
 
 **Prior integration checkpoint:** [M1-05](../plans/completed/m1-05-walking-skeleton-integration.md). Both post-closure corrections, 335 tests, strict TypeScript, fresh independent reviews, exact cleanup, and renewed documentation closure passed. The prior public smoke remains historical evidence.
 
-**Latest completed task (2026-09-03 UTC):** [M2-01 — Closed corpus snapshot](../plans/completed/m2-01-closed-corpus-snapshot.md) is Complete. The frozen `wcag22-mvp-v1` snapshot contains exactly eight sources, 16 canonical passages and three gold mappings. Structural, reconstruction, five-negative and manual checks, fresh S0 and integrated reviews, exact capture cleanup and documentation closure passed. M2-02 remains Not started; no retrieval behavior exists. Requirement and ADR semantics are unchanged.
+**Latest completed task (2026-09-08 UTC):** [M2-02 — Embedding retrieval and capacity gate](../plans/completed/m2-02-embedding-retrieval-capacity-gate.md) is Complete after all 398 tests, strict/build, the actual 3846.0786-ms retrieval-capacity observation, different final integrated critical review and documentation closure. The bounded UI timing, sampled-resource and post-success driver-shutdown limitations remain explicit. Requirement and ADR semantics are unchanged.
+
+**Current task (2026-09-08 UTC):** None. M2-02 is Complete; M2-03 and later tasks remain Not started and unselected. The owner-accepted dependency-backup limitation remains historical; no failed preservation claim is relabeled. Generation/tracing functionality and unauthorized egress remain excluded.
 
 The owner first selected [M1-02](../plans/completed/m1-02-local-service-and-aggregate.md) for planning, then authorized exact-task execution. It is now Complete: all 182 product tests, independent strict typechecking, actual startup/reopen/stop and exact synthetic-run deletion passed. Both slice S3 reviews and the different final integrated critical review passed; documentation closure is accepted. The earlier completion history below remains unchanged.
 

@@ -4,11 +4,13 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-No active task plan.
+None. M2-03 and later tasks remain unselected.
 
 ## Completed plans
 
-- [M2-01 — Closed corpus snapshot](completed/m2-01-closed-corpus-snapshot.md) — **Complete** on 2026-09-03. The frozen `wcag22-mvp-v1` snapshot contains exactly eight sources, 16 canonical passages and three gold mappings. Structural, reconstruction, five-negative and manual checks, fresh S0 and integrated reviews, exact capture cleanup and documentation closure passed. M2-02 remains Not started; no retrieval behavior exists.
+- [M2-02 — Embedding retrieval and capacity gate](completed/m2-02-embedding-retrieval-capacity-gate.md) — **Complete** on 2026-09-08. All three application slices, 398 tests, strict/build, the real 3846.0786-ms retrieval-capacity observation, different final integrated critical review and documentation closure pass. Exact limitations and retained developer-owned resources are recorded; no later task is selected.
+
+- [M2-01 — Closed corpus snapshot](completed/m2-01-closed-corpus-snapshot.md) — **Complete** on 2026-09-03. The frozen `wcag22-mvp-v1` snapshot contains exactly eight sources, 16 canonical passages and three gold mappings. Structural, reconstruction, five-negative and manual checks, fresh S0 and integrated reviews, exact capture cleanup and documentation closure passed. M2-02 separately owns the application catalog consumer and retrieval/capacity work.
 
 - [M1-05 — Walking-skeleton integration](completed/m1-05-walking-skeleton-integration.md) — **Complete** again on 2026-09-03 after both post-closure corrections, 335 passing tests, strict TypeScript, fresh S3 and different final integrated reviews, exact cleanup, and renewed documentation closure. Original implementation, failed evidence, and public-smoke history are preserved.
 - [M1-04 — Target and results UI](completed/m1-04-target-and-results-ui.md) — **Complete** on 2026-09-02 (UTC). The accepted OD-027 presentation, purpose-named component extraction, integrated-review correction, complete regression, independent reviews, exact cleanup, and documentation closure passed.

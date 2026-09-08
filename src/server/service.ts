@@ -7,10 +7,13 @@ import type { ScanFailure } from './local-service/scan-run-records.ts';
 import { createLoopbackApiServer } from './local-service/loopback-api.ts';
 import { loadClientResponses } from './local-service/client-assets.ts';
 import type { ClientResponseTable } from './local-service/client-assets.ts';
-import type { ReadResult, ScanOutcome, ServiceOptions, StartResult, StopResult } from './local-service/contracts.ts';
+import type { LocalService, ReadResult, RetrievalOutcome, ScanOutcome, ServiceOptions, StartResult, StopResult } from './local-service/contracts.ts';
+import { createRetrievalOperation } from './local-service/retrieval-operation.ts';
+import type { RetrievalReservation } from './local-service/retrieval-operation.ts';
 import { executeScan } from './scan/scan-page.ts';
+import { createExactRetrieval } from './retrieval/exact-retrieval.ts';
 
-export type { ReadResult, ScanOutcome, StopResult, LocalService, StartResult, ServiceOptions } from './local-service/contracts.ts';
+export type { ReadResult, RetrievalOutcome, ScanOutcome, StopResult, LocalService, StartResult, ServiceOptions } from './local-service/contracts.ts';
 
 export async function startLocalService(options: ServiceOptions): Promise<StartResult> {
   const config = parseServiceConfiguration(options);
@@ -36,7 +39,7 @@ export async function startLocalService(options: ServiceOptions): Promise<StartR
   let listenerClosed = false;
   let closeFinished = false;
   let deadline: ReturnType<typeof setTimeout> | undefined;
-  type Operation = { controller: AbortController; settled: boolean; completion: Promise<ScanOutcome> };
+  type Operation = { controller: AbortController; settled: boolean; completion: Promise<unknown>; onDeadline?: () => void };
   let operation: Operation | undefined;
   let reading = false;
   const busy = () => reading || operation !== undefined;
@@ -64,6 +67,7 @@ export async function startLocalService(options: ServiceOptions): Promise<StartR
     deadline = setTimeout(() => {
       deadlineExpired = true;
       stopFailed = true;
+      operation?.onDeadline?.();
       settleStop({ ok: false, error: 'stop-failed' });
     }, timeoutMilliseconds);
     operation?.controller.abort();
@@ -87,13 +91,53 @@ export async function startLocalService(options: ServiceOptions): Promise<StartR
     return stopped.promise;
   }
 
+  const retrieval = createRetrievalOperation({
+    repository,
+    defaultExecute: createExactRetrieval(),
+    isStopping: () => stopStarted,
+    deadlineExpired: () => deadlineExpired,
+    closeAdmission,
+    markStopFailed: () => { stopFailed = true; },
+  });
+
+  function reserveRetrieval(): RetrievalReservation {
+    const completion = Promise.withResolvers<RetrievalOutcome>();
+    const active: Operation = { controller: new AbortController(), settled: false, completion: completion.promise };
+    operation = active;
+    return {
+      controller: active.controller,
+      promise: completion.promise,
+      settle(outcome) {
+        if (active.settled) return;
+        if (!outcome.ok && outcome.cleanupFailed) cleanupUncertain = true;
+        active.settled = true;
+        if (!cleanupUncertain && !deadlineExpired) operation = undefined;
+        completion.resolve(outcome);
+        finishStop();
+      },
+      onDeadline(handler) { active.onDeadline = handler; },
+    };
+  }
+
+  function retrieveFinding(input: unknown, execute?: Parameters<LocalService['retrieveFinding']>[1]): Promise<RetrievalOutcome> {
+    if (admissionClosed) return Promise.resolve({ ok: false, error: 'stopping', run: null, persisted: false, cleanupFailed: false });
+    if (busy()) return Promise.resolve({ ok: false, error: 'busy', run: null, persisted: false, cleanupFailed: false });
+    const reservation = reserveRetrieval();
+    return retrieval.start(input, execute, reservation);
+  }
+
   function readRun(id: unknown): ReadResult {
     if (admissionClosed) return { ok: false, error: 'stopping' };
     if (busy()) return { ok: false, error: 'busy' };
     reading = true;
     try {
       const result = repository.read(id);
-      if (result.ok) return { ok: true, run: result.value, interrupted: result.value.status === 'running' };
+      if (result.ok) {
+        const interrupted = result.value.status === 'running' || (result.value.status === 'completed'
+          && result.value.scan.findings.some(finding => finding.state === 'active'
+            && !retrieval.owns(result.value.runId, finding.findingId)));
+        return { ok: true, run: result.value, interrupted };
+      }
       switch (result.error) {
         case 'invalid-id': case 'not-found': case 'invalid-run': case 'read-failed':
           return { ok: false, error: result.error };
@@ -200,7 +244,7 @@ export async function startLocalService(options: ServiceOptions): Promise<StartR
       startupSettled = true;
       started = true;
       resolve({ ok: true, service: { url: `http://127.0.0.1:${address.port}`, whenStopping: stopping.promise,
-        whenStopped: stopped.promise, readRun, runScan, stop } });
+        whenStopped: stopped.promise, readRun, runScan, retrieveFinding, stop } });
     });
     try { server.listen(config.port, '127.0.0.1'); }
     catch { startupFailure(); }
