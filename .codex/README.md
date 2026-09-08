@@ -38,7 +38,7 @@ Owner-requested standalone workflow and agent-configuration maintenance follows 
 | [`critical_researcher`](./agents/critical-researcher.toml) | Read only | Investigate one R3 critical evidence dimension with the stronger configured model route and failure-path coverage | Ordinary research, complete target-artifact drafting, repository edits, final synthesis, approval, or closure |
 | [`decision_analyst`](./agents/decision-analyst.toml) | Read only | When routing triggers it, audit research completeness and synthesis readiness; for decisions, also audit the Decision Review Contract, compare options, and return a traceable recommendation | Routine single-report synthesis, repository edits, artifact numbering or approval, owner-controlled choices, or task and gate status changes |
 | [`research_drafter`](./agents/research-drafter.toml) | Read only | After synthesis and any required pre-draft checkpoint, transform one frozen conclusion into one non-authoritative target-artifact draft with provenance | New research, competing drafts, recommendation changes, repository edits, artifact lifecycle, approval, or closure |
-| [`critical_research_reviewer`](./agents/critical-research-reviewer.toml) | Read only | Perform maximum-effort fresh review of an R3 contract checkpoint, final answer, or final decision artifact | Ordinary R0-R2 review, implementation review, editing, approval, or closure |
+| [`critical_research_reviewer`](./agents/critical-research-reviewer.toml) | Read only | Perform fresh adversarial review of an R3 contract checkpoint, final answer, or final decision artifact | Ordinary R0-R2 review, implementation review, editing, approval, or closure |
 | [`independent_reviewer`](./agents/independent-reviewer.toml) | Read only | Try to falsify an ordinary higher-risk decision contract, work slice, or integrated final artifact against repository authorities and reproducible evidence | Editing the reviewed work, approving owner-controlled decisions, or taking closure ownership |
 | [`milestone_reviewer`](./agents/milestone-reviewer.toml) | Read only | Review one ordinary completed implementation work slice proportionally and reuse fresh evidence | Critical-risk review, editing, or closure ownership |
 | [`critical_reviewer`](./agents/critical-reviewer.toml) | Read only | Perform maximum-effort adversarial review when a named critical trigger applies | Routine work-slice review, editing, or closure ownership |
@@ -50,7 +50,7 @@ Codex identifies each custom agent by the `name` field inside its TOML file. The
 
 ## Model and Reasoning Policy
 
-The workflow routes model and reasoning effort by responsibility and risk. The 2026-09-08 owner-authorized Astra migration updates coordination, difficult synthesis, critical research, and demanding review while retaining ordinary Sol/Terra workers and each role's existing effort. These are configured starting assignments, not a measured cost or quality ranking. The parent model selection remains operator-controlled; repository text cannot change an already running session.
+The workflow routes model and reasoning effort by responsibility and risk. The initial 2026-09-08 owner-authorized Astra migration updated coordination, difficult synthesis, critical research, and demanding review while retaining ordinary Sol/Terra workers and each role's existing effort. The subsequent owner-authorized [research-review effort trial](#research-review-effort-trial) lowers only `critical_research_reviewer` from `max` to `xhigh`. These are configured starting assignments, not a measured cost or quality ranking. The parent model selection remains operator-controlled; repository text cannot change an already running session.
 
 | Execution role | Model and effort | Rationale |
 |---|---|---|
@@ -59,7 +59,7 @@ The workflow routes model and reasoning effort by responsibility and risk. The 2
 | `critical_researcher` | `gpt-6-astra`, `high` | Covers one R3 critical dimension whose security, integrity, identity, concurrency, recovery, irreversible-data, serialization, or cross-platform risk justifies the stronger route. |
 | `decision_analyst` | `gpt-6-astra`, `xhigh` | Reconciles difficult multi-report synthesis; for decisions, also audits contract coverage, ranking, and decide-now versus prove-later boundaries. |
 | `research_drafter` | `gpt-5.6-terra`, `medium` | Performs bounded transformation after the decision or conclusion is frozen; it does not research or decide. |
-| `critical_research_reviewer` | `gpt-6-astra`, `max` | Preserves the strict quality-first review route for R3 without changing the separate implementation-critical reviewer. |
+| `critical_research_reviewer` | `gpt-6-astra`, `xhigh` | Trials one lower effort level for R3 research review while preserving its complete review contract; quality and efficiency remain to be evaluated. |
 | `milestone_reviewer` | `gpt-5.6-terra`, `high` | Reviews an ordinary completed work slice proportionally without paying maximum-effort cost. |
 | `independent_reviewer` | `gpt-6-astra`, `high` | Reviews ordinary higher-risk work slices, decision checkpoints, and integrated final states. |
 | `critical_reviewer` | `gpt-6-astra`, `max` | Performs quality-first adversarial review only for named critical triggers. |
@@ -87,6 +87,14 @@ Use a small manual comparison on representative work before claiming an improvem
 Read-only scenario probes can check routing and instruction interpretation without starting application work. They do not establish implementation quality, browser behavior, cost, or runtime efficiency. Actual work samples require their own existing task authorization; do not reopen completed work or select a future task merely to populate this comparison. Record only concise observations in the existing policy maintenance result or an authorized task's normal evidence record, with no telemetry or benchmark subsystem.
 
 Validate changed definitions in a fresh trusted session: check discovery of the exact roles and their effective model/effort using runtime evidence when available. An agent's self-description or a TOML parse alone is insufficient. If the runtime cannot expose or activate the role, report that limit and do not treat the old session as upgraded. Revisit a pin when representative evidence shows a material regression; do not silently fall back or claim savings from fewer agents.
+
+### Research-review effort trial
+
+The 2026-09-08 trial changes only the dedicated `critical_research_reviewer`. The shared `independent_reviewer` remains Astra `high`, the implementation-only `critical_reviewer` remains Astra `max`, and `milestone_reviewer` remains Terra `high`. Research and implementation review need separate evidence before extending the reduction. The [Astra launch benchmarks](https://openai.com/index/gpt-6-astra/) report the best score at any effort; they do not establish equivalent review quality at adjacent settings. The [reasoning-effort guidance](https://developers.openai.com/api/docs/guides/reasoning#reasoning-effort) supports evaluating the quality, latency, and token-use tradeoff.
+
+Before claiming an improvement, compare `xhigh` and `max` with the same original review artifacts, instructions, tools, and acceptance criteria. Include known substantive defects and clean examples; compare missed defects, unsupported findings, and total review time including rework. Neither effort is ground truth. Reuse the bounded manual evaluation route above without reopening application tasks or adding a benchmark subsystem. This configuration change and runtime discovery alone do not establish equal defect detection or savings.
+
+Retain `max` as a return option for unusually difficult reviews or evidenced material misses at `xhigh`. Record the reason in the existing coordinating context, update this policy and the role's explicit effort pin together, and verify the setting in a fresh trusted session before relying on it; a spawn override cannot supersede the role-file pin. Any additional review remains within the existing review and correction budgets. The trial changes no R3 coverage, fresh-review requirement, evidence standard, permission boundary, or approval gate.
 
 ## Runtime Concurrency Capacity
 
