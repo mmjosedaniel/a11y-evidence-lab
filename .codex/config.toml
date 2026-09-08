@@ -1,0 +1,3 @@
+# Project coordinator defaults; explicit task selections may override these.
+model = "gpt-6-astra"
+model_reasoning_effort = "high"
