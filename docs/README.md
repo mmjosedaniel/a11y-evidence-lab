@@ -1,6 +1,6 @@
 # Project documentation
 
-This index is the starting point for project work. For initial navigation, read the authority map and applicable task-router entry, then load their controlling sources. The complete catalog and unrelated current-status summaries need not be read for every task. Read a target document completely before editing it. Return to the [project overview](../README.md) for the public summary and repository status.
+This index is the starting point for project work. For initial navigation, read the authority map and applicable task-router entry, then load their controlling sources. The complete catalog and unrelated current-status summaries need not be read for every task. Follow the root [pre-edit reading rule](../AGENTS.md#required-context-and-task-routing), including its narrow routine-ExecPlan exception. Return to the [project overview](../README.md) for the public summary and repository status.
 
 ## Authority and status map
 
@@ -25,6 +25,14 @@ This index is the starting point for project work. For initial navigation, read 
 | [Project overview](../README.md) | Public orientation, current repository status, and developer toolchain instructions | Summary and operational instructions for the selected baseline; it does not override the planning or decision authorities above. |
 
 If two authoritative documents appear inconsistent, do not infer a new decision. Identify the conflict and update the applicable source documents together.
+
+## Summary and history ownership
+
+The roadmap owns task order and status; the owning ExecPlan holds detailed execution, current authorization, and evidence identities; a task progress record holds only concise accepted outcomes and a useful coordination lesson. Requirements and ADRs retain their own decisions and status. Navigation indexes link these owners instead of repeating test counts, retry histories, approval sequences, or completion narratives.
+
+The [project overview](../README.md#project-status) owns the public capability summary and maintained developer commands. Context and requirements indexes link to that summary and the roadmap instead of keeping another execution log. Preserve capability limits where a reader needs them to interpret an API, artifact, or observation. Keep superseded decisions and failed attempts in their original evidence records; shortening a summary never erases that history.
+
+At closure, update each affected owner and only materially changed navigation or capability summaries. Do not rewrite every index for an accepted checkpoint with no change to its responsibility. Any retained status mirror must match the roadmap; no summary can close a task or override evidence.
 
 ## Read by task
 
@@ -84,16 +92,12 @@ Do not load every requirements module automatically. For requirements work, read
 
 ### Development planning
 
-- [M2-02 — Embedding retrieval and capacity gate](plans/completed/m2-02-embedding-retrieval-capacity-gate.md) — **Complete** on 2026-09-08. All three slices, 398 tests, strict/build, the real 3846.0786-ms retrieval-capacity observation, fresh integrated critical review and documentation closure pass. See [how to inspect the retained evidence and what the current UI displays](../README.md#inspecting-m2-02-retrieval-evidence). Later support/UI, gold-quality and generation work remain unselected.
-- [M2-01 — Closed corpus snapshot](plans/completed/m2-01-closed-corpus-snapshot.md) — Complete. The frozen `wcag22-mvp-v1` snapshot contains exactly eight sources, 16 canonical passages and three gold mappings. Structural, reconstruction, five-negative and manual checks, fresh S0 and integrated reviews, exact capture cleanup and documentation closure passed. See the [corpus usage and notices](../README.md#closed-corpus-snapshot). M2-02 separately owns the application catalog consumer and retrieval/capacity work.
-- [M1-03 — Real scan and evidence](plans/completed/m1-03-real-scan-and-evidence.md) — completed execution plan. Both scanner slices and their S3 reviews are accepted. All 290 integrated tests and independent strict typechecking pass, including the failed-launch residue regression. The different final integrated critical review, exact task-owned runtime cleanup and documentation closure passed. At M1-03 closure, M1-04 and M1-05 were unselected.
-- [M1-04 — Target and results UI](plans/completed/m1-04-target-and-results-ui.md) — Complete after the accepted OD-027 presentation, purpose-named component extraction, integrated-review correction, complete regression, independent reviews, exact cleanup, and documentation closure.
-- [M1-05 — Walking-skeleton integration](plans/completed/m1-05-walking-skeleton-integration.md) — Complete again after both post-closure corrections, fresh S3 and different final integrated reviews, exact cleanup, and renewed documentation closure. See the [335-test replacement verification](plans/completed/m1-05-walking-skeleton-integration.md#m105-pc08-accepted-verification--replacement-evidence) and [progress summary](progress/m1-05-walking-skeleton-integration.md); the earlier public smoke remains historical.
-- [M1-02 — Local service and aggregate](plans/completed/m1-02-local-service-and-aggregate.md) — completed, archived ExecPlan with R3 literal review, guarded storage/service TDD, both S3 reviews, different final integrated review, 182 passing tests, strict typechecking, exact cleanup and documentation closure.
-- [Development toolchain](../README.md#development-toolchain) — developer-managed prerequisites, script-suppressed locked restore, independent strict type checking, the sequential ten-file suite, native production build, integrated browser-service startup/stop, validated internal reads, and exact deletion. Use the existing instructions rather than historical assessment seeds for setup.
-- [Development roadmap](DEVELOPMENT_ROADMAP.md) — accepted derived milestone sequence, task dependency graph, integration checkpoints, critical path, scope guards, and implementation progress for the first portfolio slice.
-- [Execution-plan index](plans/README.md) — active and completed task-scoped ExecPlans; [M1-01](plans/completed/m1-01-run-and-scan-contracts.md) is Complete and archived after literal review, guarded TDD, both implementation reviews and closure; its runtime contracts and 58 tests pass strict verification, while RD-002 and RD-003 are Complete and archived. RD-003 includes [verified LF checkout and clean-start instructions](plans/completed/rd-003-scan-evaluation-boundary.md#current-reproduction--rd003-procedure-003), [review and cleanup closure evidence](plans/completed/rd-003-scan-evaluation-boundary.md#reproducibility-cleanup-and-renewed-closure), and preserved native observations and failure history.
-- [Project and agent-workflow progress](progress/README.md) — concise manual task summaries; RD-002, RD-003, and M1-01 through M1-04 are Complete. M1-05 is Complete again after the two post-closure corrections passed 335 tests, strict TypeScript, fresh independent reviews, exact cleanup, and renewed documentation closure. The earlier public-page smoke remains historical evidence and was not repeated.
+- [Development roadmap](DEVELOPMENT_ROADMAP.md) — task order, status, dependencies, verification, and integration checkpoints.
+- [Execution-plan index](plans/README.md) — current task coordination and preserved completed plans, including their exact commands, decisions, failures, and closure evidence.
+- [Project and agent-workflow progress](progress/README.md) — concise accepted outcomes and coordination lessons, indexed by task.
+- [Development toolchain](../README.md#development-toolchain) and [command preparation](../README.md#development-command-preparation) — maintained prerequisites, environment wrappers, build, verification, service startup, and deletion instructions.
+- [Closed corpus](../README.md#closed-corpus-snapshot) — frozen artifacts, static checks, and required source notices.
+- [Inspecting retrieval evidence](../README.md#inspecting-m2-02-retrieval-evidence) — retained M2-02 observations and the distinction between internal retrieval and current UI capabilities.
 
 ### UI planning
 

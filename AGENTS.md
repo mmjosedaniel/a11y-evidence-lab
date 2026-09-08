@@ -40,7 +40,7 @@ Declare responsibility placement, dependency direction, reuse or bounded creatio
 
 Inspect Git status and preserve unrelated changes. Start with the [authority map](docs/README.md#authority-and-status-map) and applicable [task-router entry](docs/README.md#read-by-task); these sections suffice for initial navigation. Load controlling requirements, decisions, prerequisites, and specifications through that route rather than reading every module.
 
-Read a target document completely before editing it. For read-only investigation, begin with controlling sections and expand to resolve uncertainty. Read [PROJECT_REQUIREMENTS.md](docs/PROJECT_REQUIREMENTS.md) for shared requirement semantics, status, traceability, development authorization, or cross-module decisions. For implementation, resolve every selected task identifier through the roadmap's authority-location key and read each named authority and scenario.
+Read a target document completely before editing it, except for routine ExecPlan maintenance under [PLANS.md's bounded reading rule](PLANS.md#current-state-and-resumption). For read-only investigation, begin with controlling sections and expand to resolve uncertainty. Read [PROJECT_REQUIREMENTS.md](docs/PROJECT_REQUIREMENTS.md) for shared requirement semantics, status, traceability, development authorization, or cross-module decisions. For implementation, resolve every selected task identifier through the roadmap's authority-location key and read each named authority and scenario.
 
 For substantive repository defects, consult the [bug index and recording rules](docs/bugs/README.md) before new investigation. Use its primary-maintained records for durable evidence and agent handoff context while retaining the existing task authorization and execution workflow.
 
@@ -64,7 +64,7 @@ For implementation, run focused checks at work-slice boundaries and the complete
 
 ## Documentation rules
 
-Keep each rule in its existing authority and link to its procedure. Add a document only for a distinct responsibility. Distinguish ideas, decisions, assumptions, and implemented behavior. Keep architecture under `docs/architecture/`, with accepted significant decisions in its ADR directory and both indexes current. Preserve superseded history and stable identifiers.
+Keep each rule in its existing authority and link to its procedure. Follow the [documentation ownership rule](docs/README.md#summary-and-history-ownership) for status, evidence, and navigation summaries. Add a document only for a distinct responsibility. Distinguish ideas, decisions, assumptions, and implemented behavior. Keep architecture under `docs/architecture/`, with accepted significant decisions in its ADR directory and both indexes current. Preserve superseded history and stable identifiers.
 
 ## Task-closure documentation gate
 

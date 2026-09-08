@@ -12,7 +12,7 @@ One ExecPlan owns exactly one status-bearing roadmap task. A roadmap-approved pa
 
 ## Required operating rules
 
-Every ExecPlan must be self-contained. Explain the relevant repository state, requirements, accepted decisions, readiness gates, and terms in enough detail that a newcomer can execute it. Name repository-relative paths and stable roadmap, requirement, ADR, `BHV-*`, `SPEC-*`, and `HS-*` identifiers wherever they control the work.
+Every ExecPlan must be self-contained as a resumption guide: a newcomer can find its current contract and all required evidence without prior conversation. Summarize the relevant state and terms, and link exact repository-relative paths and stable roadmap, requirement, ADR, `BHV-*`, `SPEC-*`, and `HS-*` identifiers instead of copying their authoritative prose. Self-contained does not mean duplicating the workflow or every past command.
 
 Every ExecPlan is a living document. Update it whenever progress is made, evidence changes, a material discovery occurs, or an execution decision is taken. At every stopping point, say what is complete, what remains, and what should happen next. A reader must be able to restart from the plan alone.
 
@@ -33,6 +33,14 @@ Begin with a short action-oriented H1 and this statement:
 The following sections are mandatory and remain present for the life of the plan.
 
 ## Required living sections
+
+### Current state and resumption
+
+Place a compact `Current state` section immediately after the opening statement. Keep only the owning task and roadmap link, current authorized scope and applicable gates, latest accepted barrier and evidence links, unresolved findings or blockers, remaining correction/attempt allowance, active lease or `None`, and next action with its controlling section. Link the current work-slice contract, commands, validation, recovery instructions, and relevant decision records. This section summarizes those owners; it cannot authorize an effect, renew a grant, accept evidence, or change task status.
+
+For a routine checkpoint or current-state update that changes no scope, binding contract, authority, command, or recovery semantics, read this section, the complete current task/work-slice contract and applicable authorities, affected living sections, and every evidence or history section the update relies on. Search the whole plan for affected IDs and superseding entries; expand reading to resolve conflicts or uncertain dependencies. Only then may unchanged, unrelated historical bodies be left unread. If the current route is missing or ambiguous, or the change alters those semantics or reorganizes history, read the complete plan before editing. This exception changes no required reviewer coverage or evidence-freshness rule.
+
+Keep superseded command packages and detailed execution history under clearly labeled historical subsections in the same plan, with stable headings, IDs, source bodies, and evidence identities preserved. The current route must identify what supersedes them; historical commands and consumed grants are not execution permission. Link history from living sections instead of repeating it in each one. Preserve completed plans as historical evidence; this convention does not require retrofitting every archive or creating a second plan, summary file, or telemetry ledger.
 
 ### Progress
 
@@ -76,6 +84,8 @@ State what the owning roadmap task includes and excludes. Preserve Accepted, Pro
 
 ### Plan of Work
 
+Before proposing substantial custom setup or evaluation tooling, identify the smallest proof that satisfies each applicable Accepted contract and its adverse cases. Reuse existing tools and fresh evidence; compare a bounded direct or developer-managed procedure when it can satisfy the same boundary. If preparation or recovery starts requiring a separate substantial tool, reconsider its necessity and remaining budget before another attempt. Record that reasoning here, without a new planning phase or artifact. Changing an Accepted proof or safety boundary still follows its authority and risk route; simplicity never authorizes skipping it.
+
 Describe the dependency-ordered sequence in prose. For each coherent work slice, state what will exist afterward, the observable contract, the preflight target when TDD applies, current test and implementation ownership, risk tier, exact authority anchors, allowed and forbidden paths, focused and task-level commands, reusable evidence identities, execution budget, expected handoff, and condition for advancing. For a slice that changes application source, also record the compact responsibility-and-cohesion contract projected into Milestone Assignment Packet v2: each existing or planned production path or symbol and its primary responsibility, the responsibility added by the slice and why that placement fits, dependency, runtime-call, or interface-edge changes, the reuse, justified separation, bounded creation, or local-extraction disposition, and any permitted bounded structural refactor. Use `None — no application-source responsibility changes` for setup or other slices that change no application-source responsibility.
 
 The standard route records no profile field. Only `frontend-visual` adds the conditional profile marker, accepted reuse-audit identity, UI/design anchors, state and viewport matrix, and real-browser evidence target required by the conditional packet capsule. Identify read-only or separately worktree-isolated branches that may run in parallel. Red, Green, and Refactor remain sequential within a behavior-bearing work slice. Record `TDD: Not applicable` and the replacement evidence for a non-behavioral setup; other exceptions are stop-and-triage conditions.
@@ -92,7 +102,7 @@ After the research barrier, the synthesis owner returns exactly `DRAFT READY`, `
 
 ### Concrete Steps
 
-Give exact commands and working directories. Commands must match current repository evidence or be labeled as future commands that become authoritative only after the applicable task creates them. Include short expected results.
+Give exact commands and working directories, linking maintained developer preparation from the [current README](README.md#development-command-preparation). Commands must match current repository evidence or be labeled as future commands that become authoritative only after the applicable task creates them. Include short expected results. Apply the implementation workflow's [command preparation](.codex/execplan-implementation-workflow.md#command-preparation) to the actual caller and failure boundaries, including primary-run evaluation commands.
 
 ### Validation and Acceptance
 
@@ -130,4 +140,4 @@ Finally, apply the [task-closure documentation gate](docs/README.md#task-closure
 
 ## Revision note
 
-Whenever the plan changes materially, add a dated note at its bottom explaining what changed and why. Reflect the same change in `Progress`, `Decision Log`, and affected work, validation, or recovery sections so the document never contradicts itself.
+Whenever the plan changes materially, add a concise dated note at its bottom explaining what changed and why. Reconcile `Current state` and affected living, work, validation, or recovery sections; add a Decision Log entry only for a material execution decision. State each detailed result once in its owning section and link it from the others instead of copying the narrative.

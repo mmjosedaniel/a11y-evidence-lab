@@ -20,7 +20,7 @@ These agents support repository work. They do not change product scope, approve 
 | Project coordinator defaults | [Project Codex configuration](./config.toml) | [Model and reasoning policy](#model-and-reasoning-policy), explicit task overrides, and fresh-session verification |
 | Operator-managed runtime concurrency | [Runtime concurrency capacity](#runtime-concurrency-capacity) | [Collaboration topology](#collaboration-topology), [implementation workflow](./execplan-implementation-workflow.md), and [write-lease guard](./write-lease-guard.md) |
 
-Keep `AGENTS.md` concise and durable; put task-specific procedures in the linked ExecPlan, workflow, or repository skill. For initial navigation, read the authority map and matching task-router entry, then the controlling sections of this guide. Read a target document completely before editing it. Linked procedures are required when their route applies, not automatically for every task. Codex discovers repository skills under `.agents/skills` using progressive disclosure: it first sees skill metadata, then loads a selected `SKILL.md` and only the supporting resources needed for the task. Project-scoped custom agents live under `.codex/agents`; their definitions do not execute merely because the files exist.
+Keep `AGENTS.md` concise and durable; put task-specific procedures in the linked ExecPlan, workflow, or repository skill. For initial navigation and pre-edit reading, follow the root [context rule](../AGENTS.md#required-context-and-task-routing), including its narrow routine-ExecPlan exception. Linked procedures are required when their route applies, not automatically for every task. Codex discovers repository skills under `.agents/skills` using progressive disclosure: it first sees skill metadata, then loads a selected `SKILL.md` and only the supporting resources needed for the task. Project-scoped custom agents live under `.codex/agents`; their definitions do not execute merely because the files exist.
 
 Project-scoped `.codex` configuration loads only for a trusted project. A role file being present or syntactically valid does not by itself prove runtime discovery in the current session.
 
@@ -157,6 +157,14 @@ Every spawned researcher, analyst, drafter, or research reviewer receives a comp
 
 The capsule is an assignment projection, not a new authority document. For a decision-oriented ExecPlan, it projects the living Decision Review Contract. For research without an ExecPlan, it may live only in the coordinating prompt or final research record. Do not create a tracked plan, report, or ledger solely to administer R0 or R1 work.
 
+#### Capsule normalization and report length
+
+Before dispatch, the primary checks the applicable fields once and supplies a compact complete assignment. Fields may be combined in prose; a missing template heading is not a missing input. The primary may normalize labels from already supplied stable IDs, mark inapplicable optional artifact sections `None`, and explicitly select an applicable published default budget while checking the remaining allowance. Do not create extra IDs, documents, or owner questions solely for formatting.
+
+Recipients may interpret equivalent prose and combine report sections, briefly noting a material administrative normalization. They must not invent missing research or evidence identities, freshness, tier, scope, permissions, authority, hard gates, owner choices, budget, follow-up allowance, or review independence. Missing or contradictory consequential inputs still return the role's existing blocked/research-return result to the primary. Normalization never turns an exhausted allowance into a fresh one and does not apply to write-lease packet fields or digests.
+
+Report requirements specify coverage, not ten separate headings. Use the capsule's useful-detail limit; combine related items and omit inapplicable optional fragments or empty owner-question sections. Always retain assignment identity/scope, controlling references, traceable evidence and applicable criteria, material risks/unknowns, conclusion with its limits, and the role's terminal result. Requested artifact sections, decision-contract coverage, critical failure-path evidence, reviewer checklists, and provenance remain complete. Do not repeat the capsule, authority prose, or already shared evidence merely to fill a report template.
+
 ### Research budgets and stops
 
 | Tier | Default execution budget |
@@ -251,6 +259,8 @@ The implementation topology above remains unchanged by research-tier routing: wr
 ### Progress summaries
 
 The primary coordinator maintains the manual [project and agent-workflow progress index](../docs/progress/README.md). Create one living summary only after an existing roadmap task enters `In progress`; update it after an accepted material work-slice or integration checkpoint and at task closure. Include a reconciled blocker or next-boundary change only when it is part of that accepted checkpoint. Record outcomes, roles and routes actually used, accepted review or correction results, decisive evidence links, and the next boundary. Do not record every turn, duplicate the ExecPlan, copy raw reports or lease state, or add hooks, token/cost tracking, or generated telemetry. The roadmap remains the status authority, and the ExecPlan remains the detailed coordination and evidence record.
+
+Use the plan's [current-state route](../PLANS.md#current-state-and-resumption) to resume, the [command preparation](./execplan-implementation-workflow.md#command-preparation) before dispatch, and the [summary ownership rule](../docs/README.md#summary-and-history-ownership) at closure. These specialize existing coordination; they add no role, gate, or model-setting change.
 
 ## Decision Review Contract and Risk Tier
 

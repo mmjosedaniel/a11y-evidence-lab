@@ -145,6 +145,8 @@ Accepted command evidence may be reused only when all of these still match: exac
 
 ### Guard projection
 
+Apply the command preparation below before opening a write lease. Its checks are part of packet preparation, not another worker phase or permission to run commands with unapproved effects.
+
 Before each write turn, the coordinator passes these packet fields unchanged to the [automatic write-lease guard](./write-lease-guard.md):
 
 | Packet field | Guard input |
@@ -166,6 +168,16 @@ Before each write turn, the coordinator passes these packet fields unchanged to 
 For a write turn, the coordinator drafts the packet, starts the guard, inserts the returned digest, confirms that the projection matches, and only then authorizes the persistent or newly spawned worker to write. Preflight has no guard because it is read-only. The guard proves path compliance and no drift in its explicitly sealed Git-state invariants; it does not cover every Git write operation or metadata mutation or prove that the classification, test, code, command result, evidence identity, or design is correct.
 
 For a Green lease, every file in the accepted test boundary must be outside the allowed scope or listed explicitly in `Forbidden files` or `Forbidden directory roots`. The guard already gives forbidden scope precedence over allowed scope. This restriction applies to the implementation worker's Green turn only: the test worker may edit test-owned files under an initial or attempt-2 `red` or `evidence` lease, and the primary may make an exceptional direct test correction between leases. Either correction invalidates the prior Red or characterization evidence; the revised test and fresh result must be accepted before that evidence is reused or Green resumes.
+
+### Command preparation
+
+Prepare the actual command and its complete caller, not only component functions or an illustrative snippet. Resolve exact headings, paths, working directory, tool versions, expected outputs, and current inventories; never select a command by an ambiguous prefix. Consume returned digests, hashes, and result fields directly instead of manually transcribing them. Check the exit result and any required structured result before dispatching a dependent step. Independent read-only checks may be batched; dependent effects remain sequential.
+
+Reuse the [maintained developer preparation](../README.md#development-command-preparation) and carry forward evidenced environment limitations and the exact applicable authorization. A known sandbox/network limitation should be handled through the appropriate permitted tool route before acquisition, not rediscovered through identical retries. Permission denials remain binding, and a historical grant, preparation check, or retry label does not renew an exhausted attempt.
+
+Use proportional syntax parsing and safe read-only prerequisite checks before dispatch. For a new or corrected compound command, inspect its actual bindings, empty/error output, native exit propagation, stop-before-next-step behavior, and cleanup boundary; use isolated focused checks when these semantics need executable evidence. Syntax alone proves none of them. Such checks must stay within their own permissions and side-effect limits; do not create fixtures or caches during read-only worker preflight. Reuse still-fresh evidence instead of adding a second complete test suite for the preparation.
+
+The same preparation discipline applies to primary-run setup or evaluation. It cannot replace required implementation ownership, leases, risk-routed review, or real runtime proof, and it does not justify a general-purpose runner or validation platform.
 
 ## Normal flow
 
@@ -254,6 +266,8 @@ After the normal test-lease closure and acceptance, the separate Green worker mu
 A separately planned `setup` assignment may occur before a dependent behavior-bearing work slice. The coordinator records `TDD: Not applicable`, the reason no meaningful executable Red exists, and the structural, semantic, manual, or negative evidence that replaces it. `code_worker` receives a normal guarded `setup` packet and lease directly; no test-worker preflight or Green phase is created. Setup must not smuggle production behavior into configuration work and must have its own observable structural, build, or runtime check followed by the ordinary proportional review route.
 
 ## Corrections and exceptions
+
+Before freezing a correction packet, inspect the decisive failure and search the affected contract, test/helper family, and actual command callers for the same assumption. Consult the [bug record](../docs/bugs/README.md) when the defect recurs or needs durable handoff context. Distinguish observations from hypotheses and cover one coherent semantic correction within the authorized paths and remaining budget. Broader diagnosis does not broaden writes, permit changing tests to match incorrect production behavior, or reset a consumed correction. Return changed binding fields to reconciliation before another lease.
 
 A worker never continues writing after its lease is terminal. Guard violations, ambiguous concurrent changes, stale evidence, exhausted budgets, pre-existing failures, wrong Red failures, blocked dependencies, rejected handoffs, and review findings all take the same immediate action: stop writes and return control to the coordinator. Never repair them by reverting user or peer work automatically.
 
