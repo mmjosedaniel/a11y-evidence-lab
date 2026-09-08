@@ -9,7 +9,7 @@ import {
   requireKeys,
   requireValid,
 } from './contract-value-reader.ts';
-import { readContext, readScan, requireCompleteContext } from './scan-validation.ts';
+import { readContext, readStoredScan, requireCompleteContext } from './scan-validation.ts';
 import type {
   PageAnalysisRun,
   ProviderContext,
@@ -47,7 +47,8 @@ function readRun(input: unknown): PageAnalysisRun {
   };
   if (status === 'completed') {
     const finishedAt = readTime(record.finishedAt);
-    const scan = readScan(record.scan);
+    const scan = readStoredScan(record.scan, finishedAt);
+    requireValid(scan.findings.filter(finding => finding.state === 'active').length <= 1);
     requireChronology(common.createdAt, scan.context, finishedAt);
     return Object.freeze({ ...common, status, finishedAt, scan });
   }

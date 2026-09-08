@@ -10,6 +10,13 @@ import type { RunRepository, StoreResult, RunningRun, CompletedRun, FailedRun, T
 import { validateRun } from '../src/server/domain/run-contract.ts';
 import { runningRun, completedRun, failedRun } from './helpers/m102-run-fixture.ts';
 import type { FixtureMode, FixtureScan } from './helpers/m102-run-fixture.ts';
+import {
+  completedRetrievalRun,
+  completedScanRun,
+  failedRetrievalRun,
+  runningRetrievalRun,
+  selectedFinding,
+} from './helpers/m202-retrieval-service-fixture.ts';
 
 // M102-STORE-01: one real publish-or-preserve boundary, no service/scanner behavior.
 const repo = fileURLToPath(new URL('../', import.meta.url));
@@ -778,6 +785,133 @@ for (const phase of ['before', 'after'] as const) {
         assert.deepEqual(bytes(sandbox.runs), Buffer.from(JSON.stringify(completedRun(), null, 2) + '\n'));
         assert.deepEqual(residue(sandbox.runs), []);
       }
+    });
+  });
+}
+
+test('updateRetrieval publishes only the selected two-step transition and preserves scan evidence and siblings', options, async () => {
+  await withSandbox(({ runs }) => {
+    const store = open(runs);
+    success(store.create(runningRun()));
+    success(store.finish(completedRun()));
+    const original = completedScanRun();
+    const running = runningRetrievalRun();
+    const completed = completedRetrievalRun();
+    assert.deepEqual(success(store.updateRetrieval(original as unknown as CompletedRun, running)), running);
+    assert.deepEqual(success(store.updateRetrieval(running as unknown as CompletedRun, completed)), completed);
+    assert.deepEqual(success(store.read('run-01')), completed);
+    assert.deepEqual((completed.scan as Record<string, unknown>).context,
+      (original.scan as Record<string, unknown>).context);
+    assert.deepEqual(selectedFinding(completed, 1), selectedFinding(original, 1));
+    assert.deepEqual(bytes(runs), Buffer.from(JSON.stringify(completed, null, 2) + '\n'));
+    assert.deepEqual(residue(runs), []);
+  });
+});
+
+test('updateRetrieval returns the detached frozen durable representation for an accepted negative-zero score', options, async () => {
+  await withSandbox(({ runs }) => {
+    const store = open(runs);
+    success(store.create(runningRun()));
+    success(store.finish(completedRun()));
+    const original = completedScanRun();
+    const running = runningRetrievalRun();
+    const submitted = changed(completedRetrievalRun(),
+      ['scan', 'findings', 0, 'retrieval', 'result', 'passages', 2, 'score'], -0);
+    const before = structuredClone(submitted);
+    valid(submitted);
+    success(store.updateRetrieval(original as unknown as CompletedRun, running));
+
+    const returned = success(store.updateRetrieval(running as unknown as CompletedRun, submitted));
+    const durable = success(open(runs).read('run-01'));
+    const submittedRetrieval = selectedFinding(submitted as Record<string | number, unknown>).retrieval as Record<string, unknown>;
+    const submittedResult = submittedRetrieval.result as Record<string, unknown>;
+    const submittedPassages = submittedResult.passages as Record<string, unknown>[];
+    assert.deepEqual(submitted, before);
+    assert.equal(Object.is(submittedPassages[2]!.score, -0), true);
+    assert.notStrictEqual(returned, submitted);
+    deepFrozen(returned);
+    assert.deepEqual(JSON.parse(bytes(runs).toString('utf8')), durable);
+    assert.deepEqual(returned, durable);
+  });
+});
+
+test('updateRetrieval rejects an unrelated native signed-zero value as invalid input before JSON canonicalization', options, async () => {
+  await withSandbox(({ runs }) => {
+    const store = open(runs);
+    success(store.create(runningRun()));
+    success(store.finish(completedRun()));
+    const original = completedScanRun();
+    const running = runningRetrievalRun();
+    const completedWithNegativeZero = changed(completedRetrievalRun(),
+      ['scan', 'findings', 0, 'retrieval', 'result', 'passages', 2, 'score'], -0);
+    const candidate = changed(completedWithNegativeZero, ['scan', 'coverage', 'label', 'inapplicable'], -0);
+    const originalCoverage = (running.scan as Record<string, unknown>).coverage as Record<string, Record<string, unknown>>;
+    const candidateCoverage = ((candidate as Record<string, unknown>).scan as Record<string, unknown>)
+      .coverage as Record<string, Record<string, unknown>>;
+    assert.equal(Object.is(originalCoverage.label!.inapplicable, 0), true);
+    assert.equal(Object.is(candidateCoverage.label!.inapplicable, -0), true);
+    assert.equal(validateRun(candidate).ok, false);
+    success(store.updateRetrieval(original as unknown as CompletedRun, running));
+    const before = bytes(runs);
+
+    failure(store.updateRetrieval(running as unknown as CompletedRun, candidate), 'invalid-run');
+    assert.deepEqual(bytes(runs), before);
+  });
+});
+
+test('updateRetrieval rejects stale, duplicate, skipped and unrelated mutations without changing canonical bytes', options, async () => {
+  await withSandbox(({ runs }) => {
+    const store = open(runs);
+    success(store.create(runningRun()));
+    success(store.finish(completedRun()));
+    const original = completedScanRun();
+    const running = runningRetrievalRun();
+    assert.deepEqual(success(store.updateRetrieval(original as unknown as CompletedRun, running)), running);
+    const before = bytes(runs);
+    const mutations = [
+      [['applicationRevision'], 'b'.repeat(40)],
+      [['finishedAt'], '2026-08-30T10:00:02.500Z'],
+      [['scan', 'context', 'locale'], 'fr-FR'],
+      [['scan', 'coverage', 'image-alt', 'passes'], 1],
+      [['scan', 'findings', 1, 'evidence', 'altState'], { value: 'empty' }],
+      [['scan', 'scannerReviewObservations', 0, 'locator'], { value: ':root' }],
+    ] as const;
+    const unrelated = mutations.map(([path, value]) => changed(completedRetrievalRun(), path, value));
+    for (const [expected, candidate] of [
+      [original, completedRetrievalRun()],
+      [running, running],
+      [original, failedRetrievalRun()],
+      [running, changed(failedRetrievalRun(), ['scan', 'findings', 0, 'evidence', 'altState'], { value: 'empty' })],
+      ...unrelated.map(candidate => [running, candidate] as const),
+    ] as const) {
+      failure(store.updateRetrieval(expected as unknown as CompletedRun, candidate), 'invalid-transition');
+      assert.deepEqual(bytes(runs), before);
+    }
+  });
+});
+
+test('finish cannot admit workflow-bearing scanner completion', options, async () => {
+  await withSandbox(({ runs }) => {
+    const store = open(runs);
+    success(store.create(runningRun()));
+    failure(store.finish(runningRetrievalRun() as unknown as TerminalRun), 'invalid-transition');
+    assert.deepEqual(success(store.read('run-01')), runningRun());
+  });
+});
+
+for (const phase of ['open', 'partial-write', 'flush', 'close', 'rename'] as const) {
+  test(`updateRetrieval ${phase} fault preserves the completed aggregate through the existing staged publisher`, options, async t => {
+    await withSandbox(({ runs }) => {
+      const store = open(runs);
+      success(store.create(runningRun()));
+      success(store.finish(completedRun()));
+      const before = bytes(runs);
+      const control = installFault(t, phase);
+      try {
+        failure(store.updateRetrieval(completedScanRun() as unknown as CompletedRun, runningRetrievalRun()),
+          'write-failed', phase === 'close');
+      } finally { control.release(); }
+      assert.deepEqual(bytes(runs), before);
     });
   });
 }

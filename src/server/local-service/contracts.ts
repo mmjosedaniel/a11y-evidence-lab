@@ -1,5 +1,6 @@
-import type { PageAnalysisRun } from '../domain/run-contract.ts';
+import type { Finding, PageAnalysisRun } from '../domain/run-contract.ts';
 import type { CompletedRun, FailedRun, RunningRun } from '../persistence/run-repository.ts';
+import type { RetrievalErrorCode } from '../retrieval/retrieval-error.ts';
 
 export type ReadResult =
   | { ok: true; run: PageAnalysisRun; interrupted: boolean }
@@ -12,6 +13,15 @@ export type ScanOutcome =
       | 'scan-failed' | 'result-validation' | 'initial-persistence' | 'shutdown';
       run: FailedRun | null; persisted: boolean; cleanupFailed: boolean };
 
+export type RetrievalServiceError =
+  | 'invalid-request' | 'busy' | 'stopping' | 'not-found' | 'invalid-run'
+  | 'stored-run-unavailable' | 'read-failed' | 'not-eligible' | 'workflow-active'
+  | 'retrieval-persistence' | RetrievalErrorCode;
+export type RetrievalOutcome =
+  | { ok: true; run: CompletedRun }
+  | { ok: false; error: RetrievalServiceError; run: CompletedRun | null; persisted: boolean; cleanupFailed: boolean };
+export type RetrievalExecutor = (finding: Finding, signal: AbortSignal) => Promise<unknown>;
+
 export type StopResult =
   | { ok: true; status: 'stopped' }
   | { ok: false; error: 'stop-failed' };
@@ -22,6 +32,7 @@ export interface LocalService {
   readonly whenStopped: Promise<StopResult>;
   readRun(id: unknown): ReadResult;
   runScan(input: unknown, execute: (run: RunningRun, signal: AbortSignal) => Promise<unknown>): Promise<ScanOutcome>;
+  retrieveFinding(input: unknown, execute?: RetrievalExecutor): Promise<RetrievalOutcome>;
   stop(): Promise<StopResult>;
 }
 

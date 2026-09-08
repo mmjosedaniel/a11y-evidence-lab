@@ -17,6 +17,8 @@
   },
   "dependencies": {
     "@axe-core/playwright": "4.13.0",
+    "@langchain/classic": "1.0.46",
+    "@langchain/core": "1.2.9",
     "playwright": "1.62.1",
     "react": "19.2.8",
     "react-dom": "19.2.8"

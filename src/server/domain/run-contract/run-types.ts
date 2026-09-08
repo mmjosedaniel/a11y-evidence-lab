@@ -7,6 +7,8 @@ import type {
   imageAnyChecks,
   labelAnyChecks,
 } from './run-policy.ts';
+import type { RetrievalResult } from '../../retrieval/retrieval-contract.ts';
+import type { RetrievalErrorCode } from '../../retrieval/retrieval-error.ts';
 
 export type DeepReadonly<T> = T extends object
   ? { readonly [K in keyof T]: DeepReadonly<T[K]> }
@@ -61,12 +63,22 @@ export type RuleDetails =
   | { readonly ruleId: 'label'; readonly checks: Fact<Checks<typeof labelAnyChecks[number], 'hidden-explicit-label'>>; readonly evidence: LabelEvidence }
   | { readonly ruleId: 'color-contrast'; readonly checks: Fact<Checks<'color-contrast', never>>; readonly evidence: ContrastEvidence };
 
-export type Finding = RuleDetails & {
+export type NativeFinding = RuleDetails & {
   readonly findingId: string;
   readonly nativeResult: 'violation';
   readonly state: 'unprocessed';
   readonly locator: Locator;
 };
+type WithRetrieval<T extends NativeFinding> = Omit<T, 'state'> & (
+  | { readonly state: 'active'; readonly retrieval:
+      | { readonly status: 'running'; readonly startedAt: string }
+      | { readonly status: 'completed'; readonly startedAt: string; readonly finishedAt: string; readonly result: RetrievalResult } }
+  | { readonly state: 'failed'; readonly retrieval: { readonly status: 'failed'; readonly startedAt: string; readonly finishedAt: string; readonly error: RetrievalErrorCode } }
+);
+export type RetrievalFinding = NativeFinding extends infer T
+  ? T extends NativeFinding ? WithRetrieval<T> : never
+  : never;
+export type Finding = NativeFinding | RetrievalFinding;
 export type ScannerReviewObservation = { readonly nativeResult: 'incomplete'; readonly locator: Locator } & (
   | (Extract<RuleDetails, { ruleId: 'color-contrast' }> & { readonly incompleteReason: Fact<MessageKey> })
   | (Exclude<RuleDetails, { ruleId: 'color-contrast' }> & { readonly incompleteReason: Unavailable<'missing' | 'withheld'> })
@@ -114,6 +126,7 @@ export type ScanResult = {
   readonly findings: readonly Finding[];
   readonly scannerReviewObservations: readonly ScannerReviewObservation[];
 };
+export type NativeScanResult = Omit<ScanResult, 'findings'> & { readonly findings: readonly NativeFinding[] };
 export type RunContext = {
   readonly formatVersion: 1;
   readonly runId: string;
