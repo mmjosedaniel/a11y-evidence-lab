@@ -7,6 +7,10 @@
 - **ExecPlan:** [Embedding retrieval and capacity gate](../plans/completed/m2-02-embedding-retrieval-capacity-gate.md)
 - **Last updated:** 2026-09-08 (UTC)
 
+## 2026-09-08 — Post-closure whitespace follow-up resolved
+
+Removed the sole extra EOF blank line reported by the independent reviewer at bbe0b5e. The one-file setup lease closes compliant; exact one-byte comparison, syntax, fresh strict TypeScript, whole corrected-working-tree whitespace validation and focused S0 review all pass. [M202-EOF-01](../plans/completed/m2-02-embedding-retrieval-capacity-gate.md#m202-eof-01--post-closure-whitespace-evidence) records the old/new source hash and corrects the earlier whitespace-check coverage claim. Original capacity receipts remain immutable, with 60 unchanged fingerprints and one explained formatting-only difference. M2-02 remains Complete; no behavior, requirement/ADR, runtime/model action, commit or push changed. Documentation impact: refreshed only the owning plan and this record.
+
 ## 2026-09-08 — M2-02 completed
 
 - **Project outcome:** All three application slices, 398 tests, strict/build and the real 3846.0786-ms retrieval-capacity gate pass. The returned and durably stored selected-Finding result match, with native and nonselected evidence preserved. M2-02 is Complete; no later task is selected.

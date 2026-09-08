@@ -20,4 +20,3 @@ export class RetrievalError extends Error {
     this.cleanupFailed = cleanupFailed;
   }
 }
-
