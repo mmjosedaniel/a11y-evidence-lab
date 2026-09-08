@@ -33,8 +33,10 @@ Only one write-capable worker lease may be active in one worktree. Test and impl
 | `code_worker` | Performs bounded setup or reaches minimum complete work-slice Green, dispositions the changed surface's responsibility fit, and optionally Refactors in the same turn. It never changes an accepted test. |
 | `frontend_code_worker` | Reaches minimum complete Green, dispositions the changed surface's responsibility fit, and optionally Refactors only for a `frontend-visual` work slice with an accepted reuse audit and visual contract. It never performs standard-profile work or changes an accepted test. |
 | `milestone_reviewer` | Reviews one ordinary completed work slice and its reusable evidence proportionally. It does not repair findings or close the task. |
-| `independent_reviewer` | Reviews ordinary higher-risk work slices or the integrated final state at Sol high. It does not repair findings or close the task. |
+| `independent_reviewer` | Reviews ordinary higher-risk work slices or the integrated final state. It does not repair findings or close the task. |
 | `critical_reviewer` | Performs maximum-effort review only for a named critical-risk trigger. It does not repair findings or close the task. |
+
+The [model policy](./README.md#model-and-reasoning-policy) and each role TOML own model/effort assignments. The selected parent model does not override explicit custom-agent pins.
 
 ## Worker Assignment Packet v1
 
@@ -255,6 +257,8 @@ A separately planned `setup` assignment may occur before a dependent behavior-be
 
 A worker never continues writing after its lease is terminal. Guard violations, ambiguous concurrent changes, stale evidence, exhausted budgets, pre-existing failures, wrong Red failures, blocked dependencies, rejected handoffs, and review findings all take the same immediate action: stop writes and return control to the coordinator. Never repair them by reverting user or peer work automatically.
 
+This return is a worker-to-coordinator boundary, not an automatic request for owner permission. Under the root [autonomy rules](../AGENTS.md#authorized-autonomy), the coordinator resolves routine issues using existing authority and the correction rules below, continues unaffected authorized work, and asks the owner only when required information, authority, scope, or budget is missing. Triage grants no additional write scope and cannot reset an exhausted budget.
+
 After triage, the coordinator may send the same persistent role one correction follow-up only when the work-slice contract, objective, authority, dependency, expected outcome, and scope remain unchanged. It uses attempt 2, a fresh complete packet, reconciled tree, baseline, lease ID, digest, and the terminal attempt-1 lease ID as its correction parent. The guard requires matching workflow, task, work slice, phase, worker role, and path scope, and rejects a second attempt-2 child for that parent. The coordinator still verifies the semantic fields that the guard cannot represent, including whether a replacement agent instance remains authorized under the same role contract. A second unsuccessful correction, a repeated identical decisive failure, two no-diff write handoffs in the slice, or any binding-field change stops automatic continuation and requires rescoping, a fresh instance, owner direction, or task stop. Permission to fix one named finding never resets this budget.
 
 Ordinary test changes and corrections remain owned by `test_worker`. When an exceptional direct coordinator test correction is necessary, the coordinator first confirms that no worker lease is active, records the reason and exact paths in the ExecPlan, makes only the bounded test-side change, and runs the focused validation. The prior Red or characterization evidence is invalid immediately. It cannot be reused, and Green cannot resume, until the coordinator accepts the revised test boundary and records a fresh evidence identity. This exception does not authorize the coordinator to implement production behavior or let the implementation worker repair a test.
@@ -284,10 +288,10 @@ File length, function count, branch count, or superficial textual similarity is 
 
 After each work slice's worker handoffs are accepted, the coordinator runs its proportional affected checks and routes review:
 
-- `S0`: inside an implementation ExecPlan, a fresh `milestone_reviewer` performs the smallest semantic review at Terra high and reuses deterministic evidence. S0 work outside an implementation ExecPlan needs no LLM reviewer unless another trigger applies.
-- `S1`: a fresh `milestone_reviewer` reviews the scoped work slice at Terra high.
-- `S2`: a fresh `independent_reviewer` reviews the work slice at Sol high.
-- `S3`: a fresh `critical_reviewer` reviews at Sol max.
+- `S0`: inside an implementation ExecPlan, a fresh `milestone_reviewer` performs the smallest semantic review and reuses deterministic evidence. S0 work outside an implementation ExecPlan needs no LLM reviewer unless another trigger applies.
+- `S1`: a fresh `milestone_reviewer` reviews the scoped work slice.
+- `S2`: a fresh `independent_reviewer` reviews the work slice.
+- `S3`: a fresh `critical_reviewer` reviews the work slice.
 
 For a `frontend-visual` work slice, the same risk route also reviews the accepted reuse dispositions, the actual presentation and state ownership, and the assigned real-browser evidence. If execution shows that a disposition grouped unrelated current responsibilities, the reviewer reports that concrete mismatch without promoting the risk tier, adding a second reviewer, making a component sandbox an acceptance boundary, or claiming responsive behavior owned by a later task.
 
