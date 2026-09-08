@@ -4,7 +4,7 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-None. Consult the [roadmap](../DEVELOPMENT_ROADMAP.md) for task selection and dependency readiness.
+- [M2-03 — Sufficiency, abstention, and detail UI](m2-03-sufficiency-abstention-and-detail-ui.md) — planning; the plan records execution gates and current authorization.
 
 ## Completed plans
 
