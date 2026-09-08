@@ -52,26 +52,128 @@ Public comparison always starts from a baseline Finding. For binary `image-alt` 
 
 ## Project status
 
-Development ready. The [development roadmap](docs/DEVELOPMENT_ROADMAP.md) owns implementation order and status. [RD-002](docs/plans/completed/rd-002-minimum-development-toolchain-literals.md) completed the pinned toolchain, and [RD-003](docs/plans/completed/rd-003-scan-evaluation-boundary.md) completed the six controlled fixtures and scan-only evaluation manifest, including reviewed reproducibility and cleanup corrections. [M1-01](docs/plans/completed/m1-01-run-and-scan-contracts.md) completed the pure run/scan validators and 58 contract tests.
+Development ready. The [development roadmap](docs/DEVELOPMENT_ROADMAP.md) owns task order, selection, and status; the [task plans](docs/plans/README.md) preserve verification, reviews, limitations, and earlier failures.
 
-[M1-02 — Local service and aggregate](docs/plans/completed/m1-02-local-service-and-aggregate.md) is Complete. At its closure, all 182 product tests, independent strict typechecking, actual startup/reopen/stop and exact synthetic-run deletion passed. Both slice S3 reviews and the different final integrated critical review passed; documentation closure is accepted. The service is runnable with the instructions below. M1-05 now connects HTTP scanning to the completed internal scanner and Results UI. User-facing retrieval, generation, generation-provider calls, review, and comparison remain unimplemented; the internal M2-02 retrieval-engine checkpoint is recorded below.
-
-[M1-03 — Real scan and evidence](docs/plans/completed/m1-03-real-scan-and-evidence.md) is Complete after owner-authorized execution and verified closure. Both scanner slices and their S3 reviews are accepted. All 290 integrated tests and independent strict typechecking pass, including the failed-launch residue regression. The different final integrated critical review, exact task-owned runtime cleanup and documentation closure passed. At M1-03 closure, M1-04 and M1-05 were unselected.
-
-[M1-04 — Target and results UI](docs/plans/completed/m1-04-target-and-results-ui.md) is Complete after the OD-027 [Analyze and results presentation](docs/ui/ANALYZE_AND_RESULTS_PRESENTATION.md), purpose-named component extraction, integrated-review correction, complete regression, independent reviews, exact cleanup, and documentation closure. [M1-05](docs/plans/completed/m1-05-walking-skeleton-integration.md) is Complete again. Both post-closure corrections pass 335 tests and strict TypeScript; fresh independent reviews, exact cleanup, and renewed documentation closure passed. The earlier public-page smoke remains historical and was not repeated. [M2-01 — Closed corpus snapshot](docs/plans/completed/m2-01-closed-corpus-snapshot.md) is Complete. The frozen `wcag22-mvp-v1` snapshot contains exactly eight sources, 16 canonical passages and three gold mappings. Structural, reconstruction, five-negative and manual checks, fresh S0 and integrated reviews, exact capture cleanup and documentation closure passed. M2-02 is Complete: all three application slices, all 398 tests, strict TypeScript, client build, the real retrieval-capacity gate and different final integrated critical review pass. The cold retrieval completed in 3846.0786 ms with the app and Chrome active; validated durable readback preserves native and nonselected evidence. Exact model/runtime provenance, sampled resources, UI timing limits and qualified post-success driver cleanup remain recorded. Documentation closure is accepted; no later task is selected. See the [M2-02 evidence](docs/plans/completed/m2-02-embedding-retrieval-capacity-gate.md#capacity-screen-and-integration-closure).
+The application currently integrates same-origin HTTP scanning, durable run publication, and the Analyze/Results UI. The closed guidance corpus is frozen, and M2-02 supplies internal local embedding, exact retrieval, and selected-Finding durable service integration with a recorded real retrieval-capacity observation. User-facing retrieval, support states, generation-provider calls, human proposal review, and comparison remain later work. See [how to inspect retrieval evidence](#inspecting-m2-02-retrieval-evidence) for the internal/UI distinction and the observation's limits.
 
 ## Development toolchain
 
 Use exactly [Node.js 24.20.0 with its bundled npm 11.19.0](https://nodejs.org/en/download/archive/v24.20.0). Provision these developer prerequisites yourself; the project has no runtime installer. RD-002 used a temporary official Windows x64 distribution for verification and removed it and its task-specific cache after review; the machine's global runtime was not changed. The exact package pins live in [package.json](package.json), and [package-lock.json](package-lock.json) is the only authoritative dependency lock.
 
-From the repository root in PowerShell, use the reviewed [M1-03 command wrappers](docs/plans/completed/m1-03-real-scan-and-evidence.md#l38-exact-commands-environment-and-effects). Every npm invocation below is an inner command: apply the nonbrowser wrapper, including to npm version, restore, typecheck, service start and nonbrowser tests. It disables Node compilation caching for that invocation and restores the prior value exactly. The full browser suite uses the separate six-variable browser wrapper. Do not run these npm snippets bare. Check the prerequisites and restore the lock with dependency lifecycle scripts disabled:
+### Development command preparation
+
+The definitions below are maintained for this verified Windows checkout. Run them from the repository root in each new PowerShell command session. They read the location and environment and define values/functions; they do not install, launch, create, or remove anything. The pinned paths are checkout-specific, not a portable installer. Their existing `M105` names preserve compatibility with the commands below.
+
+This is the current preparation source. Its required definitions are extracted unchanged from the historical [M105-CMD-PREP](docs/plans/completed/m1-05-walking-skeleton-integration.md#m105-cmd-prep--exact-shell-literals-and-environment-restoration); task-specific path contracts, hashes, lease state, and cleanup procedures stay in that archive. Do not replay those historical task procedures for current development.
 
 ```powershell
-if ((node --version) -ne 'v24.20.0') { throw 'Node 24.20.0 is required.' }
-$toolchainOptions = @('--global=false', '--prefix', (Get-Location).Path, '--cache', (Join-Path (Get-Location).Path 'temp/rd002-npm-cache'), '--ignore-scripts=true', '--audit=false', '--fund=false', '--update-notifier=false', '--logs-max=0', '--registry=https://registry.npmjs.org/', '--strict-ssl=true', '--package-lock=true', '--include=dev', '--include=optional')
-if ((npm.cmd @toolchainOptions --version) -ne '11.19.0') { throw 'npm 11.19.0 is required.' }
-npm.cmd @toolchainOptions ci
-npm.cmd @toolchainOptions run typecheck
+$ErrorActionPreference = 'Stop'
+$m105Repo = [IO.Path]::GetFullPath('C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab')
+if ((Resolve-Path -LiteralPath '.').Path -ine $m105Repo) { throw 'Wrong M1-05 working directory' }
+$m105Node = 'C:/nvm4w/nodejs/node.exe'
+$m105Npm = 'C:/nvm4w/nodejs/npm.cmd'
+$m105Runtime = Join-Path $m105Repo 'm104-browser-runtime'
+$m105Browsers = Join-Path $m105Runtime 'browsers'
+$m105ScanTemp = Join-Path $m105Repo 'temp/m103-scan'
+$m105UiTemp = Join-Path $m105Repo 'temp/m104-ui'
+$m105IntegrationTemp = Join-Path $m105Repo 'temp/m105-integration'
+$m105Build = Join-Path $m105Repo 'dist/client'
+$toolchainOptions = @('--global=false','--prefix',$m105Repo,'--cache',
+  (Join-Path $m105Repo 'temp/rd002-npm-cache'),'--ignore-scripts=true',
+  '--audit=false','--fund=false','--update-notifier=false','--logs-max=0',
+  '--registry=https://registry.npmjs.org/','--strict-ssl=true',
+  '--package-lock=true','--include=dev','--include=optional')
+$m105FixedReject = @('NODE_OPTIONS','NODE_DEBUG','NODE_DEBUG_NATIVE',
+  'NODE_COMPILE_CACHE','NODE_V8_COVERAGE','NODE_REDIRECT_WARNINGS',
+  'DEBUG','DEBUG_FILE','PWDEBUG','PWDEBUGIMPL','SELENIUM_REMOTE_URL',
+  'SELENIUM_REMOTE_CAPABILITIES','SELENIUM_REMOTE_HEADERS')
+$m105Controlled = @('PLAYWRIGHT_BROWSERS_PATH','PLAYWRIGHT_SKIP_BROWSER_GC',
+  'PLAYWRIGHT_DOWNLOAD_CONNECTION_TIMEOUT')
+$m105Rejected = @(Get-ChildItem Env: | Where-Object {
+  $m105Name = $_.Name
+  $m105Alias = $m105Name -match '^(?i:npm_config_|npm_package_config_)'
+  $m105Base = $m105Name -replace '^(?i:npm_config_|npm_package_config_)',''
+  ($m105FixedReject -contains $m105Base) -or
+    (($m105Base -match '^(?i:PLAYWRIGHT_|PWTEST_|PW_)') -and
+      ($m105Alias -or $m105Controlled -notcontains $m105Base))
+} | Select-Object -ExpandProperty Name)
+if ($m105Rejected.Count) { throw ('Unsupported environment names: ' + ($m105Rejected -join ', ')) }
+
+function Invoke-M105Command([scriptblock]$Command, [string]$Scratch = '') {
+  $m105Names = @('NODE_DISABLE_COMPILE_CACHE')
+  if ($Scratch) {
+    if (@($m105ScanTemp,$m105UiTemp) -notcontains $Scratch) { throw 'Unknown M1-05 command scratch' }
+    $m105Names += @('PLAYWRIGHT_BROWSERS_PATH','PLAYWRIGHT_SKIP_BROWSER_GC',
+      'PLAYWRIGHT_DOWNLOAD_CONNECTION_TIMEOUT','TEMP','TMP')
+  }
+  $m105Saved = @{}
+  foreach ($m105Name in $m105Names) {
+    $m105Saved[$m105Name] = [Environment]::GetEnvironmentVariable($m105Name,'Process')
+  }
+  try {
+    [Environment]::SetEnvironmentVariable('NODE_DISABLE_COMPILE_CACHE','1','Process')
+    if ($Scratch) {
+      [Environment]::SetEnvironmentVariable('PLAYWRIGHT_BROWSERS_PATH',$m105Browsers,'Process')
+      [Environment]::SetEnvironmentVariable('PLAYWRIGHT_SKIP_BROWSER_GC','1','Process')
+      [Environment]::SetEnvironmentVariable('PLAYWRIGHT_DOWNLOAD_CONNECTION_TIMEOUT','30000','Process')
+      [Environment]::SetEnvironmentVariable('TEMP',$Scratch,'Process')
+      [Environment]::SetEnvironmentVariable('TMP',$Scratch,'Process')
+    }
+    & $Command
+  } finally {
+    foreach ($m105Name in $m105Names) {
+      $m105Prior = $m105Saved[$m105Name]
+      [Environment]::SetEnvironmentVariable($m105Name,
+        $(if ($null -eq $m105Prior) { [NullString]::Value } else { $m105Prior }),'Process')
+    }
+    foreach ($m105Name in $m105Names) {
+      if ([Environment]::GetEnvironmentVariable($m105Name,'Process') -cne $m105Saved[$m105Name]) {
+        throw ('Environment restore mismatch: ' + $m105Name)
+      }
+    }
+  }
+}
+
+function Assert-M105OrdinaryPath([string]$Candidate, [switch]$AllowMissing) {
+  $m105Full = [IO.Path]::GetFullPath($Candidate)
+  $m105Prefix = $m105Repo.TrimEnd([IO.Path]::DirectorySeparatorChar,[IO.Path]::AltDirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
+  if (-not $m105Full.StartsWith($m105Prefix,[StringComparison]::OrdinalIgnoreCase)) { throw 'M1-05 path escapes repository' }
+  $m105Parts = [IO.Path]::GetRelativePath($m105Repo,$m105Full) -split '[\\/]'
+  $m105Cursor = $m105Repo
+  for ($m105Index = 0; $m105Index -lt $m105Parts.Count; $m105Index++) {
+    $m105Cursor = Join-Path $m105Cursor $m105Parts[$m105Index]
+    if (-not (Test-Path -LiteralPath $m105Cursor)) {
+      if ($AllowMissing) { return $m105Full }
+      throw ('Missing M1-05 path: ' + $m105Cursor)
+    }
+    $m105Item = Get-Item -LiteralPath $m105Cursor -Force
+    if (($m105Item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw ('Linked M1-05 path: ' + $m105Cursor) }
+    if ($m105Index -lt $m105Parts.Count - 1 -and -not $m105Item.PSIsContainer) { throw 'Non-directory M1-05 ancestor' }
+    if ([IO.Path]::GetFullPath((Resolve-Path -LiteralPath $m105Cursor).Path) -ine [IO.Path]::GetFullPath($m105Cursor)) {
+      throw ('Aliased M1-05 path: ' + $m105Cursor)
+    }
+  }
+  return $m105Full
+}
+
+function Assert-M105EmptyDirectory([string]$Candidate) {
+  $m105Full = Assert-M105OrdinaryPath $Candidate
+  if (-not (Get-Item -LiteralPath $m105Full -Force).PSIsContainer) { throw 'M1-05 scratch is not a directory' }
+  if (@(Get-ChildItem -LiteralPath $m105Full -Force).Count -ne 0) { throw ('M1-05 scratch is not empty: ' + $m105Full) }
+}
+```
+
+Every npm or Node invocation below runs through `Invoke-M105Command`. With no scratch argument it disables compilation caching and restores the prior value exactly; browser commands additionally use the assigned scratch path and browser environment. Check prerequisites and restore the lock with lifecycle scripts disabled only when dependency restoration is intended:
+
+```powershell
+Invoke-M105Command {
+  if ((& $m105Node --version) -ne 'v24.20.0' -or $LASTEXITCODE -ne 0) { throw 'Node 24.20.0 is required.' }
+  if ((& $m105Npm @toolchainOptions --version) -ne '11.19.0' -or $LASTEXITCODE -ne 0) { throw 'npm 11.19.0 is required.' }
+  & $m105Npm @toolchainOptions ci
+  if ($LASTEXITCODE -ne 0) { throw 'Locked dependency restore failed.' }
+  & $m105Npm @toolchainOptions run typecheck
+  if ($LASTEXITCODE -ne 0) { throw 'Strict TypeScript failed.' }
+}
 ```
 
 Retain optional dependencies: they supply the platform-specific compiler and build binaries. Do not enable install scripts to work around a failure, regenerate the lock during a restore, or introduce another package manager. The independent `typecheck` runs strict `tsc` with no emitted JavaScript; native Node TypeScript execution does not replace it.
@@ -82,7 +184,7 @@ The focused runner is Node's built-in test runner. Server modules and tests use 
 
 The production entry now serves the built React client and its enumerated assets from the same loopback origin as the API. Vite uses `--configLoader native`, emits only `dist/client`, and needs no React plugin. Missing or invalid client output fails startup as `client-unavailable`; the service does not fall back to a dev server or arbitrary files.
 
-For this verified Windows checkout, first run only the read-only definitions in [M105-CMD-PREP](docs/plans/completed/m1-05-walking-skeleton-integration.md#m105-cmd-prep--exact-shell-literals-and-environment-restoration). They define the pinned Node path, retained browser path, environment-restoring `Invoke-M105Command`, and ordinary-path checks. Do not replay the historical planning, lease, evidence-capture, or task-cleanup blocks. The preparation block contains this checkout's absolute path; it is not a portable installer.
+First run the [development command preparation](#development-command-preparation) above. Keep the same prepared shell for build, tests, and service commands.
 
 The retained browser is full Playwright-managed Chromium revision 1234 / version 151.0.7922.34 under `m104-browser-runtime/browsers`. It remains a developer prerequisite, not a general support claim. If absent, use the reviewed [RD-003 acquisition procedure](docs/plans/completed/rd-003-scan-evaluation-boundary.md#current-reproduction--rd003-procedure-003) and reconcile the resulting browser path before running anything; the application never downloads a browser. The seven frozen evaluation artifacts retain their LF policy and original native outcomes.
 
@@ -106,7 +208,7 @@ Invoke-M105Command {
 }
 ```
 
-The complete ten-file M2-02 regression passes all 398 tests, independent strict TypeScript and the client build, including all five production-entry groups and the full browser/integration suite. The prior seven-file M1-05 regression passed 335 tests. M2-02 adds retrieval-contract, embedding-retrieval and retrieval-service suites plus stored-contract/repository coverage, including signed-zero durable round-trip regressions. Run the complete suite sequentially, with no running application service or concurrent browser test. The production-entry tests also require the built client. The scanner and walking-skeleton suites use scanner scratch; the UI suite uses separate UI scratch:
+Run the complete ten-file suite sequentially, with no running application service or concurrent browser test. The production-entry tests also require the built client. The scanner and walking-skeleton suites use scanner scratch; the UI suite uses separate UI scratch:
 
 ```powershell
 foreach ($m105Test in @('run-contract','run-repository','local-service','scan-normalization','retrieval-contract','embedding-retrieval','retrieval-service')) {
@@ -175,14 +277,17 @@ For manual deletion, first stop the service and confirm its normal exit. Verify 
 The repeatable synthetic demonstration creates exactly two exclusive `m102-demo-<UUID>` runs, starts and cleanly stops the actual entry twice, reopens a retained run, then deletes one exact run while checking the other run, a test-owned corpus marker, and pre-existing directory names. It removes its second run and temporary marker afterward; an empty `data/runs` may remain:
 
 ```powershell
-npm.cmd @toolchainOptions run test:focused -- --test-name-pattern='M102 entry-point reopen and exact deletion' tests/local-service.test.ts
+Invoke-M105Command {
+  & $m105Npm @toolchainOptions run test:focused -- --test-name-pattern='M102 entry-point reopen and exact deletion' tests/local-service.test.ts
+  if ($LASTEXITCODE -ne 0) { throw 'Reopen and exact-deletion demonstration failed.' }
+}
 ```
 
 This filtered demonstration does not replace either the core subset or the complete ten-file suite. Tests use only project-owned synthetic records, isolated `temp/m102-*` roots, and bounded owned child processes; they never acquire or delete a real corpus or user run.
 
 ## Current scope
 
-This repository contains the Accepted planning baseline, frozen scan evaluation inputs, pinned toolchain, pure run/scan validators, concrete run repository, loopback service, entry point, focused tests, and the completed M1-04 target/results UI narrowed by OD-026 and OD-027. The [M1-02 plan](docs/plans/completed/m1-02-local-service-and-aggregate.md) records ordinary literals, implementation evidence, review state and limitations. The [domain contract](src/server/domain/run-contract.ts) still owns record validation; [storage](src/server/persistence/run-repository.ts) and the [service](src/server/service.ts) reuse it with M2-02's additive selected-Finding retrieval states. [Real scanning](src/server/scan/scan-page.ts) and [minimization](src/server/scan/normalize-scan.ts) pass 88 scan tests, 20 normalization tests and both S3 reviews. M1-04's final evidence-first interface passed its controlling 290-plus-30 regression, strict, build, review, browser/accessibility, cleanup and documentation gates. [M1-05](docs/plans/completed/m1-05-walking-skeleton-integration.md#m105-pc08-accepted-verification--replacement-evidence) now verifies same-origin HTTP integration and real scan-to-disk publication. All 335 tests, strict TypeScript, fresh independent reviews, exact cleanup, and renewed documentation closure passed after the post-closure corrections. The earlier authorized public-page smoke remains historical evidence and was not repeated. M2-02 now supplies internal catalog/query/result contracts, bounded local embedding, exact in-memory retrieval and selected-Finding durable service integration. The complete ten-file regression passes all 398 tests, strict TypeScript and the client build, including all browser and entry groups; complete C S3 re-review passed after the signed-zero persistence correction. M2-02 is Complete after the real 3846.0786-ms retrieval-capacity observation, validated durable readback, different final integrated critical review and documentation closure. Generation, review, and comparison remain later roadmap work.
+The [capability summary](#project-status) distinguishes implemented behavior from later work. Source entry points are the [domain contract](src/server/domain/run-contract.ts), [run repository](src/server/persistence/run-repository.ts), [local service](src/server/service.ts), [scanner](src/server/scan/scan-page.ts), and [scan minimization](src/server/scan/normalize-scan.ts). Internal retrieval APIs and their boundaries are described with the [closed corpus](#closed-corpus-snapshot).
 
 ## Documentation
 
@@ -198,7 +303,7 @@ The accepted M2-01 snapshot consists of the [source manifest](corpus/wcag22-mvp-
 
 Read the manifest, catalog, gold mappings and these notices together. Paragraph/list line breaks represent HTML layout; entities are decoded and wording is preserved. Definition terms retain their exact glossary locator. Source references inside quoted units do not expand the closed source pack or its supported profile tags. Stable passage IDs are manual labels, not ranks. Required roles and conflict declarations are inputs for later support evaluation; gold IDs are acceptable direct-support targets for the fixed cases, not a required ordering or instruction to return all targets.
 
-The catalog is the sole canonical selected-text snapshot. Reconstruct it from its existing JSON without refetching sources or changing IDs, headings, boundaries, text, roles or mappings. A source or passage change needs a new corpus version and affected gold/evaluation evidence. The [M2-01 plan](docs/plans/completed/m2-01-closed-corpus-snapshot.md#m201-cmd-validate--future-static-candidate-read-only) records the read-only structural, reconstruction, negative and semantic checks. Slices A–C provide a fixed-path catalog loader, privacy-safe Finding queries, a strict result validator, bounded local embedding, exact in-memory ranking and selected-Finding durable service integration. Actual retrieval and durable readback now pass the recorded 3846.0786-ms capacity observation; full 398-test integration and strict/build pass. Support-state execution and UI consumption remain later work. M2-02 is [Complete after retrieval-capacity, final review and documentation closure](docs/plans/completed/m2-02-embedding-retrieval-capacity-gate.md). Gold evidence is an expected subset grounded in frozen RD-003 fixtures and historical observations, not a newly scanned Finding or a model result.
+The catalog is the sole canonical selected-text snapshot. Reconstruct it from its existing JSON without refetching sources or changing IDs, headings, boundaries, text, roles or mappings. A source or passage change needs a new corpus version and affected gold/evaluation evidence. The [M2-01 plan](docs/plans/completed/m2-01-closed-corpus-snapshot.md#m201-cmd-validate--future-static-candidate-read-only) records the read-only structural, reconstruction, negative and semantic checks. The internal retrieval APIs below consume this frozen snapshot. See the [retrieval evidence guide](#inspecting-m2-02-retrieval-evidence) for the accepted observation and current UI boundary. Gold evidence is an expected subset grounded in frozen RD-003 fixtures and historical observations, not a newly scanned Finding or a model result.
 
 To repeat the static checks in the documented development environment, run the plan's read-only PREP block and then VALIDATE in the same PowerShell session from the repository root. PREP initializes the fixed source table and scan manifest used by VALIDATE. Do not run ACQUIRE or CLEANUP: the eight temporary full-page captures were verified and removed at closure. Source-semantic review is preserved in the [curation record](docs/plans/completed/m2-01-closed-corpus-snapshot.md#m201-corpus-candidate-01--primary-curation-and-verification), and accepted artifact identities and final status are in the [freeze record](docs/plans/completed/m2-01-closed-corpus-snapshot.md#m201-closure-01--final-freeze-and-documentation-impact).
 

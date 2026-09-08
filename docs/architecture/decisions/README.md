@@ -33,6 +33,8 @@ Candidate technologies and architecture options not covered by these records rem
 
 ## Partial amendments to current decisions
 
+ADR-0024's [2026-09-08 conditional third-attempt amendment](ADR-0024-milestone-slice-tdd-with-independent-ownership.md#conditional-third-implementation-attempt) permits one evidence-justified final implementation correction while preserving early stops, stricter existing grants, and research/review budgets.
+
 ADR-0024's [2026-08-30 first-module Red amendment](ADR-0024-milestone-slice-tdd-with-independent-ownership.md#first-module-red-exception) permits an intentional missing production module/export as initial Red under a verified environment and complete bounded behavioral tests. It preserves separate Green, strict typechecking, write ownership, and all other readiness gates; it adds no production stub or workflow phase.
 
 ADR-0020 narrows ADR-0005, ADR-0006, ADR-0014, and ADR-0015 only for MVP setup and attempt-time availability: the developer installs Ollama and pulls `embeddinggemma` before retrieval in either mode, additionally pulls `qwen3.5:4b` only for Local generation, and configures the Groq credential only for Groq generation. A11y Evidence Lab does not manage those artifacts or run separate provider preflights. The earlier records otherwise remain current within their stated evaluation scope.

@@ -33,8 +33,10 @@ Only one write-capable worker lease may be active in one worktree. Test and impl
 | `code_worker` | Performs bounded setup or reaches minimum complete work-slice Green, dispositions the changed surface's responsibility fit, and optionally Refactors in the same turn. It never changes an accepted test. |
 | `frontend_code_worker` | Reaches minimum complete Green, dispositions the changed surface's responsibility fit, and optionally Refactors only for a `frontend-visual` work slice with an accepted reuse audit and visual contract. It never performs standard-profile work or changes an accepted test. |
 | `milestone_reviewer` | Reviews one ordinary completed work slice and its reusable evidence proportionally. It does not repair findings or close the task. |
-| `independent_reviewer` | Reviews ordinary higher-risk work slices or the integrated final state at Sol high. It does not repair findings or close the task. |
+| `independent_reviewer` | Reviews ordinary higher-risk work slices or the integrated final state. It does not repair findings or close the task. |
 | `critical_reviewer` | Performs maximum-effort review only for a named critical-risk trigger. It does not repair findings or close the task. |
+
+The [model policy](./README.md#model-and-reasoning-policy) and each role TOML own model/effort assignments. The selected parent model does not override explicit custom-agent pins.
 
 ## Worker Assignment Packet v1
 
@@ -58,8 +60,8 @@ Identity
 - Assignment ID:
 - Lease ID: None for preflight
 - Phase: preflight | evidence | setup | red | green
-- Attempt: 1 for preflight; 1 | 2 for write turns
-- Correction parent lease ID: None for preflight and attempt 1; required for attempt 2
+- Attempt: 1 for preflight; 1 | 2 | 3 for write turns, with attempt 3 conditional
+- Correction parent lease ID: None for preflight and attempt 1; required for attempts 2 and 3, naming the immediately preceding attempt
 - Worker role: test_worker | code_worker | frontend_code_worker
 - Lease owner:
 - Guard contract digest: None for preflight; inserted after guard start for writes
@@ -131,7 +133,7 @@ The common responsibility-and-cohesion fields apply to every application-source 
 
 The primary accepts the read-only reuse audit and frontend-visual capsule before test preflight. A missing or contradictory field stops the visual branch; the implementation worker cannot invent or silently revise it. Use the [frontend-quality skill](../.agents/skills/frontend-quality/SKILL.md) to classify the profile and prepare or review this block. This frontend overlay applies only when TDD is applicable; non-behavioral frontend setup stays on the standard `code_worker` setup route.
 
-When TDD applies, preflight is a read-only `test_worker` turn with no lease; active standard write pairs are `evidence` or `red` with `test_worker`, followed by `green` with `code_worker`. An active frontend-visual write pair uses the same test-worker route followed by `green` with `frontend_code_worker`. When TDD is not applicable, the coordinator records why and assigns `setup` directly to `code_worker` under a guarded lease; it does not spawn `test_worker` or fabricate a preflight classification. Frontend setup and nonvisual frontend work remain standard-profile `code_worker` assignments. A same-contract correction uses attempt 2 with the original role/phase/profile combination rather than inventing a `correction` phase. Refactor, when useful, occurs after Green in that same Green assignment.
+When TDD applies, preflight is a read-only `test_worker` turn with no lease; active standard write pairs are `evidence` or `red` with `test_worker`, followed by `green` with `code_worker`. An active frontend-visual write pair uses the same test-worker route followed by `green` with `frontend_code_worker`. When TDD is not applicable, the coordinator records why and assigns `setup` directly to `code_worker` under a guarded lease; it does not spawn `test_worker` or fabricate a preflight classification. Frontend setup and nonvisual frontend work remain standard-profile `code_worker` assignments. A same-contract correction uses attempt 2, or conditional attempt 3 under the [correction rules](#corrections-and-exceptions), with the original role/phase/profile combination rather than inventing a `correction` phase. Refactor, when useful, occurs after Green in that same Green assignment.
 
 ### Binding fields, capsule expansion, and evidence identity
 
@@ -142,6 +144,8 @@ Stop the worker if new information changes a binding field: roadmap-task or work
 Accepted command evidence may be reused only when all of these still match: exact command, working directory, relevant-tree fingerprint, environment fingerprint, and guard-backed no-drift state. Evidence against a mutable browser, filesystem, model runtime, provider, network, clock, or other external boundary is `Non-reusable` unless the packet pins an isolated run identity and state. Reuse avoids duplicate execution; it never converts a worker report into proof. Any mismatch invalidates the evidence and requires the proportional command to run again.
 
 ### Guard projection
+
+Apply the command preparation below before opening a write lease. Its checks are part of packet preparation, not another worker phase or permission to run commands with unapproved effects.
 
 Before each write turn, the coordinator passes these packet fields unchanged to the [automatic write-lease guard](./write-lease-guard.md):
 
@@ -163,7 +167,17 @@ Before each write turn, the coordinator passes these packet fields unchanged to 
 
 For a write turn, the coordinator drafts the packet, starts the guard, inserts the returned digest, confirms that the projection matches, and only then authorizes the persistent or newly spawned worker to write. Preflight has no guard because it is read-only. The guard proves path compliance and no drift in its explicitly sealed Git-state invariants; it does not cover every Git write operation or metadata mutation or prove that the classification, test, code, command result, evidence identity, or design is correct.
 
-For a Green lease, every file in the accepted test boundary must be outside the allowed scope or listed explicitly in `Forbidden files` or `Forbidden directory roots`. The guard already gives forbidden scope precedence over allowed scope. This restriction applies to the implementation worker's Green turn only: the test worker may edit test-owned files under an initial or attempt-2 `red` or `evidence` lease, and the primary may make an exceptional direct test correction between leases. Either correction invalidates the prior Red or characterization evidence; the revised test and fresh result must be accepted before that evidence is reused or Green resumes.
+For a Green lease, every file in the accepted test boundary must be outside the allowed scope or listed explicitly in `Forbidden files` or `Forbidden directory roots`. The guard already gives forbidden scope precedence over allowed scope. This restriction applies to the implementation worker's Green turn only: the test worker may edit test-owned files under an initial or authorized correction `red` or `evidence` lease, and the primary may make an exceptional direct test correction between leases. Either correction invalidates the prior Red or characterization evidence; the revised test and fresh result must be accepted before that evidence is reused or Green resumes.
+
+### Command preparation
+
+Prepare the actual command and its complete caller, not only component functions or an illustrative snippet. Resolve exact headings, paths, working directory, tool versions, expected outputs, and current inventories; never select a command by an ambiguous prefix. Consume returned digests, hashes, and result fields directly instead of manually transcribing them. Check the exit result and any required structured result before dispatching a dependent step. Independent read-only checks may be batched; dependent effects remain sequential.
+
+Reuse the [maintained developer preparation](../README.md#development-command-preparation) and carry forward evidenced environment limitations and the exact applicable authorization. A known sandbox/network limitation should be handled through the appropriate permitted tool route before acquisition, not rediscovered through identical retries. Permission denials remain binding, and a historical grant, preparation check, or retry label does not renew an exhausted attempt.
+
+Use proportional syntax parsing and safe read-only prerequisite checks before dispatch. For a new or corrected compound command, inspect its actual bindings, empty/error output, native exit propagation, stop-before-next-step behavior, and cleanup boundary; use isolated focused checks when these semantics need executable evidence. Syntax alone proves none of them. Such checks must stay within their own permissions and side-effect limits; do not create fixtures or caches during read-only worker preflight. Reuse still-fresh evidence instead of adding a second complete test suite for the preparation.
+
+The same preparation discipline applies to primary-run setup or evaluation. It cannot replace required implementation ownership, leases, risk-routed review, or real runtime proof, and it does not justify a general-purpose runner or validation platform.
 
 ## Normal flow
 
@@ -207,7 +221,7 @@ flowchart TD
     S --> T["Primary coordinator reconciles authorities and closes"]
 ```
 
-`X` is intentionally terminal. The diagram does not guess whether the problem belongs to classification, test, implementation, environment, authority, budget, or lease. After inspection, the coordinator may authorize one bounded same-contract correction, redefine the work slice before writes resume, request owner direction, or stop the task. Any resumed write work uses a newly valid packet and lease.
+`X` is intentionally terminal. The diagram does not guess whether the problem belongs to classification, test, implementation, environment, authority, budget, or lease. After inspection, the coordinator may authorize a bounded same-contract correction within the [remaining allowance](#corrections-and-exceptions), redefine the work slice before writes resume, request owner direction, or stop the task. Any resumed write work uses a newly valid packet and lease.
 
 ## Preflight routing
 
@@ -253,13 +267,21 @@ A separately planned `setup` assignment may occur before a dependent behavior-be
 
 ## Corrections and exceptions
 
+Before freezing a correction packet, inspect the decisive failure and search the affected contract, test/helper family, and actual command callers for the same assumption. Consult the [bug record](../docs/bugs/README.md) when the defect recurs or needs durable handoff context. Distinguish observations from hypotheses and cover one coherent semantic correction within the authorized paths and remaining budget. Broader diagnosis does not broaden writes, permit changing tests to match incorrect production behavior, or reset a consumed correction. Return changed binding fields to reconciliation before another lease.
+
 A worker never continues writing after its lease is terminal. Guard violations, ambiguous concurrent changes, stale evidence, exhausted budgets, pre-existing failures, wrong Red failures, blocked dependencies, rejected handoffs, and review findings all take the same immediate action: stop writes and return control to the coordinator. Never repair them by reverting user or peer work automatically.
 
-After triage, the coordinator may send the same persistent role one correction follow-up only when the work-slice contract, objective, authority, dependency, expected outcome, and scope remain unchanged. It uses attempt 2, a fresh complete packet, reconciled tree, baseline, lease ID, digest, and the terminal attempt-1 lease ID as its correction parent. The guard requires matching workflow, task, work slice, phase, worker role, and path scope, and rejects a second attempt-2 child for that parent. The coordinator still verifies the semantic fields that the guard cannot represent, including whether a replacement agent instance remains authorized under the same role contract. A second unsuccessful correction, a repeated identical decisive failure, two no-diff write handoffs in the slice, or any binding-field change stops automatic continuation and requires rescoping, a fresh instance, owner direction, or task stop. Permission to fix one named finding never resets this budget.
+This return is a worker-to-coordinator boundary, not an automatic request for owner permission. Under the root [autonomy rules](../AGENTS.md#authorized-autonomy), the coordinator resolves routine issues using existing authority and the correction rules below, continues unaffected authorized work, and asks the owner only when required information, authority, scope, or budget is missing. Triage grants no additional write scope and cannot reset an exhausted budget.
+
+After triage, the coordinator may send the same persistent role an ordinary correction at attempt 2 and, only when justified below, a final correction at attempt 3. Each correction requires the unchanged work-slice contract, objective, authority, dependency, expected outcome, role/phase/profile combination, and scope. It receives a fresh complete packet, reconciled tree, baseline, lease ID, and digest. Attempt 2 names its terminal attempt-1 parent; attempt 3 names its terminal attempt-2 parent. The guard requires matching workflow, task, work slice, phase, worker role, and path scope, and allows only one child per parent. No skipped predecessor, sibling correction, or attempt 4 is allowed. The coordinator still verifies semantic fields and replacement-instance authorization outside the guard's proof boundary.
+
+Before opening an attempt-3 lease, the coordinator records in the existing packet's budget/stopping fields and the owning ExecPlan: concrete progress or material new evidence from the preceding attempt, what was learned, the different bounded corrective action, why it is likely to resolve the remaining issue, and the applicable remaining authorization. Repeating a hypothesis or citing confidence alone is insufficient. When these conditions and all existing gates hold, the coordinator may authorize attempt 3 without asking the owner again. A compliant guard result alone cannot supply this justification.
+
+An unsuccessful attempt 3, the same decisive failure twice without material new evidence, two no-diff write handoffs in the slice, a changed binding field, exhausted authorization, or unresolved authority conflict stops automatic continuation. Return to coordinator reconciliation and the existing owner boundary where needed; continue unaffected authorized work. Replacing an agent or changing assignment, workflow, or work-slice IDs cannot reset consumed attempts. Existing stricter packet or owner limits remain binding, and this amendment does not reopen exhausted or completed work. Permission to fix one named finding never renews the budget.
 
 Ordinary test changes and corrections remain owned by `test_worker`. When an exceptional direct coordinator test correction is necessary, the coordinator first confirms that no worker lease is active, records the reason and exact paths in the ExecPlan, makes only the bounded test-side change, and runs the focused validation. The prior Red or characterization evidence is invalid immediately. It cannot be reused, and Green cannot resume, until the coordinator accepts the revised test boundary and records a fresh evidence identity. This exception does not authorize the coordinator to implement production behavior or let the implementation worker repair a test.
 
-Default work-slice budgets are one preflight, one coherent Red or characterization, one Green, at most one correction per role, and one review correction loop. A slice may define stricter limits. More than three TDD cycles inside one slice indicates that its contract should be split or re-evaluated; do not silently continue microcycling.
+Default work-slice budgets are one preflight, one coherent Red or characterization, one Green, and at most two corrections per unchanged worker role/phase assignment chain, with the second correction conditional as above. This is at most three write turns in that chain, not three test-command executions or three TDD cycles. Preflight and an expected, accepted Red are not failed implementation attempts. One review correction loop remains the limit; research and review allowances are unchanged. A slice may define stricter limits. More than three TDD cycles inside one slice indicates that its contract should be split or re-evaluated; do not silently continue microcycling.
 
 ## Concise worker handoffs
 
@@ -284,10 +306,10 @@ File length, function count, branch count, or superficial textual similarity is 
 
 After each work slice's worker handoffs are accepted, the coordinator runs its proportional affected checks and routes review:
 
-- `S0`: inside an implementation ExecPlan, a fresh `milestone_reviewer` performs the smallest semantic review at Terra high and reuses deterministic evidence. S0 work outside an implementation ExecPlan needs no LLM reviewer unless another trigger applies.
-- `S1`: a fresh `milestone_reviewer` reviews the scoped work slice at Terra high.
-- `S2`: a fresh `independent_reviewer` reviews the work slice at Sol high.
-- `S3`: a fresh `critical_reviewer` reviews at Sol max.
+- `S0`: inside an implementation ExecPlan, a fresh `milestone_reviewer` performs the smallest semantic review and reuses deterministic evidence. S0 work outside an implementation ExecPlan needs no LLM reviewer unless another trigger applies.
+- `S1`: a fresh `milestone_reviewer` reviews the scoped work slice.
+- `S2`: a fresh `independent_reviewer` reviews the work slice.
+- `S3`: a fresh `critical_reviewer` reviews the work slice.
 
 For a `frontend-visual` work slice, the same risk route also reviews the accepted reuse dispositions, the actual presentation and state ownership, and the assigned real-browser evidence. If execution shows that a disposition grouped unrelated current responsibilities, the reviewer reports that concrete mismatch without promoting the risk tier, adding a second reviewer, making a component sandbox an acceptance boundary, or claiming responsive behavior owned by a later task.
 
@@ -352,11 +374,14 @@ RECONCILE. Refactor only when it materially improves the accepted current-scope 
 and run a second focused check only after an actual Refactor. Before Green, or for setup,
 record the cohesion disposition as None.
 
-Allow at most one same-contract correction per role under a fresh attempt-2 lease that
-names its terminal attempt-1 parent. Stop after the
-same decisive failure twice, two no-diff write handoffs, exhausted budgets, or any
-binding-field change. Never continue under a closed lease, reset a correction budget,
-or silently turn one work slice into a stream of microcycles.
+Allow one same-contract correction at attempt 2 and a conditional final correction at
+attempt 3. Each fresh correction lease names the immediately preceding terminal attempt.
+Before attempt 3, record progress or material new evidence, learning, the changed bounded
+action, expected benefit, and remaining authorization in the packet and ExecPlan.
+Stop after an unsuccessful attempt 3, the same decisive failure twice without material
+new evidence, two no-diff write handoffs, exhausted budgets, or a binding-field change.
+Preserve stricter existing grants and research/review limits. Never continue under a closed
+lease, reset a budget through replacement agents or new IDs, or silently microcycle.
 
 Keep ordinary test changes with test_worker. If an exceptional direct coordinator test
 correction is necessary, close every worker lease first, record its reason, paths, and

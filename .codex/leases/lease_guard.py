@@ -363,8 +363,8 @@ def _validate_assignment_identity(
     agent_type: str,
     error_type: type[GuardError],
 ) -> None:
-    if not isinstance(attempt, int) or isinstance(attempt, bool) or attempt not in (1, 2):
-        raise error_type("attempt must be 1 or 2.")
+    if not isinstance(attempt, int) or isinstance(attempt, bool) or attempt not in (1, 2, 3):
+        raise error_type("attempt must be 1, 2, or 3.")
     allowed_phases = WORKER_PHASES.get(agent_type)
     if allowed_phases is None:
         raise error_type(f"unsupported write-capable agent type {agent_type!r}.")
@@ -711,7 +711,7 @@ def _validate_contract(payload: dict[str, Any], lease_id: str) -> None:
         or not IDENTIFIER.fullmatch(correction_parent)
         or correction_parent == lease_id
     ):
-        raise GuardError("Attempt 2 requires a valid, distinct correction parent lease ID.")
+        raise GuardError(f"Attempt {payload['attempt']} requires a valid, distinct correction parent lease ID.")
     if not isinstance(payload.get("baseline"), dict):
         raise GuardError("Contract baseline is malformed.")
     for field in ("index_digest", "ignore_control_digest"):
@@ -821,7 +821,7 @@ def _validate_correction_lineage(
             raise UsageError("Attempt 1 cannot name a correction parent lease.")
         return None
     if correction_parent_lease_id is None:
-        raise UsageError("Attempt 2 requires --correction-parent-lease-id.")
+        raise UsageError(f"Attempt {attempt} requires --correction-parent-lease-id.")
     parent_id = _validate_identifier(
         "correction-parent-lease-id", correction_parent_lease_id
     )
@@ -832,8 +832,8 @@ def _validate_correction_lineage(
     parent_receipt = _validate_existing_receipt(repository, parent_directory, parent)
     if parent_receipt is None:
         raise GuardError("A correction parent lease must have a terminal receipt.")
-    if parent["attempt"] != 1 or parent["correction_parent_lease_id"] is not None:
-        raise GuardError("A correction parent must be an attempt-1 lease.")
+    if parent["attempt"] != attempt - 1:
+        raise GuardError(f"A correction parent must be an attempt-{attempt - 1} lease.")
 
     matching_fields = (
         "workflow_id",
@@ -868,7 +868,7 @@ def _validate_correction_lineage(
             raise GuardError("Correction-child contract belongs to a different repository.")
         if candidate["correction_parent_lease_id"] == parent_id:
             raise UsageError(
-                f"Correction parent {parent_id!r} already has an attempt-2 child."
+                f"Correction parent {parent_id!r} already has an attempt-{attempt} child."
             )
     return parent_id
 
@@ -1035,7 +1035,7 @@ def _start(arguments: argparse.Namespace) -> tuple[int, dict[str, Any]]:
         if os.environ.get("LEASE_GUARD_INTERNAL_FAIL_START_AFTER_CLAIM") == "1":
             raise GuardError("Injected post-claim start failure.")
         repository = _discover_repository(repository.root)
-        if arguments.attempt == 2:
+        if arguments.attempt > 1:
             revalidated_parent = _validate_correction_lineage(
                 repository,
                 identities,
@@ -1246,6 +1246,8 @@ def _build_parser() -> ArgumentParser:
 
 
 def _self_test() -> tuple[int, dict[str, Any]]:
+    from unittest.mock import patch
+
     script = Path(__file__).resolve()
     checks: list[str] = []
     pins: dict[tuple[Path, str], str] = {}
@@ -1325,13 +1327,29 @@ def _self_test() -> tuple[int, dict[str, Any]]:
         )
         return completed.returncode == 0 and link.exists()
 
+    def reject_start(
+        target: Path, command: tuple[str, ...], expected_code: int, message: str
+    ) -> None:
+        state = target / STATE_RELATIVE_ROOT
+        before = {
+            str(path.relative_to(state)): path.read_bytes() if path.is_file() else None
+            for path in state.rglob("*")
+        }
+        code, payload = invoke(target, *command)
+        assert code == expected_code and message in payload["message"], payload
+        after = {
+            str(path.relative_to(state)): path.read_bytes() if path.is_file() else None
+            for path in state.rglob("*")
+        }
+        assert after == before, "Rejected start changed existing lease state."
+
     with tempfile.TemporaryDirectory(prefix="lease-guard-self-test-") as temporary:
         root = Path(temporary)
 
         target = repo(root, "assignment-identity")
         invalid_assignments = (
-            ("attempt-zero", "green", 0, "code_worker", "attempt must be 1 or 2"),
-            ("attempt-three", "green", 3, "code_worker", "attempt must be 1 or 2"),
+            ("attempt-zero", "green", 0, "code_worker", "attempt must be"),
+            ("attempt-four", "green", 4, "code_worker", "attempt must be"),
             ("test-green", "green", 1, "test_worker", "does not permit phase"),
             ("code-red", "red", 1, "code_worker", "does not permit phase"),
             ("code-refactor", "refactor", 1, "code_worker", "does not permit phase"),
@@ -1342,11 +1360,13 @@ def _self_test() -> tuple[int, dict[str, Any]]:
             ("frontend-refactor", "refactor", 1, "frontend_code_worker", "does not permit phase"),
             ("uppercase-phase", "GREEN", 1, "code_worker", "does not permit phase"),
             ("unknown-role", "green", 1, "reviewer", "unsupported write-capable agent type"),
+            ("third-test-green", "green", 3, "test_worker", "does not permit phase"),
+            ("third-frontend-setup", "setup", 3, "frontend_code_worker", "does not permit phase"),
         )
         for lease, phase, attempt, agent_type, expected_message in invalid_assignments:
-            code, payload = invoke(
+            reject_start(
                 target,
-                *start_args(
+                start_args(
                     lease,
                     "--allow-file",
                     "tracked.txt",
@@ -1354,8 +1374,9 @@ def _self_test() -> tuple[int, dict[str, Any]]:
                     attempt=attempt,
                     agent_type=agent_type,
                 ),
+                2,
+                expected_message,
             )
-            assert code == 2 and expected_message in payload["message"], payload
         valid_assignments = (
             ("test-red", "red", 1, "test_worker"),
             ("test-evidence", "evidence", 1, "test_worker"),
@@ -1363,21 +1384,27 @@ def _self_test() -> tuple[int, dict[str, Any]]:
             ("code-green", "green", 1, "code_worker"),
             ("frontend-green", "green", 1, "frontend_code_worker"),
         )
-        for lease, phase, attempt, agent_type in valid_assignments:
-            code, payload = invoke(
-                target,
-                *start_args(
-                    lease,
-                    "--allow-file",
-                    "tracked.txt",
-                    phase=phase,
-                    attempt=attempt,
-                    agent_type=agent_type,
-                ),
-            )
-            assert code == 0 and payload["status"] == "started", payload
-            code, payload = invoke(target, "close", "--lease-id", lease)
-            assert code == 0 and payload["status"] == "closed-compliant", payload
+        for prefix, phase, _, agent_type in valid_assignments:
+            parent = None
+            for attempt in (1, 2, 3):
+                lease = f"{prefix}-{attempt}"
+                code, payload = invoke(
+                    target,
+                    *start_args(
+                        lease, "--allow-file", "tracked.txt", phase=phase,
+                        attempt=attempt, agent_type=agent_type,
+                        correction_parent_lease_id=parent,
+                    ),
+                )
+                assert code == 0 and payload["status"] == "started", payload
+                (target / "tracked.txt").write_text(f"{lease}\n", encoding="utf-8")
+                code, payload = invoke(target, "verify", "--lease-id", lease)
+                assert code == 0 and payload["ok"], payload
+                code, payload = invoke(target, "close", "--lease-id", lease)
+                assert code == 0 and payload["status"] == "closed-compliant", payload
+                code, payload = invoke(target, "status", "--lease-id", lease)
+                assert code == 0 and not payload["post_close_drift"], payload
+                parent = lease
 
         target = repo(root, "stored-assignment-identity")
         code, _ = invoke(
@@ -1386,14 +1413,20 @@ def _self_test() -> tuple[int, dict[str, Any]]:
         )
         assert code == 0
         contract_path = target / STATE_RELATIVE_ROOT / "stored-invalid" / CONTRACT_FILE
-        contract_path.chmod(stat.S_IWRITE | stat.S_IREAD)
         contract = json.loads(contract_path.read_text(encoding="utf-8"))
-        contract["attempt"] = 3
-        contract["digest"] = _digest_payload(contract)
-        contract_path.write_bytes(_canonical_json(contract) + b"\n")
-        _make_read_only(contract_path)
-        code, payload = invoke(target, "verify", "--lease-id", "stored-invalid")
-        assert code == 3 and "attempt must be 1 or 2" in payload["message"], payload
+        malformed = [(value, None, "attempt must be") for value in (0, 4, True, "3", 3.0)]
+        malformed += [(3, parent, "requires a valid, distinct") for parent in (None, "stored-invalid", "../parent")]
+        for attempt, parent, message in malformed:
+            candidate = {**contract, "attempt": attempt, "correction_parent_lease_id": parent}
+            candidate["digest"] = _digest_payload(candidate)
+            contract_path.chmod(stat.S_IWRITE | stat.S_IREAD)
+            contract_path.write_bytes(_canonical_json(candidate) + b"\n")
+            _make_read_only(contract_path)
+            code, payload = invoke(
+                target, "verify", "--lease-id", "stored-invalid",
+                "--contract-digest", candidate["digest"],
+            )
+            assert code == 3 and message in payload["message"], payload
         checks.append("attempt and worker phase identity")
 
         target = repo(root, "correction-lineage")
@@ -1477,6 +1510,12 @@ def _self_test() -> tuple[int, dict[str, Any]]:
             ),
         )
         assert code == 0, payload
+        reject_start(
+            target,
+            start_args("nonterminal-third", "--allow-file", "tracked.txt", attempt=3,
+                       correction_parent_lease_id="lineage-child"),
+            3, "terminal receipt",
+        )
         code, payload = invoke(target, "close", "--lease-id", "lineage-child")
         assert code == 0, payload
         code, payload = invoke(
@@ -1490,7 +1529,102 @@ def _self_test() -> tuple[int, dict[str, Any]]:
             ),
         )
         assert code == 2 and "already has an attempt-2 child" in payload["message"], payload
+        reject_start(
+            target, start_args("missing-third-parent", "--allow-file", "tracked.txt", attempt=3),
+            2, "requires --correction-parent-lease-id",
+        )
+        reject_start(
+            target, start_args("unknown-third-parent", "--allow-file", "tracked.txt", attempt=3,
+                               correction_parent_lease_id="unknown-parent"),
+            3, "missing or malformed",
+        )
+        for attempt in (2, 3):
+            lease = f"self-parent-{attempt}"
+            reject_start(
+                target, start_args(lease, "--allow-file", "tracked.txt", attempt=attempt,
+                                   correction_parent_lease_id=lease),
+                2, "cannot name itself",
+            )
+        for attempt, parent in ((2, "lineage-child"), (3, "lineage-parent")):
+            reject_start(
+                target, start_args(f"wrong-predecessor-{attempt}", "--allow-file", "tracked.txt",
+                                   attempt=attempt, correction_parent_lease_id=parent),
+                3, f"attempt-{attempt - 1}",
+            )
+        for flag, value in (
+            ("--workflow-id", "different-workflow"), ("--task-id", "OTHER-TASK"),
+            ("--cycle-id", "different-cycle"), ("--phase", "setup"),
+            ("--agent-type", "frontend_code_worker"), ("--allow-file", "delete.txt"),
+        ):
+            command = list(start_args(
+                "mismatched-third", "--allow-file", "tracked.txt", attempt=3,
+                correction_parent_lease_id="lineage-child",
+            ))
+            command[command.index(flag) + 1] = value
+            reject_start(target, tuple(command), 2, "does not match")
+        code, payload = invoke(
+            target, *start_args("lineage-third", "--allow-file", "tracked.txt", attempt=3,
+                                correction_parent_lease_id="lineage-child"),
+        )
+        assert code == 0, payload
+        code, payload = invoke(target, "close", "--lease-id", "lineage-third")
+        assert code == 0, payload
+        reject_start(
+            target, start_args("duplicate-third", "--allow-file", "tracked.txt", attempt=3,
+                               correction_parent_lease_id="lineage-child"),
+            2, "already has an attempt-3 child",
+        )
+        reject_start(
+            target, start_args("fourth-child", "--allow-file", "tracked.txt", attempt=4,
+                               correction_parent_lease_id="lineage-third"),
+            2, "attempt must be",
+        )
         checks.append("terminal correction lineage and single-child budget")
+
+        target = repo(root, "third-reservation-race")
+        for attempt in (1, 2):
+            lease = f"race-parent-{attempt}"
+            code, payload = invoke(
+                target, *start_args(lease, "--allow-file", "tracked.txt", attempt=attempt,
+                                    correction_parent_lease_id="race-parent-1" if attempt == 2 else None),
+            )
+            assert code == 0, payload
+            code, payload = invoke(target, "close", "--lease-id", lease)
+            assert code == 0, payload
+        original_claim = _claim_active
+
+        def claim_after_competing_child(repository: Repository, lease_id: str) -> None:
+            # Complete a real contender after the first lineage check, before reservation.
+            code, payload = invoke(
+                target, *start_args("race-winner", "--allow-file", "tracked.txt", attempt=3,
+                                    correction_parent_lease_id="race-parent-2"),
+            )
+            assert code == 0, payload
+            code, payload = invoke(target, "close", "--lease-id", "race-winner")
+            assert code == 0, payload
+            original_claim(repository, lease_id)
+
+        previous_directory = Path.cwd()
+        try:
+            os.chdir(target)
+            arguments = _build_parser().parse_args(start_args(
+                "race-loser", "--allow-file", "tracked.txt", attempt=3,
+                correction_parent_lease_id="race-parent-2",
+            ))
+            with patch.dict(_start.__globals__, {"_claim_active": claim_after_competing_child}):
+                try:
+                    _start(arguments)
+                except GuardError as error:
+                    assert error.code == 2 and "already has an attempt-3 child" in str(error), error
+                else:
+                    raise AssertionError("A completed competing third child was not detected.")
+        finally:
+            os.chdir(previous_directory)
+        assert not (target / STATE_RELATIVE_ROOT / "race-loser").exists()
+        assert not (target / STATE_RELATIVE_ROOT / ACTIVE_FILE).exists()
+        code, payload = invoke(target, "status", "--lease-id", "race-winner")
+        assert code == 0 and payload["status"] == "closed-compliant", payload
+        checks.append("third-attempt lineage recheck after reservation and rollback")
 
         target = repo(root, "allowed")
         code, _ = invoke(target, *start_args("allowed", "--allow-dir-root", "work", "--allow-file", "tracked.txt", "--allow-file", "delete.txt"))
@@ -1704,24 +1838,39 @@ def _self_test() -> tuple[int, dict[str, Any]]:
         assert code == 2
         checks.append("duplicate lease ID")
 
-        target = repo(root, "concurrent-start")
-        commands = [
-            [sys.executable, "-B", str(script), *start_args(lease, "--allow-file", "tracked.txt")]
-            for lease in ("concurrent-a", "concurrent-b")
-        ]
-        processes = [subprocess.Popen(command, cwd=target, stdout=subprocess.PIPE, stderr=subprocess.PIPE) for command in commands]
-        completed = [process.communicate() + (process.returncode,) for process in processes]
-        assert sorted(item[2] for item in completed) == [0, 3]
-        winner_payload = json.loads(next(item[0] for item in completed if item[2] == 0).decode("utf-8"))
-        loser_payload = json.loads(next(item[0] for item in completed if item[2] != 0).decode("utf-8"))
-        winner = winner_payload["lease_id"]
-        loser = "concurrent-b" if winner == "concurrent-a" else "concurrent-a"
-        assert loser_payload["status"] == "error"
-        assert not (target / STATE_RELATIVE_ROOT / loser).exists()
-        pins[(target, winner)] = winner_payload["contract_digest"]
-        code, _ = invoke(target, "close", "--lease-id", winner)
-        assert code == 0
-        checks.append("atomic concurrent start rejection")
+        for concurrent_attempt in (1, 3):
+            target = repo(root, f"concurrent-start-{concurrent_attempt}")
+            parent = None
+            for attempt in range(1, concurrent_attempt):
+                lease = f"concurrent-parent-{attempt}"
+                code, payload = invoke(
+                    target, *start_args(lease, "--allow-file", "tracked.txt", attempt=attempt,
+                                        correction_parent_lease_id=parent),
+                )
+                assert code == 0, payload
+                code, payload = invoke(target, "close", "--lease-id", lease)
+                assert code == 0, payload
+                parent = lease
+            commands = [
+                [sys.executable, "-B", str(script), *start_args(
+                    lease, "--allow-file", "tracked.txt", attempt=concurrent_attempt,
+                    correction_parent_lease_id=parent,
+                )]
+                for lease in ("concurrent-a", "concurrent-b")
+            ]
+            processes = [subprocess.Popen(command, cwd=target, stdout=subprocess.PIPE, stderr=subprocess.PIPE) for command in commands]
+            completed = [process.communicate() + (process.returncode,) for process in processes]
+            assert sorted(item[2] for item in completed) in ([[0, 3]] if concurrent_attempt == 1 else [[0, 2], [0, 3]])
+            winner_payload = json.loads(next(item[0] for item in completed if item[2] == 0).decode("utf-8"))
+            loser_payload = json.loads(next(item[0] for item in completed if item[2] != 0).decode("utf-8"))
+            winner = winner_payload["lease_id"]
+            loser = "concurrent-b" if winner == "concurrent-a" else "concurrent-a"
+            assert loser_payload["status"] == "error"
+            assert not (target / STATE_RELATIVE_ROOT / loser).exists()
+            pins[(target, winner)] = winner_payload["contract_digest"]
+            code, payload = invoke(target, "close", "--lease-id", winner)
+            assert code == 0, payload
+            checks.append(f"atomic concurrent attempt-{concurrent_attempt} start rejection")
 
         target = repo(root, "failed-start-recovery")
         environment = os.environ.copy()
