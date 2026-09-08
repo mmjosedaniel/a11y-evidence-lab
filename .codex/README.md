@@ -15,6 +15,7 @@ These agents support repository work. They do not change product scope, approve 
 | Owner-authorized implementation ExecPlan | [Implementation workflow](./execplan-implementation-workflow.md) | [Write-lease guard](./write-lease-guard.md) and owning ExecPlan |
 | Visible frontend implementation work slice | [Frontend quality skill](../.agents/skills/frontend-quality/SKILL.md) | Conditional `frontend-visual` profile in the implementation workflow; standard slices remain profile-neutral |
 | Task-level project and agent-workflow progress | [Progress index](../docs/progress/README.md) | Existing roadmap task, owning ExecPlan when applicable, and accepted checkpoint evidence |
+| Persistent bug investigation and agent handoff context | [Bug index and recording rules](../docs/bugs/README.md) | Relevant record and evidence, owning task or authorized policy scope, and existing assignment/verification rules |
 | Custom role selection | [Agent registry](#agent-registry) | Exact role TOML and bounded instance assignment |
 | Project coordinator defaults | [Project Codex configuration](./config.toml) | [Model and reasoning policy](#model-and-reasoning-policy), explicit task overrides, and fresh-session verification |
 | Operator-managed runtime concurrency | [Runtime concurrency capacity](#runtime-concurrency-capacity) | [Collaboration topology](#collaboration-topology), [implementation workflow](./execplan-implementation-workflow.md), and [write-lease guard](./write-lease-guard.md) |

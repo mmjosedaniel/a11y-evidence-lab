@@ -42,6 +42,8 @@ Inspect Git status and preserve unrelated changes. Start with the [authority map
 
 Read a target document completely before editing it. For read-only investigation, begin with controlling sections and expand to resolve uncertainty. Read [PROJECT_REQUIREMENTS.md](docs/PROJECT_REQUIREMENTS.md) for shared requirement semantics, status, traceability, development authorization, or cross-module decisions. For implementation, resolve every selected task identifier through the roadmap's authority-location key and read each named authority and scenario.
 
+For substantive repository defects, consult the [bug index and recording rules](docs/bugs/README.md) before new investigation. Use its primary-maintained records for durable evidence and agent handoff context while retaining the existing task authorization and execution workflow.
+
 Product-model, runtime, and hardware evaluation follows [local MVP feasibility](docs/LOCAL_MVP_FEASIBILITY.md). Codex model selection follows the [agent model policy](.codex/README.md#model-and-reasoning-policy) and current official Codex documentation. Material rendered UI work uses the [frontend-quality skill](.agents/skills/frontend-quality/SKILL.md); nonvisual frontend work does not trigger that overlay.
 
 ## Agent coordination
