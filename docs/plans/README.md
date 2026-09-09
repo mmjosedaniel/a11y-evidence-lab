@@ -10,6 +10,7 @@ None.
 
 These archives preserve each task's execution, review, failures, and closure evidence. The roadmap remains the status authority.
 
+- [M2-04 — Retrieval checkpoint](completed/m2-04-retrieval-checkpoint.md)
 - [M2-03 — Sufficiency, abstention, and detail UI](completed/m2-03-sufficiency-abstention-and-detail-ui.md)
 - [M2-02 — Embedding retrieval and capacity gate](completed/m2-02-embedding-retrieval-capacity-gate.md)
 - [M2-01 — Closed corpus snapshot](completed/m2-01-closed-corpus-snapshot.md)

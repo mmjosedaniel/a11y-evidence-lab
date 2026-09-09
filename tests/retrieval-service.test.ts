@@ -24,6 +24,8 @@ import {
   retrievalRequest,
   selectedFinding,
 } from './helpers/m202-retrieval-service-fixture.ts';
+import { buildCheckpointSeed, controlledCases } from './helpers/m204-checkpoint-fixture.ts';
+import type { ControlledCaseId } from './helpers/m204-checkpoint-fixture.ts';
 
 type Sandbox = { root: string; runs: string; services: LocalService[]; releases: Array<() => void> };
 
@@ -761,4 +763,91 @@ test('shutdown deadline during citation resolution forbids publication from late
       syncBuiltinESMExports();
     }
   });
+});
+
+test('M204 controlled service cases preserve the aggregate and join altered corpus bytes to durable integrity failure', serial, async t => {
+  for (const caseId of ['S', 'A', 'Z', 'F', 'I'] as const satisfies readonly ControlledCaseId[]) {
+    await withSandbox(async box => {
+      const seed = buildCheckpointSeed(caseId, 'b'.repeat(40));
+      const store = open(box.runs);
+      success(store.create(seed.running as never));
+      success(store.finish(seed.completed as never));
+      const before = disk(box.runs, seed.completed.runId);
+      const service = await start(box);
+      const config = controlledCases[caseId];
+      const originalRead = fsPromises.readFile;
+      if (caseId === 'I') {
+        t.mock.method(fsPromises, 'readFile', async (...args: Parameters<typeof fsPromises.readFile>) => {
+          const bytes = await Reflect.apply(originalRead, fsPromises, args) as Buffer;
+          if (!String(args[0]).endsWith('passages.json')) return bytes;
+          const altered = Buffer.from(bytes);
+          const offset = altered.indexOf(Buffer.from('WCAG'));
+          assert.ok(offset >= 0);
+          altered[offset + 3] = 'g'.charCodeAt(0);
+          return altered;
+        });
+        syncBuiltinESMExports();
+      }
+      let outcome: RetrievalOutcome;
+      try {
+        outcome = await service.retrieveFinding(retrievalRequest(seed.completed.runId), async () => {
+          if (caseId === 'F') throw new RetrievalError('embedding-failed');
+          return retrievalResultForPassages([...(config.passages ?? [])]);
+        });
+      } finally {
+        if (caseId === 'I') {
+          t.mock.restoreAll();
+          syncBuiltinESMExports();
+        }
+      }
+      assert.deepEqual(disk(box.runs, seed.completed.runId), outcome.run);
+      assert.ok(outcome.run);
+      const after: any = structuredClone(outcome.run);
+      const prior: any = structuredClone(before);
+      for (const aggregate of [after, prior]) {
+        const selected = selectedFinding(aggregate);
+        selected.state = 'unprocessed';
+        delete selected.retrieval;
+        delete selected.analysis;
+        delete selected.result;
+      }
+      assert.deepEqual(after, prior, `${caseId}: only selected downstream fields may change`);
+      const finding = selectedFinding(outcome.run as unknown as Record<string | number, unknown>);
+      assert.equal('invocation' in finding, false);
+      assert.equal('review' in finding, false);
+      const settledRead = service.readRun(seed.completed.runId);
+      assert.ok(settledRead.ok && settledRead.interrupted === false);
+      assert.deepEqual(settledRead.run, outcome.run);
+      if (caseId === 'S') {
+        assert.ok(outcome.ok);
+        assert.equal(finding.state, 'active');
+        assert.deepEqual((finding.retrieval as Record<string, unknown>).support,
+          { state: 'supported', missingRoles: [], conflicts: [] });
+        assert.equal('result' in finding, false);
+        assert.deepEqual(await service.stop(), { ok: true, status: 'stopped' });
+        const restarted = await start(box);
+        const historical = restarted.readRun(seed.completed.runId);
+        assert.ok(historical.ok && historical.interrupted === true);
+        return;
+      }
+      if (caseId === 'A' || caseId === 'Z') {
+        assert.ok(outcome.ok);
+        assert.equal(finding.state, 'abstained');
+        const support = (finding.retrieval as Record<string, unknown>).support;
+        assert.deepEqual(support, caseId === 'A'
+          ? { state: 'incomplete', missingRoles: ['interpretation', 'remediation'], conflicts: [] }
+          : { state: 'missing', missingRoles: ['criterion', 'interpretation', 'remediation'], conflicts: [] });
+        const result = finding.result as Record<string, unknown>;
+        assert.equal(result.providerCalled, false);
+        assert.equal(result.reason, caseId === 'A' ? 'incomplete-guidance' : 'missing-guidance');
+        return;
+      }
+      assert.equal(outcome.ok, false);
+      if (!outcome.ok) assert.equal(outcome.error, caseId === 'F' ? 'embedding-failed' : 'corpus-integrity');
+      assert.equal(finding.state, 'failed');
+      assert.equal('analysis' in finding, false);
+      assert.equal('result' in finding, false);
+      assert.equal('support' in (finding.retrieval as Record<string, unknown>), false);
+    });
+  }
 });

@@ -38,6 +38,7 @@ Add each new task record to this table in the same change that creates the file:
 | [M2-01](../DEVELOPMENT_ROADMAP.md#m2-01--prepare-the-authorized-closed-corpus-snapshot) | [Closed corpus snapshot](m2-01-closed-corpus-snapshot.md) | [Task plan](../plans/completed/m2-01-closed-corpus-snapshot.md) | Complete | 2026-09-03 |
 | [M2-02](../DEVELOPMENT_ROADMAP.md#m2-02--implement-and-capacity-screen-lazy-local-exact-vector-retrieval) | [Embedding retrieval and capacity gate](m2-02-embedding-retrieval-capacity-gate.md) | [Task plan](../plans/completed/m2-02-embedding-retrieval-capacity-gate.md) | Complete | 2026-09-08 |
 | [M2-03](../DEVELOPMENT_ROADMAP.md#m2-03--apply-support-states-abstention-and-finding-detail-presentation) | [Sufficiency, abstention, and detail UI](m2-03-sufficiency-abstention-and-detail-ui.md) | [Task plan](../plans/completed/m2-03-sufficiency-abstention-and-detail-ui.md) | Complete | 2026-09-09 |
+| [M2-04](../DEVELOPMENT_ROADMAP.md#m2-04--integrate-and-verify-retrieval-and-abstention) | [Retrieval checkpoint](m2-04-retrieval-checkpoint.md) | [Task plan](../plans/completed/m2-04-retrieval-checkpoint.md) | Complete | 2026-09-09 |
 
 The mirrored status is a convenience snapshot only. The roadmap controls when a task is `Not started`, `In progress`, `Blocked`, or `Complete`.
 
