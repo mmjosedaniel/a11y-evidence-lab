@@ -6,6 +6,9 @@
 - **Mirrored roadmap status:** Complete
 - **ExecPlan:** [Task plan](../plans/completed/m2-03-sufficiency-abstention-and-detail-ui.md)
 - **Last updated:** 2026-09-09
+- **Current closure:** [Renewed task acceptance](../plans/completed/m2-03-sufficiency-abstention-and-detail-ui.md#m203-c-post01-closure--renewed-task-closure)
+
+Earlier pending statements below describe dated checkpoints; the current closure supersedes them.
 
 ## 2026-09-08 — Accepted planning checkpoint
 
@@ -59,6 +62,6 @@ Independent review identified same-tab citation navigation that can lose the in-
 
 ## 2026-09-09 — Renewed closure after citation corrections
 
-Citation links now open separately with an accessible visible indication, preserving the active results session. Empty guidance retrieval displays the exact corpus version. The corrected popup fixture matches the fragment-free request while asserting the full citation URL. All nine guidance cases and439 unaffected tests pass, totaling448; strict TypeScript, build and desktop/narrow visual-region checks also pass. Fresh independent re-review returns PASS with no findings, superseding its earlier test-blocked verdict.
+Citation links now open separately with an accessible visible indication, preserving the active results session. Empty guidance retrieval displays the exact corpus version. The corrected popup fixture matches the fragment-free request while asserting the full citation URL. All nine guidance cases and 439 unaffected tests pass, totaling 448; strict TypeScript, build and desktop/narrow visual-region checks also pass. Fresh independent re-review returns PASS with no findings, superseding its earlier test-blocked verdict.
 
-Primary accepts renewed closure and archives the same plan. Documentation impact: Updated the citation presentation contract, capability/status summaries, roadmap, progress and archive navigation. Historical real-service proof and the unused proof-helper limitation remain accurately bounded; detailed200% remains deferred and manual screen-reader testing excluded. No commit or push occurred.
+Primary accepts [renewed closure](../plans/completed/m2-03-sufficiency-abstention-and-detail-ui.md#m203-c-post01-closure--renewed-task-closure) and archives the same plan. Documentation impact: Updated the citation presentation contract, capability/status summaries, roadmap, progress and archive navigation. Historical real-service proof and the unused proof-helper limitation remain accurately bounded; detailed 200% remains deferred and manual screen-reader testing excluded. No commit or push occurred.

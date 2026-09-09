@@ -3,6 +3,7 @@
 - **Status:** M1-04 Analyze/Results is verified through OD-027; the M2-03 guidance extension and citation-presentation corrections are complete with their recorded visual evidence limits; later workflow regions remain planning guidance
 - **Last reviewed:** 2026-09-09
 - **Analyze and Results contract:** [Analyze and results presentation](ANALYZE_AND_RESULTS_PRESENTATION.md)
+- **Implemented guidance evidence and limits:** [M2-03 renewed closure](../plans/completed/m2-03-sufficiency-abstention-and-detail-ui.md#m203-c-post01-closure--renewed-task-closure)
 - **Visual direction:** [Visual foundations](VISUAL_FOUNDATIONS.md)
 
 ## Document role
