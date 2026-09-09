@@ -141,6 +141,18 @@ dd { margin: 0; }
 .failed-result { max-width: 48rem; }
 .failed-result h3 { color: #7a2020; }
 
+.finding-guidance { margin-top: 2rem; border-top: 1px solid #c8d1dc; padding-top: 1.25rem; }
+.finding-guidance > h4 { margin-top: 0; }
+.finding-guidance > button { margin-bottom: 1rem; }
+.guidance-passages, .finding-outcome { margin-top: 1.5rem; }
+.finding-guidance h5 { font-size: 1rem; margin: 1rem 0 0.5rem; }
+.passage-list { padding-left: 1.5rem; }
+.passage-list > li { padding-bottom: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid #d7dee7; }
+.passage-text, .source-notice-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+.source-notices details { margin-bottom: 1rem; }
+.source-notices summary { min-height: 2.75rem; padding: 0.625rem 0; font-weight: 600; cursor: pointer; }
+.source-notice-text { margin-top: 0.75rem; }
+
 @media (max-width: 48rem) {
   main { padding: 1rem; }
   .setup, .results { padding: 1rem; }

@@ -9,6 +9,7 @@ import type {
 } from './run-policy.ts';
 import type { RetrievalResult } from '../../retrieval/retrieval-contract.ts';
 import type { RetrievalErrorCode } from '../../retrieval/retrieval-error.ts';
+import type { FindingAnalysisDecision, GuidanceSupport } from '../finding-analysis-types.ts';
 
 export type DeepReadonly<T> = T extends object
   ? { readonly [K in keyof T]: DeepReadonly<T[K]> }
@@ -78,7 +79,18 @@ type WithRetrieval<T extends NativeFinding> = Omit<T, 'state'> & (
 export type RetrievalFinding = NativeFinding extends infer T
   ? T extends NativeFinding ? WithRetrieval<T> : never
   : never;
-export type Finding = NativeFinding | RetrievalFinding;
+type WithAnalysis<T extends NativeFinding> = Omit<T, 'state'> & (
+  | { readonly state: 'active'; readonly analysis: { readonly status: 'running'; readonly startedAt: string } }
+  | { readonly state: 'failed'; readonly analysis: { readonly status: 'failed'; readonly startedAt: string;
+      readonly finishedAt: string; readonly error: 'shutdown' | 'result-validation' } }
+  | (Extract<FindingAnalysisDecision, { state: 'abstained' }>)
+  | (FindingAnalysisDecision & { readonly retrieval: { readonly status: 'completed'; readonly startedAt: string;
+      readonly finishedAt: string; readonly result: RetrievalResult; readonly support: GuidanceSupport } })
+);
+export type AssessedFinding = NativeFinding extends infer T
+  ? T extends NativeFinding ? WithAnalysis<T> : never
+  : never;
+export type Finding = NativeFinding | RetrievalFinding | AssessedFinding;
 export type ScannerReviewObservation = { readonly nativeResult: 'incomplete'; readonly locator: Locator } & (
   | (Extract<RuleDetails, { ruleId: 'color-contrast' }> & { readonly incompleteReason: Fact<MessageKey> })
   | (Exclude<RuleDetails, { ruleId: 'color-contrast' }> & { readonly incompleteReason: Unavailable<'missing' | 'withheld'> })

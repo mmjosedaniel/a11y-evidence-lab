@@ -12,18 +12,27 @@ import { completedRun } from './m102-run-fixture.ts';
 import { validateRun } from '../../src/server/domain/run-contract.ts';
 import type { PageAnalysisRun, ProviderContext } from '../../src/server/domain/run-contract.ts';
 import type { AnalyzeIntent, AppProps } from '../../src/client/App.tsx';
+import { buildFindingAnalysis } from '../../src/server/domain/finding-analysis.ts';
+import { resolveCitations } from '../../src/server/retrieval/citation-resolution.ts';
+import { classifyGuidanceSupport } from '../../src/server/retrieval/support-policy.ts';
+import { imagePassages, retrievalFor } from './m203-finding-fixture.ts';
 
 export type Intent = AnalyzeIntent;
-export type ClientCollaborators = AppProps;
+export interface GuidanceIntent { readonly runId: string; readonly findingId: string }
+export type ClientCollaborators = AppProps & {
+  readonly retrieveFinding?: (intent: GuidanceIntent) => Promise<unknown>;
+};
 export interface KnownConfiguration {
   readonly localModelInstalled?: boolean;
   readonly groqApiUrlConfigured?: boolean;
 }
 export interface Bridge {
-  calls: { stage: 'analyze'; value: Intent; callback: number }[];
+  calls: ({ stage: 'analyze'; value: Intent; callback: number }
+    | { stage: 'guidance'; value: GuidanceIntent; callback: number })[];
   analyze: (intent: Intent) => unknown;
-  mount: (analyze?: boolean, configuration?: KnownConfiguration) => void;
-  rerender: (analyze?: boolean, configuration?: KnownConfiguration) => void;
+  guidance: (intent: GuidanceIntent) => unknown;
+  mount: (analyze?: boolean, configuration?: KnownConfiguration, guidance?: boolean) => void;
+  rerender: (analyze?: boolean, configuration?: KnownConfiguration, guidance?: boolean) => void;
   unmount: () => void;
   settle: () => Promise<void>;
   resolve: (value: unknown) => void;
@@ -139,6 +148,7 @@ const pending = new Set();
 const bridge = window.m104 = {
   calls: [], reads: 0, canary: 0, raw: null, savedNode: null, oldNode: null,
   analyze: () => Promise.resolve({ok:false,error:'create-failed',run:null,persisted:false,cleanupFailed:false}),
+  guidance: () => Promise.resolve({ok:false,error:'not-found',run:null,persisted:false,cleanupFailed:false}),
   resolve: () => {}, reject: () => {},
   hold() { return new Promise((resolve,reject) => {
     const release = () => pending.delete(cancel);
@@ -148,19 +158,24 @@ const bridge = window.m104 = {
     bridge.reject = value => { release(); reject(value); };
   }); },
   async settle() { for (const cancel of [...pending]) cancel(); await Promise.resolve(); },
-  rerender(analyze = true, configuration = {}) {
+  rerender(analyze = true, configuration = {}, guidance = false) {
     const callback = ++version;
     const analyzeHandler = bridge.analyze;
+    const guidanceHandler = bridge.guidance;
     const props = { configuration };
     if (analyze) props.analyze = intent => {
       bridge.calls.push({stage:'analyze',value:structuredClone(intent),callback});
       return analyzeHandler(intent);
     };
+    if (guidance) props.retrieveFinding = intent => {
+      bridge.calls.push({stage:'guidance',value:structuredClone(intent),callback});
+      return guidanceHandler(intent);
+    };
     root.render(<App {...props}/>);
   },
-  mount(analyze = true, configuration = {}) {
+  mount(analyze = true, configuration = {}, guidance = false) {
     root.unmount(); root = createRoot(document.getElementById('root'));
-    bridge.calls = []; bridge.rerender(analyze, configuration);
+    bridge.calls = []; bridge.rerender(analyze, configuration, guidance);
   },
   unmount() { root.unmount(); },
 };
@@ -340,4 +355,60 @@ async function manual(): Promise<void> {
   } finally { await harness.close(); }
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url) && process.argv.includes('--manual')) await manual();
+function m203ManualOutcome(template: unknown): unknown {
+  const run = structuredClone(template) as any;
+  const native = structuredClone(run.scan.findings[0]);
+  const retrieval = retrievalFor(native, [
+    { passageId: imagePassages.criterion.passageId, score: 0.8 },
+    { passageId: imagePassages.remediation.passageId, score: 0.7 },
+  ]);
+  const support = classifyGuidanceSupport(native, retrieval);
+  assert.ok(support.ok);
+  const decision = buildFindingAnalysis(native, '2026-08-30T10:00:03.000Z', '2026-08-30T10:00:04.000Z', support.value);
+  Object.assign(run.scan.findings[0], decision, { retrieval: {
+    status: 'completed', startedAt: '2026-08-30T10:00:03.000Z', finishedAt: '2026-08-30T10:00:04.000Z',
+    result: retrieval, support: support.value,
+  } });
+  const corpusRoot = path.join(repo, 'corpus/wcag22-mvp-v1');
+  const citations = resolveCitations(native, retrieval,
+    fs.readFileSync(path.join(corpusRoot, 'manifest.json')), fs.readFileSync(path.join(corpusRoot, 'passages.json')));
+  assert.ok(citations.ok);
+  return { ok: true, run: valid(run), view: {
+    runId: run.runId, findingId: native.findingId, ...citations.value,
+  } };
+}
+
+async function m203Manual(): Promise<void> {
+  const template = completedRun('m203-manual-01');
+  const outcome = m203ManualOutcome(template);
+  const harness = await startHarness(true);
+  try {
+    await harness.page.evaluate(({ template, outcome }) => {
+      window.m104.analyze = intent => new Promise(resolve => setTimeout(() => resolve(
+        intent.requestedUrl === template.requestedUrl
+          && JSON.stringify(intent.providerContext) === JSON.stringify(template.providerContext)
+          ? { ok: true, run: structuredClone(template) }
+          : { ok: false, error: 'invalid-request', run: null, persisted: false, cleanupFailed: false },
+      ), 1500));
+      window.m104.guidance = () => new Promise(resolve => setTimeout(() => resolve(structuredClone(outcome)), 1500));
+      window.m104.mount(true, {}, true);
+    }, { template, outcome });
+    await harness.page.getByLabel('Target URL').fill(template.requestedUrl);
+    await harness.page.getByLabel('Local (recommended)').check();
+    await harness.page.getByRole('button', { name: 'Analyze', exact: true }).click();
+    await harness.page.getByRole('heading', { name: 'Results', exact: true }).waitFor();
+    console.log('Synthetic M2-03 manual input: actual App, controlled run m203-manual-01, 1500 ms guidance collaborator. Observe Narrator and actual browser-menu 200% zoom; close this page or press Ctrl+C to finish.');
+    await new Promise<void>((resolve, reject) => {
+      const timer = setTimeout(() => { dispose(); reject(new Error('Manual session reached its 15-minute ceiling')); }, 15 * 60 * 1000);
+      const done = () => { dispose(); resolve(); };
+      function dispose() { clearTimeout(timer); process.removeListener('SIGINT', done); harness.page.removeListener('close', done); }
+      process.once('SIGINT', done);
+      harness.page.once('close', done);
+    });
+  } finally { await harness.close(); }
+}
+
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  if (process.argv.includes('--m203-manual')) await m203Manual();
+  else if (process.argv.includes('--manual')) await manual();
+}

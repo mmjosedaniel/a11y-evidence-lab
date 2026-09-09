@@ -170,7 +170,8 @@ test('configured transport is closed, exact and lifecycle-safe while API-only co
     fs.rmSync(apiRoot, { recursive: true, force: true });
   });
   const apiHealth = await requestJson(apiStarted.service.url, 'GET', '/api/health');
-  assert.deepEqual((apiHealth.body as { capabilities: unknown }).capabilities, { readRuns: true, scan: false });
+  assert.deepEqual((apiHealth.body as { capabilities: unknown }).capabilities,
+    { readRuns: true, scan: false, guidance: false });
   const apiPost = await requestJson(apiStarted.service.url, 'POST', '/api/runs', '{}', 'application/json');
   assert.equal(apiPost.status, 405);
 
@@ -181,7 +182,8 @@ test('configured transport is closed, exact and lifecycle-safe while API-only co
   const harness = await startConfiguredService(t, 'direct-transport', 'blocked', calls, release.promise);
   fs.writeFileSync(path.join(harness.runRoot, 'sibling.canary'), 'preserve');
   const health = await requestJson(harness.service.url, 'GET', '/api/health');
-  assert.deepEqual((health.body as { capabilities: unknown }).capabilities, { readRuns: true, scan: true });
+  assert.deepEqual((health.body as { capabilities: unknown }).capabilities,
+    { readRuns: true, scan: true, guidance: true });
   for (const response of [health]) {
     assert.equal(response.headers['cache-control'], 'no-store');
     assert.equal(response.headers['x-content-type-options'], 'nosniff');
@@ -217,7 +219,7 @@ test('configured transport is closed, exact and lifecycle-safe while API-only co
   const afterAbortHealth = await requestJson(harness.service.url, 'GET', '/api/health');
   assert.equal(afterAbortHealth.status, 200);
   assert.deepEqual(afterAbortHealth.body, { status: 'ready', busy: false,
-    capabilities: { readRuns: true, scan: true } });
+    capabilities: { readRuns: true, scan: true, guidance: true } });
 
   const first = requestJson(harness.service.url, 'POST', '/api/runs',
     JSON.stringify({ requestedUrl: targetUrl, mode: 'local' }), ' Application/JSON ')

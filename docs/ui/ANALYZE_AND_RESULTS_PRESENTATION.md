@@ -1,8 +1,8 @@
 # Analyze and results presentation
 
 - **Status:** Accepted and implemented M1-04 presentation contract through OD-027
-- **Last reviewed:** 2026-09-02
-- **Scope:** Analysis input and deterministic scan results only
+- **Last reviewed:** 2026-09-09
+- **Scope:** Analysis input and deterministic scan results, with the M2-03 selected-Finding guidance extension below
 
 ## Document role
 
@@ -157,6 +157,7 @@ Each selectable automated Finding shows only:
    - form label: element and input type, such as **Input · text**;
    - color contrast: foreground color, background color, font size, and weight.
 3. A programmatic selected state that does not rely only on color.
+4. For a processed M2-03 Finding, concise workflow text: **Eligible for generation**, **No proposal generated**, **Guidance failed**, or **Guidance unfinished**. It stays visible when another item is selected. Unprocessed Findings retain their scan-only presentation.
 
 The whole card is the evidence-selection button. Do not add **View evidence** or another redundant action label inside the card.
 
@@ -198,7 +199,7 @@ Show these elements in this order:
 
 Do not show a **Back to findings** control. Selecting either kind of item updates the adjacent or following evidence detail while keyboard focus remains on the selected item.
 
-Do not show lifecycle status, mode, provider, model, Run ID, native result, native check-group names, or provider-call text in this detail.
+Do not show lifecycle status, mode, provider, model, Run ID, native result, native check-group names, or provider-call text in the deterministic evidence region. The separate M2-03 abstention region may identify unused generation configuration and its no-call outcome.
 
 ### Image alternative evidence
 
@@ -244,6 +245,18 @@ Show:
 Show **Shadow color** only when it is available and the retained native reason is `shadowOnBgColor` or `fgOnShadowColor`, which identifies a material shadow contribution. The deterministic explanation should compare the measured and required ratios, for example: **Measured contrast is 4.48:1; this text requires 4.5:1.**
 
 Do not show `axe-core`, raw message keys such as `bgImage`, or `Any`, `All`, and `None` check groups in the primary interface.
+
+## M2-03 selected-Finding guidance
+
+The [M2-03 task](../DEVELOPMENT_ROADMAP.md#m2-03--apply-support-states-abstention-and-finding-detail-presentation) extends the selected Finding after its native evidence. Selection alone does not retrieve guidance. An explicit **Get guidance** action starts one selected-Finding operation; ScannerReviewObservations remain evidence-only.
+
+Keep retrieved guidance and the deterministic outcome in distinct regions. Display complete canonical passage text, source title and heading, WCAG/corpus version, rule and criterion, guidance role, source status, direct citation, copyright and attribution. Label similarity as retrieval ranking, separate from support or confidence. Full source notices accompany the passages in initially open native disclosures, deduplicated in first-use order and associated with each passage. Show the exact corpus version whenever retrieval exists, including zero-passage results. External passage citations open in a separate tab with visible and accessible "opens in a new tab" text and noopener/noreferrer protection, preserving the application document and its current selection.
+
+Show evidence sufficiency, exact available references and required blockers with their unavailability reasons. For completed retrieval, show guidance support and applicable missing roles or conflicting references. **Eligible for generation** indicates supported eligibility only. **No proposal generated** shows the exact application-authored reason, manual-investigation guidance, **No generation provider was called**, and the immutable mode/provider/model as unused generation configuration. Retrieval or integrity failure remains a failure with no support or abstention claim.
+
+Keep the action mounted and disabled while busy, after an attempt, for historical or non-unprocessed states, or when retained workflow ownership or cleanup uncertainty is known. A different successful Analyze clears the per-Finding display cache; a failed Analyze preserves earlier evidence. Known retained ownership remains a guidance gate across independent runs. No retry, resume, Generate, or review action is added.
+
+Selection remains available during guidance retrieval. Apply a valid response only to its captured run and Finding, announce the original item's outcome through the existing shared status, and preserve focus. Reselecting an abstained Finding announces its human label, unused generation configuration and no-call outcome. Ordinary scan-only and observation selection retains its concise announcement. Required text and notices must wrap at narrow widths and actual browser zoom; task evidence and the explicit detailed visual-check deferral belong in the [owning plan](../plans/completed/m2-03-sufficiency-abstention-and-detail-ui.md).
 
 ## Manual-review evidence
 
@@ -380,7 +393,7 @@ Results
 
 This contract does not add a score, dashboard, chart, filter, sort, search, bulk action, page preview, code editor, remediation action, provider call, run history, Run ID entry, deep link, reload restoration, settings page, model manager, export, dark theme, or new dependency.
 
-It also does not define the later retrieved-guidance, generation, abstention, human-review, or comparison presentations. Those regions remain owned by their future roadmap tasks and must reuse the evidence-first hierarchy without being prebuilt here.
+The M2-03 extension defines retrieved guidance and abstention presentation only. Generation, human review and comparison remain owned by later roadmap tasks and must reuse the evidence-first hierarchy without being prebuilt here.
 
 ## Related guidance
 

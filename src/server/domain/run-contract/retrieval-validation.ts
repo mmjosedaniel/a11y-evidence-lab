@@ -2,6 +2,7 @@ import { validateRetrievalResult } from '../../retrieval/retrieval-contract.ts';
 import type { RetrievalErrorCode } from '../../retrieval/retrieval-error.ts';
 import { readChoice, readObject, readTime, requireKeys, requireValid } from './contract-value-reader.ts';
 import { readFinding } from './finding-validation.ts';
+import { readAssessedFinding } from './finding-analysis-validation.ts';
 import type { Finding, NativeFinding } from './run-types.ts';
 
 const retrievalErrors = [
@@ -17,6 +18,7 @@ function nativeFinding(record: Record<string, unknown>): NativeFinding {
 
 export function readStoredFinding(input: unknown, parentFinishedAt: string): Finding {
   const record = readObject(input);
+  if (Object.hasOwn(record, 'analysis')) return readAssessedFinding(record, nativeFinding(record), parentFinishedAt);
   const state = readChoice(record.state, ['unprocessed', 'active', 'failed']);
   if (state === 'unprocessed') {
     requireKeys(record, [...nativeKeys, 'state']);

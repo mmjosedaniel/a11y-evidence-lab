@@ -6,12 +6,16 @@ import type { AnalysisConfiguration, AnalysisError, AnalyzeIntent } from './comp
 import { ResultsSection } from './components/results/ResultsSection.tsx';
 import type { ResultSelection } from './components/results/resultPresentation.ts';
 import { admit, sameProvider } from './run-admission.ts';
+import { admitGuidance } from './finding-guidance-admission.ts';
+import type { GuidanceIntent } from './finding-guidance-admission.ts';
+import type { GuidancePresentation } from './components/results/FindingGuidance.tsx';
 
 export type { AnalyzeIntent } from './components/analysis/analysisTypes.ts';
 
 export interface AppProps {
   readonly analyze?: (intent: AnalyzeIntent) => Promise<unknown>;
   readonly configuration?: AnalysisConfiguration;
+  readonly retrieveFinding?: (intent: GuidanceIntent) => Promise<unknown>;
 }
 
 type CompleteRun = Extract<PageAnalysisRun, { status: 'completed' }>;
@@ -30,6 +34,10 @@ export function App(props: AppProps): ReactElement {
   const [selectedResult, setSelectedResult] = useState<ResultSelection | null>(null);
   const held = useRef<{ complete: CompleteRun | null; failed: FailedRun | null }>({ complete: null, failed: null });
   const reservation = useRef<object | null>(null);
+  const [guidance, setGuidance] = useState<Readonly<Record<string, GuidancePresentation>>>({});
+  const guidanceRef = useRef<Readonly<Record<string, GuidancePresentation>>>({});
+  const [ownerKnown, setOwnerKnown] = useState(false);
+  const retainedOwner = useRef(false);
   const mounted = useRef(true);
   const resultsContent = useRef<HTMLDivElement>(null);
   const resultsHeading = useRef<HTMLHeadingElement>(null);
@@ -58,12 +66,25 @@ export function App(props: AppProps): ReactElement {
     return true;
   }
 
+  function retainOwner(): void {
+    retainedOwner.current = true;
+    setOwnerKnown(true);
+  }
+
+  function updateGuidance(findingId: string, state: GuidancePresentation): void {
+    guidanceRef.current = { ...guidanceRef.current, [findingId]: state };
+    setGuidance(guidanceRef.current);
+  }
+
   function publish(run: CompleteRun | FailedRun): void {
     if (run.status === 'completed') {
       if (run.runId !== held.current.complete?.runId) {
         moveResultsFocus.current = !!resultsContent.current?.contains(document.activeElement);
         setSelectedResult(null);
+        guidanceRef.current = {};
+        setGuidance(guidanceRef.current);
       }
+      if (run.scan.findings.some(finding => finding.state === 'active')) retainOwner();
       held.current = { complete: run, failed: null };
       setComplete(run);
       setFailed(null);
@@ -100,7 +121,10 @@ export function App(props: AppProps): ReactElement {
         return;
       }
       if (run) publish(run);
-      if (!outcome.ok) showError(outcome.error, !outcome.persisted, outcome.cleanupFailed);
+      if (!outcome.ok) {
+        if (outcome.cleanupFailed) retainOwner();
+        showError(outcome.error, !outcome.persisted, outcome.cleanupFailed);
+      }
     } catch {
       if (mounted.current && reservation.current === token) showError('request-failed');
     } finally {
@@ -118,6 +142,52 @@ export function App(props: AppProps): ReactElement {
     void execute(() => callback(intent), intent);
   }
 
+  async function retrieveFinding(findingId: string, label: string): Promise<void> {
+    const run = held.current.complete;
+    const finding = run?.scan.findings.find(item => item.findingId === findingId);
+    if (reservation.current || retainedOwner.current || !run || !finding || finding.state !== 'unprocessed' ||
+        guidanceRef.current[findingId]?.attempted) return;
+    const callback = props.retrieveFinding;
+    if (!callback) return;
+    const token = {};
+    reservation.current = token;
+    updateGuidance(findingId, { attempted: true, pending: true });
+    setBusy(true);
+    setAnnouncement(`Retrieving guidance for ${label}.`);
+    const current = (): boolean => mounted.current && reservation.current === token && held.current.complete === run;
+    const fail = (error: string, unsaved = false, cleanup = false): void => {
+      updateGuidance(findingId, { attempted: true, error, unsaved, cleanup });
+      if (cleanup) retainOwner();
+      setAnnouncement(`Guidance failed for ${label}: ${error}.${unsaved ? ' This guidance attempt was not saved.' : ''}${cleanup ? ' Resource cleanup is uncertain.' : ''}`);
+    };
+    try {
+      const raw = await callback({ runId: run.runId, findingId });
+      if (!current()) return;
+      const outcome = admitGuidance(raw, run, findingId);
+      // Descriptor reflection may reenter or unmount App; ownership must still be ours.
+      if (!current()) return;
+      if (!outcome) { fail('invalid-result'); return; }
+      if (outcome.run) {
+        held.current = { ...held.current, complete: outcome.run };
+        setComplete(outcome.run);
+        if (outcome.run.scan.findings.some(item => item.state === 'active')) retainOwner();
+      }
+      if (!outcome.ok) { fail(outcome.error, !outcome.persisted, outcome.cleanupFailed); return; }
+      updateGuidance(findingId, { attempted: true, view: outcome.view });
+      const selected = outcome.run.scan.findings.find(item => item.findingId === findingId);
+      setAnnouncement(selected?.state === 'abstained'
+        ? `No proposal generated for ${label}. No generation provider was called.`
+        : `Guidance ready for ${label}.`);
+    } catch {
+      if (current()) fail('request-failed');
+    } finally {
+      if (mounted.current && reservation.current === token) {
+        reservation.current = null;
+        setBusy(false);
+      }
+    }
+  }
+
   function selectResult(selection: ResultSelection, label: string): void {
     if (!complete) return;
     const exists = selection.kind === 'finding'
@@ -126,7 +196,12 @@ export function App(props: AppProps): ReactElement {
         complete.scan.scannerReviewObservations[selection.observationIndex] !== undefined;
     if (!exists) return;
     setSelectedResult(selection);
-    setAnnouncement(`Selected ${label}.`);
+    const finding = selection.kind === 'finding'
+      ? complete.scan.findings.find(item => item.findingId === selection.findingId) : null;
+    const provider = complete.providerContext;
+    setAnnouncement(finding?.state === 'abstained'
+      ? `Selected ${label}. No proposal generated. Unused generation configuration: ${provider.mode}, ${provider.provider}, ${provider.model}. No generation provider was called.`
+      : `Selected ${label}.`);
   }
 
   const capability = !props.analyze ? 'Analyze is unavailable in this build; service integration is pending.' : '';
@@ -140,6 +215,8 @@ export function App(props: AppProps): ReactElement {
       onAnalyze={analyze} onAnnounce={setAnnouncement} />
     {displayedRun && <ResultsSection run={displayedRun}
       selectedResult={selectedResult} failure={failedIsDisplayed ? error : null}
+      guidance={{ available: !!props.retrieveFinding, busy, ownerKnown, presentations: guidance,
+        onRetrieve: (findingId, label) => { void retrieveFinding(findingId, label); } }}
       headingRef={resultsHeading} contentRef={resultsContent} onSelect={selectResult} />}
   </main>;
 }

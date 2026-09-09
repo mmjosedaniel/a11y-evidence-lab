@@ -12,6 +12,7 @@ export function ResultCard({ result, selected, onSelect }: ResultCardProps): Rea
     onClick={() => onSelect?.(result.selection, result.label)}>
     <strong>{result.label}</strong>
     <span>{result.summary}</span>
+    {result.kind === 'finding' && result.workflowStatus && <span>{result.workflowStatus}</span>}
     {result.kind === 'manual-review' && <span className="manual-review-tag">Needs manual review</span>}
   </button>;
 }
