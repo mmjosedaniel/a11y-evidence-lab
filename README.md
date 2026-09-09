@@ -54,7 +54,11 @@ Public comparison always starts from a baseline Finding. For binary `image-alt` 
 
 Development ready. The [development roadmap](docs/DEVELOPMENT_ROADMAP.md) owns task order, selection, and status; the [task plans](docs/plans/README.md) preserve verification, reviews, limitations, and earlier failures.
 
-The application integrates same-origin HTTP scanning, durable run publication, and the Analyze/Results UI. The closed guidance corpus and M2-02 local embedding/exact retrieval are extended by M2-03's accepted evidence-sufficiency policy, authenticated citations, deterministic support states, durable abstention, and fixed selected-Finding guidance API. The selected-Finding UI displays guidance, citations, sufficiency and abstention. M2-03 is complete after verified citation-presentation corrections, with evidence and the visual-check deferral recorded in the [M2-03 closure record](docs/plans/completed/m2-03-sufficiency-abstention-and-detail-ui.md#m203-c-post01-closure--renewed-task-closure); generation, proposal review, and comparison remain later work. See [how to inspect retrieval evidence](#inspecting-m2-02-retrieval-evidence) for the current UI boundary and the earlier capacity observation's limits. M2-04 is complete. The [M2-04 checkpoint observations](docs/plans/completed/m2-04-retrieval-checkpoint.md#m204-b-accept-01--bounded-checkpoint-observations) exercise all three fixed synthetic Finding profiles through the real local retrieval path: each returns an acceptable gold passage, while missing guidance roles correctly produce no-generation-call abstention. Controlled cases separately demonstrate supported eligibility and adverse outcomes; these observations are not general retrieval-quality qualification.
+The application integrates same-origin HTTP scanning, durable run publication, and the Analyze/Results UI. Selected-Finding guidance uses the closed corpus and local exact-vector retrieval, authenticates citations, evaluates evidence sufficiency and guidance support, and durably records abstention or retrieval failure. The detail UI presents native evidence, complete cited passages, source notices and the resulting guidance state. The [M2-03 closure record](docs/plans/completed/m2-03-sufficiency-abstention-and-detail-ui.md#m203-c-post01-closure--renewed-task-closure) preserves its implementation evidence and visual-check deferral. Generation, proposal review and comparison remain later work.
+
+M2-04 is complete. Its [checkpoint observations](docs/plans/completed/m2-04-retrieval-checkpoint.md#m204-b-accept-01--bounded-checkpoint-observations) exercise all three fixed synthetic Finding profiles through the real local retrieval path: each returns an acceptable gold passage, while missing guidance roles correctly produce no-generation-call abstention. Controlled cases separately demonstrate supported eligibility and adverse outcomes. The [final closure](docs/plans/completed/m2-04-retrieval-checkpoint.md#m204-final-01--integrated-review-and-task-closure) records verification and limitations; these observations are not general retrieval-quality qualification.
+
+See [how to inspect guidance in the UI](#inspecting-m2-02-retrieval-evidence) and [where to find the M2-04 checkpoint evidence](#inspecting-m2-04-checkpoint-evidence).
 
 ## Development toolchain
 
@@ -328,6 +332,18 @@ M2-02's actual retrieval evidence is a saved JSON result, not a new retrieval sc
 - `temp/m202-capacity-01/runs/m202-capacity-01/run.json`: the full synthetic run with the completed selected-Finding retrieval result and preserved scan/sibling evidence.
 
 These local files are not included in a fresh checkout. The tracked [capacity evidence record](docs/plans/completed/m2-02-embedding-retrieval-capacity-gate.md#capacity-screen-and-integration-closure) preserves their identities and the bounded observation; the [closure record](docs/plans/completed/m2-02-embedding-retrieval-capacity-gate.md#m202-closure-01--final-integrated-verification-and-documentation-impact) records accepted verification and review. This was one retrieval-capacity observation, not retrieval-quality qualification. Browser interaction timing was not instrumented, and the driver exited 1 during post-success shutdown control; neither limitation invalidated the accepted durable result, but neither is an exit-zero or UI-latency claim.
+
+### Inspecting M2-04 checkpoint evidence
+
+The [accepted checkpoint record](docs/plans/completed/m2-04-retrieval-checkpoint.md#m204-b-accept-01--bounded-checkpoint-observations) contains the ordered passage IDs, scores, gold observations, missing roles and retained-file identities for the three real cases. Its [final closure](docs/plans/completed/m2-04-retrieval-checkpoint.md#m204-final-01--integrated-review-and-task-closure) records independent review, verification and the remaining visual-check limits.
+
+In the original development checkout, inspect the retained, ignored files under `temp/m204-retrieval-checkpoint/` in an editor:
+
+- `g1/`, `g2/` and `g3/` hold the actual image, email-label and contrast retrieval observations.
+- `s/`, `a/`, `z/`, `f/` and `i/` hold the controlled supported, incomplete, missing, embedding-failure and corpus-integrity cases.
+- Each case directory contains `evidence.json` and `runs/m204-<case>/run.json`, using the lowercase case ID, such as `g1/runs/m204-g1/run.json`.
+
+These files are absent from a fresh checkout; the tracked records above preserve the accepted outcomes and their identities. All three real results abstained, and supported eligibility was demonstrated only by a controlled case. Conflict evidence is limited to pure policy, display and canonical-rejection checks; there is no persisted conflict run. The archived callers describe consumed, bounded evaluations and are not replay instructions. Inspecting retained JSON requires no model request.
 
 ### Closed corpus notices
 
