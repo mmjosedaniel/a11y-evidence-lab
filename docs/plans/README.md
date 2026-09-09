@@ -4,7 +4,7 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-None.
+- [M3-01 — Freeze generation evaluation package](m3-01-generation-evaluation-package.md) — planning only; execution and the package freeze remain pending.
 
 ## Completed plans
 
