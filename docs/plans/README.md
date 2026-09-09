@@ -4,7 +4,7 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-None.
+- [M2-04 — Retrieval checkpoint](m2-04-retrieval-checkpoint.md) — planning only; execution and checkpoint evidence pending.
 
 ## Completed plans
 
