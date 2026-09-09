@@ -4,7 +4,7 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-None.
+- [M3-02 — Shared generation stage](m3-02-shared-generation-stage.md) — In progress for planning only; execution gates remain pending.
 
 ## Completed plans
 
