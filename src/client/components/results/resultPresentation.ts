@@ -15,6 +15,7 @@ interface PresentedFinding {
   readonly selection: Extract<ResultSelection, { kind: 'finding' }>;
   readonly summary: string;
   readonly explanation: string;
+  readonly workflowStatus: string | null;
 }
 
 interface PresentedManualReview {
@@ -95,6 +96,18 @@ function findingExplanation(item: Finding): string {
   }
 }
 
+function findingWorkflowStatus(finding: Finding): string | null {
+  if (finding.state === 'unprocessed') return null;
+  if (finding.state === 'abstained') return 'No proposal generated';
+  if (finding.state === 'failed') return 'Guidance failed';
+  if ('analysis' in finding && finding.analysis.status === 'completed' &&
+      'retrieval' in finding && finding.retrieval.status === 'completed' &&
+      'support' in finding.retrieval && finding.retrieval.support.state === 'supported') {
+    return 'Eligible for generation';
+  }
+  return 'Guidance unfinished';
+}
+
 function manualReviewReason(item: ScannerReviewObservation): string {
   switch (item.ruleId) {
     case 'image-alt': return 'Alternative text could not be inspected';
@@ -136,6 +149,7 @@ export function presentResults(
     selection: { kind: 'finding', findingId: finding.findingId },
     summary: affectedElementText(finding),
     explanation: findingExplanation(finding),
+    workflowStatus: findingWorkflowStatus(finding),
   }));
   const presentedReviews: PresentedManualReview[] = observations.map((observation, observationIndex) => ({
     kind: 'manual-review',

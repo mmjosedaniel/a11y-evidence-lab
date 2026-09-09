@@ -131,8 +131,8 @@ function failure(result: ScanOutcome, error: string, persisted: boolean, cleanup
 function noRun(error: string, cleanupFailed = false) {
   return { ok: false, error, run: null, persisted: false, cleanupFailed };
 }
-function health(status: 'ready' | 'stopping', busy: boolean, scan = false) {
-  return { status, busy, capabilities: { readRuns: true, scan } };
+function health(status: 'ready' | 'stopping', busy: boolean, scan = false, guidance = scan) {
+  return { status, busy, capabilities: { readRuns: true, scan, guidance } };
 }
 type Reply = { status: number; headers: http.IncomingHttpHeaders; text: string; body: unknown };
 function get(url: string, target = '/api/health', method = 'GET'): Promise<Reply> {
@@ -275,6 +275,7 @@ test('HTTP precedence rejects methods, literal queries, invalid IDs and all nona
     for (const method of ['POST', 'PUT', 'DELETE', 'OPTIONS', 'HEAD']) {
       await errorReply(service, '/api/health?' + canary, 405, 'method-not-allowed', method);
     }
+    await errorReply(service, '/api/finding-guidance', 405, 'method-not-allowed', 'POST');
     for (const target of ['/api/health?', '/api/health#' + canary, '/missing?' + canary]) {
       await errorReply(service, target, 400, 'invalid-request');
     }

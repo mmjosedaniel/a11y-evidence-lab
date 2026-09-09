@@ -66,7 +66,7 @@ Use component or route checks for observable semantics and state transitions. Us
 
 For browser evidence, record the application source or build identity, browser, viewport, deterministic state or input, interaction, and decisive result. Capture a screenshot only when it materially helps review; a screenshot is supporting point-in-time evidence, not a golden specification or substitute for behavior checks.
 
-Follow the compact application-accessibility boundary: one automated check, one keyboard smoke path, and one screen-reader smoke path at the milestones that own them. Do not create a browser, viewport, assistive-technology, or exhaustive state matrix unless a later Accepted requirement introduces one.
+Follow the compact application-accessibility boundary in REQ-A11Y-006: automated accessibility, keyboard, focus and announcement-semantics checks plus manual visual review at the milestones that own them. Manual screen-reader testing is outside the portfolio verification scope; do not claim unobserved spoken behavior. Do not create a browser, viewport, assistive-technology, or exhaustive state matrix unless a later Accepted requirement introduces one.
 
 ## Review without expanding scope
 

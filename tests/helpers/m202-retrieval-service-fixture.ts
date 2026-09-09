@@ -1,5 +1,7 @@
 import { completedRun } from './m102-run-fixture.ts';
 import { queryCases, retrievalResult } from './m202-retrieval-fixture.ts';
+import { buildFindingAnalysis } from '../../src/server/domain/finding-analysis.ts';
+import { classifyGuidanceSupport } from '../../src/server/retrieval/support-policy.ts';
 
 export const retrievalStartedAt = '2026-08-30T10:00:03.000Z';
 export const retrievalFinishedAt = '2026-08-30T10:00:04.000Z';
@@ -20,6 +22,10 @@ export function expectedRetrievalResult() {
     { passageId: 'understanding111-intent', score: 0.5 },
     { passageId: 'wcag22-sc111', score: 0.25 },
   ]);
+}
+
+export function retrievalResultForPassages(passages: { passageId: string; score: number }[]) {
+  return retrievalResult(queryCases[0]!.expected, passages);
 }
 
 export function runningRetrievalRun(runId = 'run-01'): MutableRecord {
@@ -49,6 +55,74 @@ export function failedRetrievalRun(
   Object.assign(selectedFinding(run), {
     state: 'failed',
     retrieval: { status: 'failed', startedAt: retrievalStartedAt, finishedAt: retrievalFinishedAt, error },
+  });
+  return run;
+}
+
+function assessedRetrievalRun(
+  runId: string,
+  passages: { passageId: string; score: number }[],
+): MutableRecord {
+  const run = runningRetrievalRun(runId);
+  const native = selectedFinding(completedScanRun(runId));
+  const retrieval = retrievalResultForPassages(passages);
+  const support = classifyGuidanceSupport(native, retrieval);
+  if (!support.ok) throw new Error('Assessed retrieval fixture must have valid support');
+  const decision = buildFindingAnalysis(native as never, retrievalStartedAt, retrievalFinishedAt, support.value);
+  Object.assign(selectedFinding(run), {
+    state: decision.state,
+    retrieval: {
+      status: 'completed', startedAt: retrievalStartedAt, finishedAt: retrievalFinishedAt,
+      result: retrieval, support: support.value,
+    },
+    analysis: decision.analysis,
+    ...('result' in decision ? { result: decision.result } : {}),
+  });
+  return run;
+}
+
+export function assessedSupportedRetrievalRun(runId = 'run-01'): MutableRecord {
+  return assessedRetrievalRun(runId, [
+    { passageId: 'h37-text-alternative', score: 0.75 },
+    { passageId: 'understanding111-intent', score: 0.5 },
+    { passageId: 'wcag22-sc111', score: 0.25 },
+  ]);
+}
+
+export function assessedMissingRetrievalRun(runId = 'run-01'): MutableRecord {
+  return assessedRetrievalRun(runId, []);
+}
+
+export function assessedIncompleteRetrievalRun(runId = 'run-01'): MutableRecord {
+  return assessedRetrievalRun(runId, [{ passageId: 'wcag22-sc111', score: 0.75 }]);
+}
+
+export function runningEvidenceAnalysisRun(runId = 'run-01'): MutableRecord {
+  const run = completedScanRun(runId);
+  const finding = selectedFinding(run);
+  (finding.evidence as MutableRecord).altState = { unavailable: 'missing' };
+  Object.assign(finding, {
+    state: 'active', analysis: { status: 'running', startedAt: retrievalStartedAt },
+  });
+  return run;
+}
+
+export function evidenceAbstainedRun(runId = 'run-01'): MutableRecord {
+  const run = completedScanRun(runId);
+  const finding = selectedFinding(run);
+  (finding.evidence as MutableRecord).altState = { unavailable: 'missing' };
+  const decision = buildFindingAnalysis(finding as never, retrievalStartedAt, retrievalFinishedAt, null);
+  Object.assign(finding, decision);
+  return run;
+}
+
+export function failedEvidenceAnalysisRun(
+  runId = 'run-01', error: 'shutdown' | 'result-validation' = 'shutdown',
+): MutableRecord {
+  const run = runningEvidenceAnalysisRun(runId);
+  Object.assign(selectedFinding(run), {
+    state: 'failed',
+    analysis: { status: 'failed', startedAt: retrievalStartedAt, finishedAt: retrievalFinishedAt, error },
   });
   return run;
 }

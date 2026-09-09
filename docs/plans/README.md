@@ -4,12 +4,13 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-- [M2-03 — Sufficiency, abstention, and detail UI](m2-03-sufficiency-abstention-and-detail-ui.md) — planning; the plan records execution gates and current authorization.
+None.
 
 ## Completed plans
 
 These archives preserve each task's execution, review, failures, and closure evidence. The roadmap remains the status authority.
 
+- [M2-03 — Sufficiency, abstention, and detail UI](completed/m2-03-sufficiency-abstention-and-detail-ui.md)
 - [M2-02 — Embedding retrieval and capacity gate](completed/m2-02-embedding-retrieval-capacity-gate.md)
 - [M2-01 — Closed corpus snapshot](completed/m2-01-closed-corpus-snapshot.md)
 - [M1-05 — Walking-skeleton integration](completed/m1-05-walking-skeleton-integration.md)

@@ -6,6 +6,7 @@ import { ResultDetail } from './ResultDetail.tsx';
 import { ResultsOverview } from './ResultsOverview.tsx';
 import { limitation, presentResults, selectedResult as findSelectedResult } from './resultPresentation.ts';
 import type { ResultSelection } from './resultPresentation.ts';
+import type { GuidanceControls } from './FindingGuidance.tsx';
 
 type CompleteRun = Extract<PageAnalysisRun, { status: 'completed' }>;
 type FailedRun = Extract<PageAnalysisRun, { status: 'failed' }>;
@@ -16,6 +17,7 @@ interface FailureNotice {
 }
 
 interface ResultsSectionProps {
+  readonly guidance: GuidanceControls;
   readonly run: CompleteRun | FailedRun;
   readonly selectedResult?: ResultSelection | null;
   readonly failure?: FailureNotice | null;
@@ -56,7 +58,8 @@ function FailedResults({ run, failure }: {
   </div>;
 }
 
-function CompletedResults({ run, selectedResult, onSelect }: {
+function CompletedResults({ run, selectedResult, onSelect, guidance }: {
+  readonly guidance: GuidanceControls;
   readonly run: CompleteRun;
   readonly selectedResult: ResultSelection | null;
   readonly onSelect?: (selection: ResultSelection, label: string) => void;
@@ -71,19 +74,19 @@ function CompletedResults({ run, selectedResult, onSelect }: {
     <ResultsOverview run={run} />
     <div className="finding-workspace">
       <FindingsPanel idPrefix={idPrefix} results={results} selectedResult={selectedResult} onSelect={onSelect} />
-      {selected && <ResultDetail idPrefix={idPrefix} result={selected} />}
+      {selected && <ResultDetail idPrefix={idPrefix} result={selected} providerContext={run.providerContext} guidance={guidance} />}
     </div>
   </div>;
 }
 
-export function ResultsSection({ run, selectedResult = null, failure = null, headingRef, contentRef, onSelect }:
+export function ResultsSection({ run, selectedResult = null, failure = null, headingRef, contentRef, onSelect, guidance }:
   ResultsSectionProps): ReactElement {
   return <section aria-labelledby="results-heading" className="results">
     <h2 id="results-heading" tabIndex={-1} ref={headingRef}>Results</h2>
     <div ref={contentRef}>
       {run.status === 'failed'
         ? <FailedResults key={run.runId} run={run} failure={failure} />
-        : <CompletedResults key={run.runId} run={run} selectedResult={selectedResult} onSelect={onSelect} />}
+        : <CompletedResults key={run.runId} run={run} selectedResult={selectedResult} onSelect={onSelect} guidance={guidance} />}
     </div>
   </section>;
 }

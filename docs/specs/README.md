@@ -15,7 +15,7 @@ They create no requirement, architectural decision, implementation authorization
 
 [ADR-0024](../architecture/decisions/ADR-0024-milestone-slice-tdd-with-independent-ownership.md) governs how future automatable production behavior is implemented and tested. It does not make these documentation-only files executable or promote a derived scenario above its linked authority.
 
-The accepted application-accessibility behavior is not duplicated as another feature matrix. `REQ-A11Y-006` keeps its verification to one automated check, one keyboard smoke path, and one screen-reader smoke path; omission of those detailed checks here does not weaken `REQ-A11Y-001`–`REQ-A11Y-004`, `REQ-A11Y-009`, or `REQ-A11Y-010`.
+The accepted application-accessibility behavior is not duplicated as another feature matrix. `REQ-A11Y-006` keeps manual verification visual and requires automated accessibility, keyboard, focus and announcement-semantics checks; omission of those detailed checks here does not weaken `REQ-A11Y-001`–`REQ-A11Y-004`, `REQ-A11Y-009`, or `REQ-A11Y-010`.
 
 An abstention is an application-authored terminal FindingWorkflow result. It explains the blocking evidence or guidance state, identifies missing or conflicting information, confirms that no provider was called, and gives manual-investigation guidance. It never enters the approve/edit-and-accept/reject proposal-review path. Only a validated generated proposal enters that review path.
 

@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import fsPromises from 'node:fs/promises';
 import net from 'node:net';
 import path from 'node:path';
+import { syncBuiltinESMExports } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import { startLocalService } from '../src/server/service.ts';
@@ -9,11 +11,16 @@ import type { LocalService, RetrievalOutcome, ServiceOptions } from '../src/serv
 import { openRunRepository } from '../src/server/persistence/run-repository.ts';
 import type { RunRepository, RunningRun, StoreResult } from '../src/server/persistence/run-repository.ts';
 import { RetrievalError } from '../src/server/retrieval/retrieval-error.ts';
+import { resolveFindingCitations } from '../src/server/retrieval/corpus-catalog.ts';
 import { completedRun, runningRun } from './helpers/m102-run-fixture.ts';
 import {
+  assessedIncompleteRetrievalRun,
+  assessedMissingRetrievalRun,
+  assessedSupportedRetrievalRun,
   completedRetrievalRun,
   completedScanRun,
   expectedRetrievalResult,
+  retrievalResultForPassages,
   retrievalRequest,
   selectedFinding,
 } from './helpers/m202-retrieval-service-fixture.ts';
@@ -169,6 +176,20 @@ function assertCompletedState(run: unknown, startedAt: string): void {
   assert.equal(retrieval.startedAt, startedAt);
   assert.ok((retrieval.finishedAt as string) >= startedAt);
   assert.deepEqual(retrieval.result, expectedRetrievalResult());
+  assert.deepEqual(retrieval.support, { state: 'supported', missingRoles: [], conflicts: [] });
+  const analysis = finding.analysis as Record<string, unknown>;
+  assert.deepEqual(Object.keys(analysis).sort(), ['evidence', 'finishedAt', 'startedAt', 'status']);
+  assert.equal(analysis.status, 'completed');
+  assert.equal(analysis.startedAt, startedAt);
+  assert.equal(analysis.finishedAt, retrieval.finishedAt);
+  assert.equal((analysis.evidence as Record<string, unknown>).state, 'complete');
+}
+function seedIncomplete(root: string, runId = 'run-01'): void {
+  const store = open(root);
+  success(store.create(runningRun(runId)));
+  const completed = structuredClone(completedRun(runId)) as unknown as Record<string | number, unknown>;
+  (selectedFinding(completed).evidence as Record<string, unknown>).altState = { unavailable: 'missing' };
+  success(store.finish(completed as never));
 }
 function assertFailedState(run: unknown, startedAt: string, error: string): void {
   const finding = selectedFinding(run as Record<string | number, unknown>);
@@ -212,6 +233,9 @@ test('retrieval reserves synchronously, publishes running before immutable selec
   await withSandbox(async box => {
     seedCompleted(box.runs);
     const service = await start(box);
+    const expectedCitations = await resolveFindingCitations(
+      selectedFinding(completedScanRun()), expectedRetrievalResult());
+    assert.ok(expectedCitations.ok);
     const entered = deferred<void>();
     const release = deferred<unknown>();
     box.releases.push(() => release.reject(new Error('Owned release')));
@@ -241,6 +265,9 @@ test('retrieval reserves synchronously, publishes running before immutable selec
     assert.ok(outcome.ok);
     const startedAt = assertRunningState(durableRunning);
     assertCompletedState(outcome.run, startedAt);
+    assert.equal('view' in outcome, true);
+    assert.deepEqual((outcome as unknown as { view: unknown }).view,
+      { runId: 'run-01', findingId: 'finding-0', ...expectedCitations.value });
     assert.deepEqual(received, selectedFinding(completedScanRun()));
     assert.ok(Object.isFrozen(received));
     assert.notStrictEqual(received, selectedFinding(durableRunning as Record<string | number, unknown>));
@@ -268,12 +295,117 @@ test('retrieval success returns the frozen durable representation without mutati
     if (!outcome.ok) return;
     const durable = success(open(box.runs).read('run-01'));
     const returnedResult = retrievalOf(outcome.run).result;
+    const view = (outcome as unknown as { view?: { passages: Array<{ passageId: string; score: number }> } }).view;
     assert.deepEqual(executorResult, before);
     assert.equal(Object.is(executorResult.passages[2]!.score, -0), true);
     assert.notStrictEqual(returnedResult, executorResult);
+    assert.ok(view);
+    assert.deepEqual(view.passages.map(passage => ({ passageId: passage.passageId, score: passage.score })), [
+      { passageId: 'h37-text-alternative', score: 0.75 },
+      { passageId: 'understanding111-intent', score: 0.5 },
+      { passageId: 'wcag22-sc111', score: 0 },
+    ]);
     deepFrozen(outcome.run);
     assert.deepEqual(disk(box.runs), durable);
     assert.deepEqual(outcome.run, durable);
+  });
+});
+
+test('incomplete native evidence completes a durable evidence-only abstention without executing retrieval', serial, async () => {
+  await withSandbox(async box => {
+    seedIncomplete(box.runs);
+    const before = disk(box.runs);
+    const sibling = structuredClone(selectedFinding(before as Record<string | number, unknown>, 1));
+    const service = await start(box);
+    let calls = 0;
+
+    const outcome = await service.retrieveFinding(retrievalRequest(), async () => {
+      calls++;
+      return expectedRetrievalResult();
+    });
+    assert.ok(outcome.ok);
+    if (!outcome.ok) return;
+    assert.equal(calls, 0);
+    const finding = selectedFinding(outcome.run as unknown as Record<string | number, unknown>);
+    assert.equal(finding.state, 'abstained');
+    assert.equal('retrieval' in finding, false);
+    assert.deepEqual(finding.result, {
+      type: 'abstention', findingId: 'finding-0',
+      evidenceReferences: ['checks', 'evidence.elementKind'], retrievalReference: null,
+      reason: 'incomplete-evidence', explanation: 'Required captured evidence is incomplete.',
+      providerCalled: false,
+      manualInvestigation: 'Inspect the affected image and verify its purpose and alternative-text state. Capture the unavailable required facts before requesting guidance in a new analysis.',
+    });
+    assert.deepEqual(selectedFinding(outcome.run as unknown as Record<string | number, unknown>, 1), sibling);
+    assert.deepEqual((outcome as unknown as { view: unknown }).view,
+      { runId: 'run-01', findingId: 'finding-0', corpus: null, passages: [], notices: [] });
+    assert.deepEqual(disk(box.runs), outcome.run);
+    assert.deepEqual(await service.retrieveFinding(retrievalRequest(), async () => expectedRetrievalResult()),
+      rejected('not-eligible', outcome.run));
+  });
+});
+
+test('authentic missing and incomplete guidance abstain durably and release workflow ownership', serial, async () => {
+  for (const [name, passages, expectedRun] of [
+    ['missing', [], assessedMissingRetrievalRun()],
+    ['incomplete', [{ passageId: 'wcag22-sc111', score: 0.75 }], assessedIncompleteRetrievalRun()],
+  ] as const) {
+    await withSandbox(async box => {
+      seedCompleted(box.runs);
+      const service = await start(box);
+      const outcome = await service.retrieveFinding(retrievalRequest(), async () => retrievalResultForPassages([...passages]));
+      assert.ok(outcome.ok, `${name} guidance must produce a successful durable abstention`);
+      if (!outcome.ok) return;
+      const finding = selectedFinding(outcome.run as unknown as Record<string | number, unknown>);
+      const expectedFinding = structuredClone(selectedFinding(expectedRun));
+      const actualRetrieval = finding.retrieval as Record<string, unknown>;
+      const expectedRetrieval = expectedFinding.retrieval as Record<string, unknown>;
+      expectedRetrieval.startedAt = actualRetrieval.startedAt;
+      expectedRetrieval.finishedAt = actualRetrieval.finishedAt;
+      const actualAnalysis = finding.analysis as Record<string, unknown>;
+      const expectedAnalysis = expectedFinding.analysis as Record<string, unknown>;
+      assert.ok(actualAnalysis);
+      expectedAnalysis.startedAt = actualAnalysis.startedAt;
+      expectedAnalysis.finishedAt = actualAnalysis.finishedAt;
+      assert.equal(finding.state, 'abstained');
+      assert.deepEqual(finding, expectedFinding);
+      assert.equal(((finding.result as Record<string, unknown>).providerCalled), false);
+      assert.deepEqual(disk(box.runs), outcome.run);
+      assert.deepEqual(await service.retrieveFinding(retrievalRequest(), async () => expectedRetrievalResult()),
+        rejected('not-eligible', outcome.run));
+      const independent = await service.runScan(scanInput(), async run => scanTerminal(run));
+      assert.ok(independent.ok);
+    });
+  }
+});
+
+test('canonical citation resolution failure persists retrieval failure with no support or abstention', serial, async t => {
+  await withSandbox(async box => {
+    seedCompleted(box.runs);
+    const service = await start(box);
+    const originalRead = fsPromises.readFile;
+    t.mock.method(fsPromises, 'readFile', async (...args: Parameters<typeof fsPromises.readFile>) => {
+      if (String(args[0]).includes('wcag22-mvp-v1')) throw new Error('SYNTHETIC_CORPUS_READ_FAILURE');
+      return Reflect.apply(originalRead, fsPromises, args);
+    });
+    syncBuiltinESMExports();
+    try {
+      const outcome = await service.retrieveFinding(retrievalRequest(), async () => expectedRetrievalResult());
+      assert.equal(outcome.ok, false);
+      assert.equal(outcome.error, 'corpus-integrity');
+      assert.equal(outcome.persisted, true);
+      const finding = selectedFinding(outcome.run as unknown as Record<string | number, unknown>);
+      assert.equal(finding.state, 'failed');
+      assert.equal('analysis' in finding, false);
+      assert.equal('result' in finding, false);
+      assert.equal('support' in (finding.retrieval as Record<string, unknown>), false);
+      assert.deepEqual(selectedFinding(outcome.run as unknown as Record<string | number, unknown>, 1),
+        selectedFinding(completedScanRun(), 1));
+      assert.deepEqual(disk(box.runs), outcome.run);
+    } finally {
+      t.mock.restoreAll();
+      syncBuiltinESMExports();
+    }
   });
 });
 
@@ -390,6 +522,116 @@ test('invalid result and final publication failure return only the last durable 
   });
 });
 
+test('failed evidence-only activation makes no executor call and releases the reservation', serial, async t => {
+  await withSandbox(async box => {
+    seedIncomplete(box.runs);
+    const service = await start(box);
+    const original = disk(box.runs);
+    const originalRename = fs.renameSync;
+    let calls = 0;
+    t.mock.method(fs, 'renameSync', (from: fs.PathLike, to: fs.PathLike) => {
+      const candidate = JSON.parse(fs.readFileSync(from, 'utf8'));
+      const analysis = selectedFinding(candidate).analysis as Record<string, unknown> | undefined;
+      if (analysis?.status === 'running') throw new Error('SYNTHETIC_ANALYSIS_ACTIVATION_FAILURE');
+      return originalRename(from, to);
+    });
+    try {
+      assert.deepEqual(await service.retrieveFinding(retrievalRequest(), async () => {
+        calls++;
+        return expectedRetrievalResult();
+      }), rejected('retrieval-persistence', original));
+    } finally { t.mock.restoreAll(); }
+    assert.equal(calls, 0);
+    assert.deepEqual(disk(box.runs), original);
+    const next = await service.retrieveFinding(retrievalRequest(), async () => {
+      calls++;
+      return expectedRetrievalResult();
+    });
+    assert.ok(next.ok);
+    assert.equal(calls, 0);
+  });
+});
+
+test('failed evidence-only terminal publication returns the running aggregate and retains its owner', serial, async t => {
+  await withSandbox(async box => {
+    seedIncomplete(box.runs);
+    const service = await start(box);
+    const originalRename = fs.renameSync;
+    let running: unknown;
+    let calls = 0;
+    t.mock.method(fs, 'renameSync', (from: fs.PathLike, to: fs.PathLike) => {
+      const candidate = JSON.parse(fs.readFileSync(from, 'utf8'));
+      const analysis = selectedFinding(candidate).analysis as Record<string, unknown> | undefined;
+      if (analysis?.status === 'running') {
+        const result = originalRename(from, to);
+        running = disk(box.runs);
+        return result;
+      }
+      if (selectedFinding(candidate).state === 'abstained') {
+        throw new Error('SYNTHETIC_ABSTENTION_PUBLICATION_FAILURE');
+      }
+      return originalRename(from, to);
+    });
+    try {
+      const outcome = await service.retrieveFinding(retrievalRequest(), async () => {
+        calls++;
+        return expectedRetrievalResult();
+      });
+      assert.deepEqual(outcome, rejected('retrieval-persistence', running));
+      assert.equal(calls, 0);
+      assert.deepEqual(disk(box.runs), running);
+      assert.deepEqual(await service.retrieveFinding(retrievalRequest(), async () => expectedRetrievalResult()),
+        rejected('workflow-active'));
+    } finally { t.mock.restoreAll(); }
+  });
+});
+
+test('shutdown after evidence-only activation persists its bounded failure without invoking retrieval', serial, async t => {
+  await withSandbox(async box => {
+    seedIncomplete(box.runs);
+    const service = await start(box, { stopTimeoutMs: 5000 });
+    const originalRename = fs.renameSync;
+    let running: unknown;
+    let stopping: Promise<unknown> | undefined;
+    let calls = 0;
+    t.mock.method(fs, 'renameSync', (from: fs.PathLike, to: fs.PathLike) => {
+      const candidate = JSON.parse(fs.readFileSync(from, 'utf8'));
+      const analysis = selectedFinding(candidate).analysis as Record<string, unknown> | undefined;
+      if (analysis?.status === 'running') {
+        const result = originalRename(from, to);
+        running = disk(box.runs);
+        stopping = service.stop();
+        return result;
+      }
+      return originalRename(from, to);
+    });
+    try {
+      const outcome = await service.retrieveFinding(retrievalRequest(), async () => {
+        calls++;
+        return expectedRetrievalResult();
+      });
+      assert.equal(calls, 0);
+      assert.equal(outcome.ok, false);
+      assert.equal(outcome.error, 'shutdown');
+      assert.equal(outcome.persisted, true);
+      assert.equal(outcome.cleanupFailed, false);
+      const finding = selectedFinding(outcome.run as unknown as Record<string | number, unknown>);
+      assert.equal(finding.state, 'failed');
+      assert.deepEqual(finding.analysis, {
+        status: 'failed',
+        startedAt: (selectedFinding(running as Record<string | number, unknown>).analysis as Record<string, unknown>).startedAt,
+        finishedAt: (finding.analysis as Record<string, unknown>).finishedAt,
+        error: 'shutdown',
+      });
+      assert.equal('retrieval' in finding, false);
+      assert.equal('result' in finding, false);
+      assert.ok(stopping);
+      assert.deepEqual(await stopping, { ok: true, status: 'stopped' });
+      assert.deepEqual(disk(box.runs), outcome.run);
+    } finally { t.mock.restoreAll(); }
+  });
+});
+
 test('failed running-state publication makes no executor call and releases the reservation', serial, async t => {
   await withSandbox(async box => {
     seedCompleted(box.runs);
@@ -478,5 +720,45 @@ test('shutdown deadline settles the retrieval once, rejects late publication and
     assert.deepEqual(service.readRun('run-01'), { ok: true, run: completedRetrievalRun(), interrupted: true });
     assert.deepEqual(await service.retrieveFinding(retrievalRequest(), async () => expectedRetrievalResult()),
       rejected('workflow-active', completedRetrievalRun()));
+  });
+});
+
+test('shutdown deadline during citation resolution forbids publication from late authenticated bytes', serial, async t => {
+  await withSandbox(async box => {
+    seedCompleted(box.runs);
+    const service = await start(box, { stopTimeoutMs: 25 });
+    const entered = deferred<void>();
+    const release = deferred<void>();
+    box.releases.push(() => release.resolve(undefined));
+    const originalRead = fsPromises.readFile;
+    t.mock.method(fsPromises, 'readFile', async (...args: Parameters<typeof fsPromises.readFile>) => {
+      if (String(args[0]).includes('wcag22-mvp-v1')) {
+        entered.resolve(undefined);
+        await release.promise;
+      }
+      return Reflect.apply(originalRead, fsPromises, args);
+    });
+    syncBuiltinESMExports();
+    try {
+      const operation = service.retrieveFinding(retrievalRequest(), async () => expectedRetrievalResult());
+      assert.equal(await within(Promise.race([
+        entered.promise.then(() => 'citation' as const),
+        operation.then(() => 'operation' as const),
+      ]), 1000, 'Retrieval produced no citation-resolution activity'),
+      'citation', 'Retrieval completed before canonical citation resolution');
+      const running = disk(box.runs);
+      const stopping = service.stop();
+      assert.deepEqual(await within(stopping, 1000, 'Stop deadline did not settle'),
+        { ok: false, error: 'stop-failed' });
+      assert.deepEqual(await within(operation, 1000, 'Retrieval deadline did not settle'),
+        rejected('shutdown', running, false, true));
+      release.resolve(undefined);
+      await new Promise<void>(resolve => setImmediate(resolve));
+      assert.deepEqual(disk(box.runs), running);
+    } finally {
+      release.resolve(undefined);
+      t.mock.restoreAll();
+      syncBuiltinESMExports();
+    }
   });
 });

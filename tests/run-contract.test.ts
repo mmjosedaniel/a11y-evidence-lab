@@ -6,9 +6,17 @@ import type {
   Fact, ValidationResult,
 } from '../src/server/domain/run-contract.ts';
 import {
+  assessedIncompleteRetrievalRun,
+  assessedMissingRetrievalRun,
+  assessedSupportedRetrievalRun,
   completedRetrievalRun,
+  evidenceAbstainedRun,
+  failedEvidenceAnalysisRun,
   failedRetrievalRun,
   retrievalStartedAt,
+  retrievalFinishedAt,
+  retrievalResultForPassages,
+  runningEvidenceAnalysisRun,
   runningRetrievalRun,
   selectedFinding,
   replaceAt,
@@ -1185,5 +1193,118 @@ test('all nine bounded retrieval failures round trip without raw provider or sup
     const run = completedRetrievalRun();
     selectedFinding(run)[key] = { secret };
     rejectRun(run);
+  }
+});
+
+// M203-B: new writes are assessed while valid M202 records above remain readable.
+test('accepts exact assessed supported, abstained and evidence-only Finding states without changing native scan admission', () => {
+  for (const run of [
+    runningEvidenceAnalysisRun(), evidenceAbstainedRun(), failedEvidenceAnalysisRun(),
+    assessedSupportedRetrievalRun(), assessedMissingRetrievalRun(), assessedIncompleteRetrievalRun(),
+  ]) {
+    accept(validateRun, run);
+    reject(validateScan, (run as RecordValue).scan, 'invalid-scan');
+  }
+  const supported = selectedFinding(assessedSupportedRetrievalRun());
+  assert.equal(supported.state, 'active');
+  assert.deepEqual((supported.retrieval as RecordValue).support,
+    { state: 'supported', missingRoles: [], conflicts: [] });
+  assert.equal('result' in supported, false);
+  const evidenceOnly = selectedFinding(evidenceAbstainedRun());
+  assert.equal('retrieval' in evidenceOnly, false);
+  assert.equal((evidenceOnly.result as RecordValue).retrievalReference, null);
+  assert.equal((evidenceOnly.result as RecordValue).providerCalled, false);
+});
+
+test('assessed records recompute evidence and authenticated support instead of trusting derived state', () => {
+  const malformed: unknown[] = [
+    replaceAt(assessedSupportedRetrievalRun(), ['scan', 'findings', 0, 'state'], 'abstained'),
+    replaceAt(assessedSupportedRetrievalRun(), ['scan', 'findings', 0, 'analysis', 'status'], 'running'),
+    replaceAt(assessedSupportedRetrievalRun(), ['scan', 'findings', 0, 'analysis', 'startedAt'], retrievalFinishedAt),
+    replaceAt(assessedSupportedRetrievalRun(), ['scan', 'findings', 0, 'analysis', 'finishedAt'], retrievalStartedAt),
+    replaceAt(assessedSupportedRetrievalRun(), ['scan', 'findings', 0, 'analysis', 'evidence', 'state'], 'incomplete'),
+    replaceAt(assessedSupportedRetrievalRun(), ['scan', 'findings', 0, 'retrieval', 'support', 'state'], 'missing'),
+    replaceAt(assessedSupportedRetrievalRun(), ['scan', 'findings', 0, 'retrieval', 'support', 'missingRoles'],
+      ['criterion', 'interpretation', 'remediation']),
+    replaceAt(assessedMissingRetrievalRun(), ['scan', 'findings', 0, 'result', 'reason'], 'incomplete-guidance'),
+    replaceAt(assessedMissingRetrievalRun(), ['scan', 'findings', 0, 'result', 'findingId'], 'finding-1'),
+    replaceAt(assessedMissingRetrievalRun(), ['scan', 'findings', 0, 'result', 'evidenceReferences'], []),
+    replaceAt(assessedMissingRetrievalRun(), ['scan', 'findings', 0, 'result', 'retrievalReference'], null),
+    replaceAt(evidenceAbstainedRun(), ['scan', 'findings', 0, 'result', 'retrievalReference'], 'retrieval'),
+    replaceAt(evidenceAbstainedRun(), ['scan', 'findings', 0, 'result', 'providerCalled'], true),
+    replaceAt(evidenceAbstainedRun(), ['scan', 'findings', 0, 'result', 'manualInvestigation'], secret),
+    replaceAt(failedEvidenceAnalysisRun(), ['scan', 'findings', 0, 'analysis', 'error'], 'embedding-failed'),
+    replaceAt(failedEvidenceAnalysisRun(), ['scan', 'findings', 0, 'result'], { type: 'abstention' }),
+  ];
+  const forgedConflict = assessedMissingRetrievalRun();
+  const forgedFinding = selectedFinding(forgedConflict);
+  const retrieval = forgedFinding.retrieval as RecordValue;
+  retrieval.result = retrievalResultForPassages([
+    { passageId: 'understanding111-decoration', score: 0.75 },
+    { passageId: 'understanding111-intent', score: 0.5 },
+  ]);
+  retrieval.support = {
+    state: 'conflicting', missingRoles: ['criterion'],
+    conflicts: [['understanding111-decoration', 'understanding111-intent']],
+  };
+  Object.assign(forgedFinding, {
+    result: {
+      ...(forgedFinding.result as RecordValue), reason: 'conflicting-guidance',
+      explanation: 'The retrieved guidance contains an unresolved material conflict.',
+    },
+  });
+  malformed.push(forgedConflict);
+  for (const run of malformed) rejectRun(run);
+});
+
+test('historical retrieval workflow remains readable while new analysis shape and single ownership stay strict', () => {
+  const incompleteRetrieval = runningRetrievalRun();
+  put(incompleteRetrieval, ['scan', 'findings', 0, 'evidence', 'altState'], unavailable('missing'));
+  accept(validateRun, incompleteRetrieval);
+  const completeAnalysis = runningEvidenceAnalysisRun();
+  put(completeAnalysis, ['scan', 'findings', 0, 'evidence', 'altState'], fact('absent'));
+  rejectRun(completeAnalysis);
+  const twoActive = runningEvidenceAnalysisRun();
+  Object.assign(selectedFinding(twoActive, 1), {
+    state: 'active', retrieval: { status: 'running', startedAt: retrievalStartedAt },
+  });
+  rejectRun(twoActive);
+});
+
+test('assessed Finding sections reject extra keys, accessors and prohibited invocation or review content', () => {
+  const paths: readonly Path[] = [
+    ['scan', 'findings', 0, 'analysis'], ['scan', 'findings', 0, 'analysis', 'evidence'],
+    ['scan', 'findings', 0, 'retrieval', 'support'], ['scan', 'findings', 0, 'result'],
+  ];
+  for (const path of paths) {
+    const extra = structuredClone(assessedMissingRetrievalRun());
+    put(extra, [...path, 'unexpected'], secret);
+    rejectRun(extra);
+    const accessor = structuredClone(assessedMissingRetrievalRun());
+    const target = get(accessor, path) as RecordValue;
+    const key = Object.keys(target)[0]!;
+    const originalValue = target[key];
+    let getterCalls = 0;
+    Object.defineProperty(target, key, { enumerable: true, get: () => { getterCalls++; return originalValue; } });
+    rejectRun(accessor);
+    assert.equal(getterCalls, 0);
+  }
+  for (const key of ['providerInvocation', 'proposal', 'review', 'remediation']) {
+    const run = structuredClone(assessedMissingRetrievalRun());
+    selectedFinding(run)[key] = { secret };
+    rejectRun(run);
+  }
+});
+
+test('assessed object correspondence ignores own-key enumeration order without relaxing exact keys', () => {
+  for (const path of [
+    ['scan', 'findings', 0, 'analysis'], ['scan', 'findings', 0, 'analysis', 'evidence'],
+    ['scan', 'findings', 0, 'retrieval'], ['scan', 'findings', 0, 'retrieval', 'support'],
+    ['scan', 'findings', 0, 'result'],
+  ] as const satisfies readonly Path[]) {
+    const run = structuredClone(assessedMissingRetrievalRun());
+    const target = get(run, path) as RecordValue;
+    put(run, path, new Proxy(target, { ownKeys(value) { return Reflect.ownKeys(value).reverse(); } }));
+    accept(validateRun, run);
   }
 });

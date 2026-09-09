@@ -11,9 +11,14 @@ import { validateRun } from '../src/server/domain/run-contract.ts';
 import { runningRun, completedRun, failedRun } from './helpers/m102-run-fixture.ts';
 import type { FixtureMode, FixtureScan } from './helpers/m102-run-fixture.ts';
 import {
+  assessedIncompleteRetrievalRun,
+  assessedMissingRetrievalRun,
+  assessedSupportedRetrievalRun,
   completedRetrievalRun,
   completedScanRun,
+  evidenceAbstainedRun,
   failedRetrievalRun,
+  runningEvidenceAnalysisRun,
   runningRetrievalRun,
   selectedFinding,
 } from './helpers/m202-retrieval-service-fixture.ts';
@@ -796,7 +801,7 @@ test('updateRetrieval publishes only the selected two-step transition and preser
     success(store.finish(completedRun()));
     const original = completedScanRun();
     const running = runningRetrievalRun();
-    const completed = completedRetrievalRun();
+    const completed = assessedSupportedRetrievalRun();
     assert.deepEqual(success(store.updateRetrieval(original as unknown as CompletedRun, running)), running);
     assert.deepEqual(success(store.updateRetrieval(running as unknown as CompletedRun, completed)), completed);
     assert.deepEqual(success(store.read('run-01')), completed);
@@ -815,7 +820,7 @@ test('updateRetrieval returns the detached frozen durable representation for an 
     success(store.finish(completedRun()));
     const original = completedScanRun();
     const running = runningRetrievalRun();
-    const submitted = changed(completedRetrievalRun(),
+    const submitted = changed(assessedSupportedRetrievalRun(),
       ['scan', 'findings', 0, 'retrieval', 'result', 'passages', 2, 'score'], -0);
     const before = structuredClone(submitted);
     valid(submitted);
@@ -842,7 +847,7 @@ test('updateRetrieval rejects an unrelated native signed-zero value as invalid i
     success(store.finish(completedRun()));
     const original = completedScanRun();
     const running = runningRetrievalRun();
-    const completedWithNegativeZero = changed(completedRetrievalRun(),
+    const completedWithNegativeZero = changed(assessedSupportedRetrievalRun(),
       ['scan', 'findings', 0, 'retrieval', 'result', 'passages', 2, 'score'], -0);
     const candidate = changed(completedWithNegativeZero, ['scan', 'coverage', 'label', 'inapplicable'], -0);
     const originalCoverage = (running.scan as Record<string, unknown>).coverage as Record<string, Record<string, unknown>>;
@@ -876,11 +881,12 @@ test('updateRetrieval rejects stale, duplicate, skipped and unrelated mutations 
       [['scan', 'findings', 1, 'evidence', 'altState'], { value: 'empty' }],
       [['scan', 'scannerReviewObservations', 0, 'locator'], { value: ':root' }],
     ] as const;
-    const unrelated = mutations.map(([path, value]) => changed(completedRetrievalRun(), path, value));
+    const unrelated = mutations.map(([path, value]) => changed(assessedSupportedRetrievalRun(), path, value));
     for (const [expected, candidate] of [
       [original, completedRetrievalRun()],
       [running, running],
       [original, failedRetrievalRun()],
+      [running, completedRetrievalRun()],
       [running, changed(failedRetrievalRun(), ['scan', 'findings', 0, 'evidence', 'altState'], { value: 'empty' })],
       ...unrelated.map(candidate => [running, candidate] as const),
     ] as const) {
@@ -888,6 +894,85 @@ test('updateRetrieval rejects stale, duplicate, skipped and unrelated mutations 
       assert.deepEqual(bytes(runs), before);
     }
   });
+});
+
+test('updateRetrieval selects activation from recomputed evidence and publishes only assessed terminal outcomes', options, async () => {
+  await withSandbox(({ runs }) => {
+    const store = open(runs);
+    success(store.create(runningRun()));
+    success(store.finish(completedRun()));
+    const original = completedScanRun();
+    const completeActivation = runningRetrievalRun();
+    assert.deepEqual(success(store.updateRetrieval(original as unknown as CompletedRun, completeActivation)), completeActivation);
+    assert.deepEqual(success(store.updateRetrieval(completeActivation as unknown as CompletedRun,
+      assessedMissingRetrievalRun())), assessedMissingRetrievalRun());
+
+    const nextId = 'incomplete-evidence';
+    success(store.create(runningRun(nextId)));
+    const incompleteOriginal = completedScanRun(nextId);
+    const selected = selectedFinding(incompleteOriginal);
+    (selected.evidence as Record<string, unknown>).altState = { unavailable: 'missing' };
+    success(store.finish(incompleteOriginal as unknown as CompletedRun));
+    const incompleteActivation = runningEvidenceAnalysisRun(nextId);
+    assert.deepEqual(success(store.updateRetrieval(incompleteOriginal as unknown as CompletedRun,
+      incompleteActivation)), incompleteActivation);
+    assert.deepEqual(success(store.updateRetrieval(incompleteActivation as unknown as CompletedRun,
+      evidenceAbstainedRun(nextId))), evidenceAbstainedRun(nextId));
+  });
+});
+
+test('updateRetrieval rejects the wrong activation branch and direct or unassessed terminal publication', options, async () => {
+  await withSandbox(({ runs }) => {
+    const store = open(runs);
+    success(store.create(runningRun()));
+    success(store.finish(completedRun()));
+    const original = completedScanRun();
+    const incomplete = completedScanRun('incomplete-evidence');
+    (selectedFinding(incomplete).evidence as Record<string, unknown>).altState = { unavailable: 'missing' };
+    const wrongCompleteActivation = structuredClone(original);
+    Object.assign(selectedFinding(wrongCompleteActivation), {
+      state: 'active', analysis: { status: 'running', startedAt: '2026-08-30T10:00:03.000Z' },
+    });
+    const wrongIncompleteActivation = structuredClone(incomplete);
+    Object.assign(selectedFinding(wrongIncompleteActivation), {
+      state: 'active', retrieval: { status: 'running', startedAt: '2026-08-30T10:00:03.000Z' },
+    });
+    success(store.create(runningRun('incomplete-evidence')));
+    success(store.finish(incomplete as unknown as CompletedRun));
+    const before = bytes(runs);
+    failure(store.updateRetrieval(original as unknown as CompletedRun, wrongCompleteActivation), 'invalid-run');
+    assert.deepEqual(bytes(runs), before);
+    for (const candidate of [assessedSupportedRetrievalRun(), assessedMissingRetrievalRun()]) {
+      failure(store.updateRetrieval(original as unknown as CompletedRun, candidate), 'invalid-transition');
+      assert.deepEqual(bytes(runs), before);
+    }
+    failure(store.updateRetrieval(incomplete as unknown as CompletedRun, wrongIncompleteActivation), 'invalid-transition');
+    assert.deepEqual(bytes(runs), before);
+
+    const running = runningRetrievalRun();
+    success(store.updateRetrieval(original as unknown as CompletedRun, running));
+    const runningBytes = bytes(runs);
+    failure(store.updateRetrieval(running as unknown as CompletedRun, completedRetrievalRun()), 'invalid-transition');
+    assert.deepEqual(bytes(runs), runningBytes);
+  });
+});
+
+test('assessed insufficient publications preserve immutable parent, native evidence and every sibling', options, async () => {
+  for (const terminal of [assessedMissingRetrievalRun(), assessedIncompleteRetrievalRun()]) {
+    await withSandbox(({ runs }) => {
+      const store = open(runs);
+      success(store.create(runningRun()));
+      success(store.finish(completedRun()));
+      const original = completedScanRun();
+      const running = runningRetrievalRun();
+      success(store.updateRetrieval(original as unknown as CompletedRun, running));
+      const returned = success(store.updateRetrieval(running as unknown as CompletedRun, terminal));
+      assert.deepEqual(selectedFinding(returned, 1), selectedFinding(original, 1));
+      assert.deepEqual((returned.scan as Record<string, unknown>).context,
+        (original.scan as Record<string, unknown>).context);
+      assert.deepEqual(success(store.read('run-01')), terminal);
+    });
+  }
 });
 
 test('finish cannot admit workflow-bearing scanner completion', options, async () => {

@@ -1,13 +1,13 @@
 # UI design documentation
 
-- **Status:** M1-04 Analyze/Results presentation is implemented and verified through OD-027; later workflow regions remain planning guidance
-- **Last reviewed:** 2026-09-02
+- **Status:** M1-04 Analyze/Results is verified through OD-027; the M2-03 guidance extension and citation-presentation corrections are complete with their recorded visual evidence limits; later workflow regions remain planning guidance
+- **Last reviewed:** 2026-09-09
 - **Analyze and Results contract:** [Analyze and results presentation](ANALYZE_AND_RESULTS_PRESENTATION.md)
 - **Visual direction:** [Visual foundations](VISUAL_FOUNDATIONS.md)
 
 ## Document role
 
-This directory describes the smallest coherent interface for the accepted portfolio MVP. [Analyze and results presentation](ANALYZE_AND_RESULTS_PRESENTATION.md) is the accepted M1-04 visible contract through OD-027. Other material in this directory remains reversible guidance for information hierarchy, minimum visible regions, and visual foundations. This directory does not select packages or components, define a second workflow state model, or prove that an interface passes its verification gates.
+This directory describes the smallest coherent interface for the accepted portfolio MVP. [Analyze and results presentation](ANALYZE_AND_RESULTS_PRESENTATION.md) preserves the accepted M1-04 visible contract through OD-027 and documents the [M2-03 selected-Finding extension](ANALYZE_AND_RESULTS_PRESENTATION.md#m2-03-selected-finding-guidance). Other material in this directory remains reversible guidance for information hierarchy, minimum visible regions, and visual foundations. This directory does not select packages or components, define a second workflow state model, or prove that an interface passes its verification gates.
 
 The identified rows in the [project requirements](../PROJECT_REQUIREMENTS.md) and their focused modules remain authoritative. [OD-027](../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-027--simplify-analysis-and-results-presentation) reconciles the Analyze/Results presentation contract with those authorities. [ADR-0012](../architecture/decisions/ADR-0012-react-as-initial-user-interface-library.md) owns React's presentation-only boundary, the [development roadmap](../DEVELOPMENT_ROADMAP.md) owns implementation order, and the [documentation-only Gherkin specifications](../specs/README.md) provide derived behavior examples.
 
@@ -33,7 +33,7 @@ Use one responsive application shell. On wider layouts, the complete results lis
 | Analysis setup | The compact [Analyze and results presentation](ANALYZE_AND_RESULTS_PRESENTATION.md): one public HTTPS URL field, one initially unselected Local-or-Groq group with Local visibly recommended, validation or an already-known missing-configuration message only when applicable, and one **Analyze** action. Selection and Analyze perform no provider probe or call. | Before a new analysis |
 | Results overview | Normalized analyzed page identity, one exact-three-check/non-certification limitation, one prominent Finding total, an optional manual-review total, and complete user-facing counts for Image alternatives, Form labels, and Color contrast. | Only after a complete scan |
 | Complete results | Every Finding grouped by the three user-facing checks with a stable human-readable label, concise affected-element summary, selection action, and programmatic selected state. Native `incomplete` ScannerReviewObservations appear under **Needs manual review**. A valid zero appears only after complete three-rule coverage. | Only after a complete scan |
-| Selected-finding workspace | Human-readable Finding identity, deterministic explanation, affected element, page location, and direct rule-specific evidence. Retrieved guidance, citations, evidence sufficiency, provider-relevant disclosure/provenance, and proposal, abstention, or failure branches are added only by their later owning tasks. Only one FindingWorkflow is selected at a time; sibling states remain visible and unchanged. | After a Finding is selected |
+| Selected-finding workspace | Human-readable Finding identity, deterministic explanation, affected element, page location, and direct rule-specific evidence. M2-03 adds explicit guidance, complete citations/notices, evidence sufficiency, supported eligibility, abstention and retrieval failure. Actual generation provenance and proposal/review branches remain later work. Only one FindingWorkflow is selected at a time; sibling states remain visible and unchanged. | After a Finding is selected |
 | Failed analysis | Requested page, **Analysis could not be completed**, one safe stage-specific explanation, and any actionable persistence or cleanup uncertainty. It never presents partial success or a completed-results overview. | Only after failure |
 | Human decision | The original AI proposal, confidence and uncertainty, assumptions, blocking pre-acceptance judgment, non-blocking post-change reminder, support confirmation, and one approve, edit-and-accept, or reject path. Reviewer-authored content and the final decision remain distinct from the proposal. | Only for a validated proposal |
 | Comparison | Baseline and later references, pair comparability, target-match disposition when applicable, before/after deterministic evidence, outcome, rationale, limitations, and follow-up checks. Proposal or review information may appear only as context. | After an intentional later scan and comparison |
@@ -63,7 +63,7 @@ The semantic source colors in [Visual foundations](VISUAL_FOUNDATIONS.md) may re
 - Project the canonical Finding paths: `unprocessed`, `active`, `abstained`, `proposal pending review`, `accepted`, `edited and accepted`, `rejected`, and `failed`.
 - Keep ScannerReviewObservations outside the Finding lifecycle and proposal flow.
 - Let the user work on one selected Finding at a time. Do not add automatic fan-out, generate-all, combined proposals, bulk decisions, queues, or parallel-workflow controls.
-- Show an explicit Generate action only for an eligible selected Finding. A provider or validation failure remains visible and never produces automatic retry, mode switching, or fallback.
+- M2-03 exposes **Get guidance** only for Findings and preserves explicit activation. A later generation task may add **Generate** for an eligible selected Finding. A provider or validation failure remains visible and never produces automatic retry, mode switching, or fallback.
 - Offer approve, edit-and-accept, and reject only for a validated proposal. An abstention is terminal and explanatory, not reviewable.
 - Use the ordinary **Analyze** flow for a new independent run. Do not add dedicated retry, resume, cancellation, or regeneration controls.
 - Make an intentional rescan available from a retained baseline Finding without requiring retrieval, generation, abstention, or review first.
@@ -78,7 +78,7 @@ The semantic source colors in [Visual foundations](VISUAL_FOUNDATIONS.md) may re
 - Support text zoom and narrow reflow without hiding, clipping, or horizontally truncating required evidence, citations, decisions, or differences.
 - Never use color, position, or item count as the only way to communicate a source, state, selection, or comparison outcome.
 
-The complete MVP verification boundary remains the automated check, keyboard smoke path, and screen-reader smoke path in [`REQ-A11Y-006`](../requirements/quality-security-and-operations/APPLICATION_ACCESSIBILITY.md#accessibility-of-a11y-evidence-lab); this document adds no support matrix.
+The complete MVP verification boundary is automated accessibility, keyboard, focus and announcement-semantics checks plus manual visual review, as defined in [`REQ-A11Y-006`](../requirements/quality-security-and-operations/APPLICATION_ACCESSIBILITY.md#accessibility-of-a11y-evidence-lab); this document adds no support matrix.
 
 ## Explicit non-goals
 

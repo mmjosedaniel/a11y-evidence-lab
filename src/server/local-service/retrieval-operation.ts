@@ -3,6 +3,10 @@ import type { Finding } from '../domain/run-contract.ts';
 import type { CompletedRun, RunRepository } from '../persistence/run-repository.ts';
 import { validateRetrievalResult } from '../retrieval/retrieval-contract.ts';
 import { RetrievalError } from '../retrieval/retrieval-error.ts';
+import { assessFindingEvidence } from '../domain/finding-sufficiency.ts';
+import { buildFindingAnalysis } from '../domain/finding-analysis.ts';
+import type { FindingGuidanceView } from '../domain/finding-analysis-types.ts';
+import { resolveFindingCitations } from '../retrieval/corpus-catalog.ts';
 import type { RetrievalErrorCode } from '../retrieval/retrieval-error.ts';
 import type { RetrievalExecutor, RetrievalOutcome } from './contracts.ts';
 
@@ -128,8 +132,10 @@ export function createRetrievalOperation(dependencies: Dependencies) {
     }
 
     const startedAt = timestamp(durable.finishedAt);
+    const evidenceOnly = assessFindingEvidence(selected).state === 'incomplete';
     const runningFinding = { ...selected, state: 'active' as const,
-      retrieval: Object.freeze({ status: 'running' as const, startedAt }) };
+      ...(evidenceOnly ? { analysis: Object.freeze({ status: 'running' as const, startedAt }) }
+        : { retrieval: Object.freeze({ status: 'running' as const, startedAt }) }) };
     const runningResult = dependencies.repository.updateRetrieval(durable, replaceFinding(durable, index, runningFinding));
     if (!runningResult.ok) {
       if (runningResult.cleanupFailed) dependencies.closeAdmission();
@@ -143,7 +149,9 @@ export function createRetrievalOperation(dependencies: Dependencies) {
       if (dependencies.deadlineExpired()) return;
       const finishedAt = timestamp(startedAt);
       const failedFinding = { ...selected, state: 'failed' as const,
-        retrieval: Object.freeze({ status: 'failed' as const, startedAt, finishedAt, error: code }) };
+        ...(evidenceOnly ? { analysis: Object.freeze({ status: 'failed' as const, startedAt, finishedAt,
+          error: code === 'shutdown' ? 'shutdown' as const : 'result-validation' as const }) }
+          : { retrieval: Object.freeze({ status: 'failed' as const, startedAt, finishedAt, error: code }) }) };
       const saved = dependencies.repository.updateRetrieval(durable!, replaceFinding(durable!, index, failedFinding));
       if (!saved.ok) {
         const uncertain = cleanupFailed || saved.cleanupFailed;
@@ -164,6 +172,17 @@ export function createRetrievalOperation(dependencies: Dependencies) {
     }
     const execute = supplied ?? dependencies.defaultExecute;
     void (async () => {
+      if (evidenceOnly) {
+        const decision = buildFindingAnalysis(selected, startedAt, timestamp(startedAt), null);
+        if (decision.state !== 'abstained') {
+          persistFailure('result-validation', false);
+          return;
+        }
+        const view: FindingGuidanceView = Object.freeze({ ...selection, corpus: null,
+          passages: Object.freeze([]), notices: Object.freeze([]) });
+        publish({ ...selected, ...decision }, view);
+        return;
+      }
       let returned: unknown;
       let thrown: unknown;
       let callbackFailed = false;
@@ -184,24 +203,50 @@ export function createRetrievalOperation(dependencies: Dependencies) {
         persistFailure('result-validation', false);
         return;
       }
+      // Match the publisher's JSON representation before projecting signed scores.
+      const canonical = validateRetrievalResult(JSON.parse(JSON.stringify(checked.value)), selected);
+      if (!canonical.ok) {
+        persistFailure('result-validation', false);
+        return;
+      }
+      const citations = await resolveFindingCitations(selected, canonical.value);
+      if (settled || dependencies.deadlineExpired()) return;
+      if (dependencies.isStopping()) {
+        persistFailure('shutdown', false);
+        return;
+      }
+      if (!citations.ok) {
+        persistFailure(citations.error, false);
+        return;
+      }
       const finishedAt = timestamp(startedAt);
-      const completedFinding = { ...selected, state: 'active' as const,
-        retrieval: Object.freeze({ status: 'completed' as const, startedAt, finishedAt, result: checked.value }) };
-      const saved = dependencies.repository.updateRetrieval(durable!, replaceFinding(durable!, index, completedFinding));
+      const decision = buildFindingAnalysis(selected, startedAt, finishedAt, citations.support);
+      const completedFinding = { ...selected, ...decision,
+        retrieval: Object.freeze({ status: 'completed' as const, startedAt, finishedAt,
+          result: canonical.value, support: citations.support }) };
+      const view = Object.freeze({ ...selection, ...citations.value });
+      publish(completedFinding, view);
+    })().catch(() => {
+      if (!settled && !dependencies.deadlineExpired()) persistFailure('result-validation', false);
+    });
+
+    function publish(finding: Finding, view: FindingGuidanceView): void {
+      if (settled || dependencies.deadlineExpired()) return;
+      if (dependencies.isStopping()) {
+        persistFailure('shutdown', false);
+        return;
+      }
+      // Everything returned to the caller is prepared before this synchronous commit boundary.
+      const saved = dependencies.repository.updateRetrieval(durable!, replaceFinding(durable!, index, finding));
       if (!saved.ok) {
         if (saved.cleanupFailed) dependencies.closeAdmission();
         settle(rejected('retrieval-persistence', durable, false, saved.cleanupFailed));
         return;
       }
       durable = saved.value;
-      if (dependencies.isStopping()) {
-        settle(rejected('shutdown', durable));
-        return;
-      }
-      settle({ ok: true, run: durable });
-    })().catch(() => {
-      if (!settled && !dependencies.deadlineExpired()) persistFailure('embedding-failed', false);
-    });
+      if (finding.state === 'abstained') owner = undefined;
+      settle({ ok: true, run: durable, view });
+    }
     return reservation.promise;
   }
 

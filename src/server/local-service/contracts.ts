@@ -1,6 +1,7 @@
 import type { Finding, PageAnalysisRun } from '../domain/run-contract.ts';
 import type { CompletedRun, FailedRun, RunningRun } from '../persistence/run-repository.ts';
 import type { RetrievalErrorCode } from '../retrieval/retrieval-error.ts';
+import type { FindingGuidanceView } from '../domain/finding-analysis-types.ts';
 
 export type ReadResult =
   | { ok: true; run: PageAnalysisRun; interrupted: boolean }
@@ -18,7 +19,7 @@ export type RetrievalServiceError =
   | 'stored-run-unavailable' | 'read-failed' | 'not-eligible' | 'workflow-active'
   | 'retrieval-persistence' | RetrievalErrorCode;
 export type RetrievalOutcome =
-  | { ok: true; run: CompletedRun }
+  | { ok: true; run: CompletedRun; view: FindingGuidanceView }
   | { ok: false; error: RetrievalServiceError; run: CompletedRun | null; persisted: boolean; cleanupFailed: boolean };
 export type RetrievalExecutor = (finding: Finding, signal: AbortSignal) => Promise<unknown>;
 
