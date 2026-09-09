@@ -6,6 +6,7 @@ This ExecPlan is a living document. Maintain `Progress`, `Surprises & Discoverie
 
 - **Task:** [M3-01](../../DEVELOPMENT_ROADMAP.md#m3-01--freeze-the-generation-evaluation-package), Complete. Verification and the documentation gate passed; this plan is archived.
 - **Accepted artifacts:** [M301-FREEZE-01](#m301-freeze-01--exact-static-package-and-verification) records the safe manifest and nine exact ignored local files. [M301-FINAL-01](#m301-final-01--final-review-and-documentation-closure) accepts the different final review and resolved documentation follow-up.
+- **Read this archive:** [M301-OWNER-02](#m301-owner-02--accepted-controlled-input-scope-and-resolved-contract) owns the resolved contract; [M301-COMMAND-02](#m301-command-02--resolved-preparation-validation-and-closure-callers) contains its read-only verification block; [Idempotence and Recovery](#idempotence-and-recovery) governs missing or changed inputs. Earlier planning, blocked-state and creation instructions are retained history, not current authorization.
 - **Evidence:** Mandatory DRAFT READY; corrected fresh pre-draft PASS; different final PASS WITH FOLLOW-UPS with F1 resolved; full 96-negative static packet; fresh strict TypeScript and all 449 tests; source/input preservation and documentation checks.
 - **Scope remaining:** None within M3-01. Runtime validation/context fit, Local configuration/capacity, Groq availability and the six generation executions remain unproved downstream. Actual M2-04 retrievals remain abstained.
 - **Allowance and ownership:** Research/analyst/pre-draft allowances are consumed; one final documentation correction cycle was used and one remains unused. No active lease or implementation-worker write occurred. Primary authored the static evidence and authority/status documents.
@@ -49,6 +50,8 @@ The decisive corrections improved integrity-failure precedence and distinguished
 Make later generation observations interpretable: one reviewer can identify exactly what each of the three controlled cases supplied, what both providers were asked to return, what support was acceptable, and how success and failure will be judged before seeing an answer. The output is a frozen evaluation definition, not an LLM result, implemented validator, eligible production run or model-capacity claim.
 
 ## Context and Orientation
+
+The two baseline records below describe their original planning/execution entry states. The accepted owner exception and completed freeze supersede their unresolved eligibility and package-absence statements; use [Current state](#current-state) for the final disposition.
 
 ### M301-EXEC-01 — execution baseline and research contract
 
@@ -267,7 +270,7 @@ If inspection demonstrates a necessary executable helper, first reconsider direc
 
 ## Decision Review Contract
 
-**Owner/artifact:** M3-01; the future safe manifest, exact local package and task-owned freeze explanation. **Tier: R3**, triggered by identity/reference binding, closed provider data boundaries and integrity of evidence interpretation, not by model selection or the number of cases. The procedure below remains controlling. Initial research and synthesis have reached M301-SYNTHESIS-01's owner-direction stop; no unresolved generation literal is accepted by that result.
+**Owner/artifact:** M3-01; the safe manifest, exact local package and task-owned freeze explanation. **Tier: R3**, triggered by identity/reference binding, closed provider data boundaries and integrity of evidence interpretation, not by model selection or the number of cases. The procedure and planning evidence table below preserve the contract used during execution. The initial owner-direction stop was resolved by [M301-OWNER-02](#m301-owner-02--accepted-controlled-input-scope-and-resolved-contract); [M301-FINAL-01](#m301-final-01--final-review-and-documentation-closure) records completed acceptance. Historical pending cells and allowances do not reopen this task or renew its budgets.
 
 One bounded non-ranking discovery pass may identify candidate package provenance/storage representations and primary provider-schema sources. Freeze the viable candidate set and common comparison matrix before comparative research. Compare authority fit, case eligibility, reference correctness, payload minimization, shared-provider expressibility, reproducibility and smallest maintenance burden. A hard-gate failure disqualifies an option; do not rank a forbidden option as a compromise. Required artifact-local outputs are A's six resolved items, input/output/provenance mappings, rubric, failure interpretation and the entire invariant packet.
 
@@ -324,6 +327,8 @@ if ($LASTEXITCODE -ne 0) { throw 'Retained evidence check failed' }
 
 ### Static package preparation (not yet executable)
 
+**Historical planning section:** Its unresolved slots were completed by [M301-COMMAND-02](#m301-command-02--resolved-preparation-validation-and-closure-callers). The original heading and steps remain for traceability; they are not the current verification entry point.
+
 Run from `C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab`. Load only the definition block in [README development command preparation](../../../README.md#development-command-preparation) into the actual calling PowerShell session; do not replay the adjacent dependency-restore command. Missing runtime/dependencies stop for reconciliation, not installation.
 
 ```powershell
@@ -363,6 +368,8 @@ These **unresolved future command slots are not executable permission**. Primary
 No bootstrap, dependency restore, live retrieval or generation command is needed. M301-COMMAND-02 resolves the stale-suite identity issue with only the maintained regression tests' temporary service/browser effects; no manual browser proof or new public scan is selected. Other effects require scope/command triage.
 
 ### M301-COMMAND-02 — resolved preparation, validation and closure callers
+
+**Read-only reuse after closure:** Load the maintained README definitions and use only the verification code block below, with its stated input/path prerequisites. The creation and full-regression paragraphs record completed M3-01 work; they do not require recreating files or rerunning the task to inspect an unchanged freeze. Apply the existing evidence-identity and recovery rules if inputs differ.
 
 These slots supersede the earlier unresolved future table for the selected static route. Load only the README definitions into the actual PowerShell caller as described above. Every Node invocation uses Invoke-M105Command and the pinned executable. Primary creates the nine files named in M301-OWNER-02 and the safe manifest using apply_patch after pre-draft PASS. JSON bytes are JSON.stringify(value,null,2) plus LF; no existing file is overwritten. Source reconstruction uses the exact pure imports below; primary captures candidate data in memory and authors the reviewed static definitions, never a reusable runner.
 

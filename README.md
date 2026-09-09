@@ -58,6 +58,8 @@ The application integrates same-origin HTTP scanning, durable run publication, a
 
 M2-04 is complete. Its [checkpoint observations](docs/plans/completed/m2-04-retrieval-checkpoint.md#m204-b-accept-01--bounded-checkpoint-observations) exercise all three fixed synthetic Finding profiles through the real local retrieval path: each returns an acceptable gold passage, while missing guidance roles correctly produce no-generation-call abstention. Controlled cases separately demonstrate supported eligibility and adverse outcomes. The [final closure](docs/plans/completed/m2-04-retrieval-checkpoint.md#m204-final-01--integrated-review-and-task-closure) records verification and limitations; these observations are not general retrieval-quality qualification.
 
+The [generation evaluation package](#frozen-generation-evaluation-package) freezes the controlled inputs and shared output contract for later Local and Groq evaluations. This static definition does not implement generation or establish model capacity or provider availability.
+
 See [how to inspect guidance in the UI](#inspecting-m2-02-retrieval-evidence) and [where to find the M2-04 checkpoint evidence](#inspecting-m2-04-checkpoint-evidence).
 
 ## Development toolchain
@@ -305,6 +307,14 @@ Start with the [project documentation index](docs/README.md) for the recommended
 ## License
 
 Project-authored code and documentation are licensed under the [MIT License](LICENSE). The W3C text in the closed corpus retains its source-specific terms below.
+
+## Frozen generation evaluation package
+
+The [M3-01 manifest](evaluation/m301-generation-v1.json) defines three shared controlled cases, six future Local/Groq bindings, one output/instruction contract, material controls, the rubric and one provider-independent no-call case. The [accepted evaluation-only exception](docs/requirements/evaluation-and-release/EVALUATION_AND_ACCEPTANCE.md#controlled-generation-input-exception) permits independently assembled canonical support for those six executions. Actual M2-04 retrieval abstentions, production eligibility and later integration obligations remain unchanged.
+
+In the original development checkout, the nine exact files under `temp/m301-generation-freeze-v1/` contain the inputs, separate provenance, instruction, schema and no-call definition. They are ignored and absent from a fresh checkout; the manifest records their identities without publishing raw prompts or payloads. The [freeze receipt](docs/plans/completed/m3-01-generation-evaluation-package.md#m301-freeze-01--exact-static-package-and-verification) and [final acceptance](docs/plans/completed/m3-01-generation-evaluation-package.md#m301-final-01--final-review-and-documentation-closure) preserve the evidence and its limits.
+
+For read-only verification, load only the [development command definitions](#development-command-preparation), then run the preserved verification block in [M301-COMMAND-02](docs/plans/completed/m3-01-generation-evaluation-package.md#m301-command-02--resolved-preparation-validation-and-closure-callers) from the repository root. It also requires the retained M2-04 run/seed files named there and makes no model request. Historical creation and task-closure instructions are not steps to replay. Missing or mismatched exact files block downstream use until the existing [recovery conditions](docs/plans/completed/m3-01-generation-evaluation-package.md#idempotence-and-recovery) are satisfied; do not regenerate or overwrite the frozen package merely to make a check pass.
 
 ## Closed corpus snapshot
 
