@@ -4,11 +4,13 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-- [M3-01 — Freeze generation evaluation package](m3-01-generation-evaluation-package.md) — planning only; execution and the package freeze remain pending.
+None.
 
 ## Completed plans
 
 These archives preserve each task's execution, review, failures, and closure evidence. The roadmap remains the status authority.
+
+- [M3-01 — Freeze generation evaluation package](completed/m3-01-generation-evaluation-package.md)
 
 - [M2-04 — Retrieval checkpoint](completed/m2-04-retrieval-checkpoint.md)
 - [M2-03 — Sufficiency, abstention, and detail UI](completed/m2-03-sufficiency-abstention-and-detail-ui.md)
