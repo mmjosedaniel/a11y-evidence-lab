@@ -27,6 +27,10 @@ ADR-0017 also moved mode selection to one immutable global `Local` or `Groq` con
 
 [OD-027](../../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-027--simplify-analysis-and-results-presentation) removes provider/model disclosure from the ready Analyze form and provider-independent scan Results. The immutable run context remains canonical. Provider, exact model, execution location, minimized Groq data categories, and relevant failure/provenance context become visible when the later selected-Finding workflow makes generation relevant, before any explicit Groq invocation. This changes placement only: it adds no provider probe or confirmation gate, does not authorize automatic egress, and does not weaken minimized payload, credential, provenance, or no-fallback controls.
 
+### Fixed evaluation input clarification recorded 2026-09-09
+
+The owner accepted the [controlled generation input exception](../../requirements/evaluation-and-release/EVALUATION_AND_ACCEPTANCE.md#controlled-generation-input-exception) solely for the six fixed generation executions. Those executions may use independently assembled canonical support-complete inputs, with honest controlled provenance and unchanged actual retrieval abstentions. The completed actual retrieval prerequisite below continues to govern production and real end-to-end integration; the exception proves generation/provider behavior only. All other evidence, guidance-role, citation, minimization, structured-output, human-review and no-fallback boundaries remain unchanged. No production substitute or additional model execution is authorized.
+
 ## Considered options
 
 1. Keep external generation outside the MVP.

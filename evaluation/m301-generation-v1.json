@@ -1,0 +1,546 @@
+{
+  "version": "m301-generation-v1",
+  "status": "frozen-before-model-output",
+  "frozenAt": "2026-09-09T19:47:51Z",
+  "scope": "Static definition for three shared controlled generation cases and exactly six future executions; no model output, implementation, capacity or release qualification.",
+  "authority": {
+    "exception": "docs/requirements/evaluation-and-release/EVALUATION_AND_ACCEPTANCE.md#controlled-generation-input-exception",
+    "acceptedAt": "2026-09-09",
+    "task": "M3-01",
+    "requirements": [
+      "REQ-EVAL-001",
+      "REQ-EVAL-004",
+      "REQ-EVAL-005",
+      "REQ-EVAL-006",
+      "REQ-EVAL-007",
+      "REQ-EVAL-008",
+      "REQ-GEN-001",
+      "REQ-GEN-002",
+      "REQ-GEN-003",
+      "REQ-GEN-004",
+      "REQ-GEN-008",
+      "REQ-REV-009",
+      "REQ-SEC-015",
+      "REQ-SEC-021"
+    ],
+    "limit": "Independently assembled canonical support replaces completed actual retrieval only for the six fixed generation evaluations. Production eligibility and later separate integration/capacity obligations are unchanged."
+  },
+  "encoding": {
+    "charset": "UTF-8",
+    "bom": false,
+    "newlines": "LF",
+    "finalNewlines": 1,
+    "jsonRepresentation": "JSON.stringify(value, null, 2) followed by LF; exact bytes, not canonical JSON."
+  },
+  "sources": [
+    {
+      "path": "corpus/wcag22-mvp-v1/manifest.json",
+      "sha256": "87D8867ED1138BFB38E6C44EED67A79B0A43BDAF2532A056AFAFAED828202DA9"
+    },
+    {
+      "path": "corpus/wcag22-mvp-v1/passages.json",
+      "sha256": "29EA0033E825A0FA20430AA42E9718B87A87AA59EDADDA0A3876A0A7BE871850"
+    },
+    {
+      "path": "evaluation/m201-corpus-v1.json",
+      "sha256": "A7D38CACF98BF263CDD53012350708BE987699DF21B4C0F1BB7F32BC1892E29B"
+    },
+    {
+      "path": "evaluation/rd003-scan-v1.json",
+      "sha256": "13C9722BE9EA2E3B0AAF020EA91F429A701180A83814FE7AB21BAF2DDAD57459"
+    }
+  ],
+  "corpusIdentity": {
+    "version": "wcag22-mvp-v1",
+    "manifestSha256": "475F66CF68F6245707CAACC3E1FE423E4B0153B1A91FD967A0F1DB82ADB89E4F",
+    "passagesSha256": "8C396C2C5472DA9A199363410F8E89A13BB4AC04B30192DFD985371890C9B4AB"
+  },
+  "scanProfile": {
+    "manifestVersion": "rd003-scan-v1",
+    "goldVersion": "m201-corpus-v1",
+    "evidencePolicyVersion": "m1-public-v1",
+    "origin": "Retained M2-04 synthetic seeded native evidence; exact source scan context is local provenance, not a newly executed scan."
+  },
+  "cases": [
+    {
+      "caseId": "informative-image-alt",
+      "fixtureRevision": "informative-image-alt-v1-failing",
+      "targetKey": "rd3-image",
+      "ruleId": "image-alt",
+      "successCriterion": "1.1.1",
+      "evidenceOrigin": "synthetic-seeded-native-evidence",
+      "guidanceOrigin": "independently-assembled-canonical-evaluation-only",
+      "passageIds": [
+        "wcag22-sc111",
+        "understanding111-intent",
+        "h37-text-alternative"
+      ],
+      "passageOrder": [
+        "criterion",
+        "interpretation",
+        "remediation"
+      ],
+      "availableEvidenceReferences": [
+        "checks",
+        "evidence.elementKind",
+        "evidence.altState"
+      ],
+      "expectedEvidence": "complete",
+      "expectedSupport": "supported",
+      "actualRetrievalObservation": {
+        "state": "abstained",
+        "missingRoles": [
+          "interpretation"
+        ],
+        "providerCalled": false,
+        "sourcePath": "temp/m204-retrieval-checkpoint/g1/runs/m204-g1/run.json",
+        "sourceSha256": "9292D3C1EC28466FB5FEB6CAEBBC23F39C570D6EFC4C2D3C2767351BF57F4C8E"
+      },
+      "input": {
+        "path": "temp/m301-generation-freeze-v1/informative-image-alt.input.json",
+        "sha256": "6651E5C75388E845CA1573E49F54147C24AA44D63EE255DA3BA9A20441B17097"
+      },
+      "provenance": {
+        "path": "temp/m301-generation-freeze-v1/informative-image-alt.provenance.json",
+        "sha256": "384E076708E3421CE7D4C1333CF6D221E7B293D5C05272101ADA10BC43F1A1B4"
+      },
+      "blockingJudgment": "Determine image purpose, informative versus decorative treatment and suitable equivalent wording; the minimized evidence does not reveal image meaning."
+    },
+    {
+      "caseId": "form-input-label",
+      "fixtureRevision": "form-input-label-v1-failing",
+      "targetKey": "rd3-email",
+      "ruleId": "label",
+      "successCriterion": "4.1.2",
+      "evidenceOrigin": "synthetic-seeded-native-evidence",
+      "guidanceOrigin": "independently-assembled-canonical-evaluation-only",
+      "passageIds": [
+        "wcag22-sc412",
+        "understanding412-intent",
+        "h44-explicit-label"
+      ],
+      "passageOrder": [
+        "criterion",
+        "interpretation",
+        "remediation"
+      ],
+      "availableEvidenceReferences": [
+        "checks",
+        "evidence.elementKind",
+        "evidence.inputType",
+        "evidence.nameSources.explicitLabel",
+        "evidence.nameSources.implicitLabel",
+        "evidence.nameSources.ariaLabel",
+        "evidence.nameSources.ariaLabelledby",
+        "evidence.nameSources.title",
+        "evidence.nameSources.placeholder",
+        "evidence.nameSources.presentationalRole"
+      ],
+      "expectedEvidence": "complete",
+      "expectedSupport": "supported",
+      "actualRetrievalObservation": {
+        "state": "abstained",
+        "missingRoles": [
+          "criterion"
+        ],
+        "providerCalled": false,
+        "sourcePath": "temp/m204-retrieval-checkpoint/g2/runs/m204-g2/run.json",
+        "sourceSha256": "0471BFE4BF569CF3BF16E746AE4A0F394B2F0280A256D9777F8C8C489971077D"
+      },
+      "input": {
+        "path": "temp/m301-generation-freeze-v1/form-input-label.input.json",
+        "sha256": "48EB42DDCBB0C42EBA64A9AA0FD2202D8770211FEDACBFE569084C3E6B23C6C8"
+      },
+      "provenance": {
+        "path": "temp/m301-generation-freeze-v1/form-input-label.provenance.json",
+        "sha256": "3019D7244C4E5BC171DA60AA0BDA37B388D5E4BD72C7D0FE823C6349F44FF116"
+      },
+      "blockingJudgment": "Determine understandable appropriate visible label wording and verify the actual programmatic association; naming-source absence alone does not determine suitable wording."
+    },
+    {
+      "caseId": "text-contrast",
+      "fixtureRevision": "text-contrast-v1-failing",
+      "targetKey": "rd3-text",
+      "ruleId": "color-contrast",
+      "successCriterion": "1.4.3",
+      "evidenceOrigin": "synthetic-seeded-native-evidence",
+      "guidanceOrigin": "independently-assembled-canonical-evaluation-only",
+      "passageIds": [
+        "wcag22-sc143",
+        "understanding143-threshold-measurement",
+        "g18-contrast-remediation"
+      ],
+      "passageOrder": [
+        "criterion",
+        "interpretation",
+        "remediation"
+      ],
+      "availableEvidenceReferences": [
+        "checks",
+        "evidence.foregroundColor",
+        "evidence.backgroundColor",
+        "evidence.contrastRatio",
+        "evidence.expectedContrastRatio",
+        "evidence.fontSize",
+        "evidence.fontWeight",
+        "evidence.measurementSource"
+      ],
+      "expectedEvidence": "complete",
+      "expectedSupport": "supported",
+      "actualRetrievalObservation": {
+        "state": "abstained",
+        "missingRoles": [
+          "criterion"
+        ],
+        "providerCalled": false,
+        "sourcePath": "temp/m204-retrieval-checkpoint/g3/runs/m204-g3/run.json",
+        "sourceSha256": "AB4950B5A2B79260189249A38B524C35FDC83256F803D27EFAFFBA781F5F4147"
+      },
+      "input": {
+        "path": "temp/m301-generation-freeze-v1/text-contrast.input.json",
+        "sha256": "2E356A2380926E50EEC3F9143FB47258B8CF03900814EBF0D123ECB0BEAD0EAE"
+      },
+      "provenance": {
+        "path": "temp/m301-generation-freeze-v1/text-contrast.provenance.json",
+        "sha256": "B0FD563D21A5D521371D18A70D7E4FEC5149424888B9FAFFE2EA1134A9231E1E"
+      },
+      "blockingJudgment": "Determine meaningful text, applicable threshold or exception and visual context; preserve native measurements without inventing new measurements."
+    }
+  ],
+  "shared": {
+    "instructions": {
+      "version": "m301-instructions-v1",
+      "path": "temp/m301-generation-freeze-v1/instructions.txt",
+      "sha256": "1755087AA9B09C40BFB181F96740984091962F17EC1174B916D5B0ECA5B59A05"
+    },
+    "outputSchema": {
+      "version": "m301-proposal-v1",
+      "path": "temp/m301-generation-freeze-v1/output-schema.json",
+      "sha256": "86E6F43CE861EA0E48C07C56A3C43764F618C9E35721C86A2D41F181A8659704"
+    },
+    "noCall": {
+      "caseId": "shared-incomplete-guidance",
+      "frequency": "once-provider-independent",
+      "path": "temp/m301-generation-freeze-v1/no-call.json",
+      "sha256": "1B07D5D764AD99BB028DB1AEF767B9BB9D0685661B5AD761731D60F93394B6DD"
+    }
+  },
+  "executions": [
+    {
+      "caseId": "informative-image-alt",
+      "mode": "local",
+      "inputSha256": "6651E5C75388E845CA1573E49F54147C24AA44D63EE255DA3BA9A20441B17097",
+      "instructionSha256": "1755087AA9B09C40BFB181F96740984091962F17EC1174B916D5B0ECA5B59A05",
+      "outputSchemaSha256": "86E6F43CE861EA0E48C07C56A3C43764F618C9E35721C86A2D41F181A8659704"
+    },
+    {
+      "caseId": "informative-image-alt",
+      "mode": "groq",
+      "inputSha256": "6651E5C75388E845CA1573E49F54147C24AA44D63EE255DA3BA9A20441B17097",
+      "instructionSha256": "1755087AA9B09C40BFB181F96740984091962F17EC1174B916D5B0ECA5B59A05",
+      "outputSchemaSha256": "86E6F43CE861EA0E48C07C56A3C43764F618C9E35721C86A2D41F181A8659704"
+    },
+    {
+      "caseId": "form-input-label",
+      "mode": "local",
+      "inputSha256": "48EB42DDCBB0C42EBA64A9AA0FD2202D8770211FEDACBFE569084C3E6B23C6C8",
+      "instructionSha256": "1755087AA9B09C40BFB181F96740984091962F17EC1174B916D5B0ECA5B59A05",
+      "outputSchemaSha256": "86E6F43CE861EA0E48C07C56A3C43764F618C9E35721C86A2D41F181A8659704"
+    },
+    {
+      "caseId": "form-input-label",
+      "mode": "groq",
+      "inputSha256": "48EB42DDCBB0C42EBA64A9AA0FD2202D8770211FEDACBFE569084C3E6B23C6C8",
+      "instructionSha256": "1755087AA9B09C40BFB181F96740984091962F17EC1174B916D5B0ECA5B59A05",
+      "outputSchemaSha256": "86E6F43CE861EA0E48C07C56A3C43764F618C9E35721C86A2D41F181A8659704"
+    },
+    {
+      "caseId": "text-contrast",
+      "mode": "local",
+      "inputSha256": "2E356A2380926E50EEC3F9143FB47258B8CF03900814EBF0D123ECB0BEAD0EAE",
+      "instructionSha256": "1755087AA9B09C40BFB181F96740984091962F17EC1174B916D5B0ECA5B59A05",
+      "outputSchemaSha256": "86E6F43CE861EA0E48C07C56A3C43764F618C9E35721C86A2D41F181A8659704"
+    },
+    {
+      "caseId": "text-contrast",
+      "mode": "groq",
+      "inputSha256": "2E356A2380926E50EEC3F9143FB47258B8CF03900814EBF0D123ECB0BEAD0EAE",
+      "instructionSha256": "1755087AA9B09C40BFB181F96740984091962F17EC1174B916D5B0ECA5B59A05",
+      "outputSchemaSha256": "86E6F43CE861EA0E48C07C56A3C43764F618C9E35721C86A2D41F181A8659704"
+    }
+  ],
+  "inputPolicy": {
+    "rootProperties": [
+      "finding",
+      "guidance"
+    ],
+    "findingProperties": [
+      "findingId",
+      "ruleId",
+      "nativeResult",
+      "facts"
+    ],
+    "facts": "Ordered reference/value pairs for exactly assessFindingEvidence.availableReferences of the single selected native Finding; unwrap value objects and omit unavailable optional facts.",
+    "guidanceProperties": [
+      "corpusVersion",
+      "passages",
+      "notices"
+    ],
+    "passages": "Exactly three complete authenticated canonical passage objects in fixed role order. No retrieval result, score, embedding or ranking provenance is manufactured.",
+    "notices": "Only selected-source title/type/url/status/version/copyright/attribution plus both unchanged applicable SOURCE_NOTICES texts.",
+    "identity": "The repeated finding-0 ID is scoped by case and source run in local provenance.",
+    "excluded": [
+      "target URL or origin",
+      "locator or selector",
+      "HTML",
+      "page or element text",
+      "image source",
+      "form or input values",
+      "arbitrary attributes",
+      "screenshots",
+      "DOM or accessibility snapshots",
+      "target cookies or headers",
+      "credentials or authorization data",
+      "redirect or network data",
+      "sibling Findings",
+      "unrelated passages",
+      "vectors or scores",
+      "prior review history"
+    ],
+    "localProvenance": "Separate ignored native projection, original source hash/state/run, fixture/target and scan context. Never transmit provenance or retain a duplicate raw outbound payload in run.json."
+  },
+  "outputContract": {
+    "version": "m301-proposal-v1",
+    "requiredProperties": [
+      "type",
+      "findingId",
+      "findingSummary",
+      "userImpact",
+      "remediation",
+      "evidenceSufficiency",
+      "confidence",
+      "uncertainty",
+      "assumptions",
+      "blockingManualJudgment",
+      "postChangeVerificationReminder"
+    ],
+    "allObjectsClosed": true,
+    "allPropertiesRequired": true,
+    "nulls": false,
+    "coercion": false,
+    "defaults": false,
+    "silentRepair": false,
+    "supportedTextFields": [
+      "findingSummary",
+      "userImpact",
+      "remediation"
+    ],
+    "supportedTextProperties": [
+      "text",
+      "evidenceReferences",
+      "passageIds"
+    ],
+    "fieldMinimumReferences": {
+      "findingSummary": {
+        "evidenceReferences": 1,
+        "passageIds": 0
+      },
+      "userImpact": {
+        "evidenceReferences": 0,
+        "passageIds": 1
+      },
+      "remediation": {
+        "evidenceReferences": 0,
+        "passageIds": 1
+      }
+    },
+    "references": "Unique exact case-scoped members of the selected available EvidencePath set or supplied correct-profile passage set; maximum array sizes equal the respective set sizes.",
+    "findingId": "Exact supplied selected Finding ID.",
+    "evidenceSufficiency": {
+      "findingEvidence": "complete",
+      "guidance": "supported",
+      "validation": "Checked against application-owned pre-call assessments; model labels cannot create eligibility."
+    },
+    "confidence": [
+      "high",
+      "medium",
+      "low"
+    ],
+    "uncertainty": "Nonblank at every confidence level; concerns bounded interpretation, never accessibility status, evidence sufficiency or a numerical probability.",
+    "bounds": {
+      "measurement": "Original JavaScript UTF-16 code units before normalization",
+      "nonblank": "Every prose string must have trim().length > 0",
+      "proseMaximum": 1000,
+      "remediationTextMaximum": 2000,
+      "assumptionsMaximumItems": 5,
+      "assumptionMaximum": 500
+    },
+    "validation": "Schema enforces only its common closed required object/string/array/enum subset. Application validation additionally enforces exact ID, sufficiency, lengths, minima, uniqueness, membership and mechanical prohibited claims.",
+    "claimPlacement": "Material scanner/guidance claims occur only in supported text fields and must be substantiated by those fields' references. Ancillary fields contain uncertainty, conditional assumptions and human work, not unsupported factual conclusions.",
+    "humanReview": "Every material claim requires support confirmation. Unsupported or contradictory claims require resolving edit or rejection. No per-claim record. Original proposal remains unchanged; an edit does not retroactively pass its generation observation.",
+    "manualBoundary": "blockingManualJudgment requests the profile determination; it does not complete or disposition it. Approval requires a supporting judgment or explicitly not applicable with reason. A separate postChangeVerificationReminder remains visible and non-blocking."
+  },
+  "messageAssembly": {
+    "count": 2,
+    "system": "Exact instructions.txt text including final LF.",
+    "user": "Exact selected case input JSON text including final LF.",
+    "schema": "Exact shared output-schema.json parsed into the adapter's designated schema field.",
+    "additionalMessages": false,
+    "history": false,
+    "caseSpecificInstructions": false
+  },
+  "controls": {
+    "requestDeadlineMs": 120000,
+    "local": {
+      "provider": "ollama",
+      "model": "qwen3.5:4b",
+      "endpoint": "Approved Ollama loopback /api/chat; exact Local endpoint binding remains M3-03.",
+      "options": {
+        "temperature": 0,
+        "top_p": 1,
+        "num_predict": 4096
+      },
+      "think": false,
+      "stream": false,
+      "responses": 1,
+      "format": "Exact shared schema.",
+      "omittedControls": "No additional sampling overrides, tools or application stop sequences. Seed, top-k/min-p and repetition controls inherit the acquired model/runtime configuration. Bind effective material Local settings, digest/runtime/template/parser/context/offload before output inspection; unknown applicable material Local settings block execution."
+    },
+    "groq": {
+      "provider": "groq",
+      "model": "openai/gpt-oss-20b",
+      "endpoint": "https://api.groq.com/openai/v1/chat/completions",
+      "temperature": 0,
+      "top_p": 1,
+      "max_completion_tokens": 4096,
+      "reasoning_effort": "low",
+      "include_reasoning": false,
+      "stream": false,
+      "n": 1,
+      "response_format": {
+        "type": "json_schema",
+        "name": "m301_proposal_v1",
+        "strict": true,
+        "schema": "Exact shared schema; name/strict/schema belong inside json_schema."
+      },
+      "omittedControls": "reasoning_format, additional sampling overrides, tools and application stop sequences are omitted. Bind exact API model, adapter version, explicit fields, documented exposed defaults and context-fit evidence before output inspection. Unavailable server internals remain unknown; runtime/model revision is recorded only when available."
+    },
+    "protocolBoundary": "Fixed provider destination/model/schema/material controls only. Groq credential solely in required transport authentication; no arbitrary metadata or custom headers. Credential never enters model-visible or retained content.",
+    "limitations": "Equal numeric caps do not imply equal tokenization, visible-output allowance or deterministic replay. No hidden reasoning is persisted or exposed.",
+    "prohibitions": [
+      "retry",
+      "fallback",
+      "batching",
+      "truncation",
+      "silent output repair"
+    ]
+  },
+  "prohibitedClaims": {
+    "version": "m301-prohibited-v1",
+    "normalization": "For each prose leaf independently: normalize('NFKC').toLowerCase().replace(/\\s+/gu, ' ').trim(); preserve original text.",
+    "leaves": [
+      "findingSummary.text",
+      "userImpact.text",
+      "remediation.text",
+      "uncertainty",
+      "assumptions[]",
+      "blockingManualJudgment",
+      "postChangeVerificationReminder"
+    ],
+    "flags": "u",
+    "patterns": [
+      "\\b(?:certif[a-z]*|conform[a-z]*|complian[a-z]*)\\b",
+      "\\b(?:whole|entire)[ -]+(?:page|site|website)[ -]+(?:is[ -]+)?(?:(?:fully|completely)[ -]+)?accessible\\b",
+      "\\b(?:page|site|website)[ -]+(?:is|are)[ -]+(?:(?:fully|completely)[ -]+)?accessible\\b",
+      "\\b(?:finding|issue|violation)[ -]+(?:is|was|has been)[ -]+(?:fixed|resolved|remediated)\\b",
+      "\\b(?:automated|automatic|scanner|axe(?:-core)?)[ -]+(?:evidence|results?|changes?|checks?|scans?)[ -]+(?:alone[ -]+)?(?:prove|proves|confirm|confirms)[ -]+(?:a[ -]+|the[ -]+)?(?:fix|resolution)\\b"
+    ],
+    "semanticProhibitions": [
+      "certification",
+      "legal compliance",
+      "whole-page or whole-site accessibility",
+      "complete success-criterion conformance or non-conformance",
+      "fix established by automated changes or evidence alone"
+    ],
+    "limits": "Conservative lexical rejection includes negation and direct completed-fix declarations. It misses paraphrases, split assertions, punctuation variants, homoglyphs and other languages. Lexical pass never proves semantic safety."
+  },
+  "rubric": [
+    {
+      "observation": "scanner provenance",
+      "basis": "Use retained controlled scanner observations separately; these synthetic native projections are not fresh scans."
+    },
+    {
+      "observation": "evidence completeness",
+      "basis": "Existing native validation and all required available EvidencePath facts pass before invocation."
+    },
+    {
+      "observation": "actual retrieval relevance",
+      "basis": "Preserve actual M2-04 gold-hit results and all three abstentions; no controlled success repairs actual ranking."
+    },
+    {
+      "observation": "controlled support and citations",
+      "basis": "All three authenticated required roles, correct profile and unchanged canonical text/metadata; cited references actually support associated claims."
+    },
+    {
+      "observation": "structural validity",
+      "basis": "One response passes the shared schema and all additional application rules; invalid, incomplete or failed response fails its case."
+    },
+    {
+      "observation": "semantic groundedness",
+      "basis": "One reviewer checks every material claim against its evidence/passages. A valid shape alone is insufficient."
+    },
+    {
+      "observation": "remediation usefulness",
+      "basis": "Actionable bounded recommendation with no invented image meaning, label wording or new measurements; unavailable context remains for human judgment."
+    },
+    {
+      "observation": "human judgment and reminder",
+      "basis": "Profile blocking judgment remains unresolved for a human; separate non-blocking post-change rescan/human reminder is present."
+    },
+    {
+      "observation": "prohibited claims",
+      "basis": "Pass both the mechanical policy and semantic prohibited-claim assessment."
+    },
+    {
+      "observation": "provider completion",
+      "basis": "Report Local and Groq separately on these same three cases, with limitations and no ranking, percentages or aggregate score."
+    }
+  ],
+  "observationValues": [
+    "pass",
+    "fail",
+    "not-run"
+  ],
+  "happyCasePass": "Valid supported proposal, useful bounded remediation, preserved uncertainty/judgment/reminder and no prohibited claim. Record distinct observations. Human editing cannot rewrite original model evidence.",
+  "failures": {
+    "integrity": "Canonical/hash/unknown/wrong-profile/duplicate/excess-passage faults fail before sufficiency assessment, including when evidence is also incomplete. No provider invocation and no fabricated support state.",
+    "abstention": "Valid but incomplete required evidence or incomplete/missing/conflicting guidance abstains before invocation. Shared vector is incomplete guidance with missing remediation; no proposal/invocation/review.",
+    "prerequisiteOrFit": "Unavailable selected-mode prerequisite or inability to fit the full unchanged input/instruction/schema plus output allowance fails before request; no widening or truncation.",
+    "attemptedCall": "Authentication, quota/rate-limit, timeout/network/provider and response-validation failures retain bounded non-secret invocation provenance and fail the case. Cap-exhausted/incomplete output fails.",
+    "semantic": "A structurally valid but unsupported answer requires human edit/reject; it is not a post-call abstention and does not pass original groundedness.",
+    "laterAttempt": "Any later attempt or other mode needs ordinary Analyze and a new independent PageAnalysisRun, with new case evidence under applicable authorization. Never hide retries inside the six executions."
+  },
+  "downstreamProofs": [
+    {
+      "task": "M3-02",
+      "status": "unproved",
+      "proof": "Runtime schema/reference/prohibited-claim validation, minimization, context fit, abstention/no-call, and failure/no-retry enforcement."
+    },
+    {
+      "task": "M3-03",
+      "status": "unproved",
+      "proof": "Exact acquired Qwen digest/runtime/quantization/template/parser/effective settings/endpoint/context/offload binding and Local/full-stack capacity."
+    },
+    {
+      "task": "M3-04",
+      "status": "unproved",
+      "proof": "Fixed Groq adapter/API configuration, documented exposed defaults, context fit and current exact-model availability; unavailable server internals remain unknown."
+    },
+    {
+      "task": "M6-02",
+      "status": "not-run",
+      "proof": "Exactly six separately authorized fixed generation executions after applicable gates, with separate provider observations."
+    }
+  ],
+  "retentionAndChange": "Keep all nine exact ignored files for downstream use; no cleanup selected. Missing or mismatched bytes block use. Recover only byte-identical originals verified against every frozen hash; otherwise freeze a new version before outputs, preserving prior files and evidence. Material input, instruction, schema, adapter or model configuration changes create new bindings and affected-case evidence, never rewrite this version."
+}
