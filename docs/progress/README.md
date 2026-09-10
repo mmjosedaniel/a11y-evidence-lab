@@ -41,6 +41,7 @@ Add each new task record to this table in the same change that creates the file:
 | [M2-04](../DEVELOPMENT_ROADMAP.md#m2-04--integrate-and-verify-retrieval-and-abstention) | [Retrieval checkpoint](m2-04-retrieval-checkpoint.md) | [Task plan](../plans/completed/m2-04-retrieval-checkpoint.md) | Complete | 2026-09-09 |
 | [M3-01](../DEVELOPMENT_ROADMAP.md#m3-01--freeze-the-generation-evaluation-package) | [Freeze generation evaluation package](m3-01-generation-evaluation-package.md) | [Task plan](../plans/completed/m3-01-generation-evaluation-package.md) | Complete | 2026-09-09 |
 | [M3-02](../DEVELOPMENT_ROADMAP.md#m3-02--implement-the-shared-generation-stage-and-validation) | [Shared generation stage](m3-02-shared-generation-stage.md) | [Task plan](../plans/completed/m3-02-shared-generation-stage.md) | Complete | 2026-09-10 |
+| [M3-03](../DEVELOPMENT_ROADMAP.md#m3-03--integrate-qwen-local-generation-and-run-its-capacity-screen) | [Qwen adapter and capacity screen](m3-03-qwen-adapter-and-capacity-screen.md) | [Task plan](../plans/m3-03-qwen-adapter-and-capacity-screen.md) | In progress | 2026-09-10 |
 
 The mirrored status is a convenience snapshot only. The roadmap controls when a task is `Not started`, `In progress`, `Blocked`, or `Complete`.
 
