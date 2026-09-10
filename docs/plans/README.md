@@ -4,7 +4,7 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-- [M3-03 — Qwen adapter and capacity screen](m3-03-qwen-adapter-and-capacity-screen.md) — In progress for planning only; execution and capacity gates remain pending.
+- [M3-03 — Qwen adapter and capacity screen](m3-03-qwen-adapter-and-capacity-screen.md) — Blocked on authentic supported retrieval and the required reviewer interface for capacity; G and A/B implementation/reviews are accepted.
 
 ## Completed plans
 

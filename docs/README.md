@@ -99,7 +99,7 @@ Do not load every requirements module automatically. For requirements work, read
 - [Development toolchain](../README.md#development-toolchain) and [command preparation](../README.md#development-command-preparation) — maintained prerequisites, environment wrappers, build, verification, service startup, and deletion instructions.
 - [Closed corpus](../README.md#closed-corpus-snapshot) — frozen artifacts, static checks, and required source notices.
 - [Inspecting retrieval evidence](../README.md#inspecting-m2-02-retrieval-evidence) — retained M2-02 observations and the distinction between internal retrieval and current UI capabilities.
-- [Shared generation APIs](../README.md#shared-generation-apis) — internal service continuation, adapter and proposal contracts, maintained tests and accepted closure evidence; actual provider adapters and the Generate UI remain later work.
+- [Shared generation APIs](../README.md#shared-generation-apis) — internal service continuation, adapter and proposal contracts, maintained tests and accepted closure evidence; the fixed Local adapter is implemented with controlled verification, while real Qwen capacity, the Groq adapter and the Generate UI remain pending.
 - [Generation evaluation manifest](../evaluation/m301-generation-v1.json) — three controlled shared cases, six future bindings, output/control/rubric definitions and exact local-file identities; [verification and recovery](plans/completed/m3-01-generation-evaluation-package.md#m301-command-02--resolved-preparation-validation-and-closure-callers) preserve the distinction from runtime generation.
 
 ### UI planning
