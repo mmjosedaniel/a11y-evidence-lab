@@ -1,6 +1,8 @@
 export type {
   Fact,
   Finding,
+  GenerationFinding,
+  SupportedFinding,
   NativeFinding,
   PageAnalysisRun,
   ProviderContext,

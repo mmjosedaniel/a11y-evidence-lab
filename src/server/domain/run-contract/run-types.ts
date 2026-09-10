@@ -1,3 +1,5 @@
+import type { GenerationErrorCode, ProviderInvocation } from '../../generation/generation-contract.ts';
+import type { Proposal } from '../../generation/proposal-contract.ts';
 import type {
   AttributeState,
   FailureCategory,
@@ -90,7 +92,17 @@ type WithAnalysis<T extends NativeFinding> = Omit<T, 'state'> & (
 export type AssessedFinding = NativeFinding extends infer T
   ? T extends NativeFinding ? WithAnalysis<T> : never
   : never;
-export type Finding = NativeFinding | RetrievalFinding | AssessedFinding;
+export type SupportedFinding = Extract<AssessedFinding, { state: 'active'; retrieval: { status: 'completed' } }>;
+type WithGeneration<T extends SupportedFinding> = Omit<T, 'state'> & (
+  | { readonly state: 'active'; readonly generation: { readonly status: 'running'; readonly startedAt: string } }
+  | { readonly state: 'proposal-pending-review'; readonly generation: { readonly status: 'completed'; readonly startedAt: string;
+      readonly finishedAt: string; readonly invocation: ProviderInvocation }; readonly result: Proposal }
+  | { readonly state: 'failed'; readonly generation: { readonly status: 'failed'; readonly startedAt: string;
+      readonly finishedAt: string; readonly error: GenerationErrorCode; readonly invocation?: ProviderInvocation } }
+);
+export type GenerationFinding = SupportedFinding extends infer T
+  ? T extends SupportedFinding ? WithGeneration<T> : never : never;
+export type Finding = NativeFinding | RetrievalFinding | AssessedFinding | GenerationFinding;
 export type ScannerReviewObservation = { readonly nativeResult: 'incomplete'; readonly locator: Locator } & (
   | (Extract<RuleDetails, { ruleId: 'color-contrast' }> & { readonly incompleteReason: Fact<MessageKey> })
   | (Exclude<RuleDetails, { ruleId: 'color-contrast' }> & { readonly incompleteReason: Unavailable<'missing' | 'withheld'> })

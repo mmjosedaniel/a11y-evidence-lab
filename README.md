@@ -54,7 +54,9 @@ Public comparison always starts from a baseline Finding. For binary `image-alt` 
 
 Development ready. The [development roadmap](docs/DEVELOPMENT_ROADMAP.md) owns task order, selection, and status; the [task plans](docs/plans/README.md) preserve verification, reviews, limitations, and earlier failures.
 
-The application integrates same-origin HTTP scanning, durable run publication, and the Analyze/Results UI. Selected-Finding guidance uses the closed corpus and local exact-vector retrieval, authenticates citations, evaluates evidence sufficiency and guidance support, and durably records abstention or retrieval failure. The detail UI presents native evidence, complete cited passages, source notices and the resulting guidance state. The [M2-03 closure record](docs/plans/completed/m2-03-sufficiency-abstention-and-detail-ui.md#m203-c-post01-closure--renewed-task-closure) preserves its implementation evidence and visual-check deferral. Generation, proposal review and comparison remain later work.
+The application integrates same-origin HTTP scanning, durable run publication, and the Analyze/Results UI. Selected-Finding guidance uses the closed corpus and local exact-vector retrieval, authenticates citations, evaluates evidence sufficiency and guidance support, and durably records abstention or retrieval failure. The detail UI presents native evidence, complete cited passages, source notices and the resulting guidance state. The [M2-03 closure record](docs/plans/completed/m2-03-sufficiency-abstention-and-detail-ui.md#m203-c-post01-closure--renewed-task-closure) preserves its implementation evidence and visual-check deferral.
+
+The [shared generation stage](#shared-generation-apis) validates selected-only input, configuration-bound context fit, one transport attempt, bounded failures and cited proposals. Its internal service continuation durably records generation and preserves completed scan, retrieval and sibling evidence. [M3-02 verification](docs/plans/completed/m3-02-shared-generation-stage.md#m302-regression-01--complete-authoritative-suite) covers controlled adapters and real aggregate persistence. Actual Local/Groq adapters, model capacity, the Generate UI, proposal review and comparison remain later work.
 
 M2-04 is complete. Its [checkpoint observations](docs/plans/completed/m2-04-retrieval-checkpoint.md#m204-b-accept-01--bounded-checkpoint-observations) exercise all three fixed synthetic Finding profiles through the real local retrieval path: each returns an acceptable gold passage, while missing guidance roles correctly produce no-generation-call abstention. Controlled cases separately demonstrate supported eligibility and adverse outcomes. The [final closure](docs/plans/completed/m2-04-retrieval-checkpoint.md#m204-final-01--integrated-review-and-task-closure) records verification and limitations; these observations are not general retrieval-quality qualification.
 
@@ -216,10 +218,10 @@ Invoke-M105Command {
 }
 ```
 
-Run the complete thirteen-file suite sequentially, with no running application service or concurrent browser test. The production-entry tests also require the built client. The scanner and walking-skeleton suites use scanner scratch; both UI suites use separate UI scratch:
+Run the complete sixteen-file suite sequentially, with no running application service or concurrent browser test. The production-entry tests also require the built client. The scanner and walking-skeleton suites use scanner scratch; both UI suites use separate UI scratch:
 
 ```powershell
-foreach ($m105Test in @('run-contract','run-repository','local-service','scan-normalization','retrieval-contract','embedding-retrieval','retrieval-service','finding-sufficiency','finding-guidance-api')) {
+foreach ($m105Test in @('run-contract','run-repository','local-service','scan-normalization','retrieval-contract','embedding-retrieval','retrieval-service','finding-sufficiency','finding-guidance-api','generation-contract','generation-stage','generation-service')) {
   Invoke-M105Command {
     & $m105Node --test --test-timeout=120000 ("tests/" + $m105Test + ".test.ts")
     if ($LASTEXITCODE -ne 0) { throw 'Browser-free suite failed.' }
@@ -281,7 +283,7 @@ The service refuses overlapping operations without a queue. Cleanup uncertainty 
 
 ## Retained runs and deletion
 
-Run data stays in the ignored `data/runs/<run-id>/run.json` tree. Reads never repair invalid records, promote staging residue, or automatically resume interrupted work. The parent completed/failed scan state is terminal. M2-03 extends M2-02's selected-Finding retrieval updates with assessed outcomes and terminal abstention inside a completed aggregate; completed scan evidence and sibling data stay immutable. Historical M2-02 records remain readable without automatic resumption. Generation, review and comparison updates remain their owning tasks. No backup, hidden copy, sweep, or synchronization mechanism is added.
+Run data stays in the ignored `data/runs/<run-id>/run.json` tree. Reads never repair invalid records, promote staging residue, or automatically resume interrupted work. The parent completed/failed scan state is terminal. Selected-Finding updates retain assessed retrieval outcomes, terminal abstention, and M3-02's running, failed or pending-proposal generation branches inside a completed aggregate. Completed scan evidence and sibling data stay immutable. Historical records remain readable without automatic resumption; a running generation record without invocation has unknown call history. Review and comparison updates remain later work. No backup, hidden copy, sweep, or synchronization mechanism is added.
 
 For manual deletion, first stop the service and confirm its normal exit. Verify the resolved absolute target is the exact, correctly spelled direct run-directory child of this checkout's `data/runs`, all ancestors and the target are ordinary directories rather than links or junctions, and its inventory contains only the expected ordinary single-link `run.json`. If any check fails, preserve the directory for inspection. Remove only that verified directory using PowerShell's `Remove-Item` with `-LiteralPath` and `-Recurse`; never use a wildcard or target `data/runs`, its parents, another run, or a corpus directory. Local deletion does not remove any provider-side records.
 
@@ -294,11 +296,19 @@ Invoke-M105Command {
 }
 ```
 
-This filtered demonstration does not replace either the core subset or the complete thirteen-file suite. Tests use only project-owned synthetic records, isolated `temp/m102-*` roots, and bounded owned child processes; they never acquire or delete a real corpus or user run.
+This filtered demonstration does not replace either the core subset or the complete sixteen-file suite. Tests use only project-owned synthetic records, isolated `temp/m102-*` roots, and bounded owned child processes; they never acquire or delete a real corpus or user run.
 
 ## Current scope
 
 The [capability summary](#project-status) distinguishes implemented behavior from later work. Source entry points are the [domain contract](src/server/domain/run-contract.ts), [run repository](src/server/persistence/run-repository.ts), [local service](src/server/service.ts), [scanner](src/server/scan/scan-page.ts), and [scan minimization](src/server/scan/normalize-scan.ts). Internal retrieval APIs and their boundaries are described with the [closed corpus](#closed-corpus-snapshot).
+
+### Shared generation APIs
+
+[LocalService.generateFinding](src/server/local-service/contracts.ts) continues only the exact live supported retrieval workflow for one `{runId, findingId}`. It saves generation-running before invoking the [shared stage](src/server/generation/generation-stage.ts), then publishes a validated pending proposal or bounded failure through [RunRepository.updateGeneration](src/server/persistence/run-repository/contracts.ts). Failure results distinguish the last durable run from separately returned, unpersisted invocation provenance. Failed publication retains ownership, uncertain cleanup closes admission, and restart never reconstructs a generation capability.
+
+The [adapter contract](src/server/generation/generation-contract.ts) defines preparation, the bounded transport attempt and invocation provenance; the [proposal validator](src/server/generation/proposal-contract.ts) admits only the shared structured output and authenticated selected citations. Missing adapters fail before transport; no production success double or default provider exists. This API has no HTTP route or UI action yet.
+
+The [generation contract](tests/generation-contract.test.ts), [shared-stage](tests/generation-stage.test.ts) and [service continuation](tests/generation-service.test.ts) suites are included in the complete verification command above. Service tests use exclusive `temp/m302-generation-*` roots and owned loopback ports. The [M3-02 closure record](docs/plans/completed/m3-02-shared-generation-stage.md#m302-final-01--final-integrated-review-and-documentation-closure) preserves accepted verification and its limits: controlled adapters do not prove actual provider conformance, model capacity or semantic grounding.
 
 ## Documentation
 

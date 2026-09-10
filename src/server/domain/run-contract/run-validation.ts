@@ -1,3 +1,4 @@
+import { invocationMatchesProvider } from '../../generation/generation-contract.ts';
 import { failureCategories } from './run-policy.ts';
 import {
   readChoice,
@@ -49,6 +50,11 @@ function readRun(input: unknown): PageAnalysisRun {
     const finishedAt = readTime(record.finishedAt);
     const scan = readStoredScan(record.scan, finishedAt);
     requireValid(scan.findings.filter(finding => finding.state === 'active').length <= 1);
+    for (const finding of scan.findings) {
+      if ('generation' in finding && 'invocation' in finding.generation) {
+        requireValid(invocationMatchesProvider(finding.generation.invocation!, common.providerContext));
+      }
+    }
     requireChronology(common.createdAt, scan.context, finishedAt);
     return Object.freeze({ ...common, status, finishedAt, scan });
   }

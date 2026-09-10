@@ -38,10 +38,11 @@ If the same defect recurs, reuse its record and return to `Reported` or `Confirm
 
 ## Bug index
 
-No bug records have been added yet. Add real reports as needed using the template below.
+The records below preserve confirmed defects and their current disposition.
 
 | Bug | Summary | Status | Responsible task or policy scope |
 | --- | --- | --- | --- |
+| [BUG-0001](bug-0001-generation-metadata-read-escape.md) | Admitted generation metadata can throw after transport and escape bounded outcomes | Verified | M3-02 |
 
 ## Record template
 

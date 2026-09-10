@@ -1,3 +1,4 @@
+import type { GenerationAdapter, GenerationErrorCode, ProviderInvocation } from '../generation/generation-contract.ts';
 import type { Finding, PageAnalysisRun } from '../domain/run-contract.ts';
 import type { CompletedRun, FailedRun, RunningRun } from '../persistence/run-repository.ts';
 import type { RetrievalErrorCode } from '../retrieval/retrieval-error.ts';
@@ -23,6 +24,12 @@ export type RetrievalOutcome =
   | { ok: false; error: RetrievalServiceError; run: CompletedRun | null; persisted: boolean; cleanupFailed: boolean };
 export type RetrievalExecutor = (finding: Finding, signal: AbortSignal) => Promise<unknown>;
 
+export type GenerationServiceOutcome =
+  | { ok: true; run: CompletedRun }
+  | { ok: false; error: Exclude<RetrievalServiceError, RetrievalErrorCode | 'retrieval-persistence'>
+      | GenerationErrorCode | 'generation-persistence'; run: CompletedRun | null; persisted: boolean;
+      cleanupFailed: boolean; invocationPersisted: boolean; invocation?: ProviderInvocation };
+
 export type StopResult =
   | { ok: true; status: 'stopped' }
   | { ok: false; error: 'stop-failed' };
@@ -34,6 +41,7 @@ export interface LocalService {
   readRun(id: unknown): ReadResult;
   runScan(input: unknown, execute: (run: RunningRun, signal: AbortSignal) => Promise<unknown>): Promise<ScanOutcome>;
   retrieveFinding(input: unknown, execute?: RetrievalExecutor): Promise<RetrievalOutcome>;
+  generateFinding(input: unknown, adapter?: GenerationAdapter): Promise<GenerationServiceOutcome>;
   stop(): Promise<StopResult>;
 }
 

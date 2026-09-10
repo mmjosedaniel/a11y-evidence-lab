@@ -10,6 +10,7 @@ None.
 
 These archives preserve each task's execution, review, failures, and closure evidence. The roadmap remains the status authority.
 
+- [M3-02 — Shared generation stage](completed/m3-02-shared-generation-stage.md)
 - [M3-01 — Freeze generation evaluation package](completed/m3-01-generation-evaluation-package.md)
 
 - [M2-04 — Retrieval checkpoint](completed/m2-04-retrieval-checkpoint.md)
