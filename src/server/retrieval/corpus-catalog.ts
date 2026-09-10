@@ -9,7 +9,7 @@ import type { CitationResolutionResult } from '../domain/finding-analysis-types.
 const manifestPath = fileURLToPath(new URL('../../../corpus/wcag22-mvp-v1/manifest.json', import.meta.url));
 const passagesPath = fileURLToPath(new URL('../../../corpus/wcag22-mvp-v1/passages.json', import.meta.url));
 
-async function readCorpusBytes(): Promise<readonly [Uint8Array, Uint8Array]> {
+export async function readCorpusBytes(): Promise<readonly [Uint8Array, Uint8Array]> {
   return Promise.all([readFile(manifestPath), readFile(passagesPath)]);
 }
 

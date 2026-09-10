@@ -26,6 +26,7 @@ import {
 } from './helpers/m202-retrieval-service-fixture.ts';
 import { buildCheckpointSeed, controlledCases } from './helpers/m204-checkpoint-fixture.ts';
 import type { ControlledCaseId } from './helpers/m204-checkpoint-fixture.ts';
+import { generationAdapterHarness } from './helpers/m302-generation-fixture.ts';
 
 type Sandbox = { root: string; runs: string; services: LocalService[]; releases: Array<() => void> };
 
@@ -281,6 +282,19 @@ test('retrieval reserves synchronously, publishes running before immutable selec
     assert.ok(independent.ok, JSON.stringify(independent));
     assert.deepEqual(await service.stop(), { ok: true, status: 'stopped' });
     assert.deepEqual(disk(box.runs), outcome.run);
+  });
+});
+
+test('supported retrieval ownership transfers once to generation and cannot be reacquired after terminal publication', serial, async () => {
+  await withSandbox(async box => {
+    seedCompleted(box.runs);
+    const service = await start(box);
+    const retrieval = await service.retrieveFinding(retrievalRequest(), async () => expectedRetrievalResult());
+    assert.ok(retrieval.ok, JSON.stringify(retrieval));
+    const generation = await service.generateFinding(retrievalRequest(), generationAdapterHarness().adapter);
+    assert.ok(generation.ok, JSON.stringify(generation));
+    assert.deepEqual(await service.retrieveFinding(retrievalRequest(), async () => expectedRetrievalResult()),
+      rejected('not-eligible', generation.ok ? generation.run : null));
   });
 });
 

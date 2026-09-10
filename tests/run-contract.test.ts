@@ -21,6 +21,12 @@ import {
   selectedFinding,
   replaceAt,
 } from './helpers/m202-retrieval-service-fixture.ts';
+import {
+  failedGenerationRun,
+  generationInvocation,
+  proposalGenerationRun,
+  runningGenerationRun,
+} from './helpers/m302-generation-fixture.ts';
 
 // M101-CONTRACT-01: synthetic records prove the frozen L1 contract only.
 // They do not prove native capture, DOM correspondence, persistence, or provider execution.
@@ -1307,4 +1313,86 @@ test('assessed object correspondence ignores own-key enumeration order without r
     put(run, path, new Proxy(target, { ownKeys(value) { return Reflect.ownKeys(value).reverse(); } }));
     accept(validateRun, run);
   }
+});
+
+// M302-C-RED-01: generation-bearing records extend only an authenticated supported Finding.
+test('accepts exact running, pending-proposal and bounded failed generation records', () => {
+  for (const mode of ['local', 'groq'] as const) {
+    accept(validateRun, runningGenerationRun('run-01', mode));
+    accept(validateRun, proposalGenerationRun('run-01', mode));
+    for (const error of ['input-integrity', 'configuration', 'missing-prerequisite', 'input-fit'] as const) {
+      accept(validateRun, failedGenerationRun(error, { mode }));
+    }
+    accept(validateRun, failedGenerationRun('response-validation', {
+      mode, invocation: generationInvocation(mode, 'response', 'failed'),
+    }));
+    for (const error of ['authentication', 'quota', 'rate-limit', 'network', 'provider'] as const) {
+      accept(validateRun, failedGenerationRun(error, {
+        mode, invocation: generationInvocation(mode, error, 'not-run'),
+      }));
+    }
+    for (const error of ['timeout', 'shutdown'] as const) {
+      accept(validateRun, failedGenerationRun(error, { mode }));
+      accept(validateRun, failedGenerationRun(error, {
+        mode, invocation: generationInvocation(mode, error, 'not-run'),
+      }));
+      accept(validateRun, failedGenerationRun(error, {
+        mode, invocation: generationInvocation(mode, 'response', 'passed'),
+      }));
+    }
+  }
+});
+
+test('generation validation rejects impossible provenance, changed inputs and private payload fields', () => {
+  const impossible: unknown[] = [];
+  const runningWithInvocation = runningGenerationRun();
+  (selectedFinding(runningWithInvocation).generation as RecordValue).invocation = generationInvocation();
+  impossible.push(runningWithInvocation);
+
+  const pendingWithoutInvocation = proposalGenerationRun();
+  delete (selectedFinding(pendingWithoutInvocation).generation as RecordValue).invocation;
+  impossible.push(pendingWithoutInvocation);
+  const pendingWithReview = proposalGenerationRun();
+  selectedFinding(pendingWithReview).review = { decision: 'approved' };
+  impossible.push(pendingWithReview);
+
+  impossible.push(failedGenerationRun('configuration', { invocation: generationInvocation() }));
+  impossible.push(failedGenerationRun('response-validation'));
+  impossible.push(failedGenerationRun('network'));
+  impossible.push(failedGenerationRun('response-validation', {
+    invocation: generationInvocation('local', 'response', 'passed'),
+  }));
+  impossible.push(failedGenerationRun('network', {
+    invocation: generationInvocation('local', 'provider', 'not-run'),
+  }));
+  impossible.push(failedGenerationRun('network', {
+    mode: 'groq', invocation: generationInvocation('local', 'network', 'not-run'),
+  }));
+
+  const changedRetrieval = proposalGenerationRun();
+  put(changedRetrieval, ['scan', 'findings', 0, 'retrieval', 'result', 'query', 'ruleId'], 'label');
+  impossible.push(changedRetrieval);
+  const changedAnalysis = proposalGenerationRun();
+  const changedAnalysisFinding = selectedFinding(changedAnalysis);
+  changedAnalysisFinding.analysis = {
+    ...(changedAnalysisFinding.analysis as RecordValue), finishedAt: retrievalStartedAt,
+  };
+  impossible.push(changedAnalysis);
+  const generationBeforeAnalysis = runningGenerationRun();
+  put(generationBeforeAnalysis, ['scan', 'findings', 0, 'generation', 'startedAt'], retrievalStartedAt);
+  impossible.push(generationBeforeAnalysis);
+  const generationEndsBeforeStart = proposalGenerationRun();
+  put(generationEndsBeforeStart, ['scan', 'findings', 0, 'generation', 'finishedAt'], retrievalFinishedAt);
+  impossible.push(generationEndsBeforeStart);
+
+  for (const key of ['candidate', 'rawRequest', 'rawResponse', 'secret', 'hiddenReasoning']) {
+    const run = proposalGenerationRun();
+    (selectedFinding(run).generation as RecordValue)[key] = secret;
+    impossible.push(run);
+  }
+  for (const run of impossible) rejectRun(run);
+
+  // Existing scan/retrieval/abstention shapes remain valid after generation dispatch is added.
+  for (const run of [completedRetrievalRun(), assessedSupportedRetrievalRun(), assessedMissingRetrievalRun(),
+    evidenceAbstainedRun(), failedRetrievalRun()]) accept(validateRun, run);
 });

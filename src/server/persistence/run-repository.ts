@@ -1,9 +1,10 @@
+import { checkGenerationTransition } from './run-repository/generation-transition.ts';
 import fs from 'node:fs';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { validateRun } from '../domain/run-contract.ts';
 import type { PageAnalysisRun } from '../domain/run-contract.ts';
-import type { RunRepository, RunningRun, StoreResult, TerminalRun } from './run-repository/contracts.ts';
+import type { CompletedRun, RunRepository, RunningRun, StoreResult, TerminalRun } from './run-repository/contracts.ts';
 import { StoreFailure, failure, hasCode, reject } from './run-repository/store-errors.ts';
 import { checkTransition } from './run-repository/run-transition.ts';
 import { checkRetrievalTransition } from './run-repository/retrieval-transition.ts';
@@ -130,6 +131,27 @@ export function openRunRepository(rootDirectory: string): StoreResult<RunReposit
     }
   }
 
+  function updateFinding(expected: CompletedRun, input: unknown,
+    check: (expected: CompletedRun, current: CompletedRun, next: CompletedRun) => void): StoreResult<CompletedRun> {
+    const expectedResult = validateRun(expected);
+    const validated = validateRun(input);
+    if (!expectedResult.ok || expectedResult.value.status !== 'completed'
+        || !validated.ok || validated.value.status !== 'completed') {
+      return failure(new StoreFailure('invalid-run'), 'invalid-run');
+    }
+    const value = validated.value;
+    if (!validId(value.runId)) return failure(new StoreFailure('invalid-id'), 'invalid-id');
+    try {
+      const current = readCurrent(value.runId);
+      if (current.value.status !== 'completed') reject('invalid-transition');
+      check(expectedResult.value, current.value, value);
+      const buffer = Buffer.from(JSON.stringify(value, null, 2) + '\n');
+      const durable = validateRun(JSON.parse(buffer.toString('utf8')));
+      if (!durable.ok || durable.value.status !== 'completed') reject('invalid-run');
+      return publish({ ok: true as const, value: durable.value }, buffer, current.directory, false, current.canonical);
+    } catch (error) { return failure(error, 'read-failed'); }
+  }
+
   const repository: RunRepository = {
     create(input) {
       const validated = validateRun(input);
@@ -179,25 +201,8 @@ export function openRunRepository(rootDirectory: string): StoreResult<RunReposit
         return publish(success, buffer, current.directory, false, current.canonical);
       } catch (error) { return failure(error, 'read-failed'); }
     },
-    updateRetrieval(expected, input) {
-      const expectedResult = validateRun(expected);
-      const validated = validateRun(input);
-      if (!expectedResult.ok || expectedResult.value.status !== 'completed'
-          || !validated.ok || validated.value.status !== 'completed') {
-        return failure(new StoreFailure('invalid-run'), 'invalid-run');
-      }
-      const value = validated.value;
-      if (!validId(value.runId)) return failure(new StoreFailure('invalid-id'), 'invalid-id');
-      try {
-        const current = readCurrent(value.runId);
-        if (current.value.status !== 'completed') reject('invalid-transition');
-        checkRetrievalTransition(expectedResult.value, current.value, value);
-        const buffer = Buffer.from(JSON.stringify(value, null, 2) + '\n');
-        const durable = validateRun(JSON.parse(buffer.toString('utf8')));
-        if (!durable.ok || durable.value.status !== 'completed') reject('invalid-run');
-        return publish({ ok: true as const, value: durable.value }, buffer, current.directory, false, current.canonical);
-      } catch (error) { return failure(error, 'read-failed'); }
-    },
+    updateRetrieval(expected, input) { return updateFinding(expected, input, checkRetrievalTransition); },
+    updateGeneration(expected, input) { return updateFinding(expected, input, checkGenerationTransition); },
   };
   return { ok: true, value: repository };
 }

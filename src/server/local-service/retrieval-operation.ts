@@ -1,3 +1,4 @@
+import { isDeepStrictEqual } from 'node:util';
 import { readId, readObject } from '../domain/run-contract/contract-value-reader.ts';
 import type { Finding } from '../domain/run-contract.ts';
 import type { CompletedRun, RunRepository } from '../persistence/run-repository.ts';
@@ -70,6 +71,7 @@ function boundedFailure(error: unknown, stopping: boolean): { code: RetrievalErr
 
 export function createRetrievalOperation(dependencies: Dependencies) {
   let owner: Selection | undefined;
+  let supportedSnapshot: CompletedRun | undefined;
 
   function owns(runId: string, findingId: string): boolean {
     return owner?.runId === runId && owner.findingId === findingId;
@@ -245,10 +247,17 @@ export function createRetrievalOperation(dependencies: Dependencies) {
       }
       durable = saved.value;
       if (finding.state === 'abstained') owner = undefined;
+      else supportedSnapshot = durable;
       settle({ ok: true, run: durable, view });
     }
     return reservation.promise;
   }
 
-  return Object.freeze({ start, owns });
+  function takeOwner(expected: CompletedRun, findingId: string): boolean {
+    if (!owns(expected.runId, findingId) || !supportedSnapshot || !isDeepStrictEqual(expected, supportedSnapshot)) return false;
+    owner = undefined;
+    supportedSnapshot = undefined;
+    return true;
+  }
+  return Object.freeze({ start, owns, takeOwner, hasOwner: () => owner !== undefined });
 }

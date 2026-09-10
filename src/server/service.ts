@@ -1,3 +1,4 @@
+import { createGenerationOperation } from './local-service/generation-operation.ts';
 import type { Server } from 'node:http';
 import { openRunRepository } from './persistence/run-repository.ts';
 import type { RunningRun, FailedRun } from './persistence/run-repository.ts';
@@ -7,13 +8,13 @@ import type { ScanFailure } from './local-service/scan-run-records.ts';
 import { createLoopbackApiServer } from './local-service/loopback-api.ts';
 import { loadClientResponses } from './local-service/client-assets.ts';
 import type { ClientResponseTable } from './local-service/client-assets.ts';
-import type { LocalService, ReadResult, RetrievalOutcome, ScanOutcome, ServiceOptions, StartResult, StopResult } from './local-service/contracts.ts';
+import type { GenerationServiceOutcome, LocalService, ReadResult, RetrievalOutcome, ScanOutcome, ServiceOptions, StartResult, StopResult } from './local-service/contracts.ts';
 import { createRetrievalOperation } from './local-service/retrieval-operation.ts';
 import type { RetrievalReservation } from './local-service/retrieval-operation.ts';
 import { executeScan } from './scan/scan-page.ts';
 import { createExactRetrieval } from './retrieval/exact-retrieval.ts';
 
-export type { ReadResult, RetrievalOutcome, ScanOutcome, StopResult, LocalService, StartResult, ServiceOptions } from './local-service/contracts.ts';
+export type { GenerationServiceOutcome, ReadResult, RetrievalOutcome, ScanOutcome, StopResult, LocalService, StartResult, ServiceOptions } from './local-service/contracts.ts';
 
 export async function startLocalService(options: ServiceOptions): Promise<StartResult> {
   const config = parseServiceConfiguration(options);
@@ -100,14 +101,18 @@ export async function startLocalService(options: ServiceOptions): Promise<StartR
     markStopFailed: () => { stopFailed = true; },
   });
 
-  function reserveRetrieval(): RetrievalReservation {
-    const completion = Promise.withResolvers<RetrievalOutcome>();
+  const generation = createGenerationOperation({ repository, retrieval,
+    isStopping: () => stopStarted, deadlineExpired: () => deadlineExpired,
+    closeAdmission, markStopFailed: () => { stopFailed = true; } });
+
+  function reserveFinding<T extends RetrievalOutcome | GenerationServiceOutcome>() {
+    const completion = Promise.withResolvers<T>();
     const active: Operation = { controller: new AbortController(), settled: false, completion: completion.promise };
     operation = active;
     return {
       controller: active.controller,
       promise: completion.promise,
-      settle(outcome) {
+      settle(outcome: T) {
         if (active.settled) return;
         if (!outcome.ok && outcome.cleanupFailed) cleanupUncertain = true;
         active.settled = true;
@@ -115,15 +120,23 @@ export async function startLocalService(options: ServiceOptions): Promise<StartR
         completion.resolve(outcome);
         finishStop();
       },
-      onDeadline(handler) { active.onDeadline = handler; },
+      onDeadline(handler: () => void) { active.onDeadline = handler; },
     };
   }
 
   function retrieveFinding(input: unknown, execute?: Parameters<LocalService['retrieveFinding']>[1]): Promise<RetrievalOutcome> {
     if (admissionClosed) return Promise.resolve({ ok: false, error: 'stopping', run: null, persisted: false, cleanupFailed: false });
     if (busy()) return Promise.resolve({ ok: false, error: 'busy', run: null, persisted: false, cleanupFailed: false });
-    const reservation = reserveRetrieval();
+    if (generation.hasOwner()) return Promise.resolve({ ok: false, error: 'workflow-active', run: null, persisted: false, cleanupFailed: false });
+    const reservation: RetrievalReservation = reserveFinding<RetrievalOutcome>();
     return retrieval.start(input, execute, reservation);
+  }
+
+  function generateFinding(input: unknown, adapter?: Parameters<LocalService['generateFinding']>[1]): Promise<GenerationServiceOutcome> {
+    const error = admissionClosed ? 'stopping' : busy() ? 'busy' : undefined;
+    if (error) return Promise.resolve({ ok: false, error, run: null, persisted: false,
+      cleanupFailed: false, invocationPersisted: false });
+    return generation.start(input, adapter, reserveFinding<GenerationServiceOutcome>());
   }
 
   function readRun(id: unknown): ReadResult {
@@ -135,7 +148,8 @@ export async function startLocalService(options: ServiceOptions): Promise<StartR
       if (result.ok) {
         const interrupted = result.value.status === 'running' || (result.value.status === 'completed'
           && result.value.scan.findings.some(finding => finding.state === 'active'
-            && !retrieval.owns(result.value.runId, finding.findingId)));
+            && !retrieval.owns(result.value.runId, finding.findingId)
+            && !generation.owns(result.value.runId, finding.findingId)));
         return { ok: true, run: result.value, interrupted };
       }
       switch (result.error) {
@@ -244,7 +258,7 @@ export async function startLocalService(options: ServiceOptions): Promise<StartR
       startupSettled = true;
       started = true;
       resolve({ ok: true, service: { url: `http://127.0.0.1:${address.port}`, whenStopping: stopping.promise,
-        whenStopped: stopped.promise, readRun, runScan, retrieveFinding, stop } });
+        whenStopped: stopped.promise, readRun, runScan, retrieveFinding, generateFinding, stop } });
     });
     try { server.listen(config.port, '127.0.0.1'); }
     catch { startupFailure(); }

@@ -283,7 +283,7 @@ test('HTTP precedence rejects methods, literal queries, invalid IDs and all nona
       await errorReply(service, target, 400, 'invalid-id');
     }
     await errorReply(service, '/api/runs/missing', 404, 'not-found');
-    for (const target of ['/', '/api/health/', '/api/runs', '/README.md', '/data/runs/', '/api/configuration', '/api/stop', '/api/analyze']) {
+    for (const target of ['/', '/api/health/', '/api/runs', '/README.md', '/data/runs/', '/api/configuration', '/api/stop', '/api/analyze', '/api/generate']) {
       await errorReply(service, target, 404, 'not-found');
     }
     assert.deepEqual(service.readRun(undefined), { ok: false, error: 'invalid-id' });

@@ -1,3 +1,4 @@
+import { readGenerationFinding } from './generation-validation.ts';
 import { validateRetrievalResult } from '../../retrieval/retrieval-contract.ts';
 import type { RetrievalErrorCode } from '../../retrieval/retrieval-error.ts';
 import { readChoice, readObject, readTime, requireKeys, requireValid } from './contract-value-reader.ts';
@@ -18,6 +19,7 @@ function nativeFinding(record: Record<string, unknown>): NativeFinding {
 
 export function readStoredFinding(input: unknown, parentFinishedAt: string): Finding {
   const record = readObject(input);
+  if (Object.hasOwn(record, 'generation')) return readGenerationFinding(record, nativeFinding(record), parentFinishedAt);
   if (Object.hasOwn(record, 'analysis')) return readAssessedFinding(record, nativeFinding(record), parentFinishedAt);
   const state = readChoice(record.state, ['unprocessed', 'active', 'failed']);
   if (state === 'unprocessed') {

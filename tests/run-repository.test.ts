@@ -22,6 +22,11 @@ import {
   runningRetrievalRun,
   selectedFinding,
 } from './helpers/m202-retrieval-service-fixture.ts';
+import {
+  failedGenerationRun,
+  proposalGenerationRun,
+  runningGenerationRun,
+} from './helpers/m302-generation-fixture.ts';
 
 // M102-STORE-01: one real publish-or-preserve boundary, no service/scanner behavior.
 const repo = fileURLToPath(new URL('../', import.meta.url));
@@ -994,6 +999,82 @@ for (const phase of ['open', 'partial-write', 'flush', 'close', 'rename'] as con
       const control = installFault(t, phase);
       try {
         failure(store.updateRetrieval(completedScanRun() as unknown as CompletedRun, runningRetrievalRun()),
+          'write-failed', phase === 'close');
+      } finally { control.release(); }
+      assert.deepEqual(bytes(runs), before);
+    });
+  });
+}
+
+// M302-C-RED-01: generation uses the same expected-current, publish-or-preserve boundary.
+test('updateGeneration publishes only running then terminal generation and preserves the aggregate', options, async () => {
+  await withSandbox(({ runs }) => {
+    const store = open(runs);
+    success(store.create(runningRun()));
+    success(store.finish(completedRun()));
+    const original = completedScanRun();
+    const retrievalRunning = runningRetrievalRun();
+    const supported = assessedSupportedRetrievalRun();
+    success(store.updateRetrieval(original as unknown as CompletedRun, retrievalRunning));
+    success(store.updateRetrieval(retrievalRunning as unknown as CompletedRun, supported));
+
+    const generationRunning = runningGenerationRun();
+    const pending = proposalGenerationRun();
+    assert.deepEqual(success(store.updateGeneration(supported as unknown as CompletedRun, generationRunning)), generationRunning);
+    const durable = success(store.updateGeneration(generationRunning as unknown as CompletedRun, pending));
+    assert.deepEqual(durable, pending);
+    deepFrozen(durable);
+    assert.deepEqual(success(store.read('run-01')), pending);
+    assert.deepEqual(selectedFinding(durable, 1), selectedFinding(original, 1));
+    assert.deepEqual((durable.scan as Record<string, unknown>).context,
+      (original.scan as Record<string, unknown>).context);
+    assert.deepEqual(bytes(runs), Buffer.from(JSON.stringify(pending, null, 2) + '\n'));
+    assert.deepEqual(residue(runs), []);
+  });
+});
+
+test('updateGeneration rejects stale, duplicate, skipped, replayed and unrelated candidates', options, async () => {
+  await withSandbox(({ runs }) => {
+    const store = open(runs);
+    success(store.create(runningRun()));
+    success(store.finish(completedRun()));
+    const original = completedScanRun();
+    const retrievalRunning = runningRetrievalRun();
+    const supported = assessedSupportedRetrievalRun();
+    success(store.updateRetrieval(original as unknown as CompletedRun, retrievalRunning));
+    success(store.updateRetrieval(retrievalRunning as unknown as CompletedRun, supported));
+    const generationRunning = runningGenerationRun();
+    success(store.updateGeneration(supported as unknown as CompletedRun, generationRunning));
+    const before = bytes(runs);
+    const unrelated = changed(proposalGenerationRun(), ['scan', 'findings', 1, 'evidence', 'altState'], { value: 'empty' });
+    for (const [expected, candidate] of [
+      [supported, generationRunning],
+      [generationRunning, generationRunning],
+      [supported, proposalGenerationRun()],
+      [supported, failedGenerationRun()],
+      [generationRunning, unrelated],
+    ] as const) {
+      failure(store.updateGeneration(expected as unknown as CompletedRun, candidate), 'invalid-transition');
+      assert.deepEqual(bytes(runs), before);
+    }
+  });
+});
+
+for (const phase of ['open', 'partial-write', 'flush', 'close', 'rename'] as const) {
+  test(`updateGeneration ${phase} fault preserves the supported aggregate`, options, async t => {
+    await withSandbox(({ runs }) => {
+      const store = open(runs);
+      success(store.create(runningRun()));
+      success(store.finish(completedRun()));
+      const original = completedScanRun();
+      const retrievalRunning = runningRetrievalRun();
+      const supported = assessedSupportedRetrievalRun();
+      success(store.updateRetrieval(original as unknown as CompletedRun, retrievalRunning));
+      success(store.updateRetrieval(retrievalRunning as unknown as CompletedRun, supported));
+      const before = bytes(runs);
+      const control = installFault(t, phase);
+      try {
+        failure(store.updateGeneration(supported as unknown as CompletedRun, runningGenerationRun()),
           'write-failed', phase === 'close');
       } finally { control.release(); }
       assert.deepEqual(bytes(runs), before);
