@@ -47,6 +47,15 @@ export function validateGenerationConfiguration(candidate: unknown, providerCont
       if (binding.serverRevision !== null) readGenerationIdentity(binding.serverRevision);
     }
     error = 'input-fit';
+    const method = readObject(root.accounting).method;
+    if (method === 'serialized-byte-budget') {
+      const accounting = frozenRecord(root.accounting, ['method', 'implementationVersion', 'tokenizerIdentity',
+        'maxRequestBytes', 'contextTokenLimit', 'outputTokenLimit']);
+      requireValid(mode === 'groq' && accounting.implementationVersion === 'm304-groq-request-bytes-v1'
+        && accounting.tokenizerIdentity === null && accounting.maxRequestBytes === 65536
+        && accounting.contextTokenLimit === 131072 && accounting.outputTokenLimit === 65536);
+      return Object.freeze({ ok: true, value: candidate as GenerationConfiguration });
+    }
     const accounting = frozenRecord(root.accounting, ['method', 'implementationVersion', 'tokenizerIdentity', 'contextTokenLimit', 'outputTokenLimit']);
     readChoice(accounting.method, ['exact-tokenizer', 'verified-upper-bound']);
     readGenerationIdentity(accounting.implementationVersion);
@@ -61,6 +70,17 @@ export function validateGenerationConfiguration(candidate: unknown, providerCont
 
 export function validatePreparedGenerationFit(fit: unknown, configuration: GenerationConfiguration): boolean {
   try {
+    if (configuration.accounting.method === 'serialized-byte-budget') {
+      const report = frozenRecord(fit, ['accounting', 'serializedRequestBytes', 'requestedOutputTokens',
+        'contextTokenLimit', 'outputTokenLimit']);
+      requireValid(report.accounting === configuration.accounting);
+      const bytes = readInteger(report.serializedRequestBytes, 1);
+      const context = readInteger(report.contextTokenLimit, 1);
+      const output = readInteger(report.outputTokenLimit, 1);
+      return bytes <= configuration.accounting.maxRequestBytes && report.requestedOutputTokens === 4096
+        && context === configuration.accounting.contextTokenLimit
+        && output === configuration.accounting.outputTokenLimit && output >= 4096;
+    }
     const report = readObject(fit, ['accounting', 'inputTokens', 'reservedOutputTokens', 'contextTokenLimit', 'outputTokenLimit']);
     requireValid(report.accounting === configuration.accounting);
     const input = readInteger(report.inputTokens, 0);

@@ -62,7 +62,7 @@ Feature: Non-negotiable boundaries for the portfolio MVP
       And comparison uses complete baseline and later scan evidence without requiring or changing a proposal, review decision, or manual judgment
 
   @HS-008 @REQ-RETR-004 @REQ-RETR-005 @REQ-GEN-001 @REQ-GEN-002 @REQ-GEN-003 @REQ-GEN-004 @REQ-GEN-009 @REQ-GEN-010 @REQ-LLM-008
-  Rule: Evidence sufficiency and context fit gate every model call
+  Rule: Evidence sufficiency and mode-specific input admission gate every model call
 
     Scenario: Invoke a model only for one eligible Finding
       Given one selected Finding remains visible with its minimized evidence
@@ -72,7 +72,8 @@ Feature: Non-negotiable boundaries for the portfolio MVP
       And incomplete evidence or incomplete, missing, or conflicting guidance visibly renders a terminal application-authored abstention that references rather than duplicates available evidence and any retrieval result, records the applicable sufficiency state, reason, missing or conflicting information, confirmation that no provider was called, and manual-investigation guidance, and contains no remediation conclusion
       And an abstention creates no ProviderInvocation or approve/edit-and-accept/reject review decision
       And retrieval execution or passage-integrity failure fails the Finding workflow with no support state and is not recorded as abstention
-      And required input that cannot fit without truncation fails before invocation with a content-safe reason and is not recorded as abstention
+      And required Local input that fails complete context fit or Groq input that fails its fixed serialized-request byte policy fails before invocation with a content-safe reason and is not recorded as abstention
+      And admitted Groq input has no guaranteed hosted token fit or verified complete consumption, and an actual provider rejection remains an attempted bounded failure
       And no sibling Finding is included or changed
 
   @HS-009 @REQ-GEN-008 @REQ-LLM-002 @REQ-LLM-003 @REQ-LLM-004 @REQ-LLM-005 @REQ-LLM-007 @REQ-LLM-009 @REQ-LLM-019 @REQ-LLM-021 @REQ-SEC-004 @REQ-SEC-016 @ADR-0014 @ADR-0020 @ADR-0023

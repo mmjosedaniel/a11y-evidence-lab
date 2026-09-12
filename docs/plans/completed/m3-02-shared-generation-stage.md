@@ -163,6 +163,8 @@ Narrowly export the existing `readCorpusBytes()` from `retrieval/corpus-catalog.
 
 #### L3 — immutable configuration and fail-closed fit
 
+**Forward amendment accepted 2026-09-11:** [M3-04](m3-04-groq-adapter.md#m304-fit-amendment-01--proposed-groq-request-admission) adds a Groq-only serialized-byte-admission branch under amended REQ-LLM-008. This archived L3 and its verified token-fit behavior remain historical evidence; the new branch requires M3-04 A0 verification and does not reopen M3-02 or alter Local runtime behavior.
+
 The module boundary is `validateGenerationConfiguration(candidate:unknown,providerContext:ProviderContext): {ok:true,value:GenerationConfiguration}|{ok:false,error:'configuration'|'input-fit'}` and `validatePreparedGenerationFit(fit:unknown,configuration:GenerationConfiguration):boolean`. The latter is the shared validator's result over the complete closed accounting report described below, never a caller-supplied fit assertion. Request/prepared/adapter reference checks remain the stage's explicit responsibility. These signatures make existing semantics callable without adding behavior; B tests may exercise the full contract through executeGeneration.
 
 Prepared request/configuration or captured adapter-reference substitution is `configuration`; fit/accounting omission, substitution or invalidity is `input-fit`. Check the other closed prepared-success fields independently so an absent fit report receives the required input-fit category. Retain explicit complete preparation cleanup only when those other fields and cleanup declaration are valid; otherwise malformed preparation has uncertain cleanup under L4. These are normalization details of the existing identity/fit gates, not additional dispatch behavior.

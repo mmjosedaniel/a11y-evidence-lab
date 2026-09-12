@@ -7,10 +7,16 @@ import type { Proposal } from './proposal-contract.ts';
 export type GenerationErrorCode = 'input-integrity' | 'configuration' | 'missing-prerequisite' | 'input-fit'
   | 'authentication' | 'quota' | 'rate-limit' | 'network' | 'provider' | 'timeout' | 'shutdown' | 'response-validation';
 export type GenerationParameters = typeof LOCAL_PARAMETERS | typeof GROQ_PARAMETERS;
-export type GenerationAccounting = {
+export type GenerationTokenAccounting = {
   readonly method: 'exact-tokenizer' | 'verified-upper-bound'; readonly implementationVersion: string;
   readonly tokenizerIdentity: string | null; readonly contextTokenLimit: number; readonly outputTokenLimit: number;
 };
+export type GenerationByteAccounting = {
+  readonly method: 'serialized-byte-budget'; readonly implementationVersion: 'm304-groq-request-bytes-v1';
+  readonly tokenizerIdentity: null; readonly maxRequestBytes: 65536;
+  readonly contextTokenLimit: 131072; readonly outputTokenLimit: 65536;
+};
+export type GenerationAccounting = GenerationTokenAccounting | GenerationByteAccounting;
 export type GenerationBinding = {
   readonly kind: 'local'; readonly runtimeVersion: string; readonly modelDigest: string;
   readonly tokenizerIdentity: string; readonly templateIdentity: string; readonly parserIdentity: string;
@@ -30,10 +36,15 @@ export type GenerationRequest = {
   readonly outputContractVersion: typeof OUTPUT_CONTRACT_VERSION;
   readonly controls: GenerationParameters; readonly deadlineMs: 120000; readonly configuration: GenerationConfiguration;
 };
-export type GenerationFit = {
-  readonly accounting: GenerationAccounting; readonly inputTokens: number; readonly reservedOutputTokens: 4096;
+export type GenerationTokenFit = {
+  readonly accounting: GenerationTokenAccounting; readonly inputTokens: number; readonly reservedOutputTokens: 4096;
   readonly contextTokenLimit: number; readonly outputTokenLimit: number;
 };
+export type GenerationByteFit = {
+  readonly accounting: GenerationByteAccounting; readonly serializedRequestBytes: number; readonly requestedOutputTokens: 4096;
+  readonly contextTokenLimit: 131072; readonly outputTokenLimit: 65536;
+};
+export type GenerationFit = GenerationTokenFit | GenerationByteFit;
 export type AttemptTransport = <T>(start: () => T) => T;
 export type PreparedGeneration = {
   readonly ok: true; readonly request: GenerationRequest; readonly configuration: GenerationConfiguration;

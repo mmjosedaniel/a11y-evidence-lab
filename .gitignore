@@ -5,3 +5,4 @@ logs/
 /dist/client/
 /data/runs/
 /m104-browser-runtime/
+/.env

@@ -4,11 +4,13 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-None.
+- [M3-03 — Qwen adapter and capacity screen](m3-03-qwen-adapter-and-capacity-screen.md) — Blocked on authentic supported retrieval and the required reviewer interface for capacity; G and A/B implementation/reviews are accepted.
 
 ## Completed plans
 
 These archives preserve each task's execution, review, failures, and closure evidence. The roadmap remains the status authority.
+
+- [M3-04 — Groq adapter](completed/m3-04-groq-adapter.md)
 
 - [M3-02 — Shared generation stage](completed/m3-02-shared-generation-stage.md)
 - [M3-01 — Freeze generation evaluation package](completed/m3-01-generation-evaluation-package.md)

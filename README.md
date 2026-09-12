@@ -56,7 +56,7 @@ Development ready. The [development roadmap](docs/DEVELOPMENT_ROADMAP.md) owns t
 
 The application integrates same-origin HTTP scanning, durable run publication, and the Analyze/Results UI. Selected-Finding guidance uses the closed corpus and local exact-vector retrieval, authenticates citations, evaluates evidence sufficiency and guidance support, and durably records abstention or retrieval failure. The detail UI presents native evidence, complete cited passages, source notices and the resulting guidance state. The [M2-03 closure record](docs/plans/completed/m2-03-sufficiency-abstention-and-detail-ui.md#m203-c-post01-closure--renewed-task-closure) preserves its implementation evidence and visual-check deferral.
 
-The [shared generation stage](#shared-generation-apis) validates selected-only input, configuration-bound context fit, one transport attempt, bounded failures and cited proposals. Its internal service continuation durably records generation and preserves completed scan, retrieval and sibling evidence. [M3-02 verification](docs/plans/completed/m3-02-shared-generation-stage.md#m302-regression-01--complete-authoritative-suite) covers controlled adapters and real aggregate persistence. Actual Local/Groq adapters, model capacity, the Generate UI, proposal review and comparison remain later work.
+The [shared generation stage](#shared-generation-apis) validates selected-only input, configuration-bound mode-specific admission, one transport attempt, bounded failures and cited proposals. Local retains complete token-fit checking; the accepted Groq branch checks its fixed serialized-body byte policy without claiming hosted token fit. Its internal service continuation durably records generation and preserves completed scan, retrieval and sibling evidence. [M3-02 verification](docs/plans/completed/m3-02-shared-generation-stage.md#m302-regression-01--complete-authoritative-suite) covers controlled adapters and real aggregate persistence. The fixed Local Qwen and [Groq adapters](#fixed-groq-adapter) are implemented with controlled contract and service tests; real Qwen capacity and eligible provider execution remain unverified. Generate UI, proposal review and comparison remain later work.
 
 M2-04 is complete. Its [checkpoint observations](docs/plans/completed/m2-04-retrieval-checkpoint.md#m204-b-accept-01--bounded-checkpoint-observations) exercise all three fixed synthetic Finding profiles through the real local retrieval path: each returns an acceptable gold passage, while missing guidance roles correctly produce no-generation-call abstention. Controlled cases separately demonstrate supported eligibility and adverse outcomes. The [final closure](docs/plans/completed/m2-04-retrieval-checkpoint.md#m204-final-01--integrated-review-and-task-closure) records verification and limitations; these observations are not general retrieval-quality qualification.
 
@@ -218,10 +218,10 @@ Invoke-M105Command {
 }
 ```
 
-Run the complete sixteen-file suite sequentially, with no running application service or concurrent browser test. The production-entry tests also require the built client. The scanner and walking-skeleton suites use scanner scratch; both UI suites use separate UI scratch:
+Run the complete twenty-two-file suite sequentially, with no running application service or concurrent browser test. The production-entry tests also require the built client. The scanner and walking-skeleton suites use scanner scratch; both UI suites use separate UI scratch:
 
 ```powershell
-foreach ($m105Test in @('run-contract','run-repository','local-service','scan-normalization','retrieval-contract','embedding-retrieval','retrieval-service','finding-sufficiency','finding-guidance-api','generation-contract','generation-stage','generation-service')) {
+foreach ($m105Test in @('run-contract','run-repository','local-service','scan-normalization','retrieval-contract','embedding-retrieval','retrieval-service','finding-sufficiency','finding-guidance-api','generation-contract','generation-stage','generation-service','ollama-generation-contract','ollama-generation','ollama-generation-service','groq-generation-contract','groq-generation','groq-generation-service')) {
   Invoke-M105Command {
     & $m105Node --test --test-timeout=120000 ("tests/" + $m105Test + ".test.ts")
     if ($LASTEXITCODE -ne 0) { throw 'Browser-free suite failed.' }
@@ -296,7 +296,7 @@ Invoke-M105Command {
 }
 ```
 
-This filtered demonstration does not replace either the core subset or the complete sixteen-file suite. Tests use only project-owned synthetic records, isolated `temp/m102-*` roots, and bounded owned child processes; they never acquire or delete a real corpus or user run.
+This filtered demonstration does not replace either the core subset or the complete twenty-two-file suite. Tests use only project-owned synthetic records, isolated `temp/m102-*` roots, and bounded owned child processes; they never acquire or delete a real corpus or user run.
 
 ## Current scope
 
@@ -309,6 +309,27 @@ The [capability summary](#project-status) distinguishes implemented behavior fro
 The [adapter contract](src/server/generation/generation-contract.ts) defines preparation, the bounded transport attempt and invocation provenance; the [proposal validator](src/server/generation/proposal-contract.ts) admits only the shared structured output and authenticated selected citations. Missing adapters fail before transport; no production success double or default provider exists. This API has no HTTP route or UI action yet.
 
 The [generation contract](tests/generation-contract.test.ts), [shared-stage](tests/generation-stage.test.ts) and [service continuation](tests/generation-service.test.ts) suites are included in the complete verification command above. Service tests use exclusive `temp/m302-generation-*` roots and owned loopback ports. The [M3-02 closure record](docs/plans/completed/m3-02-shared-generation-stage.md#m302-final-01--final-integrated-review-and-documentation-closure) preserves accepted verification and its limits: controlled adapters do not prove actual provider conformance, model capacity or semantic grounding.
+
+### Fixed Local Qwen adapter
+
+Construct [createOllamaGenerationAdapter](src/server/generation/ollama-generation.ts) and pass it explicitly to `LocalService.generateFinding({runId, findingId}, adapter)` for the current live supported retrieval owner. Import, construction, service startup and mode selection perform no generation I/O. Preparation first proves the complete request fits, then reads version, model metadata and tags from fixed `127.0.0.1:11434`; dispatch uses one bounded `/api/chat` attempt. No default adapter or Generate HTTP/UI action is installed.
+
+This implementation admits the developer-managed [Ollama v0.33.3 release](https://github.com/ollama/ollama/releases/tag/v0.33.3) and `qwen3.5:4b` Q4_K_M manifest SHA-256 `2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd`. Install the retained official runtime outside the repository and acquire the model through Ollama's own `ollama pull qwen3.5:4b` command only after the [local capacity prefilter](docs/LOCAL_MVP_FEASIBILITY.md) passes; the application performs no acquisition. A fresh pull must match the admitted digest and metadata. Missing prerequisites or drift fail before chat. Preserve the runtime/model configuration while an eligible action is in progress; observed metadata does not lock a mutable model tag atomically.
+
+The fixed request reserves 4096 output tokens within an explicit 32768-token context, uses temperature 0 and top-p 1, and disables thinking, streaming, input truncation and context shifting. The [accepted configuration and accounting contract](docs/plans/m3-03-qwen-adapter-and-capacity-screen.md#m303-g-contract-01--authored-local-adapter-contract) records the complete bound, inherited settings, parser identity and setup receipt. The three `ollama-generation` suites above use injected transport and controlled service fixtures, including exclusive `temp/m303-generation-*` roots; they do not establish loaded model capacity or real output quality. The required real capacity smoke remains pending supported live retrieval and the implemented reviewer interface.
+
+### Fixed Groq adapter
+
+Construct [createGroqGenerationAdapter](src/server/generation/groq-generation.ts) and pass it explicitly to `LocalService.generateFinding({runId, findingId}, adapter)` for the current live supported retrieval owner. Import, construction, startup and mode selection perform no credential or provider I/O. The adapter uses only the fixed `openai/gpt-oss-20b` model and one HTTPS Chat Completions attempt at `api.groq.com`, with normal certificate and hostname verification.
+
+Create your own API key using the [Groq quickstart](https://console.groq.com/docs/quickstart), then set the single `GROQ_API_KEY=` entry in the existing repository-root `.env`. Confirm that `.env` is Git-ignored and untracked before adding the key. Preserve other local content and never paste the key into chat or tracked files. The service reads only this selected file entry when preparing an eligible Groq request; it does not load credentials from the process environment. Missing or invalid credentials fail before a provider attempt.
+
+Preparation preserves both complete shared messages, the strict `m301_proposal_v1` schema and fixed controls. Its versioned policy admits at most 65536 UTF-8 bytes for the complete serialized request body, then sends that exact body with a 4096-token completion limit. The byte cap is an application policy, not a token estimate or proof of hosted context fit or full input consumption. [The accepted contract](docs/plans/completed/m3-04-groq-adapter.md#m304-g-contract-01--authored-groq-adapter-contract) records the exposed defaults and provider-processing limits.
+
+The adapter rejects credential echoes before publication, bounds response bodies and cleanup, and preserves authentication, quota, rate-limit, network and provider failure provenance without retry or fallback. The three `groq-generation` suites use virtual credentials, injected native transport and actual service/repository fixtures in exclusive `temp/m304-groq-*` roots. This controlled verification does not establish real provider availability, output quality or evaluation results; those remain with the later authorized integration and evaluation tasks.
+
+Before an authorized evaluation, check the fixed model's current [availability](https://console.groq.com/docs/models), [deprecations](https://console.groq.com/docs/deprecations) and [strict-output support](https://console.groq.com/docs/structured-outputs), and confirm your account's access and limits without sharing its credential. Documentation listings alone do not prove account access.
+
 
 ## Documentation
 

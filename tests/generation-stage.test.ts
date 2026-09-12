@@ -10,6 +10,7 @@ import {
   generationConfiguration,
   generationFixture,
 } from './helpers/m302-generation-fixture.ts';
+import type { MutableGenerationConfiguration } from './helpers/m302-generation-fixture.ts';
 
 const analysisStartedAt = '2026-09-09T12:00:00.000Z';
 const analysisFinishedAt = '2026-09-09T12:00:01.000Z';
@@ -59,6 +60,39 @@ function fit(configuration: StageConfiguration, inputTokens = 4096): Readonly<Re
   });
 }
 
+function byteConfiguration(
+  mode: 'local' | 'groq' = 'groq',
+  mutate?: (configuration: MutableGenerationConfiguration) => void,
+): StageConfiguration {
+  return generationConfiguration(mode, configuration => {
+    configuration.accounting = {
+      method: 'serialized-byte-budget',
+      implementationVersion: 'm304-groq-request-bytes-v1',
+      tokenizerIdentity: null,
+      maxRequestBytes: 65536,
+      contextTokenLimit: 131072,
+      outputTokenLimit: 65536,
+    };
+    mutate?.(configuration);
+  }) as StageConfiguration;
+}
+
+function byteFit(
+  configuration: StageConfiguration,
+  serializedRequestBytes = 65536,
+  mutate?: (report: Record<string, unknown>) => void,
+): Readonly<Record<string, unknown>> {
+  const report: Record<string, unknown> = {
+    accounting: configuration.accounting,
+    serializedRequestBytes,
+    requestedOutputTokens: 4096,
+    contextTokenLimit: configuration.accounting.contextTokenLimit,
+    outputTokenLimit: configuration.accounting.outputTokenLimit,
+  };
+  mutate?.(report);
+  return Object.freeze(report);
+}
+
 function deferred<T>() {
   let resolve!: (value: T) => void;
   let reject!: (reason?: unknown) => void;
@@ -83,6 +117,7 @@ function adapterHarness(
     readonly dispatch?: Dispatch;
     readonly prepare?: PrepareOverride;
     readonly inputTokens?: number;
+    readonly preparedFit?: Readonly<Record<string, unknown>>;
   } = {},
 ) {
   const calls = { prepare: 0, dispatch: 0, transport: 0 };
@@ -105,7 +140,7 @@ function adapterHarness(
         ok: true,
         request: received,
         configuration,
-        fit: fit(configuration, options.inputTokens),
+        fit: options.preparedFit ?? fit(configuration, options.inputTokens),
         dispatch,
         cleanup: 'complete',
       });
@@ -413,6 +448,100 @@ test('requires prepared request, configuration and complete fit identity and enf
     assert.equal(stale.invocation, undefined);
   }
   assert.equal(staleTransportCalls, 0);
+});
+
+test('admits the fixed Groq byte profile and positive serialized-byte reports through one transport attempt', async () => {
+  const fixture = generationFixture();
+  const configuration = byteConfiguration();
+  assertDeepFrozen(configuration);
+
+  for (const [name, serializedRequestBytes] of [
+    ['inclusive cap', 65536],
+    ['Unicode and escaping byte measurement', Buffer.byteLength(JSON.stringify({ text: 'café 😀 \\"' }), 'utf8')],
+  ] as const) {
+    const harness = adapterHarness(configuration, {
+      candidate: fixture.proposal,
+      preparedFit: byteFit(configuration, serializedRequestBytes),
+    });
+    const result = await execute(fixture, { mode: 'groq', adapter: harness.adapter });
+    assert.equal(result.status, 'proposal', name);
+    assert.deepEqual(harness.calls, { prepare: 1, dispatch: 1, transport: 1 }, name);
+  }
+});
+
+test('rejects malformed, mixed-mode and drifted byte accounting before preparation', async () => {
+  const fixture = generationFixture();
+  const cases: readonly [string, StageConfiguration][] = [
+    ['Local byte method', byteConfiguration('local')],
+    ['wrong implementation version', byteConfiguration('groq', value => { value.accounting.implementationVersion = 'm304-groq-request-bytes-v2'; })],
+    ['tokenizer identity', byteConfiguration('groq', value => { value.accounting.tokenizerIdentity = 'groq-tokenizer'; })],
+    ['wrong byte cap', byteConfiguration('groq', value => { value.accounting.maxRequestBytes = 65535; })],
+    ['negative-zero byte cap', byteConfiguration('groq', value => { value.accounting.maxRequestBytes = -0; })],
+    ['wrong context metadata', byteConfiguration('groq', value => { value.accounting.contextTokenLimit = 131071; })],
+    ['wrong output metadata', byteConfiguration('groq', value => { value.accounting.outputTokenLimit = 65535; })],
+    ['missing byte cap', byteConfiguration('groq', value => { delete value.accounting.maxRequestBytes; })],
+    ['extra accounting field', byteConfiguration('groq', value => { value.accounting.inputTokens = 1; })],
+  ];
+  for (const [name, configuration] of cases) {
+    const harness = adapterHarness(configuration, { candidate: fixture.proposal });
+    const context = configuration.providerContext as { readonly mode: 'local' | 'groq' };
+    const result = await execute(fixture, { mode: context.mode, adapter: harness.adapter });
+    assert.deepEqual(result, { status: 'failed', error: 'input-fit', cleanupFailed: false }, name);
+    assert.deepEqual(harness.calls, { prepare: 0, dispatch: 0, transport: 0 }, name);
+  }
+
+  const precedence = byteConfiguration('groq', value => {
+    value.endpoint = 'ollama-loopback-chat';
+    delete value.accounting.maxRequestBytes;
+  });
+  const harness = adapterHarness(precedence, { candidate: fixture.proposal });
+  assert.deepEqual(await execute(fixture, { mode: 'groq', adapter: harness.adapter }), {
+    status: 'failed', error: 'configuration', cleanupFailed: false,
+  });
+  assert.deepEqual(harness.calls, { prepare: 0, dispatch: 0, transport: 0 });
+});
+
+test('rejects invalid closed byte-fit reports after configuration admission and before transport', async () => {
+  const fixture = generationFixture();
+  const configuration = byteConfiguration();
+  const cases: readonly [string, Readonly<Record<string, unknown>>][] = [
+    ['cap plus one', byteFit(configuration, 65537)],
+    ['zero bytes', byteFit(configuration, 0)],
+    ['negative-zero bytes', byteFit(configuration, -0)],
+    ['fractional bytes', byteFit(configuration, 1.5)],
+    ['unsafe bytes', byteFit(configuration, Number.MAX_SAFE_INTEGER + 1)],
+    ['wrong requested output', byteFit(configuration, 1, value => { value.requestedOutputTokens = 4095; })],
+    ['wrong context metadata', byteFit(configuration, 1, value => { value.contextTokenLimit = 131071; })],
+    ['wrong output metadata', byteFit(configuration, 1, value => { value.outputTokenLimit = 65535; })],
+    ['copied accounting', byteFit(configuration, 1, value => { value.accounting = Object.freeze({ ...configuration.accounting }); })],
+    ['mixed token fields', byteFit(configuration, 1, value => { value.inputTokens = 1; value.reservedOutputTokens = 4096; })],
+    ['extra field', byteFit(configuration, 1, value => { value.extra = true; })],
+    ['missing byte count', byteFit(configuration, 1, value => { delete value.serializedRequestBytes; })],
+    ['mutable report', { ...byteFit(configuration, 1) }],
+  ];
+  for (const [name, preparedFit] of cases) {
+    const harness = adapterHarness(configuration, { candidate: fixture.proposal, preparedFit });
+    const result = await execute(fixture, { mode: 'groq', adapter: harness.adapter });
+    assert.deepEqual(result, { status: 'failed', error: 'input-fit', cleanupFailed: false }, name);
+    assert.deepEqual(harness.calls, { prepare: 1, dispatch: 0, transport: 0 }, name);
+  }
+});
+
+test('rejects copied byte configuration after preparation without entering transport', async () => {
+  const fixture = generationFixture();
+  const configuration = byteConfiguration();
+  const harness = adapterHarness(configuration, {
+    candidate: fixture.proposal,
+    preparedFit: byteFit(configuration, 1),
+    prepare: (_request, _signal, prepared) => Object.freeze({
+      ...prepared,
+      configuration: Object.freeze({ ...configuration }),
+    }),
+  });
+  assert.deepEqual(await execute(fixture, { mode: 'groq', adapter: harness.adapter }), {
+    status: 'failed', error: 'configuration', cleanupFailed: false,
+  });
+  assert.deepEqual(harness.calls, { prepare: 1, dispatch: 0, transport: 0 });
 });
 
 test('normalizes preparation failures without invocation or exception disclosure', async () => {
