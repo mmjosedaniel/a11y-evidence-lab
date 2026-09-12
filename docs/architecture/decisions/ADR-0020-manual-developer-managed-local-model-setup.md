@@ -44,6 +44,14 @@ Accept option 2.
 - The bounded context-fit check remains deterministic application behavior before the actual request so required evidence, guidance, citations, or constraints are never silently truncated.
 - Missing setup, request failure, or invalid output remains a visible finding-level failure. It preserves the completed scan and evidence and never causes an automatic retry, provider switch, or fallback.
 
+### Groq admission amendment — 2026-09-11
+
+**Accepted by the owner on 2026-09-11.** This is a normative amendment to the preceding deterministic-check statement; the original decision is preserved as history.
+
+The deterministic pre-request check is now mode-specific under amended REQ-LLM-008. Local retains complete context-fit proof. Groq enforces a fixed, versioned complete-request-body byte policy while preserving the admitted application payload; it does not claim complete hosted token accounting, guaranteed context fit or verified consumption of every input. The owner accepts the possibility of explicit provider rejection and unobservable hosted transformation or truncation. Actual rejections retain attempted provenance and bounded failure handling. No setup, probe, retry, provider-selection, disclosure, credential, output-validation or Local-mode boundary changes follow.
+
+The [M3-04 accepted policy](../../plans/completed/m3-04-groq-adapter.md#m304-fit-amendment-01--proposed-groq-request-admission) fixes the body cap at 65536 UTF-8 bytes, with honest byte semantics and a requested 4096-token completion ceiling. The [evaluation authority](../../requirements/evaluation-and-release/EVALUATION_AND_ACCEPTANCE.md#groq-admission-amendment-to-the-frozen-generation-definition) owns its forward disposition of frozen fit clauses. This accepts no implementation or provider evaluation result.
+
 ### Minimal provider disclosure — historical initial placement
 
 - Historical OD-022 placement showed one concise disclosure at global mode selection and kept the selected provider/model visibly labeled throughout the run. OD-027 supersedes that initial and persistent placement.

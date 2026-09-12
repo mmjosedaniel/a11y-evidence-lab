@@ -101,13 +101,32 @@ Feature: Evidence-first accessibility analysis for one trusted public page
       And no ProviderInvocation or approve/edit-and-accept/reject review decision is created
       And the completed scan, minimized evidence, and sibling Finding states remain unchanged
 
-    Scenario: Fail before invocation when required input does not fit
-      Given the selected Finding has complete required evidence and "supported" retrieval
+    Scenario: Fail before invocation when required Local input does not fit
+      Given the run uses Local mode
+      And the selected Finding has complete required evidence and "supported" retrieval
       But its required evidence, guidance, citations, or system constraints cannot fit without truncation
       When the application checks context fit
       Then that Finding workflow fails before provider invocation with a content-safe limiting-capability reason
       And the result is not recorded as an evidence-sufficiency abstention
       And the completed scan, minimized evidence, and sibling Finding states remain unchanged
+
+    Scenario: Reject a Groq body above its fixed byte policy before invocation
+      Given the run uses Groq mode and the selected Finding has complete required evidence and "supported" retrieval
+      And the complete unchanged serialized request body exceeds the fixed 65536-byte UTF-8 policy
+      When the application applies Groq input admission
+      Then the selected Finding workflow fails as "input-fit" before any provider invocation
+      And no required input is removed or truncated and the result is not an abstention
+      And the completed scan, minimized evidence and sibling Finding states remain unchanged
+      And exactly 65536 bytes passes this size check while 65537 bytes fails it, without claiming hosted token fit
+
+    Scenario: Preserve attempted provenance when Groq rejects an admitted body
+      Given one eligible selected Finding in Groq mode passes the byte policy and all other generation gates
+      When its one complete unchanged request is sent and Groq returns an otherwise unclassified rejection
+      Then the selected workflow fails with the bounded "provider" category and one ProviderInvocation
+      And that invocation records outcome "provider" and validation "not-run"
+      And the completed scan, minimized evidence and sibling Finding states remain unchanged
+      And no raw provider error is retained and no automatic retry or fallback occurs
+      And passing byte admission or receiving schema-valid output does not prove complete hosted input consumption
 
   @SPEC-004 @BHV-04 @REQ-GEN-008 @REQ-LLM-002 @REQ-LLM-003 @REQ-LLM-004 @REQ-LLM-005 @REQ-LLM-007 @REQ-LLM-009 @REQ-LLM-019 @REQ-LLM-021 @REQ-SEC-004 @REQ-SEC-016 @ADR-0014 @ADR-0020 @ADR-0023
   Rule: One explicit provider mode applies to the whole analysis

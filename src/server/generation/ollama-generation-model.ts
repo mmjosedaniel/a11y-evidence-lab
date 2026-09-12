@@ -1,4 +1,4 @@
-import type { GenerationConfiguration } from './generation-contract.ts';
+import type { GenerationConfiguration, GenerationTokenAccounting } from './generation-contract.ts';
 import { LOCAL_PARAMETERS, OUTPUT_CONTRACT_VERSION, PROMPT_VERSION, SCHEMA_VERSION } from './generation-artifacts.ts';
 import { readArray, readObject, requireValid } from '../domain/run-contract/contract-value-reader.ts';
 
@@ -14,7 +14,7 @@ const profile = Object.freeze({
     draft_num_predict: 4, use_mmap: undefined }),
 });
 
-export const QWEN_CONFIGURATION: GenerationConfiguration = Object.freeze({
+export const QWEN_CONFIGURATION: GenerationConfiguration & { readonly accounting: GenerationTokenAccounting } = Object.freeze({
   providerContext: Object.freeze({ mode: 'local', provider: 'ollama', model: 'qwen3.5:4b' }),
   adapterId: 'ollama-generation', adapterVersion: 'm303-ollama-chat-v1', endpoint: 'ollama-loopback-chat',
   promptVersion: PROMPT_VERSION, schemaVersion: SCHEMA_VERSION, outputContractVersion: OUTPUT_CONTRACT_VERSION,
