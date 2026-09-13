@@ -99,13 +99,13 @@ Do not load every requirements module automatically. For requirements work, read
 - [Development toolchain](../README.md#development-toolchain) and [command preparation](../README.md#development-command-preparation) — maintained prerequisites, environment wrappers, build, verification, service startup, and deletion instructions.
 - [Closed corpus](../README.md#closed-corpus-snapshot) — frozen artifacts, static checks, and required source notices.
 - [Inspecting retrieval evidence](../README.md#inspecting-m2-02-retrieval-evidence) — retained M2-02 observations and the distinction between internal retrieval and current UI capabilities.
-- [Shared generation APIs](../README.md#shared-generation-apis) — internal service continuation, adapter and proposal contracts, maintained tests and accepted closure evidence; the fixed Local and Groq adapters are implemented with controlled verification, while real Qwen capacity, eligible provider execution and the Generate UI remain pending.
+- [Shared generation APIs](../README.md#shared-generation-apis) and [generation inspection](../README.md#inspecting-generation-for-one-finding) — service continuation, fixed adapters, same-origin generation and original proposal presentation; the [completed M3-05 checkpoint](plans/completed/m3-05-generation-checkpoint.md#m305-final-06--integrated-review-and-task-closure) records both actual provider paths and keeps the Qwen capacity gate separate.
 - [Generation evaluation manifest](../evaluation/m301-generation-v1.json) — three controlled shared cases, six future bindings, output/control/rubric definitions and exact local-file identities; [verification and recovery](plans/completed/m3-01-generation-evaluation-package.md#m301-command-02--resolved-preparation-validation-and-closure-callers) preserve the distinction from runtime generation.
 
 ### UI planning
 
 - [UI design documentation](ui/README.md) — minimum evidence-oriented application composition, interaction boundaries, source-layer distinctions, accessibility guidance, and explicit UI non-goals.
-- [Analyze and results presentation](ui/ANALYZE_AND_RESULTS_PRESENTATION.md) — accepted exact visible content, hierarchy, responsive behavior, evidence presentation, and omissions for M1-04.
+- [Analyze and results presentation](ui/ANALYZE_AND_RESULTS_PRESENTATION.md) — accepted visible content, hierarchy, responsive behavior and evidence presentation for M1-04, with the [M2-03 guidance](ui/ANALYZE_AND_RESULTS_PRESENTATION.md#m2-03-selected-finding-guidance) and [M3-05 generation](ui/ANALYZE_AND_RESULTS_PRESENTATION.md#m3-05-selected-finding-generation) extensions.
 - [UI visual foundations](ui/VISUAL_FOUNDATIONS.md) — reversible light-theme palette, semantic color usage, checked contrast pairings, typography, and restrained layout guidance.
 
 ### Derived planning specifications

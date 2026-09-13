@@ -1,6 +1,7 @@
 import { MemoryVectorStore } from '@langchain/classic/vectorstores/memory';
 import type { EmbeddingsInterface } from '@langchain/core/embeddings';
 import { createCorpusDocuments } from './corpus-catalog.ts';
+import { findPassageReference, PROFILE_REQUIRED_ROLES } from './corpus-identity.ts';
 import type { CorpusCatalog, CorpusPassage } from './corpus-validation.ts';
 import { readArray, readObject } from '../domain/run-contract/contract-value-reader.ts';
 import type { FindingQuery } from './finding-query.ts';
@@ -59,13 +60,13 @@ export async function rankCanonicalPassages(
         || !Number.isFinite(Math.hypot(...vector)) || Math.hypot(...vector) <= 0) {
       throw new RetrievalError('result-validation');
     }
-    const found = await store.similaritySearchVectorWithScore([...vector], 16, document => {
+    const found = await store.similaritySearchVectorWithScore([...vector], catalog.passages.length, document => {
       const rules = document.metadata.ruleIds;
       const criteria = document.metadata.successCriteria;
       return Array.isArray(rules) && rules.includes(query.ruleId)
         && Array.isArray(criteria) && criteria.includes(query.successCriterion);
     });
-    if (found.length > 16) throw new RetrievalError('result-validation');
+    if (found.length > catalog.passages.length) throw new RetrievalError('result-validation');
     const seen = new Set<string>();
     const resolved = found.map(([document, score]) => {
       if (typeof score !== 'number' || !Number.isFinite(score)
@@ -81,7 +82,12 @@ export async function rankCanonicalPassages(
     });
     resolved.sort((left, right) => left.score > right.score ? -1 : left.score < right.score ? 1
       : left.passageId < right.passageId ? -1 : left.passageId > right.passageId ? 1 : 0);
-    return Object.freeze(resolved.slice(0, 3));
+    const remainingRoles = new Set(PROFILE_REQUIRED_ROLES[query.ruleId]);
+    return Object.freeze(resolved.filter(passage => {
+      const reference = findPassageReference(passage.passageId);
+      if (!reference) throw new RetrievalError('result-validation');
+      return remainingRoles.delete(reference.guidanceRole);
+    }));
   } catch (error) {
     if (error instanceof RetrievalError) throw error;
     throw new RetrievalError('result-validation');

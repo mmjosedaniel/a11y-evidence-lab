@@ -1,3 +1,4 @@
+import { snapshot, equal } from './finding-response-snapshot.ts';
 import { validateRun } from '../server/domain/run-contract.ts';
 import type { Finding, PageAnalysisRun } from '../server/domain/run-contract.ts';
 import type { Citation, FindingGuidanceView, NoticeKind } from '../server/domain/finding-analysis-types.ts';
@@ -16,28 +17,6 @@ const errors = ['invalid-request', 'busy', 'stopping', 'not-found', 'invalid-run
   'stored-run-unavailable', 'read-failed', 'not-eligible', 'workflow-active', 'retrieval-persistence',
   'corpus-integrity', 'missing-prerequisite', 'model-identity', 'input-fit', 'embedding-failed',
   'embedding-response', 'timeout', 'shutdown', 'result-validation'];
-
-// Detach every value before validation, including nested views. Accessors are never evaluated.
-function snapshot(value: unknown, ancestors = new Set<object>()): unknown {
-  if (value === null || typeof value === 'string' || typeof value === 'boolean' ||
-      (typeof value === 'number' && Number.isFinite(value))) return value;
-  requireValid(typeof value === 'object' && value !== null && !ancestors.has(value));
-  ancestors.add(value);
-  const copy = Array.isArray(value)
-    ? readArray(value, item => snapshot(item, ancestors))
-    : Object.fromEntries(Object.entries(readObject(value)).map(([key, item]) => [key, snapshot(item, ancestors)]));
-  ancestors.delete(value);
-  return Object.freeze(copy);
-}
-
-function equal(left: unknown, right: unknown): boolean {
-  if (Object.is(left, right)) return true;
-  if (!left || !right || typeof left !== 'object' || typeof right !== 'object' ||
-      Array.isArray(left) !== Array.isArray(right)) return false;
-  const a = left as Record<string, unknown>, b = right as Record<string, unknown>;
-  return Object.keys(a).length === Object.keys(b).length &&
-    Object.keys(a).every(key => Object.hasOwn(b, key) && equal(a[key], b[key]));
-}
 
 function preservesRun(before: CompleteRun, after: CompleteRun, findingId: string): boolean {
   const original = before.scan.findings.find(item => item.findingId === findingId);

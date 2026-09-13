@@ -23,7 +23,7 @@ Automated accessibility scanners are effective at identifying deterministic issu
 The project objective is to demonstrate the practical use of retrieval-augmented generation in an evidence-centered application without turning the portfolio MVP into a production-scale platform:
 
 - **RAG** would ground explanations and remediation proposals in a curated, versioned accessibility corpus.
-- **LangChain** is the initial evaluation baseline for the small retrieve-then-generate integration. For the fixed corpus, it would use in-process `MemoryVectorStore` retrieval with local `embeddinggemma` vectors, exact cosine similarity, and a fixed top three. Application startup performs no embedding work: the disposable vector collection is built on the first explicit retrieval request and rebuilt only when the process, corpus, or relevant configuration requires it. The MVP has no Chroma or other vector-database service.
+- **LangChain** is the initial evaluation baseline for the small retrieve-then-generate integration. For the fixed corpus, it would use in-process `MemoryVectorStore` retrieval with local `embeddinggemma` vectors, exact cosine similarity, and at most three passages selected as the highest-ranked passage for each required guidance role after complete filtered ranking. The [2026-09-12 selection amendment](docs/architecture/decisions/ADR-0019-in-process-exact-vector-search.md#selection-amendment--2026-09-12) preserves earlier global-three results and distinguishes role coverage from measured relevance. Application startup performs no embedding work: the disposable vector collection is built on the first explicit retrieval request and rebuilt only when the process, corpus, or relevant configuration requires it. The MVP has no Chroma or other vector-database service.
 - Plain TypeScript application state is sufficient for the first linear workflow and one current human decision at a time.
 - Each page analysis would be retained as one versioned `data/runs/<run-id>/run.json` aggregate, with no canonical child files, Markdown report, database, or audit graph.
 - **LangGraph** remains a later candidate only if a demonstrated resume or recovery need justifies it.
@@ -56,13 +56,13 @@ Development ready. The [development roadmap](docs/DEVELOPMENT_ROADMAP.md) owns t
 
 The application integrates same-origin HTTP scanning, durable run publication, and the Analyze/Results UI. Selected-Finding guidance uses the closed corpus and local exact-vector retrieval, authenticates citations, evaluates evidence sufficiency and guidance support, and durably records abstention or retrieval failure. The detail UI presents native evidence, complete cited passages, source notices and the resulting guidance state. The [M2-03 closure record](docs/plans/completed/m2-03-sufficiency-abstention-and-detail-ui.md#m203-c-post01-closure--renewed-task-closure) preserves its implementation evidence and visual-check deferral.
 
-The [shared generation stage](#shared-generation-apis) validates selected-only input, configuration-bound mode-specific admission, one transport attempt, bounded failures and cited proposals. Local retains complete token-fit checking; the accepted Groq branch checks its fixed serialized-body byte policy without claiming hosted token fit. Its internal service continuation durably records generation and preserves completed scan, retrieval and sibling evidence. [M3-02 verification](docs/plans/completed/m3-02-shared-generation-stage.md#m302-regression-01--complete-authoritative-suite) covers controlled adapters and real aggregate persistence. The fixed Local Qwen and [Groq adapters](#fixed-groq-adapter) are implemented with controlled contract and service tests; real Qwen capacity and eligible provider execution remain unverified. Generate UI, proposal review and comparison remain later work.
+The [shared generation stage](#shared-generation-apis) validates selected-only input, configuration-bound mode-specific admission, one transport attempt, bounded failures and cited proposals. Local retains complete token-fit checking; the accepted Groq branch checks its fixed serialized-body byte policy without claiming hosted token fit. Its internal service continuation durably records generation and preserves completed scan, retrieval and sibling evidence. [M3-02 verification](docs/plans/completed/m3-02-shared-generation-stage.md#m302-regression-01--complete-authoritative-suite) covers controlled adapters and real aggregate persistence. The fixed Local Qwen and [Groq adapters](#fixed-groq-adapter) are implemented with controlled contract and service tests; one real Local run and one real Groq run have each saved a mechanically validated proposal pending human review, while Qwen capacity remains unverified. M3-05 adds the explicit Generate action, same-origin generation API and original proposal detail. Proposal review and comparison remain later work. The [completed M3-05 checkpoint](docs/plans/completed/m3-05-generation-checkpoint.md#m305-final-06--integrated-review-and-task-closure) records implementation verification and both successful real-provider observations with their limits.
 
 M2-04 is complete. Its [checkpoint observations](docs/plans/completed/m2-04-retrieval-checkpoint.md#m204-b-accept-01--bounded-checkpoint-observations) exercise all three fixed synthetic Finding profiles through the real local retrieval path: each returns an acceptable gold passage, while missing guidance roles correctly produce no-generation-call abstention. Controlled cases separately demonstrate supported eligibility and adverse outcomes. The [final closure](docs/plans/completed/m2-04-retrieval-checkpoint.md#m204-final-01--integrated-review-and-task-closure) records verification and limitations; these observations are not general retrieval-quality qualification.
 
 The [generation evaluation package](#frozen-generation-evaluation-package) freezes the controlled inputs and shared output contract for later Local and Groq evaluations. This static definition does not implement generation or establish model capacity or provider availability.
 
-See [how to inspect guidance in the UI](#inspecting-m2-02-retrieval-evidence) and [where to find the M2-04 checkpoint evidence](#inspecting-m2-04-checkpoint-evidence).
+See [how to inspect guidance in the UI](#inspecting-m2-02-retrieval-evidence), [how to generate and inspect one proposal](#inspecting-generation-for-one-finding), and [where to find the M2-04 checkpoint evidence](#inspecting-m2-04-checkpoint-evidence).
 
 ## Development toolchain
 
@@ -218,14 +218,21 @@ Invoke-M105Command {
 }
 ```
 
-Run the complete twenty-two-file suite sequentially, with no running application service or concurrent browser test. The production-entry tests also require the built client. The scanner and walking-skeleton suites use scanner scratch; both UI suites use separate UI scratch:
+Run the complete twenty-five-file suite sequentially, with no running application service or concurrent browser test. The production-entry tests also require the built client. The scanner and walking-skeleton suites use scanner scratch; all three UI suites use separate UI scratch:
 
 ```powershell
-foreach ($m105Test in @('run-contract','run-repository','local-service','scan-normalization','retrieval-contract','embedding-retrieval','retrieval-service','finding-sufficiency','finding-guidance-api','generation-contract','generation-stage','generation-service','ollama-generation-contract','ollama-generation','ollama-generation-service','groq-generation-contract','groq-generation','groq-generation-service')) {
+if ($null -ne [Environment]::GetEnvironmentVariable('A11Y_M305_CAPTURE_PROOF','Process')) {
+  throw 'Ordinary regression requires the synthetic capture flag absent.'
+}
+foreach ($m105Test in @('run-contract','run-repository','local-service','scan-normalization','retrieval-contract','embedding-retrieval','retrieval-service','finding-sufficiency','finding-guidance-api','generation-contract','generation-stage','generation-service','ollama-generation-contract','ollama-generation','ollama-generation-service','groq-generation-contract','groq-generation','groq-generation-service','finding-generation-admission')) {
   Invoke-M105Command {
     & $m105Node --test --test-timeout=120000 ("tests/" + $m105Test + ".test.ts")
     if ($LASTEXITCODE -ne 0) { throw 'Browser-free suite failed.' }
   }
+}
+Invoke-M105Command {
+  & $m105Node --experimental-test-module-mocks --test --test-timeout=120000 tests/finding-generation-api.test.ts
+  if ($LASTEXITCODE -ne 0) { throw 'Generation API suite failed.' }
 }
 foreach ($m105Test in @('scan-page','walking-skeleton')) {
   Assert-M105EmptyDirectory $m105ScanTemp
@@ -235,7 +242,7 @@ foreach ($m105Test in @('scan-page','walking-skeleton')) {
     if ($LASTEXITCODE -ne 0) { throw 'Scanner or integration suite failed.' }
   } $m105ScanTemp
 }
-foreach ($m105Test in @('target-results-ui','finding-guidance-ui')) {
+foreach ($m105Test in @('target-results-ui','finding-guidance-ui','finding-generation-ui')) {
   Assert-M105EmptyDirectory $m105UiTemp
   Invoke-M105Command {
     & $m105Node --test --test-timeout=120000 ("tests/" + $m105Test + ".test.ts")
@@ -246,6 +253,8 @@ foreach ($m105Scratch in @($m105ScanTemp,$m105UiTemp,$m105IntegrationTemp)) {
   Assert-M105EmptyDirectory $m105Scratch
 }
 ```
+
+For whitespace review, replace `<base>` with the reviewed base commit: `git diff <base> --check` checks the cumulative tracked working-tree changes, while `git diff <base> HEAD --check` checks only committed changes. `git diff --check` alone omits changes already committed. These diff checks exclude untracked files, which need separate inspection before they enter a commit. The [M3-05 EOF correction](docs/plans/completed/m3-05-generation-checkpoint.md#m305-eof-01--post-closure-whitespace-correction) records this distinction.
 
 The controlled tests use the six project-owned states and intercepted project-owned HTTPS responses. They are not live-public-site qualification. The separate authorized public-page smoke passed only after the production service and managed browser ran outside a network-restricted sandbox; `net::ERR_NETWORK_ACCESS_DENIED` in that sandbox was an environment failure, not a valid zero result. Do not disable browser isolation or broaden target scope to work around it. Work and cleanup deadlines remain cooperative, not an OS process-kill guarantee.
 
@@ -266,8 +275,12 @@ try {
   } $m105ScanTemp
   Assert-M105EmptyDirectory $m105ScanTemp
 } finally {
-  [Environment]::SetEnvironmentVariable('A11Y_APPLICATION_REVISION',$m105PriorRevision,'Process')
-  [Environment]::SetEnvironmentVariable('A11Y_PORT',$m105PriorPort,'Process')
+  $m105RestoreRevision = if ($null -eq $m105PriorRevision) { [System.Management.Automation.Language.NullString]::Value } else { $m105PriorRevision }
+  $m105RestorePort = if ($null -eq $m105PriorPort) { [System.Management.Automation.Language.NullString]::Value } else { $m105PriorPort }
+  [Environment]::SetEnvironmentVariable('A11Y_APPLICATION_REVISION',$m105RestoreRevision,'Process')
+  [Environment]::SetEnvironmentVariable('A11Y_PORT',$m105RestorePort,'Process')
+  if ([Environment]::GetEnvironmentVariable('A11Y_APPLICATION_REVISION','Process') -cne $m105PriorRevision -or
+      [Environment]::GetEnvironmentVariable('A11Y_PORT','Process') -cne $m105PriorPort) { throw 'Service environment restoration failed.' }
 }
 ```
 
@@ -275,7 +288,7 @@ The revision must be exactly 40 lowercase hexadecimal characters. Optional `A11Y
 
 A successful start prints one JSON `service-ready` event with the actual `http://127.0.0.1:<port>` URL. Open that exact URL in Chrome or Edge, enter one permitted trusted public HTTPS target, explicitly select Local or Groq, and activate Analyze once. The service owns a separate fresh managed Chromium context; it does not use your UI browser profile. Keep the target and ordinary redirect destination non-sensitive. Local/Groq selection records context only and makes no provider call.
 
-Production health reports `readRuns: true`, `scan: true`, and `guidance: true` when serving the built client. Analyze posts only target and mode to `POST /api/runs`; the service validates, scans, and publishes one minimized `run.json` before returning a completed result. `POST /api/finding-guidance` accepts exactly `{runId, findingId}` and returns the selected durable outcome with its authenticated citation view, or a bounded failure. `GET /api/runs/<run-id>` remains a validated internal read, not a UI reopen/history action. API-only programmatic construction without `clientRoot` reports `scan: false` and `guidance: false`, serves no UI, and rejects these POST routes with 405. Neither service exposes configuration, upload, shutdown, or arbitrary-file routes.
+Production health reports `readRuns: true`, `scan: true`, and `guidance: true` when serving the built client. Analyze posts only target and mode to `POST /api/runs`; the service validates, scans, and publishes one minimized `run.json` before returning a completed result. `POST /api/finding-guidance` accepts exactly `{runId, findingId}` and returns the selected durable outcome with its authenticated citation view, or a bounded failure. `POST /api/finding-generation` accepts exactly the same two IDs and continues only their supported live workflow through the fixed run-selected adapter. Its bounded response distinguishes durable results, attempted invocation, unsaved outcomes and uncertainty. The health JSON shape is unchanged. `GET /api/runs/<run-id>` remains a validated internal read, not a UI reopen/history action. API-only programmatic construction without `clientRoot` reports `scan: false` and `guidance: false`, serves no UI, and rejects these POST routes with 405. Neither service exposes configuration, upload, shutdown, or arbitrary-file routes.
 
 Type exactly `stop` and press Enter in the service terminal, then require `service-stopped` and exit 0. EOF, SIGINT, and SIGBREAK also request stop. Forced Windows termination is not proof of clean cleanup. Startup errors emit only `service-startup-failed` with a closed error code and exit 1; failed stop emits `service-stop-failed` and exit 1.
 
@@ -296,7 +309,7 @@ Invoke-M105Command {
 }
 ```
 
-This filtered demonstration does not replace either the core subset or the complete twenty-two-file suite. Tests use only project-owned synthetic records, isolated `temp/m102-*` roots, and bounded owned child processes; they never acquire or delete a real corpus or user run.
+This filtered demonstration does not replace either the core subset or the complete twenty-five-file suite. Tests use only project-owned synthetic records, isolated `temp/m102-*` roots, and bounded owned child processes; they never acquire or delete a real corpus or user run.
 
 ## Current scope
 
@@ -306,27 +319,27 @@ The [capability summary](#project-status) distinguishes implemented behavior fro
 
 [LocalService.generateFinding](src/server/local-service/contracts.ts) continues only the exact live supported retrieval workflow for one `{runId, findingId}`. It saves generation-running before invoking the [shared stage](src/server/generation/generation-stage.ts), then publishes a validated pending proposal or bounded failure through [RunRepository.updateGeneration](src/server/persistence/run-repository/contracts.ts). Failure results distinguish the last durable run from separately returned, unpersisted invocation provenance. Failed publication retains ownership, uncertain cleanup closes admission, and restart never reconstructs a generation capability.
 
-The [adapter contract](src/server/generation/generation-contract.ts) defines preparation, the bounded transport attempt and invocation provenance; the [proposal validator](src/server/generation/proposal-contract.ts) admits only the shared structured output and authenticated selected citations. Missing adapters fail before transport; no production success double or default provider exists. This API has no HTTP route or UI action yet.
+The [adapter contract](src/server/generation/generation-contract.ts) defines preparation, the bounded transport attempt and invocation provenance; the [proposal validator](src/server/generation/proposal-contract.ts) admits only the shared structured output and authenticated selected citations. The service resolves the fixed Local or Groq adapter from the durable run's immutable provider context only after consuming the supported owner and saving generation-running. An explicitly supplied adapter remains the internal controlled-test seam. The same-origin generation API and Generate action pass only the selected run and Finding IDs; browser input cannot configure a provider.
 
 The [generation contract](tests/generation-contract.test.ts), [shared-stage](tests/generation-stage.test.ts) and [service continuation](tests/generation-service.test.ts) suites are included in the complete verification command above. Service tests use exclusive `temp/m302-generation-*` roots and owned loopback ports. The [M3-02 closure record](docs/plans/completed/m3-02-shared-generation-stage.md#m302-final-01--final-integrated-review-and-documentation-closure) preserves accepted verification and its limits: controlled adapters do not prove actual provider conformance, model capacity or semantic grounding.
 
 ### Fixed Local Qwen adapter
 
-Construct [createOllamaGenerationAdapter](src/server/generation/ollama-generation.ts) and pass it explicitly to `LocalService.generateFinding({runId, findingId}, adapter)` for the current live supported retrieval owner. Import, construction, service startup and mode selection perform no generation I/O. Preparation first proves the complete request fits, then reads version, model metadata and tags from fixed `127.0.0.1:11434`; dispatch uses one bounded `/api/chat` attempt. No default adapter or Generate HTTP/UI action is installed.
+The service selects [createOllamaGenerationAdapter](src/server/generation/ollama-generation.ts) for the current live supported Local retrieval owner. Import, construction, service startup and mode selection perform no generation I/O. Preparation first proves the complete request fits, then reads version, model metadata and tags from fixed `127.0.0.1:11434`; dispatch uses one bounded `/api/chat` attempt.
 
 This implementation admits the developer-managed [Ollama v0.33.3 release](https://github.com/ollama/ollama/releases/tag/v0.33.3) and `qwen3.5:4b` Q4_K_M manifest SHA-256 `2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd`. Install the retained official runtime outside the repository and acquire the model through Ollama's own `ollama pull qwen3.5:4b` command only after the [local capacity prefilter](docs/LOCAL_MVP_FEASIBILITY.md) passes; the application performs no acquisition. A fresh pull must match the admitted digest and metadata. Missing prerequisites or drift fail before chat. Preserve the runtime/model configuration while an eligible action is in progress; observed metadata does not lock a mutable model tag atomically.
 
-The fixed request reserves 4096 output tokens within an explicit 32768-token context, uses temperature 0 and top-p 1, and disables thinking, streaming, input truncation and context shifting. The [accepted configuration and accounting contract](docs/plans/m3-03-qwen-adapter-and-capacity-screen.md#m303-g-contract-01--authored-local-adapter-contract) records the complete bound, inherited settings, parser identity and setup receipt. The three `ollama-generation` suites above use injected transport and controlled service fixtures, including exclusive `temp/m303-generation-*` roots; they do not establish loaded model capacity or real output quality. The required real capacity smoke remains pending supported live retrieval and the implemented reviewer interface.
+The fixed request reserves 4096 output tokens within an explicit 32768-token context, uses temperature 0 and top-p 1, and disables thinking, streaming, input truncation and context shifting. The [accepted configuration and accounting contract](docs/plans/m3-03-qwen-adapter-and-capacity-screen.md#m303-g-contract-01--authored-local-adapter-contract) records the complete bound, inherited settings, parser identity and setup receipt. The three `ollama-generation` suites above use injected transport and controlled service fixtures, including exclusive `temp/m303-generation-*` roots; they do not establish loaded model capacity or real output quality. M3-05 now demonstrates authentic supported live retrieval and Local generation. The [remaining M3-03 capacity gate](docs/plans/m3-03-qwen-adapter-and-capacity-screen.md#m303-resume-02--documentation-reconciliation-after-m3-05) still requires the implemented reviewer interface and one representative full-stack observation; the integration result supplies no capacity credit.
 
 ### Fixed Groq adapter
 
-Construct [createGroqGenerationAdapter](src/server/generation/groq-generation.ts) and pass it explicitly to `LocalService.generateFinding({runId, findingId}, adapter)` for the current live supported retrieval owner. Import, construction, startup and mode selection perform no credential or provider I/O. The adapter uses only the fixed `openai/gpt-oss-20b` model and one HTTPS Chat Completions attempt at `api.groq.com`, with normal certificate and hostname verification.
+The service selects [createGroqGenerationAdapter](src/server/generation/groq-generation.ts) for the current live supported Groq retrieval owner. Import, construction, startup and mode selection perform no credential or provider I/O. The adapter uses only the fixed `openai/gpt-oss-20b` model and one HTTPS Chat Completions attempt at `api.groq.com`, with normal certificate and hostname verification.
 
 Create your own API key using the [Groq quickstart](https://console.groq.com/docs/quickstart), then set the single `GROQ_API_KEY=` entry in the existing repository-root `.env`. Confirm that `.env` is Git-ignored and untracked before adding the key. Preserve other local content and never paste the key into chat or tracked files. The service reads only this selected file entry when preparing an eligible Groq request; it does not load credentials from the process environment. Missing or invalid credentials fail before a provider attempt.
 
 Preparation preserves both complete shared messages, the strict `m301_proposal_v1` schema and fixed controls. Its versioned policy admits at most 65536 UTF-8 bytes for the complete serialized request body, then sends that exact body with a 4096-token completion limit. The byte cap is an application policy, not a token estimate or proof of hosted context fit or full input consumption. [The accepted contract](docs/plans/completed/m3-04-groq-adapter.md#m304-g-contract-01--authored-groq-adapter-contract) records the exposed defaults and provider-processing limits.
 
-The adapter rejects credential echoes before publication, bounds response bodies and cleanup, and preserves authentication, quota, rate-limit, network and provider failure provenance without retry or fallback. The three `groq-generation` suites use virtual credentials, injected native transport and actual service/repository fixtures in exclusive `temp/m304-groq-*` roots. This controlled verification does not establish real provider availability, output quality or evaluation results; those remain with the later authorized integration and evaluation tasks.
+The adapter rejects credential echoes before publication, bounds response bodies and cleanup, and preserves authentication, quota, rate-limit, network and provider failure provenance without retry or fallback. The three `groq-generation` suites use virtual credentials, injected native transport and actual service/repository fixtures in exclusive `temp/m304-groq-*` roots. These controlled tests establish adapter behavior. The separate [M3-05 integration observation](docs/plans/completed/m3-05-generation-checkpoint.md#m305-f-observation-02--corrected-local-failure-and-groq-proposal) records one successful actual Groq proposal, without establishing continued availability, output quality or the later fixed evaluation results.
 
 Before an authorized evaluation, check the fixed model's current [availability](https://console.groq.com/docs/models), [deprecations](https://console.groq.com/docs/deprecations) and [strict-output support](https://console.groq.com/docs/structured-outputs), and confirm your account's access and limits without sharing its credential. Documentation listings alone do not prove account access.
 
@@ -365,7 +378,7 @@ M2-02's slice-B APIs are [createExactRetrieval](src/server/retrieval/exact-retri
 
 ### Inspecting M2-02 retrieval evidence
 
-Follow [Run the local service](#run-the-local-service) to open the Analyze/Results UI. Select a Finding to inspect its native evidence, then activate **Get guidance** once. The application first checks captured evidence; complete evidence uses the developer-managed local embedding runtime. The detail shows complete cited passages and source notices, evidence sufficiency, and supported eligibility, a no-generation-call abstention, or a distinct retrieval failure. Citation links open in a separate tab to preserve the current results session. The exact corpus version remains visible even when retrieval returns no passages. Similarity describes ranking, not support or confidence. Opening the UI and selecting an item do not start model work. Scanner review observations remain evidence-only; no saved-run reopen/import, Generate, retry or review control is provided. A supported unfinished workflow retains ownership and prevents another guidance operation. The [M2-03 closure record](docs/plans/completed/m2-03-sufficiency-abstention-and-detail-ui.md#m203-c-post01-closure--renewed-task-closure) records completed verification and its limits; the [M2-04 observations](docs/plans/completed/m2-04-retrieval-checkpoint.md#m204-b-accept-01--bounded-checkpoint-observations) record the fixed three-profile integration evaluation separately from general retrieval quality.
+Follow [Run the local service](#run-the-local-service) to open the Analyze/Results UI. Select a Finding to inspect its native evidence, then activate **Get guidance** once. The application first checks captured evidence; complete evidence uses the developer-managed local embedding runtime. The detail shows complete cited passages and source notices, evidence sufficiency, and supported eligibility, a no-generation-call abstention, or a distinct retrieval failure. Citation links open in a separate tab to preserve the current results session. The exact corpus version remains visible even when retrieval returns no passages. Similarity describes ranking, not support or confidence. Opening the UI and selecting an item do not start model work. Scanner review observations remain evidence-only; no saved-run reopen/import, retry or review control is provided. Supported live eligibility enables the separate [explicit generation action](#inspecting-generation-for-one-finding). A supported unfinished workflow retains ownership and prevents another guidance operation. The [M2-03 closure record](docs/plans/completed/m2-03-sufficiency-abstention-and-detail-ui.md#m203-c-post01-closure--renewed-task-closure) records completed verification and its limits; the [M2-04 observations](docs/plans/completed/m2-04-retrieval-checkpoint.md#m204-b-accept-01--bounded-checkpoint-observations) record the fixed three-profile integration evaluation separately from general retrieval quality.
 
 M2-02's actual retrieval evidence is a saved JSON result, not a new retrieval screen. In the original development checkout, inspect these retained, ignored files in an editor without rerunning inference:
 
@@ -373,6 +386,16 @@ M2-02's actual retrieval evidence is a saved JSON result, not a new retrieval sc
 - `temp/m202-capacity-01/runs/m202-capacity-01/run.json`: the full synthetic run with the completed selected-Finding retrieval result and preserved scan/sibling evidence.
 
 These local files are not included in a fresh checkout. The tracked [capacity evidence record](docs/plans/completed/m2-02-embedding-retrieval-capacity-gate.md#capacity-screen-and-integration-closure) preserves their identities and the bounded observation; the [closure record](docs/plans/completed/m2-02-embedding-retrieval-capacity-gate.md#m202-closure-01--final-integrated-verification-and-documentation-impact) records accepted verification and review. This was one retrieval-capacity observation, not retrieval-quality qualification. Browser interaction timing was not instrumented, and the driver exited 1 during post-success shutdown control; neither limitation invalidated the accepted durable result, but neither is an exit-zero or UI-latency claim.
+
+### Inspecting generation for one Finding
+
+In a new analysis, select a Finding and activate **Get guidance**. Complete captured evidence and supported guidance from the current service session enable **Generate** for that Finding. Read the fixed provider/model and data-flow disclosure, then activate Generate once. Local uses the approved Ollama loopback boundary; Groq sends the permitted minimized selected facts and guidance to its fixed external endpoint. Mode selection and scanning make no generation request.
+
+The pending state keeps selection available. The result distinguishes a confirmed pre-call failure, an attempted call, durable publication, an unsaved attempt and an unknown outcome. A browser timeout or lost response does not prove that service/provider work stopped. The consumed action cannot be retried; ordinary Analyze can start an independent run when the service accepts it. Restart does not recover a supported workflow capability.
+
+A validated proposal keeps its original cited summary, user impact and remediation separate from scanner evidence and curated guidance. Evidence sufficiency, model confidence, uncertainty, assumptions, blocking human judgment and the post-change verification reminder remain visible. Approve, edit, reject and comparison controls remain later work.
+
+The [M3-05 plan](docs/plans/completed/m3-05-generation-checkpoint.md) records implementation verification and bounded actual-provider checks. The clarified runtime prompt preserves historical invocation identities. One Local and one Groq run saved and displayed original proposals that pass mechanical validation under the same runtime version. Both remain pending human review, including their judgment and remediation limitations. The successful Local diagnostic did not reproduce the earlier rejection; its exact cause remains unknown. The selection amendment also retains an informative-image relevance failure despite complete guidance-role coverage. These observations do not establish model capacity, semantic quality or release readiness.
 
 ### Inspecting M2-04 checkpoint evidence
 

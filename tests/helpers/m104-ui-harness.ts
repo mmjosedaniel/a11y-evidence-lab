@@ -19,8 +19,10 @@ import { imagePassages, retrievalFor } from './m203-finding-fixture.ts';
 
 export type Intent = AnalyzeIntent;
 export interface GuidanceIntent { readonly runId: string; readonly findingId: string }
+export interface GenerationIntent { readonly runId: string; readonly findingId: string }
 export type ClientCollaborators = AppProps & {
   readonly retrieveFinding?: (intent: GuidanceIntent) => Promise<unknown>;
+  readonly generateFinding?: (intent: GenerationIntent, signal: AbortSignal) => Promise<unknown>;
 };
 export interface KnownConfiguration {
   readonly localModelInstalled?: boolean;
@@ -28,16 +30,29 @@ export interface KnownConfiguration {
 }
 export interface Bridge {
   calls: ({ stage: 'analyze'; value: Intent; callback: number }
-    | { stage: 'guidance'; value: GuidanceIntent; callback: number })[];
+    | { stage: 'guidance'; value: GuidanceIntent; callback: number }
+    | { stage: 'generation'; value: GenerationIntent; callback: number; signal: AbortSignal }
+    | { stage: 'http'; value: { url: string; method: string; body: string | null; contentType: string | null };
+        callback: number; signal: AbortSignal | null })[];
   analyze: (intent: Intent) => unknown;
   guidance: (intent: GuidanceIntent) => unknown;
-  mount: (analyze?: boolean, configuration?: KnownConfiguration, guidance?: boolean) => void;
-  rerender: (analyze?: boolean, configuration?: KnownConfiguration, guidance?: boolean) => void;
+  generation: (intent: GenerationIntent, signal: AbortSignal) => unknown;
+  fetch: (input: RequestInfo | URL, init?: RequestInit) => unknown;
+  generationAccessor: (callback: (intent: GenerationIntent, signal: AbortSignal) => Promise<unknown>) => unknown;
+  generationReads: number;
+  timerDelay: number | null;
+  mount: (analyze?: boolean, configuration?: KnownConfiguration, guidance?: boolean,
+    generation?: boolean, accessor?: boolean) => void;
+  rerender: (analyze?: boolean, configuration?: KnownConfiguration, guidance?: boolean,
+    generation?: boolean, accessor?: boolean) => void;
   unmount: () => void;
+  restore: () => void;
   settle: () => Promise<void>;
   resolve: (value: unknown) => void;
   reject: (value: unknown) => void;
-  hold: () => Promise<unknown>;
+  resolveKey: (key: string, value: unknown) => void;
+  rejectKey: (key: string, value: unknown) => void;
+  hold: (key?: string) => Promise<unknown>;
   raw: any;
   reads: number;
   savedNode: Element | null;
@@ -135,7 +150,7 @@ export function richRun(id = 'm104-complete-01', mode: 'local' | 'groq' = 'local
   return valid(run);
 }
 
-function entrySource(): string {
+function appEntrySource(): string {
   const app = '/@fs/' + path.join(repo, 'src/client/App.tsx').replaceAll('\\', '/');
   const styles = '/@fs/' + path.join(repo, 'src/client/styles.css').replaceAll('\\', '/');
   return `import React from 'react';
@@ -144,24 +159,48 @@ import { App } from ${JSON.stringify(app)};
 import ${JSON.stringify(styles)};
 let root = createRoot(document.getElementById('root'));
 let version = 0;
-const pending = new Set();
+let pendingSequence = 0;
+const pending = new Map();
+let accessorProps = {};
+let accessorMode = false;
+function AccessorApp() {
+  const proxied = new Proxy(accessorProps, { get(target,key,receiver) {
+    if (key === 'generateFinding') {
+      bridge.generationReads++;
+      return bridge.generationAccessor(target.generateFinding);
+    }
+    return Reflect.get(target,key,receiver);
+  } });
+  return App(proxied);
+}
 const bridge = window.m104 = {
-  calls: [], reads: 0, canary: 0, raw: null, savedNode: null, oldNode: null,
+  calls: [], reads: 0, generationReads: 0, timerDelay: null, canary: 0, raw: null, savedNode: null, oldNode: null,
   analyze: () => Promise.resolve({ok:false,error:'create-failed',run:null,persisted:false,cleanupFailed:false}),
   guidance: () => Promise.resolve({ok:false,error:'not-found',run:null,persisted:false,cleanupFailed:false}),
+  generation: () => Promise.resolve({ok:false,error:'not-eligible',run:null,persisted:false,cleanupFailed:false,invocationPersisted:false}),
+  fetch: () => Promise.reject(new Error('Fetch is unavailable in the App harness')),
+  generationAccessor: callback => callback,
   resolve: () => {}, reject: () => {},
-  hold() { return new Promise((resolve,reject) => {
-    const release = () => pending.delete(cancel);
-    const cancel = () => { release(); resolve({ok:false,error:'busy'}); };
-    pending.add(cancel);
-    bridge.resolve = value => { release(); resolve(value); };
-    bridge.reject = value => { release(); reject(value); };
+  resolveKey(key,value) { pending.get(key)?.resolve(value); },
+  rejectKey(key,value) { pending.get(key)?.reject(value); },
+  hold(key = 'pending-' + (++pendingSequence)) { return new Promise((resolve,reject) => {
+    if (pending.has(key)) throw new Error('Duplicate controlled pending key');
+    const release = () => pending.delete(key);
+    const record = {
+      resolve: value => { release(); resolve(value); },
+      reject: value => { release(); reject(value); },
+      cancel: () => { release(); resolve({ok:false,error:'busy'}); },
+    };
+    pending.set(key,record);
+    bridge.resolve = record.resolve;
+    bridge.reject = record.reject;
   }); },
-  async settle() { for (const cancel of [...pending]) cancel(); await Promise.resolve(); },
-  rerender(analyze = true, configuration = {}, guidance = false) {
+  async settle() { for (const record of [...pending.values()]) record.cancel(); await Promise.resolve(); },
+  rerender(analyze = true, configuration = {}, guidance = false, generation = false, accessor = accessorMode) {
     const callback = ++version;
     const analyzeHandler = bridge.analyze;
     const guidanceHandler = bridge.guidance;
+    const generationHandler = bridge.generation;
     const props = { configuration };
     if (analyze) props.analyze = intent => {
       bridge.calls.push({stage:'analyze',value:structuredClone(intent),callback});
@@ -171,15 +210,68 @@ const bridge = window.m104 = {
       bridge.calls.push({stage:'guidance',value:structuredClone(intent),callback});
       return guidanceHandler(intent);
     };
-    root.render(<App {...props}/>);
+    const generationCallback = (intent,signal) => {
+      bridge.calls.push({stage:'generation',value:structuredClone(intent),callback,signal});
+      return generationHandler(intent,signal);
+    };
+    if (generation && !accessor) props.generateFinding = generationCallback;
+    if (generation && accessor) props.generateFinding = generationCallback;
+    accessorMode = accessor;
+    accessorProps = props;
+    root.render(accessor ? <AccessorApp/> : <App {...props}/>);
   },
-  mount(analyze = true, configuration = {}, guidance = false) {
+  mount(analyze = true, configuration = {}, guidance = false, generation = false, accessor = false) {
     root.unmount(); root = createRoot(document.getElementById('root'));
-    bridge.calls = []; bridge.rerender(analyze, configuration, guidance);
+    accessorMode = accessor;
+    bridge.calls = []; bridge.rerender(analyze, configuration, guidance, generation, accessor);
   },
   unmount() { root.unmount(); },
+  restore() {},
 };
 bridge.rerender(false);
+`;
+}
+
+function mainEntrySource(): string {
+  const main = '/@fs/' + path.join(repo, 'src/client/main.tsx').replaceAll('\\', '/');
+  return `const nativeFetch = window.fetch.bind(window);
+let pendingSequence = 0;
+const pending = new Map();
+let version = 0;
+const bridge = window.m104 = {
+  calls: [], reads: 0, generationReads: 0, timerDelay: null, canary: 0, raw: null, savedNode: null, oldNode: null,
+  analyze: () => Promise.reject(new Error('Analyze collaborator is unavailable in the main harness')),
+  guidance: () => Promise.reject(new Error('Guidance collaborator is unavailable in the main harness')),
+  generation: () => Promise.reject(new Error('Generation collaborator is unavailable in the main harness')),
+  fetch: () => Promise.reject(new Error('Controlled fetch response is not configured')),
+  generationAccessor: callback => callback,
+  resolve: () => {}, reject: () => {},
+  resolveKey(key,value) { pending.get(key)?.resolve(value); },
+  rejectKey(key,value) { pending.get(key)?.reject(value); },
+  hold(key = 'pending-' + (++pendingSequence)) { return new Promise((resolve,reject) => {
+    if (pending.has(key)) throw new Error('Duplicate controlled pending key');
+    const release = () => pending.delete(key);
+    const record = {
+      resolve: value => { release(); resolve(value); },
+      reject: value => { release(); reject(value); },
+      cancel: () => { release(); resolve({ok:false,error:'busy'}); },
+    };
+    pending.set(key,record);
+    bridge.resolve = record.resolve;
+    bridge.reject = record.reject;
+  }); },
+  async settle() { for (const record of [...pending.values()]) record.cancel(); await Promise.resolve(); },
+  mount() {}, rerender() {}, unmount() {}, restore() { window.fetch = nativeFetch; },
+};
+window.fetch = (input,init = {}) => {
+  const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+  const headers = new Headers(init.headers);
+  const callback = ++version;
+  bridge.calls.push({stage:'http',value:{url,method:init.method ?? 'GET',body:typeof init.body === 'string' ? init.body : null,
+    contentType:headers.get('content-type')},callback,signal:init.signal ?? null});
+  return bridge.fetch(input,init);
+};
+await import(${JSON.stringify(main)});
 `;
 }
 
@@ -203,7 +295,7 @@ async function listenerClosed(port: number): Promise<void> {
   });
 }
 
-export async function startHarness(manual = false): Promise<Harness> {
+export async function startHarness(manual = false, entry: 'app' | 'main' = 'app'): Promise<Harness> {
   assert.equal(process.cwd().toLowerCase(), repo.toLowerCase());
   assert.equal(process.env.NODE_DISABLE_COMPILE_CACHE, '1');
   assert.equal(path.resolve(process.env.TEMP ?? ''), scratch);
@@ -238,7 +330,9 @@ export async function startHarness(manual = false): Promise<Harness> {
     closed = true;
     const errors: unknown[] = [];
     const attempt = async (action: () => unknown) => { try { await action(); } catch (error) { errors.push(error); } };
-    if (page && !page.isClosed()) await attempt(() => page!.evaluate(async () => { if (window.m104) await window.m104.settle(); }));
+    if (page && !page.isClosed()) await attempt(() => page!.evaluate(async () => {
+      if (window.m104) { await window.m104.settle(); window.m104.restore(); }
+    }));
     if (context) await attempt(() => context!.close());
     if (browser) await attempt(() => browser!.close());
     if (server) await attempt(() => server!.close());
@@ -267,7 +361,7 @@ export async function startHarness(manual = false): Promise<Harness> {
   }
   try {
     fs.writeFileSync(path.join(scratch, generated[0]), '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>M1-04 UI contract</title></head><body><div id="root"></div><script type="module" src="/m104-test-entry.tsx"></script></body></html>', { flag: 'wx' });
-    fs.writeFileSync(path.join(scratch, generated[1]), entrySource(), { flag: 'wx' });
+    fs.writeFileSync(path.join(scratch, generated[1]), entry === 'app' ? appEntrySource() : mainEntrySource(), { flag: 'wx' });
     server = await createServer({
       configFile: false, root: scratch, publicDir: false,
       cacheDir: path.join(scratch, 'vite-cache'), appType: 'mpa',

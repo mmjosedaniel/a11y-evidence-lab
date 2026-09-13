@@ -443,7 +443,7 @@ test('fails closed on request shape, identity, controls, schema, roles and Unico
   const cases: readonly [string, Record<string, unknown>, 'configuration' | 'input-fit'][] = [
     ['copied configuration', { ...base, configuration: Object.freeze({ ...GROQ_CONFIGURATION }) }, 'configuration'],
     ['wrong adapter version', { ...base, configuration: Object.freeze({ ...GROQ_CONFIGURATION, adapterVersion: 'm304-groq-v2' }) }, 'configuration'],
-    ['wrong prompt version', { ...base, promptVersion: 'm302-instructions-v2' }, 'configuration'],
+    ['historical prompt version', { ...base, promptVersion: 'm302-instructions-v1' }, 'configuration'],
     ['copied equivalent controls', { ...base, controls: Object.freeze({ ...GROQ_PARAMETERS }) }, 'configuration'],
     ['wrong controls', { ...base, controls: Object.freeze({ ...GROQ_PARAMETERS, temperature: 1 }) }, 'configuration'],
     ['copied schema', { ...base, schema: structuredClone(GENERATION_SCHEMA) }, 'input-fit'],

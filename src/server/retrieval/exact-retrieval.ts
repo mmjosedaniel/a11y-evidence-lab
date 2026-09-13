@@ -7,7 +7,7 @@ import { createFindingQuery } from './finding-query.ts';
 import { beginOllamaEmbedding } from './ollama-embedding.ts';
 import type { OllamaRequester } from './ollama-http.ts';
 import { buildVectorCollection, rankCanonicalPassages } from './retrieval-ranking.ts';
-import { validateRetrievalResult } from './retrieval-contract.ts';
+import { RETRIEVAL_SELECTION_POLICY, validateRetrievalResult } from './retrieval-contract.ts';
 import type { RetrievalResult } from './retrieval-contract.ts';
 import { RetrievalError } from './retrieval-error.ts';
 import type { MemoryVectorStore } from '@langchain/classic/vectorstores/memory';
@@ -106,6 +106,7 @@ export function createExactRetrieval(dependencies: Dependencies = {}) {
           corpus: { ...CORPUS_IDENTITY }, query: { ...query.value }, embedding: { ...EMBEDDING_IDENTITY },
           filter: { ruleId: query.value.ruleId, successCriterion: query.value.successCriterion },
           metric: 'cosine', topK: 3, tieBreak: 'passageId-ascending', passages,
+          selectionPolicy: RETRIEVAL_SELECTION_POLICY,
         } as const;
         const validated = validateRetrievalResult(proposed, finding);
         if (!validated.ok) throw new RetrievalError('result-validation');

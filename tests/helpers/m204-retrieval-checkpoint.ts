@@ -20,7 +20,6 @@ import type { LocalService } from '../../src/server/service.ts';
 import { RetrievalError } from '../../src/server/retrieval/retrieval-error.ts';
 import { resolveFindingCitations, loadCorpusCatalog } from '../../src/server/retrieval/corpus-catalog.ts';
 import { prepareEmbeddingInput } from '../../src/server/retrieval/embedding-input-fit.ts';
-import { presentResults, ruleOrder } from '../../src/client/components/results/resultPresentation.ts';
 import { buildFindingAnalysis } from '../../src/server/domain/finding-analysis.ts';
 import { classifyGuidanceSupport } from '../../src/server/retrieval/support-policy.ts';
 import { retrievalResult } from './m202-retrieval-fixture.ts';
@@ -38,7 +37,9 @@ import {
 import type { CheckpointCaseId, ControlledCaseId, RealCaseId } from './m204-checkpoint-fixture.ts';
 
 const repo = path.resolve(fileURLToPath(new URL('../../', import.meta.url)));
-const taskRoot = path.join(repo, 'temp', 'm204-retrieval-checkpoint');
+const historicalTaskRoot = path.join(repo, 'temp', 'm204-retrieval-checkpoint');
+const roleSelectionTaskRoot = path.join(repo, 'temp', 'm305-retrieval-role-proof');
+let taskRoot = historicalTaskRoot;
 const clientRoot = path.join(repo, 'dist', 'client');
 const uiScratch = path.join(repo, 'temp', 'm104-ui');
 
@@ -151,10 +152,21 @@ function validateGuidanceEnvelope(raw: unknown, seed: any) {
 }
 
 function checkpointPresentation(seed: any) {
-  const results = presentResults(seed.scan.findings, seed.scan.scannerReviewObservations);
-  const rendered = ruleOrder.flatMap(rule => results.filter(result => result.item.ruleId === rule));
-  const matches = rendered.filter(result => result.kind === 'finding'
-    && result.selection.findingId === checkpointFindingId);
+  const ruleOrder = ['image-alt', 'label', 'color-contrast'] as const;
+  const labels = {
+    'image-alt': 'Image alternative issue',
+    label: 'Form label issue',
+    'color-contrast': 'Color contrast issue',
+  } as const;
+  const findings = seed.scan.findings as readonly any[];
+  const rendered = ruleOrder.flatMap(rule => findings.filter(finding => finding.ruleId === rule)
+    .map((finding, index) => ({
+      kind: 'finding' as const,
+      item: finding,
+      label: `${labels[rule]} ${index + 1}`,
+      selection: { findingId: finding.findingId },
+    })));
+  const matches = rendered.filter(result => result.selection.findingId === checkpointFindingId);
   assert.equal(matches.length, 1, 'The checkpoint Finding must have one rendered card identity');
   return { target: matches[0]!, rendered };
 }
@@ -272,18 +284,20 @@ async function coordinate<T>(body: (resources: CoordinatedResources) => Promise<
 }
 
 function parseArguments(argv: readonly string[]) {
-  if (argv.length === 2 && argv[0] === '--prepare' && /^[0-9a-f]{40}$/.test(argv[1]!)) {
-    return { mode: 'prepare' as const, revision: argv[1]! };
+  const roleSelection = argv.at(-1) === '--m305-role-selection';
+  const args = roleSelection ? argv.slice(0, -1) : argv;
+  if (args.length === 2 && args[0] === '--prepare' && /^[0-9a-f]{40}$/.test(args[1]!)) {
+    return { mode: 'prepare' as const, revision: args[1]!, roleSelection };
   }
-  if (argv.length === 3 && argv[0] === '--real' && realCaseIds.includes(argv[1] as RealCaseId)
-      && /^[0-9a-f]{40}$/.test(argv[2]!)) {
-    return { mode: 'real' as const, caseId: argv[1] as RealCaseId, revision: argv[2]! };
+  if (args.length === 3 && args[0] === '--real' && realCaseIds.includes(args[1] as RealCaseId)
+      && /^[0-9a-f]{40}$/.test(args[2]!)) {
+    return { mode: 'real' as const, caseId: args[1] as RealCaseId, revision: args[2]!, roleSelection };
   }
-  if (argv.length === 3 && argv[0] === '--controlled' && controlledCaseIds.includes(argv[1] as ControlledCaseId)
-      && /^[0-9a-f]{40}$/.test(argv[2]!)) {
-    return { mode: 'controlled' as const, caseId: argv[1] as ControlledCaseId, revision: argv[2]! };
+  if (args.length === 3 && args[0] === '--controlled' && controlledCaseIds.includes(args[1] as ControlledCaseId)
+      && /^[0-9a-f]{40}$/.test(args[2]!)) {
+    return { mode: 'controlled' as const, caseId: args[1] as ControlledCaseId, revision: args[2]!, roleSelection };
   }
-  throw new Error('Usage: --prepare <HEAD> | --real G1|G2|G3 <HEAD> | --controlled S|A|Z|F|I <HEAD>');
+  throw new Error('Usage: --prepare <HEAD> | --real G1|G2|G3 <HEAD> | --controlled S|A|Z|F|I <HEAD> [--m305-role-selection]');
 }
 
 function assertRevision(revision: string): void {
@@ -337,7 +351,9 @@ async function prepare(revision: string): Promise<void> {
   const beforeCliChecks = fs.readdirSync(taskRoot).sort();
   for (const invalid of [[], ['--prepare'], ['--prepare', revision, 'extra'], ['--real', 'G4', revision],
     ['--real', 'G1', 'bad'],
-    ['--controlled', 'C', revision], ['--unknown', revision]]) {
+    ['--controlled', 'C', revision], ['--unknown', revision],
+    ['--m305-role-selection', '--prepare', revision],
+    ['--prepare', revision, '--m305-role-selection', '--m305-role-selection']]) {
     assert.throws(() => parseArguments(invalid));
     assert.deepEqual(fs.readdirSync(taskRoot).sort(), beforeCliChecks);
   }
@@ -897,6 +913,7 @@ async function executeCase(caseId: CheckpointCaseId, revision: string, real: boo
 
 async function main(argv: readonly string[]): Promise<void> {
   const parsed = parseArguments(argv);
+  taskRoot = parsed.roleSelection ? roleSelectionTaskRoot : historicalTaskRoot;
   if (parsed.mode === 'prepare') return prepare(parsed.revision);
   return executeCase(parsed.caseId, parsed.revision, parsed.mode === 'real');
 }

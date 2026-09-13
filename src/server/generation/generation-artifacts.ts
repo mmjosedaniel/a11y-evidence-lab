@@ -1,4 +1,4 @@
-export const PROMPT_VERSION = 'm302-instructions-v1';
+export const PROMPT_VERSION = 'm302-instructions-v2';
 export const SCHEMA_VERSION = 'm302-schema-v1';
 export const OUTPUT_CONTRACT_VERSION = 'm301-proposal-v1';
 export const GENERATION_DEADLINE_MS = 120000;
@@ -10,6 +10,10 @@ Put scanner and guidance claims only in findingSummary, userImpact and remediati
 Evidence sufficiency is complete and supported only because the application established eligibility. Confidence is high, medium or low for bounded interpretation; always explain uncertainty. Assumptions are conditional. Do not claim certification, legal compliance, whole-page or whole-site accessibility, complete success-criterion conformance, or that automated evidence establishes a fix.
 
 Preserve unresolved human judgment: for image-alt, determine purpose and suitable equivalent wording; for label, determine suitable visible wording and verify association; for color-contrast, determine meaningful text, applicable threshold or exception and visual context. Include a separate reminder to rescan and perform relevant human verification after changes. Do not present either human task as completed.
+
+Use unique exact strings from finding.facts[].reference for evidenceReferences and guidance.passages[].passageId for passageIds. Both arrays are required in each supported text field. findingSummary requires at least one evidence reference; userImpact and remediation each require at least one passage ID. Other reference arrays may be empty. Cite only identifiers that support that field's claims.
+
+Every prose string must be nonblank and at most 1000 JavaScript UTF-16 code units before normalization, except remediation.text may contain 2000. assumptions contains zero to five nonblank strings, each at most 500 code units. Avoid words beginning with certif, conform or complian, even in negative statements: the mechanical policy rejects them. Do not state that a Finding, issue or violation is already fixed, resolved or remediated.
 `;
 
 const stringSchema = Object.freeze({ type: 'string' });

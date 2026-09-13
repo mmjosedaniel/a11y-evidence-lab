@@ -153,6 +153,15 @@ dd { margin: 0; }
 .source-notices summary { min-height: 2.75rem; padding: 0.625rem 0; font-weight: 600; cursor: pointer; }
 .source-notice-text { margin-top: 0.75rem; }
 
+.finding-generation, .proposal-detail { margin-top: 2rem; border-top: 1px solid #c8d1dc; padding-top: 1.25rem; }
+.finding-generation > h4, .proposal-detail > h4 { margin-top: 0; }
+.finding-generation > button { margin-bottom: 1rem; }
+.proposal-detail > h4 { color: #5b3db5; }
+.proposal-detail h5, .proposal-detail h6 { font-size: 1rem; margin: 1rem 0 0.5rem; }
+.proposal-detail h6 { color: #4a586d; font-weight: 600; }
+.proposal-detail p, .proposal-detail li, .finding-generation p { max-width: 75ch; overflow-wrap: anywhere; white-space: pre-wrap; }
+.proposal-detail ul { padding-left: 1.5rem; }
+
 @media (max-width: 48rem) {
   main { padding: 1rem; }
   .setup, .results { padding: 1rem; }

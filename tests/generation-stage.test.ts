@@ -25,6 +25,10 @@ Put scanner and guidance claims only in findingSummary, userImpact and remediati
 Evidence sufficiency is complete and supported only because the application established eligibility. Confidence is high, medium or low for bounded interpretation; always explain uncertainty. Assumptions are conditional. Do not claim certification, legal compliance, whole-page or whole-site accessibility, complete success-criterion conformance, or that automated evidence establishes a fix.
 
 Preserve unresolved human judgment: for image-alt, determine purpose and suitable equivalent wording; for label, determine suitable visible wording and verify association; for color-contrast, determine meaningful text, applicable threshold or exception and visual context. Include a separate reminder to rescan and perform relevant human verification after changes. Do not present either human task as completed.
+
+Use unique exact strings from finding.facts[].reference for evidenceReferences and guidance.passages[].passageId for passageIds. Both arrays are required in each supported text field. findingSummary requires at least one evidence reference; userImpact and remediation each require at least one passage ID. Other reference arrays may be empty. Cite only identifiers that support that field's claims.
+
+Every prose string must be nonblank and at most 1000 JavaScript UTF-16 code units before normalization, except remediation.text may contain 2000. assumptions contains zero to five nonblank strings, each at most 500 code units. Avoid words beginning with certif, conform or complian, even in negative statements: the mechanical policy rejects them. Do not state that a Finding, issue or violation is already fixed, resolved or remediated.
 `;
 
 const requiredProposalProperties = [
@@ -211,7 +215,7 @@ test('projects only authenticated selected facts and canonical guidance into the
     ].sort());
     assert.strictEqual(request.configuration, configuration);
     assert.deepEqual(request.controls, configuration.parameters);
-    assert.equal(request.promptVersion, 'm302-instructions-v1');
+    assert.equal(request.promptVersion, 'm302-instructions-v2');
     assert.equal(request.schemaVersion, 'm302-schema-v1');
     assert.equal(request.outputContractVersion, 'm301-proposal-v1');
     assert.equal(request.deadlineMs, 120000);
@@ -377,6 +381,8 @@ test('admits only the two exact immutable configurations and fails malformed acc
     ['mode mismatch', generationConfiguration('local'), 'configuration'],
     ['extra configuration key', generationConfiguration('local', value => { value.extra = true; }), 'configuration'],
     ['wrong endpoint', generationConfiguration('local', value => { value.endpoint = 'https://example.test'; }), 'configuration'],
+    ['historical Local prompt version', generationConfiguration('local', value => { value.promptVersion = 'm302-instructions-v1'; }), 'configuration'],
+    ['historical Groq prompt version', generationConfiguration('groq', value => { value.promptVersion = 'm302-instructions-v1'; }), 'configuration'],
     ['wrong parameters', generationConfiguration('local', value => { value.parameters.temperature = 0.1; }), 'configuration'],
     ['missing binding', generationConfiguration('local', value => { delete (value as Record<string, unknown>).binding; }), 'configuration'],
     ['malformed accounting', generationConfiguration('groq', value => { value.accounting.contextTokenLimit = -0; }), 'input-fit'],

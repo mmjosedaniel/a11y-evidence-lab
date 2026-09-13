@@ -36,7 +36,7 @@ test('publishes the one exact deeply frozen Local generation configuration', () 
   assert.deepEqual(QWEN_CONFIGURATION, {
     providerContext: { mode: 'local', provider: 'ollama', model: 'qwen3.5:4b' },
     adapterId: 'ollama-generation', adapterVersion: 'm303-ollama-chat-v1', endpoint: 'ollama-loopback-chat',
-    promptVersion: 'm302-instructions-v1', schemaVersion: 'm302-schema-v1', outputContractVersion: 'm301-proposal-v1',
+    promptVersion: 'm302-instructions-v2', schemaVersion: 'm302-schema-v1', outputContractVersion: 'm301-proposal-v1',
     parameters: LOCAL_PARAMETERS,
     binding: {
       kind: 'local', runtimeVersion: '0.33.3', modelDigest: QWEN_DIGEST,
@@ -185,7 +185,7 @@ test('fails closed on request identity, versions, controls, schema, domain and U
   const configuration = structuredClone(QWEN_CONFIGURATION) as GenerationConfiguration;
   const cases: GenerationRequest[] = [
     { ...cloneRequest(base), configuration },
-    { ...cloneRequest(base), promptVersion: 'changed' as never },
+    { ...cloneRequest(base), promptVersion: 'm302-instructions-v1' as never },
     { ...cloneRequest(base), schemaVersion: 'changed' as never },
     { ...cloneRequest(base), outputContractVersion: 'changed' as never },
     { ...cloneRequest(base), controls: { ...LOCAL_PARAMETERS, temperature: 1 } as never },

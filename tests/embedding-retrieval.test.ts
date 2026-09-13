@@ -286,7 +286,7 @@ test('final metadata verification rejects tag, model and loaded-state drift afte
   }
 });
 
-test('ranking uses actual supplied-vector MemoryVectorStore, broad rule/SC filter and ASCII ties before top three', async () => {
+test('ranking uses the complete broad-filtered set and selects the first passage per required role in ASCII tie order', async () => {
   const currentCatalog = await catalog();
   const documents = createCorpusDocuments(currentCatalog);
   const vectors = documents.map((document, index) => {
@@ -300,7 +300,8 @@ test('ranking uses actual supplied-vector MemoryVectorStore, broad rule/SC filte
   assert.equal(queryResult.ok, true);
   if (!queryResult.ok) return;
   const ranked = await rankCanonicalPassages(store, currentCatalog, queryResult.value, vector(0));
-  assert.deepEqual(ranked.map(item => item.passageId), ['h37-text-alternative','h67-ignored-image','understanding111-decoration']);
+  assert.deepEqual(ranked.map(item => item.passageId),
+    ['h37-text-alternative','understanding111-decoration','wcag22-sc111']);
   assert.deepEqual(ranked.map(item => item.score), [1, 1, 1]);
   assert.equal(Object.isFrozen(ranked), true);
   ranked.forEach(item => assert.equal(Object.isFrozen(item), true));
@@ -328,7 +329,7 @@ test('ranking rejects malformed library results instead of repairing unknown, du
   store.similaritySearchVectorWithScore = original;
 });
 
-test('ranking preserves signed zero and applies ASCII passage ordering to exact zero ties before cutoff', async () => {
+test('role selection preserves signed zero and applies ASCII passage ordering to exact zero ties', async () => {
   const currentCatalog = await catalog();
   const documents = createCorpusDocuments(currentCatalog).filter(document => document.metadata.ruleIds[0] === 'image-alt');
   const store = await buildVectorCollection(currentCatalog, currentCatalog.passages.map((_, index) => vector(index % 16)));
@@ -339,9 +340,40 @@ test('ranking preserves signed zero and applies ASCII passage ordering to exact 
     [documents[4], -0], [documents[3], 0], [documents[2], -0], [documents[1], 0], [documents[0], -0],
   ];
   const result = await rankCanonicalPassages(store, currentCatalog, queryResult.value, vector());
-  assert.deepEqual(result.map(item => item.passageId), ['h37-text-alternative','h67-ignored-image','understanding111-decoration']);
+  assert.deepEqual(result.map(item => item.passageId),
+    ['h37-text-alternative','understanding111-decoration','wcag22-sc111']);
   assert.equal(Object.is(result[0].score, 0), true);
   assert.equal(Object.is(result[1].score, -0), true);
+});
+
+test('role selection ranks every filtered candidate before choosing varied within-role winners', async () => {
+  const currentCatalog = await catalog();
+  const documents = createCorpusDocuments(currentCatalog).filter(document =>
+    document.metadata.ruleIds[0] === 'image-alt');
+  const byId = new Map(documents.map(document => [document.id, document]));
+  const store = await buildVectorCollection(currentCatalog,
+    currentCatalog.passages.map((_, index) => vector(index % 16)));
+  const queryResult = createFindingQuery(imageFinding());
+  assert.equal(queryResult.ok, true);
+  if (!queryResult.ok) return;
+  let requestedCandidates = 0;
+  store.similaritySearchVectorWithScore = async (_query, k) => {
+    requestedCandidates = k;
+    return [
+      [byId.get('h37-text-alternative')!, 0.98],
+      [byId.get('wcag22-sc111')!, 0.2],
+      [byId.get('understanding111-decoration')!, 0.96],
+      [byId.get('h67-ignored-image')!, 0.99],
+      [byId.get('understanding111-intent')!, 0.97],
+    ];
+  };
+  const result = await rankCanonicalPassages(store, currentCatalog, queryResult.value, vector());
+  assert.equal(requestedCandidates, 16);
+  assert.deepEqual(result, [
+    { passageId: 'h67-ignored-image', score: 0.99 },
+    { passageId: 'understanding111-intent', score: 0.97 },
+    { passageId: 'wcag22-sc111', score: 0.2 },
+  ]);
 });
 
 function executorRequester(options: { failEmbed?: number; driftAtTags?: number; deferVersion?: ReturnType<typeof deferred<unknown>> } = {}) {
@@ -358,7 +390,7 @@ function executorRequester(options: { failEmbed?: number; driftAtTags?: number; 
   });
 }
 
-test('exact retrieval is lazy, builds all 16 vectors once, embeds one query per call and returns validated detached immutable top3', async () => {
+test('exact retrieval is lazy, builds all 16 vectors once, embeds one query per call and returns marked validated immutable role selection', async () => {
   let loads = 0;
   const requests = executorRequester();
   const execute = createExactRetrieval({ request: requests.request, loadCatalog: async () => { loads += 1; return loadCorpusCatalog(); } });
@@ -371,6 +403,7 @@ test('exact retrieval is lazy, builds all 16 vectors once, embeds one query per 
   assert.equal(firstEmbeds.filter(call => call.input?.startsWith(DOCUMENT_PREFIX)).length, 16);
   assert.equal(firstEmbeds.filter(call => call.input?.startsWith(QUERY_PREFIX)).length, 1);
   assert.equal(validateRetrievalResult(first, finding).ok, true);
+  assert.equal(first.selectionPolicy, 'highest-per-required-role-v1');
   assert.equal(first.passages.length, 3);
   assert.equal(Object.isFrozen(first), true);
   assert.equal(Object.isFrozen(first.passages), true);

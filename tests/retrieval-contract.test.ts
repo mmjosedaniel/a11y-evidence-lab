@@ -247,6 +247,58 @@ test('accepts only exact immutable results with zero through three canonical map
   if (negativeZero.ok) assert.equal(Object.is(negativeZero.value.passages[0].score, -0), true);
 });
 
+test('accepts only the finite role-selection policy while preserving unmarked historical results', () => {
+  const entry = queryCases[0];
+  const passages = [
+    { passageId: 'h37-text-alternative', score: 0.75 },
+    { passageId: 'understanding111-intent', score: 0.5 },
+    { passageId: 'wcag22-sc111', score: 0.25 },
+  ];
+  const historical = retrievalResult(entry.expected, [
+    { passageId: 'h37-text-alternative', score: 0.75 },
+    { passageId: 'h67-ignored-image', score: 0.5 },
+  ]);
+  const historicalResult = validateRetrievalResult(historical, entry.finding);
+  assert.equal(historicalResult.ok, true);
+  if (historicalResult.ok) assert.equal(Object.hasOwn(historicalResult.value, 'selectionPolicy'), false);
+
+  const marked = { ...retrievalResult(entry.expected, passages),
+    selectionPolicy: 'highest-per-required-role-v1' };
+  const markedResult = validateRetrievalResult(marked, entry.finding);
+  assert.equal(markedResult.ok, true);
+  if (markedResult.ok) {
+    assert.deepEqual(markedResult.value, marked);
+    assert.equal(markedResult.value.selectionPolicy, 'highest-per-required-role-v1');
+    expectDeepFrozen(markedResult);
+  }
+
+  for (const partial of [[], passages.slice(0, 1), passages.slice(0, 2)]) {
+    const result = validateRetrievalResult({ ...retrievalResult(entry.expected, partial),
+      selectionPolicy: 'highest-per-required-role-v1' }, entry.finding);
+    assert.equal(result.ok, true);
+    if (result.ok) assert.deepEqual(result.value.passages, partial);
+  }
+
+  for (const policy of [undefined, null, 'global-three-v1', 'highest-per-required-role-v2']) {
+    assert.deepEqual(validateRetrievalResult({ ...retrievalResult(entry.expected, passages),
+      selectionPolicy: policy }, entry.finding), resultFailure);
+  }
+  const duplicateRole = { ...retrievalResult(entry.expected, [
+    { passageId: 'h37-text-alternative', score: 0.75 },
+    { passageId: 'h67-ignored-image', score: 0.5 },
+  ]), selectionPolicy: 'highest-per-required-role-v1' };
+  assert.deepEqual(validateRetrievalResult(duplicateRole, entry.finding), resultFailure);
+
+  const malformed = [
+    { ...marked, extra: true },
+    { ...marked, passages: marked.passages.map((passage, index) => index === 0
+      ? { ...passage, extra: true } : passage) },
+    { ...marked, passages: marked.passages.map((passage, index) => index === 0
+      ? { ...passage, score: Number.NaN } : passage) },
+  ];
+  for (const input of malformed) assert.deepEqual(validateRetrievalResult(input, entry.finding), resultFailure);
+});
+
 test('enforces finite score bounds, descending score order and exact ASCII tie ordering without repair', () => {
   const entry = queryCases[0];
   const accepted = [
