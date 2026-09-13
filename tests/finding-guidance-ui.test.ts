@@ -8,6 +8,7 @@ import type { Page, Route } from 'playwright';
 import { resolveCitations } from '../src/server/retrieval/citation-resolution.ts';
 import { SOURCE_NOTICES } from '../src/server/retrieval/source-notices.ts';
 import { buildFindingAnalysis } from '../src/server/domain/finding-analysis.ts';
+import { RETRIEVAL_SELECTION_POLICY } from '../src/server/retrieval/retrieval-contract.ts';
 import { classifyGuidanceSupport } from '../src/server/retrieval/support-policy.ts';
 import {
   assessedIncompleteRetrievalRun,
@@ -60,9 +61,17 @@ async function show(run: unknown, guidance = true): Promise<void> {
   await findingButton().click();
 }
 
-function citationOutcome(kind: 'supported' | 'incomplete' | 'missing', runId: string): unknown {
+function citationOutcome(
+  kind: 'supported' | 'incomplete' | 'missing',
+  runId: string,
+  markedSelectionPolicy = false,
+): unknown {
   const raw = kind === 'supported' ? assessedSupportedRetrievalRun(runId)
     : kind === 'incomplete' ? assessedIncompleteRetrievalRun(runId) : assessedMissingRetrievalRun(runId);
+  if (markedSelectionPolicy) {
+    const retrieval = selectedFinding(raw).retrieval as Mutable;
+    (retrieval.result as Mutable).selectionPolicy = RETRIEVAL_SELECTION_POLICY;
+  }
   const run = valid(raw) as Mutable;
   const finding = selectedFinding(run) as Mutable;
   const native = selectedFinding(completedScanRun(runId));
@@ -233,10 +242,65 @@ describe('selected Finding guidance UI', { concurrency: false, timeout: 120000 }
     }
   });
 
+  it('explains marked and historical retrieval selection at desktop and narrow widths', async () => {
+    const explanations = {
+      marked: 'The highest-ranked passage for each required guidance role is shown.',
+      legacy: 'Up to three highest-ranked passages are shown.',
+    } as const;
+    const evidenceRoot = path.join(repo, 'temp', `m203-ui-${crypto.randomUUID()}`);
+    assert.equal(fs.existsSync(evidenceRoot), false);
+    fs.mkdirSync(evidenceRoot);
+    const stat = fs.lstatSync(evidenceRoot);
+    assert.ok(stat.isDirectory() && !stat.isSymbolicLink());
+    const failures: unknown[] = [];
+
+    for (const policy of ['marked', 'legacy'] as const) {
+      const runId = `guidance-policy-${policy}`;
+      await show(valid(completedScanRun(runId)));
+      const outcome = citationOutcome('supported', runId, policy === 'marked');
+      await page.evaluate(outcome => {
+        window.m104.guidance = () => Promise.resolve(structuredClone(outcome));
+        window.m104.rerender(true, {}, true);
+      }, outcome);
+      await guidanceButton().click();
+      const detail = page.getByRole('region', { name: /Image alternative issue 1 evidence/i });
+      await detail.getByText('Eligible for generation', { exact: true }).waitFor();
+
+      for (const [viewport, width] of [['desktop', 1280], ['narrow', 320]] as const) {
+        await page.setViewportSize({ width, height: 800 });
+        await paint();
+        try {
+          assert.equal(await detail.getByText(explanations[policy], { exact: true }).count(), 1,
+            `${policy} policy explanation at ${width}x800`);
+          const otherPolicy = policy === 'marked' ? 'legacy' : 'marked';
+          assert.equal(await detail.getByText(explanations[otherPolicy], { exact: true }).count(), 0,
+            `${policy} record must not show the ${otherPolicy} explanation`);
+          assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1),
+            `${policy} policy presentation must not overflow at ${width}x800`);
+        } catch (error) {
+          failures.push(error);
+        }
+        await detail.getByRole('heading', { name: 'Retrieved guidance', exact: true })
+          .evaluate(element => element.scrollIntoView({ block: 'start' }));
+        await paint();
+        await page.screenshot({ path: path.join(evidenceRoot, `${policy}-${viewport}.png`) });
+      }
+    }
+
+    assert.deepEqual(fs.readdirSync(evidenceRoot).sort(), [
+      'legacy-desktop.png', 'legacy-narrow.png', 'marked-desktop.png', 'marked-narrow.png',
+    ]);
+    console.log(JSON.stringify({ event: 'm305-policy-ui-evidence',
+      root: path.relative(repo, evidenceRoot).replaceAll('\\', '/'), browserSource: 'm104-ui-ready',
+      policies: ['marked', 'legacy'], viewports: ['1280x800', '320x800'], retained: true, synthetic: true }));
+    if (failures.length) throw new AggregateError(failures,
+      'Each persisted retrieval policy must expose its exact explanation without horizontal overflow');
+  });
+
   it('renders evidence and guidance abstentions distinctly and confirms that generation was not called', async () => {
     for (const [runId, outcome, expected] of [
       ['guidance-evidence', evidenceOutcome('guidance-evidence'), ['Required captured evidence is incomplete.', 'Alternative text', 'Unavailable (missing)']],
-      ['guidance-missing', citationOutcome('missing', 'guidance-missing'), ['No applicable guidance was retrieved.', 'criterion', 'interpretation', 'remediation']],
+      ['guidance-missing', citationOutcome('missing', 'guidance-missing', true), ['No applicable guidance was retrieved.', 'criterion', 'interpretation', 'remediation']],
       ['guidance-incomplete', citationOutcome('incomplete', 'guidance-incomplete'), ['does not cover every required role', 'interpretation', 'remediation']],
     ] as const) {
       await show(runId === 'guidance-evidence' ? evidenceInitial(runId) : valid(completedScanRun(runId)));
@@ -257,6 +321,11 @@ describe('selected Finding guidance UI', { concurrency: false, timeout: 120000 }
       if (runId === 'guidance-missing') {
         assert.equal(await detail.getByText('wcag22-mvp-v1', { exact: true }).count(), 1,
           'Zero-passage retrieval must show its exact corpus version once');
+        for (const explanation of [
+          'The highest-ranked passage for each required guidance role is shown.',
+          'Up to three highest-ranked passages are shown.',
+        ]) assert.equal(await detail.getByText(explanation, { exact: true }).count(), 0,
+          'Zero-passage retrieval must not show a selection-policy explanation');
       }
     }
   });

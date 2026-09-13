@@ -22,7 +22,10 @@ import {
   generationAdapterHarness,
   generationFixture,
   generationInvocation,
+  proposalGenerationRun,
+  runningGenerationRun,
 } from './helpers/m302-generation-fixture.ts';
+import { controlledMissingPrerequisiteAdapter } from './helpers/m305-generation-fixture.ts';
 
 const repo = fileURLToPath(new URL('../', import.meta.url));
 const tempParent = path.join(repo, 'temp');
@@ -132,10 +135,11 @@ async function start(box: Sandbox, options: Partial<ServiceOptions> = {}): Promi
   box.services.push(result.service);
   return result.service;
 }
-async function ready(box: Sandbox, mode: Mode = 'local'): Promise<LocalService> {
+async function ready(box: Sandbox, mode: Mode = 'local',
+  result: unknown = expectedRetrievalResult()): Promise<LocalService> {
   seedCompleted(box.runs, mode);
   const service = await start(box);
-  const retrieval = await service.retrieveFinding(retrievalRequest(), async () => expectedRetrievalResult());
+  const retrieval = await service.retrieveFinding(retrievalRequest(), async () => result);
   assert.ok(retrieval.ok, JSON.stringify(retrieval));
   return service;
 }
@@ -148,6 +152,58 @@ function failed(result: Awaited<ReturnType<LocalService['generateFinding']>>, er
 
 test('first module exposes the purpose-named generation operation', serial, () => {
   assert.equal(typeof createGenerationOperation, 'function');
+});
+
+test('canonical service admission preserves historical and current persisted invocation tuples', serial, async () => {
+  for (const promptVersion of ['m302-instructions-v1', 'm302-instructions-v2'] as const) {
+    await withSandbox(async box => {
+      seedSupported(box.runs);
+      const store = open(box.runs);
+      const supported = assessedSupportedRetrievalRun();
+      const running = runningGenerationRun();
+      success(store.updateGeneration(supported as never, running as never));
+      const completed = proposalGenerationRun('run-01', 'local', promptVersion);
+      const written = store.updateGeneration(running as never, completed as never);
+      assert.equal(written.ok, true, `Canonical repository rejected ${promptVersion}`);
+      if (!written.ok) return;
+      const service = await start(box);
+      const read = service.readRun('run-01');
+      assert.ok(read.ok, JSON.stringify(read));
+      if (!read.ok) return;
+      const invocation = (selectedFinding(read.run).generation as Record<string, unknown>).invocation as Record<string, unknown>;
+      assert.equal(invocation.promptVersion, promptVersion);
+    });
+  }
+});
+
+test('marked role selection remains durable and supplies the unchanged three-passage generation package', serial, async () => {
+  await withSandbox(async box => {
+    const marked = { ...expectedRetrievalResult(), selectionPolicy: 'highest-per-required-role-v1' as const };
+    const service = await ready(box, 'local', marked);
+    const harness = generationAdapterHarness();
+    let preparedInput: Record<string, unknown> | undefined;
+    const adapter = Object.freeze({
+      configuration: harness.adapter.configuration,
+      prepare(request: Parameters<typeof harness.adapter.prepare>[0], signal: AbortSignal) {
+        const message = request.messages[1];
+        assert.ok(message && message.role === 'user');
+        preparedInput = JSON.parse(message.content) as Record<string, unknown>;
+        return harness.adapter.prepare(request, signal);
+      },
+    });
+    const outcome = await service.generateFinding(request(), adapter);
+    assert.ok(outcome.ok, JSON.stringify(outcome));
+    if (!outcome.ok) return;
+    const persistedRetrieval = selectedFinding(outcome.run).retrieval as Record<string, unknown>;
+    assert.equal((persistedRetrieval.result as Record<string, unknown>).selectionPolicy,
+      'highest-per-required-role-v1');
+    const guidance = preparedInput?.guidance as Record<string, unknown>;
+    const passages = guidance.passages as readonly Record<string, unknown>[];
+    assert.deepEqual(passages.map(passage => passage.passageId),
+      ['wcag22-sc111', 'understanding111-intent', 'h37-text-alternative']);
+    assert.equal(passages.length, 3);
+    assert.equal(Object.hasOwn(preparedInput!, 'selectionPolicy'), false);
+  });
 });
 
 test('supported retained ownership publishes one durable pending proposal in either immutable mode', serial, async () => {
@@ -186,7 +242,8 @@ test('supported retained ownership publishes one durable pending proposal in eit
 test('pre-call and attempted failures persist exact invocation truth without a proposal', serial, async () => {
   await withSandbox(async box => {
     const missingService = await ready(box);
-    const missing = failed(await missingService.generateFinding(request()), 'missing-prerequisite');
+    const missing = failed(await missingService.generateFinding(
+      request(), controlledMissingPrerequisiteAdapter()), 'missing-prerequisite');
     assert.equal(missing.persisted, true);
     assert.equal(missing.invocationPersisted, false);
     assert.equal('invocation' in missing, false);

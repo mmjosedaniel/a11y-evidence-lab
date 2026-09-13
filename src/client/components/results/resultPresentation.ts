@@ -1,4 +1,6 @@
 import type { Finding, ScannerReviewObservation } from '../../../server/domain/run-contract.ts';
+import { generationStatus } from './FindingGeneration.tsx';
+import type { GenerationPresentation } from './FindingGeneration.tsx';
 
 export type EvidenceItem = Finding | ScannerReviewObservation;
 export type RuleId = Finding['ruleId'];
@@ -99,6 +101,8 @@ function findingExplanation(item: Finding): string {
 function findingWorkflowStatus(finding: Finding): string | null {
   if (finding.state === 'unprocessed') return null;
   if (finding.state === 'abstained') return 'No proposal generated';
+  if (finding.state === 'proposal-pending-review') return 'Proposal pending review';
+  if ('generation' in finding) return finding.generation.status === 'failed' ? 'Generation failed' : 'Generation unfinished';
   if (finding.state === 'failed') return 'Guidance failed';
   if ('analysis' in finding && finding.analysis.status === 'completed' &&
       'retrieval' in finding && finding.retrieval.status === 'completed' &&
@@ -139,6 +143,7 @@ function manualReviewLabel(observation: ScannerReviewObservation, index: number)
 export function presentResults(
   findings: readonly Finding[],
   observations: readonly ScannerReviewObservation[],
+  generation: Readonly<Record<string, GenerationPresentation>> = {},
 ): readonly PresentedResult[] {
   const presentedFindings: PresentedFinding[] = findings.map(finding => ({
     kind: 'finding',
@@ -149,7 +154,7 @@ export function presentResults(
     selection: { kind: 'finding', findingId: finding.findingId },
     summary: affectedElementText(finding),
     explanation: findingExplanation(finding),
-    workflowStatus: findingWorkflowStatus(finding),
+    workflowStatus: generation[finding.findingId] ? generationStatus(generation[finding.findingId]!, finding.findingId) : findingWorkflowStatus(finding),
   }));
   const presentedReviews: PresentedManualReview[] = observations.map((observation, observationIndex) => ({
     kind: 'manual-review',

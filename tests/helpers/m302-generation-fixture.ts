@@ -8,6 +8,7 @@ import type {
   GenerationRequest,
   ProviderInvocation,
 } from '../../src/server/generation/generation-contract.ts';
+import { PROMPT_VERSION } from '../../src/server/generation/generation-artifacts.ts';
 import { createFindingQuery } from '../../src/server/retrieval/finding-query.ts';
 import type { RetrievalResult } from '../../src/server/retrieval/retrieval-contract.ts';
 import {
@@ -139,7 +140,7 @@ export function generationConfiguration(
     adapterId: 'ollama-generation',
     adapterVersion: 'adapter-v1',
     endpoint: 'ollama-loopback-chat',
-    promptVersion: 'm302-instructions-v1',
+    promptVersion: PROMPT_VERSION,
     schemaVersion: 'm302-schema-v1',
     outputContractVersion: 'm301-proposal-v1',
     parameters: { temperature: 0, top_p: 1, num_predict: 4096, think: false, stream: false, responses: 1 },
@@ -157,7 +158,7 @@ export function generationConfiguration(
     adapterId: 'groq-generation',
     adapterVersion: 'adapter-v1',
     endpoint: 'groq-chat-completions',
-    promptVersion: 'm302-instructions-v1',
+    promptVersion: PROMPT_VERSION,
     schemaVersion: 'm302-schema-v1',
     outputContractVersion: 'm301-proposal-v1',
     parameters: {
@@ -178,13 +179,14 @@ export function generationInvocation(
   mode: GenerationMode = 'local',
   outcome: ProviderInvocation['outcome'] = 'response',
   validation: ProviderInvocation['validation'] = outcome === 'response' ? 'passed' : 'not-run',
+  promptVersion: 'm302-instructions-v1' | 'm302-instructions-v2' = PROMPT_VERSION,
 ): ProviderInvocation {
   const configuration = generationConfiguration(mode);
   return structuredClone({
     adapterId: configuration.adapterId,
     adapterVersion: configuration.adapterVersion,
     endpointIdentity: configuration.endpoint,
-    promptVersion: configuration.promptVersion,
+    promptVersion,
     schemaVersion: configuration.schemaVersion,
     outputContractVersion: configuration.outputContractVersion,
     parameters: configuration.parameters,
@@ -214,6 +216,7 @@ export function runningGenerationRun(
 
 export function proposalGenerationRun(
   runId = 'run-01', mode: GenerationMode = 'local',
+  promptVersion: 'm302-instructions-v1' | 'm302-instructions-v2' = PROMPT_VERSION,
 ): Record<string | number, unknown> {
   const run = supportedGenerationBase(runId, mode);
   const proposal = generationFixture('image-alt').proposal;
@@ -221,7 +224,7 @@ export function proposalGenerationRun(
     state: 'proposal-pending-review',
     generation: {
       status: 'completed', startedAt: generationStartedAt, finishedAt: generationFinishedAt,
-      invocation: generationInvocation(mode),
+      invocation: generationInvocation(mode, 'response', 'passed', promptVersion),
     },
     result: proposal,
   });

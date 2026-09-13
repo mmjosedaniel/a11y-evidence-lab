@@ -4,6 +4,7 @@ import type { CompletedRun, RunRepository } from '../persistence/run-repository.
 import { executeGeneration } from '../generation/generation-stage.ts';
 import type { GenerationAdapter, GenerationErrorCode, GenerationOutcome, ProviderInvocation } from '../generation/generation-contract.ts';
 import type { GenerationServiceOutcome } from './contracts.ts';
+import { resolveGenerationAdapter } from './generation-adapters.ts';
 
 type Selection = { runId: string; findingId: string };
 type Reservation = {
@@ -82,7 +83,8 @@ export function createGenerationOperation(dependencies: Dependencies) {
         ? { status: 'failed', error: 'shutdown', cleanupFailed: false }
         : await executeGeneration({ finding: Object.freeze(native), retrieval: selected.retrieval.result,
           analysisStartedAt: selected.analysis.startedAt, analysisFinishedAt: selected.analysis.finishedAt,
-          providerContext: durable!.providerContext, ...(adapter ? { adapter } : {}), signal: reservation.controller.signal });
+          providerContext: durable!.providerContext,
+          adapter: adapter ?? resolveGenerationAdapter(durable!.providerContext), signal: reservation.controller.signal });
       if (settled || dependencies.deadlineExpired()) return;
       const invocation = 'invocation' in outcome ? outcome.invocation : undefined;
       let error: GenerationErrorCode | undefined = outcome.status === 'failed' ? outcome.error

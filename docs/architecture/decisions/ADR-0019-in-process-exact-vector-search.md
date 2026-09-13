@@ -19,6 +19,8 @@ LangChain documents an in-memory vector store intended for lightweight and demon
 
 ## Decision
 
+The 2026-09-12 amendment below governs current passage selection. The original global top-three decision remains recorded here to interpret earlier implementations and observations.
+
 Use an in-process exact vector search as the MVP retrieval baseline. Evaluate LangChain JavaScript's documented in-memory vector-store integration for this role.
 
 - Generate canonical passage and query vectors locally with the EmbeddingGemma configuration accepted in ADR-0006. The canonical setup tag is `embeddinggemma`; the 300M designation identifies the model family rather than a second configuration, and evaluation records the resolved full artifact digest.
@@ -41,6 +43,16 @@ This decision supersedes ADR-0007 for the MVP. Chroma may be reconsidered only a
 - The vector collection is built on the first explicit retrieval request after process start and then reused in that process until a material incompatibility requires one rebuild. This avoids startup embedding while accepting a small first-retrieval or rebuild cost, measured only as part of the existing compact retrieval evaluation.
 - Exact linear search is intentionally not a production-scale indexing strategy. Corpus growth or performance evidence may require a later ADR.
 - LangChain's in-memory integration is an evaluation baseline, not a release-qualified dependency or authorization to implement.
+
+## Selection amendment — 2026-09-12
+
+**Status:** Accepted by the owner after the [M3-05 retrieval investigation and independent proposal review](../../plans/completed/m3-05-generation-checkpoint.md#m305-r-proposal-01--proposed-selection-by-guidance-role). M3-05 records implementation and fresh observations separately; this decision alone does not establish retrieval quality or successful generation.
+
+Keep the closed corpus, EmbeddingGemma configuration, privacy-safe query, broad rule/success-criterion filter, exact cosine scores and passage-ID tie-break. Rank the complete filtered candidate set before selecting output members. Traverse that ordered set and retain the highest-ranked passage for each profile-required guidance role: criterion, interpretation and remediation. Return at most three passages in their original score/ID order. Do not prefilter by role or exact passage ID, rewrite queries, make an additional embedding request, add a separate ranking model or retrieve fallback material.
+
+This supersedes only the original global top-three membership rule, its unqualified top-k provenance interpretation, and the consequence that membership is not role-constrained. Semantic ranking now selects among candidates within each role. The current catalog has singleton criterion choices and singleton label/contrast remediation choices; those members are consequently fixed. With every required role present in the complete current catalog, role coverage is satisfied by construction. It is not measured relevance, semantic grounding or generation quality; original gold mappings and human judgment remain necessary.
+
+Record the new selection policy explicitly in future nested retrieval provenance. Preserve the original unmarked global-three records and their interpretation without rewriting, migrating or replaying them. Continue to validate canonical passages and classify support after selection: missing roles, no applicable passages, unresolved returned-set conflicts and execution/integrity failures retain their existing distinct outcomes. Evidence sufficiency, explicit generation, provider admission and no-call abstention remain unchanged. The fixed corpus version/text, model/query input identities and old evaluation manifests remain unchanged; affected fixed retrieval cases produce new evidence under REQ-EVAL-005/007.
 
 ## Primary references
 

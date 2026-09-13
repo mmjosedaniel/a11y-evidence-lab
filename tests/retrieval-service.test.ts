@@ -285,6 +285,27 @@ test('retrieval reserves synchronously, publishes running before immutable selec
   });
 });
 
+test('marked role selection survives publication, disk, repository validation and restart', serial, async () => {
+  await withSandbox(async box => {
+    seedCompleted(box.runs);
+    const service = await start(box);
+    const marked = { ...expectedRetrievalResult(), selectionPolicy: 'highest-per-required-role-v1' as const };
+    const outcome = await service.retrieveFinding(retrievalRequest(), async () => marked);
+    assert.ok(outcome.ok, JSON.stringify(outcome));
+    if (!outcome.ok) return;
+    assert.deepEqual((retrievalOf(outcome.run).result as Record<string, unknown>).selectionPolicy,
+      'highest-per-required-role-v1');
+    assert.deepEqual(disk(box.runs), outcome.run);
+    assert.deepEqual(service.readRun('run-01'), { ok: true, run: outcome.run, interrupted: false });
+    assert.deepEqual(await service.stop(), { ok: true, status: 'stopped' });
+    const restarted = await start(box);
+    const historical = restarted.readRun('run-01');
+    assert.ok(historical.ok && historical.interrupted === true);
+    if (historical.ok) assert.equal((retrievalOf(historical.run).result as Record<string, unknown>).selectionPolicy,
+      'highest-per-required-role-v1');
+  });
+});
+
 test('supported retrieval ownership transfers once to generation and cannot be reacquired after terminal publication', serial, async () => {
   await withSandbox(async box => {
     seedCompleted(box.runs);

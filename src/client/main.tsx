@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { App } from './App.tsx';
 import type { AnalyzeIntent } from './App.tsx';
 import type { GuidanceIntent } from './finding-guidance-admission.ts';
+import type { GenerationIntent } from './finding-generation-admission.ts';
 import './styles.css';
 
 const root = document.getElementById('root');
@@ -18,4 +19,10 @@ async function retrieveFinding(intent: GuidanceIntent): Promise<unknown> {
   return response.json() as Promise<unknown>;
 }
 
-if (root) createRoot(root).render(<App analyze={analyze} retrieveFinding={retrieveFinding} />);
+async function generateFinding(intent: GenerationIntent, signal: AbortSignal): Promise<unknown> {
+  const response = await fetch('/api/finding-generation', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ runId: intent.runId, findingId: intent.findingId }), signal });
+  return response.json() as Promise<unknown>;
+}
+
+if (root) createRoot(root).render(<App analyze={analyze} retrieveFinding={retrieveFinding} generateFinding={generateFinding} />);

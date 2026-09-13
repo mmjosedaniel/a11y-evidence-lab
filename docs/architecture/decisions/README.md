@@ -33,6 +33,8 @@ Candidate technologies and architecture options not covered by these records rem
 
 ## Partial amendments to current decisions
 
+ADR-0019's [2026-09-12 selection amendment](ADR-0019-in-process-exact-vector-search.md#selection-amendment--2026-09-12) retains exact cosine ranking and three outputs, selecting the highest-ranked passage per required guidance role after complete filtered ranking. Earlier global-three observations remain historical evidence; role coverage is distinct from relevance.
+
 ADR-0024's [2026-09-08 conditional third-attempt amendment](ADR-0024-milestone-slice-tdd-with-independent-ownership.md#conditional-third-implementation-attempt) permits one evidence-justified final implementation correction while preserving early stops, stricter existing grants, and research/review budgets.
 
 ADR-0024's [2026-08-30 first-module Red amendment](ADR-0024-milestone-slice-tdd-with-independent-ownership.md#first-module-red-exception) permits an intentional missing production module/export as initial Red under a verified environment and complete bounded behavioral tests. It preserves separate Green, strict typechecking, write ownership, and all other readiness gates; it adds no production stub or workflow phase.

@@ -1,11 +1,12 @@
 import type { ReactElement } from 'react';
 import type { Finding, ProviderContext } from '../../../server/domain/run-contract.ts';
 
-export function FindingOutcome({ finding, providerContext }: {
+export function FindingOutcome({ finding, providerContext, generationConsumed = false }: {
+  readonly generationConsumed?: boolean;
   readonly finding: Finding; readonly providerContext: ProviderContext;
 }): ReactElement | null {
   const analysis = 'analysis' in finding ? finding.analysis : null;
-  if (finding.state === 'failed') {
+  if (finding.state === 'failed' && !('generation' in finding)) {
     const error = 'retrieval' in finding ? finding.retrieval.status === 'failed' && finding.retrieval.error
       : analysis?.status === 'failed' && analysis.error;
     return <div className="finding-outcome"><h4>Guidance failed</h4><p>{error}</p></div>;
@@ -43,6 +44,6 @@ export function FindingOutcome({ finding, providerContext }: {
         <div><dt>Provider</dt><dd>{providerContext.provider}</dd></div>
         <div><dt>Model</dt><dd>{providerContext.model}</dd></div>
       </dl>
-    </> : support?.state === 'supported' && <h4>Eligible for generation</h4>}
+    </> : support?.state === 'supported' && !generationConsumed && !('generation' in finding) && <h4>Eligible for generation</h4>}
   </div>;
 }

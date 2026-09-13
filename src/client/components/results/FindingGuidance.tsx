@@ -20,7 +20,8 @@ export interface GuidanceControls {
   readonly onRetrieve: (findingId: string, label: string) => void;
 }
 
-export function FindingGuidance({ finding, label, providerContext, controls }: {
+export function FindingGuidance({ finding, label, providerContext, controls, generationConsumed = false }: {
+  readonly generationConsumed?: boolean;
   readonly finding: Finding; readonly label: string; readonly providerContext: ProviderContext;
   readonly controls: GuidanceControls;
 }): ReactElement {
@@ -40,7 +41,9 @@ export function FindingGuidance({ finding, label, providerContext, controls }: {
     </div>}
     {!controls.available && <p>Guidance is unavailable in this build.</p>}
     {controls.ownerKnown && !state?.pending && <p>A Finding workflow remains active or resource cleanup is uncertain.</p>}
-    {state?.view && <GuidancePassages view={state.view} />}
-    <FindingOutcome finding={finding} providerContext={providerContext} />
+    {state?.view && <GuidancePassages view={state.view}
+      selectionPolicy={'retrieval' in finding && finding.retrieval?.status === 'completed'
+        ? finding.retrieval.result.selectionPolicy : undefined} />}
+    <FindingOutcome finding={finding} providerContext={providerContext} generationConsumed={generationConsumed} />
   </div>;
 }

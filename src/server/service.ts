@@ -230,7 +230,7 @@ export async function startLocalService(options: ServiceOptions): Promise<StartR
   let server: Server;
   try {
     server = createLoopbackApiServer({ isStopping: () => admissionClosed, isBusy: busy, readRun,
-      ...(clientResponses ? { clientResponses, retrieveFinding, runScan: (input: unknown) => {
+      ...(clientResponses ? { clientResponses, retrieveFinding, generateFinding, runScan: (input: unknown) => {
         const prepared = prepareServiceScan(input);
         return prepared ? runScan(prepared, executeScan) : Promise.resolve(createRejectedScanOutcome('invalid-request'));
       } } : {}) });

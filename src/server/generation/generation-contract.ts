@@ -56,13 +56,19 @@ export type GenerationAdapter = {
   readonly prepare: (request: GenerationRequest, signal: AbortSignal) => unknown;
 };
 export type InvocationOutcome = 'response' | 'authentication' | 'quota' | 'rate-limit' | 'network' | 'provider' | 'timeout' | 'shutdown';
+type InvocationVersions = {
+  readonly promptVersion: 'm302-instructions-v1'; readonly schemaVersion: 'm302-schema-v1';
+  readonly outputContractVersion: 'm301-proposal-v1';
+} | {
+  readonly promptVersion: typeof PROMPT_VERSION; readonly schemaVersion: typeof SCHEMA_VERSION;
+  readonly outputContractVersion: typeof OUTPUT_CONTRACT_VERSION;
+};
 export type ProviderInvocation = {
   readonly adapterId: 'ollama-generation' | 'groq-generation'; readonly adapterVersion: string;
   readonly endpointIdentity: 'ollama-loopback-chat' | 'groq-chat-completions';
-  readonly promptVersion: typeof PROMPT_VERSION; readonly schemaVersion: typeof SCHEMA_VERSION;
-  readonly outputContractVersion: typeof OUTPUT_CONTRACT_VERSION; readonly parameters: GenerationParameters;
+  readonly parameters: GenerationParameters;
   readonly outcome: InvocationOutcome; readonly validation: 'passed' | 'failed' | 'not-run';
-};
+} & InvocationVersions;
 export type GenerationOutcome =
   | { readonly status: 'proposal'; readonly proposal: Proposal; readonly invocation: ProviderInvocation; readonly cleanupFailed: false }
   | { readonly status: 'abstained'; readonly decision: Extract<FindingAnalysisDecision, { state: 'abstained' }>; readonly cleanupFailed: false }
@@ -85,14 +91,16 @@ export function readProviderInvocation(input: unknown): ProviderInvocation {
   const adapterId = readChoice(root.adapterId, ['ollama-generation', 'groq-generation']);
   const local = adapterId === 'ollama-generation';
   requireValid(root.endpointIdentity === (local ? 'ollama-loopback-chat' : 'groq-chat-completions'));
-  requireValid(root.promptVersion === PROMPT_VERSION && root.schemaVersion === SCHEMA_VERSION
-    && root.outputContractVersion === OUTPUT_CONTRACT_VERSION);
+  requireValid((root.promptVersion === PROMPT_VERSION && root.schemaVersion === SCHEMA_VERSION
+    && root.outputContractVersion === OUTPUT_CONTRACT_VERSION)
+    || (root.promptVersion === 'm302-instructions-v1' && root.schemaVersion === 'm302-schema-v1'
+      && root.outputContractVersion === 'm301-proposal-v1'));
   const outcome = readChoice(root.outcome, ['response', 'authentication', 'quota', 'rate-limit', 'network', 'provider', 'timeout', 'shutdown']);
   const validation = readChoice(root.validation, ['passed', 'failed', 'not-run']);
   requireValid(outcome === 'response' ? validation !== 'not-run' : validation === 'not-run');
   return Object.freeze({ adapterId, adapterVersion: readGenerationIdentity(root.adapterVersion),
     endpointIdentity: local ? 'ollama-loopback-chat' : 'groq-chat-completions',
-    promptVersion: PROMPT_VERSION, schemaVersion: SCHEMA_VERSION, outputContractVersion: OUTPUT_CONTRACT_VERSION,
+    promptVersion: root.promptVersion, schemaVersion: root.schemaVersion, outputContractVersion: root.outputContractVersion,
     parameters: readGenerationParameters(root.parameters, local ? 'local' : 'groq'), outcome, validation });
 }
 

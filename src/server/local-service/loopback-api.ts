@@ -1,6 +1,7 @@
 import http from 'node:http';
 import type { ClientResponseTable } from './client-assets.ts';
-import type { ReadResult, RetrievalOutcome, ScanOutcome } from './contracts.ts';
+import type { GenerationServiceOutcome, ReadResult, RetrievalOutcome, ScanOutcome } from './contracts.ts';
+import { receiveGeneration } from './generation-api.ts';
 
 export interface LoopbackApiCallbacks {
   isStopping(): boolean;
@@ -9,6 +10,7 @@ export interface LoopbackApiCallbacks {
   clientResponses?: ClientResponseTable;
   runScan?(input: unknown): Promise<ScanOutcome>;
   retrieveFinding?(input: unknown): Promise<RetrievalOutcome>;
+  generateFinding?(input: unknown): Promise<GenerationServiceOutcome>;
 }
 
 export function createLoopbackApiServer(callbacks: LoopbackApiCallbacks): http.Server {
@@ -25,6 +27,11 @@ export function createLoopbackApiServer(callbacks: LoopbackApiCallbacks): http.S
     const scanError = (status: number, code: 'invalid-request' | 'scan-failed') => send(status,
       { ok: false, error: code, run: null, persisted: false, cleanupFailed: false });
     const target = request.url ?? '';
+    if (request.method === 'POST' && callbacks.generateFinding
+        && target.split(/[?#]/, 1)[0] === '/api/finding-generation') {
+      receiveGeneration(request, input => callbacks.generateFinding!(input), send);
+      return;
+    }
     if (request.method === 'POST' && callbacks.retrieveFinding
         && target.split(/[?#]/, 1)[0] === '/api/finding-guidance') {
       const guidanceError = (status: number, code: 'invalid-request' | 'result-validation') => send(status,
