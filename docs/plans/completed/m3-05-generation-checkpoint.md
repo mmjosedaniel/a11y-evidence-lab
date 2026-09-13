@@ -9,7 +9,7 @@ This ExecPlan is a living document. Maintain `Progress`, `Surprises & Discoverie
 - **Actual evidence:** One original mechanically validated, durably saved and UI-presented proposal per provider under the same v2 runtime. Both remain pending human review. Earlier failures and their unknown exact causes remain preserved.
 - **Remaining limitations:** M3-03/C is independently Blocked; G1 image-guidance relevance, model-quality evaluation and later human-review implementation remain separate. This task supplies no capacity, evaluation or release credit.
 - **Allowances:** All execution history and finite grants are preserved below. Cumulative public operations are thirteen scans, nine retrievals and seven generations. H's conditional corrected-verification run is unused and unnecessary; no further actual operation or task is selected.
-- **Active lease:** None. All seventeen write leases are terminally compliant. Owned application services, observer and tabs are closed; runtime scratch is empty. Ollama remains running at the owner's request.
+- **Active lease:** None. All implementation and formatting-maintenance leases are terminally compliant. Owned application services, observer and tabs are closed; runtime scratch is empty. Ollama remains running at the owner's request.
 - **Next action:** None for M3-05. The plan is archived and relocated links pass validation. No later task is selected.
 
 ## Progress
@@ -1536,6 +1536,12 @@ Invoke-M105Command {
 Before the remaining actual calls, primary exclusively creates absent ordinary ignored/untracked `temp/m305-live-proof-06` and a static `runtime-definition.json` binding the instruction/schema hashes above, final source/test/build identity, existing fixed providers/controls, original M3-01 identity and unchanged six bindings, and the F01 remaining two-run procedure. Readback must pass before output inspection. Each run uses the unchanged maintained README ordinary service caller without inspector, a fresh owned CUA tab, one Analyze, first complete native Finding, one authentic supported retrieval and at most one Generate; observations append only minimized `record.json` after completion. Failure or uncertainty consumes the applicable allowance. Close each owned tab/service normally, verify ports/scratch/runtime preservation, and retain Ollama. No helper implementation or actual call is authorized before its gates pass.
 
 Recovery retains all old/new canonical and proof bytes. Do not roll back to a reader that cannot admit already-persisted v2 records. Final documentation reconciles only this owning plan, current roadmap/progress and relevant capability/navigation statements; closed M3-02 and original M3-01 artifacts remain history.
+
+### M305-EOF-01 — Post-closure whitespace correction
+
+Independent review of aff27e6 found one extra EOF blank line in src/client/finding-response-snapshot.ts. Primary reproduced the failure with git diff 6b6644b HEAD --check. A single guarded formatting-only setup removed exactly the final CRLF while preserving the remaining final newline and every preceding byte; the lease closed compliant and primary independently verified the one-line diff. The current file SHA-256 is 5aa4c0143a826b393333f171c5c7550cecf245186964714c0405611d2a57a39b. Earlier source fingerprints remain historical identities; executable text is unchanged, so no functional suite, browser or provider call was repeated. TDD and additional implementation review are not applicable to this S0 formatting correction.
+
+The cumulative working-tree check, git diff 6b6644b --check, and ordinary git diff --check pass. The committed HEAD comparison still describes aff27e6 until a separate authorized commit records the fix. M3-05 remains Complete, with all existing evidence limitations preserved. Documentation impact: Updated this closure note; no requirement, command, capability, navigation or roadmap status changed.
 
 ### M305-FINAL-06 — Integrated review and task closure
 

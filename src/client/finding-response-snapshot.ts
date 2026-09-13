@@ -21,4 +21,3 @@ export function equal(left: unknown, right: unknown): boolean {
   return Object.keys(a).length === Object.keys(b).length &&
     Object.keys(a).every(key => Object.hasOwn(b, key) && equal(a[key], b[key]));
 }
-
