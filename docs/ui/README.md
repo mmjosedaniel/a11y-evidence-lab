@@ -4,6 +4,7 @@
 - **Last reviewed:** 2026-09-14
 - **Analyze and Results contract:** [Analyze and results presentation](ANALYZE_AND_RESULTS_PRESENTATION.md)
 - **Implemented guidance evidence and limits:** [M2-03 renewed closure](../plans/completed/m2-03-sufficiency-abstention-and-detail-ui.md#m203-c-post01-closure--renewed-task-closure)
+- **Implemented review evidence and limits:** [M4-02 closure](../plans/completed/m4-02-accessible-review-ui.md#m402-final-01--integrated-review-and-task-closure)
 - **Visual direction:** [Visual foundations](VISUAL_FOUNDATIONS.md)
 
 ## Document role
