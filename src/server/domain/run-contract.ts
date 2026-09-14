@@ -2,6 +2,7 @@ export type {
   Fact,
   Finding,
   GenerationFinding,
+  ReviewedFinding,
   SupportedFinding,
   NativeFinding,
   PageAnalysisRun,

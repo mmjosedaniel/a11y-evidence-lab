@@ -3,7 +3,7 @@ import test from 'node:test';
 import { validateRun, validateScan } from '../src/server/domain/run-contract.ts';
 import type {
   PageAnalysisRun, ScanResult, Finding, ScannerReviewObservation, ProviderContext,
-  Fact, ValidationResult,
+  Fact, ReviewedFinding, ValidationResult,
 } from '../src/server/domain/run-contract.ts';
 import {
   assessedIncompleteRetrievalRun,
@@ -27,6 +27,12 @@ import {
   proposalGenerationRun,
   runningGenerationRun,
 } from './helpers/m302-generation-fixture.ts';
+import {
+  durableReview,
+  generationFinishedAt,
+  reviewDecidedAt,
+  reviewedRun,
+} from './helpers/m401-review-fixture.ts';
 
 // M101-CONTRACT-01: synthetic records prove the frozen L1 contract only.
 // They do not prove native capture, DOM correspondence, persistence, or provider execution.
@@ -34,7 +40,10 @@ type RecordValue = Record<string, unknown>;
 type Path = readonly (string | number)[];
 type Validator = (input: unknown) => ValidationResult<unknown>;
 // Green's independent typecheck also verifies the public type-export surface.
-type PublicContractTypes = [PageAnalysisRun, ScanResult, Finding, ScannerReviewObservation, ProviderContext, Fact<string>];
+type PublicContractTypes = [
+  PageAnalysisRun, ScanResult, Finding, ReviewedFinding,
+  ScannerReviewObservation, ProviderContext, Fact<string>,
+];
 type Rule = 'image-alt' | 'label' | 'color-contrast';
 
 const rules: readonly Rule[] = ['image-alt', 'label', 'color-contrast'];
@@ -1395,4 +1404,131 @@ test('generation validation rejects impossible provenance, changed inputs and pr
   // Existing scan/retrieval/abstention shapes remain valid after generation dispatch is added.
   for (const run of [completedRetrievalRun(), assessedSupportedRetrievalRun(), assessedMissingRetrievalRun(),
     evidenceAbstainedRun(), failedRetrievalRun()]) accept(validateRun, run);
+});
+
+// M401-A-RED01: final review extends one completed pending proposal without replacing its evidence.
+test('accepts exact approved, edited-and-accepted and rejected reviewed Findings', () => {
+  for (const action of ['approve', 'edit-and-accept', 'reject'] as const) {
+    const run = reviewedRun(action);
+    const value = accept(validateRun, run) as RecordValue;
+    const reviewed = selectedFinding(value);
+    assert.equal(reviewed.state, ({
+      approve: 'accepted',
+      'edit-and-accept': 'edited-and-accepted',
+      reject: 'rejected',
+    } as const)[action]);
+    assert.deepEqual(reviewed.review, durableReview(action));
+    assert.equal('supportConfirmed' in (reviewed.review as RecordValue), false);
+    assert.equal('editedProposal' in (reviewed.review as RecordValue), action === 'edit-and-accept');
+  }
+});
+
+test('review round trip preserves the original proposal, reminder, provenance, context, siblings and parent', () => {
+  for (const action of ['approve', 'edit-and-accept', 'reject'] as const) {
+    const pending = proposalGenerationRun();
+    const final = reviewedRun(action);
+    const output = accept(validateRun, final) as RecordValue;
+    const pendingFinding = selectedFinding(pending);
+    const finalFinding = selectedFinding(output);
+    const projected = structuredClone(finalFinding);
+    delete projected.review;
+    projected.state = 'proposal-pending-review';
+    assert.deepEqual(projected, pendingFinding, action);
+    assert.deepEqual((output.scan as RecordValue).findings, (final.scan as RecordValue).findings, action);
+    assert.deepEqual(
+      Object.fromEntries(Object.entries(output).filter(([key]) => key !== 'scan')),
+      Object.fromEntries(Object.entries(pending).filter(([key]) => key !== 'scan')),
+      action,
+    );
+    assert.equal((finalFinding.result as RecordValue).postChangeVerificationReminder,
+      (pendingFinding.result as RecordValue).postChangeVerificationReminder);
+  }
+});
+
+test('review dispatch preserves historical pending and generation tuples while keeping native scan admission strict', () => {
+  for (const promptVersion of ['m302-instructions-v1', 'm302-instructions-v2'] as const) {
+    accept(validateRun, proposalGenerationRun('run-01', 'local', promptVersion));
+  }
+  for (const run of [runningGenerationRun(), failedGenerationRun(), proposalGenerationRun()]) {
+    accept(validateRun, run);
+    reject(validateScan, (run as RecordValue).scan, 'invalid-scan');
+  }
+  const reviewed = reviewedRun('approve');
+  accept(validateRun, reviewed);
+  reject(validateScan, (reviewed as RecordValue).scan, 'invalid-scan');
+});
+
+test('rejects missing, premature, repeated, mismatched or non-chronological review state', () => {
+  const invalid: unknown[] = [];
+  for (const state of ['accepted', 'edited-and-accepted', 'rejected'] as const) {
+    const missing = proposalGenerationRun();
+    selectedFinding(missing).state = state;
+    invalid.push(missing);
+  }
+  const pendingWithReview = proposalGenerationRun();
+  selectedFinding(pendingWithReview).review = durableReview('approve');
+  invalid.push(pendingWithReview);
+
+  const activeWithReview = runningGenerationRun();
+  selectedFinding(activeWithReview).review = durableReview('approve');
+  invalid.push(activeWithReview);
+
+  const mismatches = [
+    ['approve', 'rejected'],
+    ['reject', 'accepted'],
+    ['edit-and-accept', 'accepted'],
+  ] as const;
+  for (const [action, state] of mismatches) {
+    const run = reviewedRun(action);
+    selectedFinding(run).state = state;
+    invalid.push(run);
+  }
+
+  const early = reviewedRun('approve');
+  (selectedFinding(early).review as RecordValue).decidedAt = '2026-08-30T10:00:05.999Z';
+  invalid.push(early);
+  const malformed = reviewedRun('approve');
+  (selectedFinding(malformed).review as RecordValue).decidedAt = 'not-a-time';
+  invalid.push(malformed);
+
+  for (const run of invalid) rejectRun(run);
+
+  const equal = reviewedRun('approve');
+  (selectedFinding(equal).review as RecordValue).decidedAt = generationFinishedAt;
+  accept(validateRun, equal);
+  const later = reviewedRun('approve');
+  (selectedFinding(later).review as RecordValue).decidedAt = reviewDecidedAt;
+  accept(validateRun, later);
+});
+
+test('reviewed Findings reject unknown, input-only, action-inapplicable and invalid edited content', () => {
+  const invalid: unknown[] = [];
+  const unknown = reviewedRun('approve');
+  (selectedFinding(unknown).review as RecordValue).unexpected = secret;
+  invalid.push(unknown);
+  const confirmation = reviewedRun('approve');
+  (selectedFinding(confirmation).review as RecordValue).supportConfirmed = true;
+  invalid.push(confirmation);
+  const approveEdit = reviewedRun('approve');
+  (selectedFinding(approveEdit).review as RecordValue).editedProposal =
+    (durableReview('edit-and-accept') as RecordValue).editedProposal;
+  invalid.push(approveEdit);
+  const editWithoutProposal = reviewedRun('edit-and-accept');
+  delete (selectedFinding(editWithoutProposal).review as RecordValue).editedProposal;
+  invalid.push(editWithoutProposal);
+  const wrongEditedFinding = reviewedRun('edit-and-accept');
+  (((selectedFinding(wrongEditedFinding).review as RecordValue).editedProposal as RecordValue).findingId) = 'finding-elsewhere';
+  invalid.push(wrongEditedFinding);
+  const invalidOriginal = reviewedRun('edit-and-accept');
+  ((selectedFinding(invalidOriginal).result as RecordValue).findingId) = 'finding-elsewhere';
+  invalid.push(invalidOriginal);
+  const unresolvedApproval = reviewedRun('approve');
+  (selectedFinding(unresolvedApproval).review as RecordValue).blockingJudgment = { status: 'unresolved' };
+  invalid.push(unresolvedApproval);
+  const reasonOnSupporting = reviewedRun('reject');
+  (selectedFinding(reasonOnSupporting).review as RecordValue).blockingJudgment = {
+    status: 'supports-proposal', reason: 'forbidden',
+  };
+  invalid.push(reasonOnSupporting);
+  for (const run of invalid) rejectRun(run);
 });
