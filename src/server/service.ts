@@ -1,4 +1,6 @@
 import { createGenerationOperation } from './local-service/generation-operation.ts';
+import { createReviewOperation } from './local-service/review-operation.ts';
+import type { ReviewOutcome } from './local-service/contracts.ts';
 import type { Server } from 'node:http';
 import { openRunRepository } from './persistence/run-repository.ts';
 import type { RunningRun, FailedRun } from './persistence/run-repository.ts';
@@ -15,6 +17,7 @@ import { executeScan } from './scan/scan-page.ts';
 import { createExactRetrieval } from './retrieval/exact-retrieval.ts';
 
 export type { GenerationServiceOutcome, ReadResult, RetrievalOutcome, ScanOutcome, StopResult, LocalService, StartResult, ServiceOptions } from './local-service/contracts.ts';
+export type { ReviewOutcome } from './local-service/contracts.ts';
 
 export async function startLocalService(options: ServiceOptions): Promise<StartResult> {
   const config = parseServiceConfiguration(options);
@@ -105,7 +108,9 @@ export async function startLocalService(options: ServiceOptions): Promise<StartR
     isStopping: () => stopStarted, deadlineExpired: () => deadlineExpired,
     closeAdmission, markStopFailed: () => { stopFailed = true; } });
 
-  function reserveFinding<T extends RetrievalOutcome | GenerationServiceOutcome>() {
+  const review = createReviewOperation({ repository, isStopping: () => stopStarted, closeAdmission });
+
+  function reserveFinding<T extends RetrievalOutcome | GenerationServiceOutcome | ReviewOutcome>() {
     const completion = Promise.withResolvers<T>();
     const active: Operation = { controller: new AbortController(), settled: false, completion: completion.promise };
     operation = active;
@@ -137,6 +142,13 @@ export async function startLocalService(options: ServiceOptions): Promise<StartR
     if (error) return Promise.resolve({ ok: false, error, run: null, persisted: false,
       cleanupFailed: false, invocationPersisted: false });
     return generation.start(input, adapter, reserveFinding<GenerationServiceOutcome>());
+  }
+
+  function reviewFinding(input: unknown): Promise<ReviewOutcome> {
+    const error = admissionClosed ? 'stopping' : busy() ? 'busy'
+      : generation.hasOwner() || retrieval.hasOwner() ? 'workflow-active' : undefined;
+    if (error) return Promise.resolve({ ok: false, error, run: null, persisted: false, cleanupFailed: false });
+    return review.start(input, reserveFinding<ReviewOutcome>());
   }
 
   function readRun(id: unknown): ReadResult {
@@ -258,7 +270,7 @@ export async function startLocalService(options: ServiceOptions): Promise<StartR
       startupSettled = true;
       started = true;
       resolve({ ok: true, service: { url: `http://127.0.0.1:${address.port}`, whenStopping: stopping.promise,
-        whenStopped: stopped.promise, readRun, runScan, retrieveFinding, generateFinding, stop } });
+        whenStopped: stopped.promise, readRun, runScan, retrieveFinding, generateFinding, reviewFinding, stop } });
     });
     try { server.listen(config.port, '127.0.0.1'); }
     catch { startupFailure(); }

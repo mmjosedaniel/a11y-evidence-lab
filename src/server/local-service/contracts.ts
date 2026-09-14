@@ -34,6 +34,13 @@ export type StopResult =
   | { ok: true; status: 'stopped' }
   | { ok: false; error: 'stop-failed' };
 
+export type ReviewOutcome =
+  | { ok: true; run: CompletedRun }
+  | { ok: false; error: 'invalid-request' | 'busy' | 'stopping' | 'workflow-active' | 'not-found'
+      | 'invalid-run' | 'stored-run-unavailable' | 'read-failed' | 'not-eligible'
+      | 'review-validation' | 'review-persistence' | 'shutdown';
+      run: CompletedRun | null; persisted: false; cleanupFailed: boolean };
+
 export interface LocalService {
   readonly url: string;
   readonly whenStopping: Promise<void>;
@@ -42,6 +49,7 @@ export interface LocalService {
   runScan(input: unknown, execute: (run: RunningRun, signal: AbortSignal) => Promise<unknown>): Promise<ScanOutcome>;
   retrieveFinding(input: unknown, execute?: RetrievalExecutor): Promise<RetrievalOutcome>;
   generateFinding(input: unknown, adapter?: GenerationAdapter): Promise<GenerationServiceOutcome>;
+  reviewFinding(input: unknown): Promise<ReviewOutcome>;
   stop(): Promise<StopResult>;
 }
 

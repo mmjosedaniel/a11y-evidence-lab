@@ -56,7 +56,7 @@ Development ready. The [development roadmap](docs/DEVELOPMENT_ROADMAP.md) owns t
 
 The application integrates same-origin HTTP scanning, durable run publication, and the Analyze/Results UI. Selected-Finding guidance uses the closed corpus and local exact-vector retrieval, authenticates citations, evaluates evidence sufficiency and guidance support, and durably records abstention or retrieval failure. The detail UI presents native evidence, complete cited passages, source notices and the resulting guidance state. The [M2-03 closure record](docs/plans/completed/m2-03-sufficiency-abstention-and-detail-ui.md#m203-c-post01-closure--renewed-task-closure) preserves its implementation evidence and visual-check deferral.
 
-The [shared generation stage](#shared-generation-apis) validates selected-only input, configuration-bound mode-specific admission, one transport attempt, bounded failures and cited proposals. Local retains complete token-fit checking; the accepted Groq branch checks its fixed serialized-body byte policy without claiming hosted token fit. Its internal service continuation durably records generation and preserves completed scan, retrieval and sibling evidence. [M3-02 verification](docs/plans/completed/m3-02-shared-generation-stage.md#m302-regression-01--complete-authoritative-suite) covers controlled adapters and real aggregate persistence. The fixed Local Qwen and [Groq adapters](#fixed-groq-adapter) are implemented with controlled contract and service tests; one real Local run and one real Groq run have each saved a mechanically validated proposal pending human review, while Qwen capacity remains unverified. M3-05 adds the explicit Generate action, same-origin generation API and original proposal detail. Proposal review and comparison remain later work. The [completed M3-05 checkpoint](docs/plans/completed/m3-05-generation-checkpoint.md#m305-final-06--integrated-review-and-task-closure) records implementation verification and both successful real-provider observations with their limits.
+The [shared generation stage](#shared-generation-apis) validates selected-only input, configuration-bound mode-specific admission, one transport attempt, bounded failures and cited proposals. Local retains complete token-fit checking; the accepted Groq branch checks its fixed serialized-body byte policy without claiming hosted token fit. Its internal service continuation durably records generation and preserves completed scan, retrieval and sibling evidence. [M3-02 verification](docs/plans/completed/m3-02-shared-generation-stage.md#m302-regression-01--complete-authoritative-suite) covers controlled adapters and real aggregate persistence. The fixed Local Qwen and [Groq adapters](#fixed-groq-adapter) are implemented with controlled contract and service tests; one real Local run and one real Groq run have each saved a mechanically validated proposal pending human review, while Qwen capacity remains unverified. M3-05 adds the explicit Generate action, same-origin generation API and original proposal detail. The [internal review API](#proposal-review-apis) records one final decision through the existing aggregate writer. Review controls, real-proposal human review and comparison remain later tasks. The [completed M3-05 checkpoint](docs/plans/completed/m3-05-generation-checkpoint.md#m305-final-06--integrated-review-and-task-closure) records implementation verification and both successful real-provider observations with their limits.
 
 M2-04 is complete. Its [checkpoint observations](docs/plans/completed/m2-04-retrieval-checkpoint.md#m204-b-accept-01--bounded-checkpoint-observations) exercise all three fixed synthetic Finding profiles through the real local retrieval path: each returns an acceptable gold passage, while missing guidance roles correctly produce no-generation-call abstention. Controlled cases separately demonstrate supported eligibility and adverse outcomes. The [final closure](docs/plans/completed/m2-04-retrieval-checkpoint.md#m204-final-01--integrated-review-and-task-closure) records verification and limitations; these observations are not general retrieval-quality qualification.
 
@@ -218,15 +218,15 @@ Invoke-M105Command {
 }
 ```
 
-Run the complete twenty-five-file suite sequentially, with no running application service or concurrent browser test. The production-entry tests also require the built client. The scanner and walking-skeleton suites use scanner scratch; all three UI suites use separate UI scratch:
+Run the complete twenty-eight-file suite sequentially, with no running application service or concurrent browser test. The production-entry tests also require the built client. The scanner and walking-skeleton suites use scanner scratch; all three UI suites use separate UI scratch:
 
 ```powershell
 if ($null -ne [Environment]::GetEnvironmentVariable('A11Y_M305_CAPTURE_PROOF','Process')) {
   throw 'Ordinary regression requires the synthetic capture flag absent.'
 }
-foreach ($m105Test in @('run-contract','run-repository','local-service','scan-normalization','retrieval-contract','embedding-retrieval','retrieval-service','finding-sufficiency','finding-guidance-api','generation-contract','generation-stage','generation-service','ollama-generation-contract','ollama-generation','ollama-generation-service','groq-generation-contract','groq-generation','groq-generation-service','finding-generation-admission')) {
+foreach ($m105Test in @('tests/run-contract.test.ts','tests/run-repository.test.ts','tests/local-service.test.ts','tests/scan-normalization.test.ts','tests/retrieval-contract.test.ts','tests/embedding-retrieval.test.ts','tests/retrieval-service.test.ts','tests/finding-sufficiency.test.ts','tests/finding-guidance-api.test.ts','tests/generation-contract.test.ts','tests/generation-stage.test.ts','tests/generation-service.test.ts','tests/ollama-generation-contract.test.ts','tests/ollama-generation.test.ts','tests/ollama-generation-service.test.ts','tests/groq-generation-contract.test.ts','tests/groq-generation.test.ts','tests/groq-generation-service.test.ts','tests/finding-generation-admission.test.ts','tests/review-contract.test.ts','tests/review-repository.test.ts','tests/review-service.test.ts')) {
   Invoke-M105Command {
-    & $m105Node --test --test-timeout=120000 ("tests/" + $m105Test + ".test.ts")
+    & $m105Node --test --test-timeout=120000 $m105Test
     if ($LASTEXITCODE -ne 0) { throw 'Browser-free suite failed.' }
   }
 }
@@ -234,18 +234,18 @@ Invoke-M105Command {
   & $m105Node --experimental-test-module-mocks --test --test-timeout=120000 tests/finding-generation-api.test.ts
   if ($LASTEXITCODE -ne 0) { throw 'Generation API suite failed.' }
 }
-foreach ($m105Test in @('scan-page','walking-skeleton')) {
+foreach ($m105Test in @('tests/scan-page.test.ts','tests/walking-skeleton.test.ts')) {
   Assert-M105EmptyDirectory $m105ScanTemp
   Assert-M105EmptyDirectory $m105IntegrationTemp
   Invoke-M105Command {
-    & $m105Node --test --test-timeout=120000 ("tests/" + $m105Test + ".test.ts")
+    & $m105Node --test --test-timeout=120000 $m105Test
     if ($LASTEXITCODE -ne 0) { throw 'Scanner or integration suite failed.' }
   } $m105ScanTemp
 }
-foreach ($m105Test in @('target-results-ui','finding-guidance-ui','finding-generation-ui')) {
+foreach ($m105Test in @('tests/target-results-ui.test.ts','tests/finding-guidance-ui.test.ts','tests/finding-generation-ui.test.ts')) {
   Assert-M105EmptyDirectory $m105UiTemp
   Invoke-M105Command {
-    & $m105Node --test --test-timeout=120000 ("tests/" + $m105Test + ".test.ts")
+    & $m105Node --test --test-timeout=120000 $m105Test
     if ($LASTEXITCODE -ne 0) { throw 'UI suite failed.' }
   } $m105UiTemp
 }
@@ -296,7 +296,7 @@ The service refuses overlapping operations without a queue. Cleanup uncertainty 
 
 ## Retained runs and deletion
 
-Run data stays in the ignored `data/runs/<run-id>/run.json` tree. Reads never repair invalid records, promote staging residue, or automatically resume interrupted work. The parent completed/failed scan state is terminal. Selected-Finding updates retain assessed retrieval outcomes, terminal abstention, and M3-02's running, failed or pending-proposal generation branches inside a completed aggregate. Completed scan evidence and sibling data stay immutable. Historical records remain readable without automatic resumption; a running generation record without invocation has unknown call history. Review and comparison updates remain later work. No backup, hidden copy, sweep, or synchronization mechanism is added.
+Run data stays in the ignored `data/runs/<run-id>/run.json` tree. Reads never repair invalid records, promote staging residue, or automatically resume interrupted work. The parent completed/failed scan state is terminal. Selected-Finding updates retain assessed retrieval outcomes, terminal abstention, and M3-02's running, failed or pending-proposal generation branches inside a completed aggregate. Completed scan evidence and sibling data stay immutable. Historical records remain readable without automatic resumption; a running generation record without invocation has unknown call history. Selected pending proposals can now receive one immutable review decision through the [internal review API](#proposal-review-apis); comparison updates remain later work. No backup, hidden copy, sweep, or synchronization mechanism is added.
 
 For manual deletion, first stop the service and confirm its normal exit. Verify the resolved absolute target is the exact, correctly spelled direct run-directory child of this checkout's `data/runs`, all ancestors and the target are ordinary directories rather than links or junctions, and its inventory contains only the expected ordinary single-link `run.json`. If any check fails, preserve the directory for inspection. Remove only that verified directory using PowerShell's `Remove-Item` with `-LiteralPath` and `-Recurse`; never use a wildcard or target `data/runs`, its parents, another run, or a corpus directory. Local deletion does not remove any provider-side records.
 
@@ -309,7 +309,7 @@ Invoke-M105Command {
 }
 ```
 
-This filtered demonstration does not replace either the core subset or the complete twenty-five-file suite. Tests use only project-owned synthetic records, isolated `temp/m102-*` roots, and bounded owned child processes; they never acquire or delete a real corpus or user run.
+This filtered demonstration does not replace either the core subset or the complete twenty-eight-file suite. Tests use only project-owned synthetic records, isolated `temp/m102-*` roots, and bounded owned child processes; they never acquire or delete a real corpus or user run.
 
 ## Current scope
 
@@ -322,6 +322,24 @@ The [capability summary](#project-status) distinguishes implemented behavior fro
 The [adapter contract](src/server/generation/generation-contract.ts) defines preparation, the bounded transport attempt and invocation provenance; the [proposal validator](src/server/generation/proposal-contract.ts) admits only the shared structured output and authenticated selected citations. The service resolves the fixed Local or Groq adapter from the durable run's immutable provider context only after consuming the supported owner and saving generation-running. An explicitly supplied adapter remains the internal controlled-test seam. The same-origin generation API and Generate action pass only the selected run and Finding IDs; browser input cannot configure a provider.
 
 The [generation contract](tests/generation-contract.test.ts), [shared-stage](tests/generation-stage.test.ts) and [service continuation](tests/generation-service.test.ts) suites are included in the complete verification command above. Service tests use exclusive `temp/m302-generation-*` roots and owned loopback ports. The [M3-02 closure record](docs/plans/completed/m3-02-shared-generation-stage.md#m302-final-01--final-integrated-review-and-documentation-closure) preserves accepted verification and its limits: controlled adapters do not prove actual provider conformance, model capacity or semantic grounding.
+
+### Proposal review APIs
+
+[LocalService.reviewFinding](src/server/local-service/contracts.ts) accepts exactly `{runId, findingId, review}` for one valid pending proposal in a completed run. It reserves the service before inspecting caller input, rejects active or retained workflows, and publishes through [RunRepository.updateReview](src/server/persistence/run-repository/contracts.ts). A clean retained pending proposal can be reviewed after restart without reconstructing a generation owner. This internal API has no HTTP route or browser controls; those remain M4-02 work.
+
+| Review action | Final Finding state | Required action-specific input |
+| --- | --- | --- |
+| `approve` | `accepted` | `supportConfirmed: true` |
+| `edit-and-accept` | `edited-and-accepted` | `supportConfirmed: true` and complete `editedProposal` |
+| `reject` | `rejected` | Neither confirmation nor edited content is allowed |
+
+Every review requires `blockingJudgment`. Approval/edit admit `{status: 'supports-proposal'}` or `{status: 'not-applicable', reason}`; rejection also permits `unresolved` and `contradicts-proposal`. N/A requires a nonblank reason of at most 500 raw UTF-16 units. An optional `note` must be nonblank and at most 1000 raw UTF-16 units. Supplied text is preserved exactly. Unknown keys, partial edits, unconfirmed acceptance and action-inapplicable fields fail. Edited content uses the existing complete Proposal validator with the selected Finding and retained guidance; confirmation and judgment concern that resulting proposal. These mechanical gates cannot establish the truth of a person's support assessment.
+
+The service owns canonical `decidedAt`, at least the generation finish time. The one nested `review` stores action, time, judgment, optional note and edited content only for edit; input confirmation is not retained. Original proposal, reminder, invocation, native evidence, retrieval, analysis, siblings and parent remain unchanged. The post-change reminder is neither completed nor an acceptance gate. Format-version-1 historical records remain readable. Final decisions cannot be replaced or repeated.
+
+Success returns `{ok: true, run}` only after publication. Failure returns `{ok: false, error, run, persisted: false, cleanupFailed}`; `run` is the last validated read when available and is null for stale-transition failure. Closed errors distinguish request/body validation, eligibility/admission, stored-read failure, publication failure and shutdown. Precommit failure preserves the last valid file. Cleanup uncertainty closes admission and remains visible to stop; a successful rename retains its existing commit meaning. A lost response requires validated canonical readback before another action.
+
+The [pure review](tests/review-contract.test.ts), [repository](tests/review-repository.test.ts) and [service](tests/review-service.test.ts) suites use synthetic proposals, exclusive `temp/m401-review-repository-*` / `temp/m401-review-service-*` leaves and owned loopback ports. They perform no actual provider or retrieval work and do not review retained owner proposals. Real-proposal human review remains M4-03.
 
 ### Fixed Local Qwen adapter
 

@@ -10,6 +10,8 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 These archives preserve each task's execution, review, failures, and closure evidence. The roadmap remains the status authority.
 
+- [M4-01 — Review behavior and persistence](completed/m4-01-review-behavior-and-persistence.md)
+
 - [M3-05 — Generation checkpoint](completed/m3-05-generation-checkpoint.md)
 
 - [M3-04 — Groq adapter](completed/m3-04-groq-adapter.md)

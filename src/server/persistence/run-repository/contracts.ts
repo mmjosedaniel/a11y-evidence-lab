@@ -16,5 +16,6 @@ export interface RunRepository {
   read(runId: unknown): StoreResult<PageAnalysisRun>;
   finish(input: unknown): StoreResult<TerminalRun>;
   updateGeneration(expected: CompletedRun, input: unknown): StoreResult<CompletedRun>;
+  updateReview(expected: CompletedRun, input: unknown): StoreResult<CompletedRun>;
   updateRetrieval(expected: CompletedRun, input: unknown): StoreResult<CompletedRun>;
 }

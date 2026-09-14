@@ -100,6 +100,7 @@ Do not load every requirements module automatically. For requirements work, read
 - [Closed corpus](../README.md#closed-corpus-snapshot) — frozen artifacts, static checks, and required source notices.
 - [Inspecting retrieval evidence](../README.md#inspecting-m2-02-retrieval-evidence) — retained M2-02 observations and the distinction between internal retrieval and current UI capabilities.
 - [Shared generation APIs](../README.md#shared-generation-apis) and [generation inspection](../README.md#inspecting-generation-for-one-finding) — service continuation, fixed adapters, same-origin generation and original proposal presentation; the [completed M3-05 checkpoint](plans/completed/m3-05-generation-checkpoint.md#m305-final-06--integrated-review-and-task-closure) records both actual provider paths and keeps the Qwen capacity gate separate.
+- [Proposal review APIs](../README.md#proposal-review-apis) — internal final-decision validation, selected-Finding persistence and controlled verification; browser controls and real-proposal review remain separately scoped.
 - [Generation evaluation manifest](../evaluation/m301-generation-v1.json) — three controlled shared cases, six future bindings, output/control/rubric definitions and exact local-file identities; [verification and recovery](plans/completed/m3-01-generation-evaluation-package.md#m301-command-02--resolved-preparation-validation-and-closure-callers) preserve the distinction from runtime generation.
 
 ### UI planning

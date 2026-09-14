@@ -12,6 +12,7 @@ import type {
 import type { RetrievalResult } from '../../retrieval/retrieval-contract.ts';
 import type { RetrievalErrorCode } from '../../retrieval/retrieval-error.ts';
 import type { FindingAnalysisDecision, GuidanceSupport } from '../finding-analysis-types.ts';
+import type { ReviewDecision } from '../review-contract.ts';
 
 export type DeepReadonly<T> = T extends object
   ? { readonly [K in keyof T]: DeepReadonly<T[K]> }
@@ -102,7 +103,15 @@ type WithGeneration<T extends SupportedFinding> = Omit<T, 'state'> & (
 );
 export type GenerationFinding = SupportedFinding extends infer T
   ? T extends SupportedFinding ? WithGeneration<T> : never : never;
-export type Finding = NativeFinding | RetrievalFinding | AssessedFinding | GenerationFinding;
+type PendingFinding = Extract<GenerationFinding, { state: 'proposal-pending-review' }>;
+type WithReview<T extends PendingFinding> = Omit<T, 'state'> & (
+  | { readonly state: 'accepted'; readonly review: Extract<ReviewDecision, { action: 'approve' }> }
+  | { readonly state: 'edited-and-accepted'; readonly review: Extract<ReviewDecision, { action: 'edit-and-accept' }> }
+  | { readonly state: 'rejected'; readonly review: Extract<ReviewDecision, { action: 'reject' }> }
+);
+export type ReviewedFinding = PendingFinding extends infer T
+  ? T extends PendingFinding ? WithReview<T> : never : never;
+export type Finding = NativeFinding | RetrievalFinding | AssessedFinding | GenerationFinding | ReviewedFinding;
 export type ScannerReviewObservation = { readonly nativeResult: 'incomplete'; readonly locator: Locator } & (
   | (Extract<RuleDetails, { ruleId: 'color-contrast' }> & { readonly incompleteReason: Fact<MessageKey> })
   | (Exclude<RuleDetails, { ruleId: 'color-contrast' }> & { readonly incompleteReason: Unavailable<'missing' | 'withheld'> })
