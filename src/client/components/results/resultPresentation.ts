@@ -1,5 +1,5 @@
 import type { Finding, ScannerReviewObservation } from '../../../server/domain/run-contract.ts';
-import { generationStatus } from './FindingGeneration.tsx';
+import { finalReviewStatus, generationStatus } from './FindingGeneration.tsx';
 import type { GenerationPresentation } from './FindingGeneration.tsx';
 
 export type EvidenceItem = Finding | ScannerReviewObservation;
@@ -154,7 +154,8 @@ export function presentResults(
     selection: { kind: 'finding', findingId: finding.findingId },
     summary: affectedElementText(finding),
     explanation: findingExplanation(finding),
-    workflowStatus: generation[finding.findingId] ? generationStatus(generation[finding.findingId]!, finding.findingId) : findingWorkflowStatus(finding),
+    workflowStatus: finalReviewStatus(finding) ?? (generation[finding.findingId]
+      ? generationStatus(generation[finding.findingId]!, finding.findingId) : findingWorkflowStatus(finding)),
   }));
   const presentedReviews: PresentedManualReview[] = observations.map((observation, observationIndex) => ({
     kind: 'manual-review',

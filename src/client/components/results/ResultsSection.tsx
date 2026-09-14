@@ -8,6 +8,7 @@ import { limitation, presentResults, selectedResult as findSelectedResult } from
 import type { ResultSelection } from './resultPresentation.ts';
 import type { GuidanceControls } from './FindingGuidance.tsx';
 import type { GenerationControls } from './FindingGeneration.tsx';
+import type { ReviewControls } from './ProposalReviewForm.tsx';
 
 type CompleteRun = Extract<PageAnalysisRun, { status: 'completed' }>;
 type FailedRun = Extract<PageAnalysisRun, { status: 'failed' }>;
@@ -18,6 +19,7 @@ interface FailureNotice {
 }
 
 interface ResultsSectionProps {
+  readonly review: ReviewControls;
   readonly generation: GenerationControls;
   readonly guidance: GuidanceControls;
   readonly run: CompleteRun | FailedRun;
@@ -60,7 +62,8 @@ function FailedResults({ run, failure }: {
   </div>;
 }
 
-function CompletedResults({ run, selectedResult, onSelect, guidance, generation }: {
+function CompletedResults({ run, selectedResult, onSelect, guidance, generation, review }: {
+  readonly review: ReviewControls;
   readonly generation: GenerationControls;
   readonly guidance: GuidanceControls;
   readonly run: CompleteRun;
@@ -77,19 +80,19 @@ function CompletedResults({ run, selectedResult, onSelect, guidance, generation 
     <ResultsOverview run={run} />
     <div className="finding-workspace">
       <FindingsPanel idPrefix={idPrefix} results={results} selectedResult={selectedResult} onSelect={onSelect} />
-      {selected && <ResultDetail idPrefix={idPrefix} result={selected} providerContext={run.providerContext} guidance={guidance} generation={generation} />}
+      {selected && <ResultDetail key={selected.key} idPrefix={idPrefix} result={selected} providerContext={run.providerContext} guidance={guidance} generation={generation} review={review} />}
     </div>
   </div>;
 }
 
-export function ResultsSection({ run, selectedResult = null, failure = null, headingRef, contentRef, onSelect, guidance, generation }:
+export function ResultsSection({ run, selectedResult = null, failure = null, headingRef, contentRef, onSelect, guidance, generation, review }:
   ResultsSectionProps): ReactElement {
   return <section aria-labelledby="results-heading" className="results">
     <h2 id="results-heading" tabIndex={-1} ref={headingRef}>Results</h2>
     <div ref={contentRef}>
       {run.status === 'failed'
         ? <FailedResults key={run.runId} run={run} failure={failure} />
-        : <CompletedResults key={run.runId} run={run} selectedResult={selectedResult} onSelect={onSelect} guidance={guidance} generation={generation} />}
+        : <CompletedResults key={run.runId} run={run} selectedResult={selectedResult} onSelect={onSelect} guidance={guidance} generation={generation} review={review} />}
     </div>
   </section>;
 }

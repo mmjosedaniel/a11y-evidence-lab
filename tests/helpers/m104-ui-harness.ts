@@ -20,9 +20,11 @@ import { imagePassages, retrievalFor } from './m203-finding-fixture.ts';
 export type Intent = AnalyzeIntent;
 export interface GuidanceIntent { readonly runId: string; readonly findingId: string }
 export interface GenerationIntent { readonly runId: string; readonly findingId: string }
+export interface ReviewIntent { readonly runId: string; readonly findingId: string; readonly review: unknown }
 export type ClientCollaborators = AppProps & {
   readonly retrieveFinding?: (intent: GuidanceIntent) => Promise<unknown>;
   readonly generateFinding?: (intent: GenerationIntent, signal: AbortSignal) => Promise<unknown>;
+  readonly reviewFinding?: (intent: ReviewIntent, signal: AbortSignal) => Promise<unknown>;
 };
 export interface KnownConfiguration {
   readonly localModelInstalled?: boolean;
@@ -32,19 +34,23 @@ export interface Bridge {
   calls: ({ stage: 'analyze'; value: Intent; callback: number }
     | { stage: 'guidance'; value: GuidanceIntent; callback: number }
     | { stage: 'generation'; value: GenerationIntent; callback: number; signal: AbortSignal }
+    | { stage: 'review'; value: ReviewIntent; callback: number; signal: AbortSignal }
     | { stage: 'http'; value: { url: string; method: string; body: string | null; contentType: string | null };
         callback: number; signal: AbortSignal | null })[];
   analyze: (intent: Intent) => unknown;
   guidance: (intent: GuidanceIntent) => unknown;
   generation: (intent: GenerationIntent, signal: AbortSignal) => unknown;
+  review: (intent: ReviewIntent, signal: AbortSignal) => unknown;
   fetch: (input: RequestInfo | URL, init?: RequestInit) => unknown;
   generationAccessor: (callback: (intent: GenerationIntent, signal: AbortSignal) => Promise<unknown>) => unknown;
+  reviewAccessor: (callback: (intent: ReviewIntent, signal: AbortSignal) => Promise<unknown>) => unknown;
   generationReads: number;
+  reviewReads: number;
   timerDelay: number | null;
   mount: (analyze?: boolean, configuration?: KnownConfiguration, guidance?: boolean,
-    generation?: boolean, accessor?: boolean) => void;
+    generation?: boolean, accessor?: boolean, review?: boolean, reviewAccessor?: boolean) => void;
   rerender: (analyze?: boolean, configuration?: KnownConfiguration, guidance?: boolean,
-    generation?: boolean, accessor?: boolean) => void;
+    generation?: boolean, accessor?: boolean, review?: boolean, reviewAccessor?: boolean) => void;
   unmount: () => void;
   restore: () => void;
   settle: () => Promise<void>;
@@ -169,17 +175,23 @@ function AccessorApp() {
       bridge.generationReads++;
       return bridge.generationAccessor(target.generateFinding);
     }
+    if (key === 'reviewFinding') {
+      bridge.reviewReads++;
+      return bridge.reviewAccessor(target.reviewFinding);
+    }
     return Reflect.get(target,key,receiver);
   } });
   return App(proxied);
 }
 const bridge = window.m104 = {
-  calls: [], reads: 0, generationReads: 0, timerDelay: null, canary: 0, raw: null, savedNode: null, oldNode: null,
+  calls: [], reads: 0, generationReads: 0, reviewReads: 0, timerDelay: null, canary: 0, raw: null, savedNode: null, oldNode: null,
   analyze: () => Promise.resolve({ok:false,error:'create-failed',run:null,persisted:false,cleanupFailed:false}),
   guidance: () => Promise.resolve({ok:false,error:'not-found',run:null,persisted:false,cleanupFailed:false}),
   generation: () => Promise.resolve({ok:false,error:'not-eligible',run:null,persisted:false,cleanupFailed:false,invocationPersisted:false}),
+  review: () => Promise.resolve({status:400,body:{ok:false,error:'invalid-request',run:null,persisted:false,cleanupFailed:false}}),
   fetch: () => Promise.reject(new Error('Fetch is unavailable in the App harness')),
   generationAccessor: callback => callback,
+  reviewAccessor: callback => callback,
   resolve: () => {}, reject: () => {},
   resolveKey(key,value) { pending.get(key)?.resolve(value); },
   rejectKey(key,value) { pending.get(key)?.reject(value); },
@@ -196,11 +208,12 @@ const bridge = window.m104 = {
     bridge.reject = record.reject;
   }); },
   async settle() { for (const record of [...pending.values()]) record.cancel(); await Promise.resolve(); },
-  rerender(analyze = true, configuration = {}, guidance = false, generation = false, accessor = accessorMode) {
+  rerender(analyze = true, configuration = {}, guidance = false, generation = false, accessor = accessorMode, review = false, reviewAccessor = false) {
     const callback = ++version;
     const analyzeHandler = bridge.analyze;
     const guidanceHandler = bridge.guidance;
     const generationHandler = bridge.generation;
+    const reviewHandler = bridge.review;
     const props = { configuration };
     if (analyze) props.analyze = intent => {
       bridge.calls.push({stage:'analyze',value:structuredClone(intent),callback});
@@ -216,14 +229,19 @@ const bridge = window.m104 = {
     };
     if (generation && !accessor) props.generateFinding = generationCallback;
     if (generation && accessor) props.generateFinding = generationCallback;
-    accessorMode = accessor;
+    const reviewCallback = (intent,signal) => {
+      bridge.calls.push({stage:'review',value:structuredClone(intent),callback,signal});
+      return reviewHandler(intent,signal);
+    };
+    if (review) props.reviewFinding = reviewCallback;
+    accessorMode = accessor || reviewAccessor;
     accessorProps = props;
-    root.render(accessor ? <AccessorApp/> : <App {...props}/>);
+    root.render((accessor || reviewAccessor) ? <AccessorApp/> : <App {...props}/>);
   },
-  mount(analyze = true, configuration = {}, guidance = false, generation = false, accessor = false) {
+  mount(analyze = true, configuration = {}, guidance = false, generation = false, accessor = false, review = false, reviewAccessor = false) {
     root.unmount(); root = createRoot(document.getElementById('root'));
-    accessorMode = accessor;
-    bridge.calls = []; bridge.rerender(analyze, configuration, guidance, generation, accessor);
+    accessorMode = accessor || reviewAccessor;
+    bridge.calls = []; bridge.rerender(analyze, configuration, guidance, generation, accessor, review, reviewAccessor);
   },
   unmount() { root.unmount(); },
   restore() {},
@@ -239,12 +257,14 @@ let pendingSequence = 0;
 const pending = new Map();
 let version = 0;
 const bridge = window.m104 = {
-  calls: [], reads: 0, generationReads: 0, timerDelay: null, canary: 0, raw: null, savedNode: null, oldNode: null,
+  calls: [], reads: 0, generationReads: 0, reviewReads: 0, timerDelay: null, canary: 0, raw: null, savedNode: null, oldNode: null,
   analyze: () => Promise.reject(new Error('Analyze collaborator is unavailable in the main harness')),
   guidance: () => Promise.reject(new Error('Guidance collaborator is unavailable in the main harness')),
   generation: () => Promise.reject(new Error('Generation collaborator is unavailable in the main harness')),
+  review: () => Promise.reject(new Error('Review collaborator is unavailable in the main harness')),
   fetch: () => Promise.reject(new Error('Controlled fetch response is not configured')),
   generationAccessor: callback => callback,
+  reviewAccessor: callback => callback,
   resolve: () => {}, reject: () => {},
   resolveKey(key,value) { pending.get(key)?.resolve(value); },
   rejectKey(key,value) { pending.get(key)?.reject(value); },
@@ -279,6 +299,8 @@ export interface Harness {
   page: Page;
   context: BrowserContext;
   origin: string;
+  browserVersion: string;
+  hashes: Readonly<Record<string, string>>;
   close: () => Promise<void>;
 }
 
@@ -421,7 +443,7 @@ export async function startHarness(manual = false, entry: 'app' | 'main' = 'app'
     const hashes = Object.fromEntries([...clientHashes, ...evidenceHashes]
       .sort(([left], [right]) => left.localeCompare(right)));
     console.log(JSON.stringify({ event: 'm104-ui-ready', browser: browser.version(), origin, hashes, synthetic: true }));
-    return { page, context, origin, close };
+    return { page, context, origin, browserVersion: browser.version(), hashes, close };
   } catch (error) {
     try { await close(); } catch (cleanup) { throw new AggregateError([error, cleanup], 'UI setup and cleanup failed'); }
     throw error;

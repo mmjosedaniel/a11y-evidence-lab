@@ -162,6 +162,44 @@ dd { margin: 0; }
 .proposal-detail p, .proposal-detail li, .finding-generation p { max-width: 75ch; overflow-wrap: anywhere; white-space: pre-wrap; }
 .proposal-detail ul { padding-left: 1.5rem; }
 
+.proposal-review, .review-decision { margin-top: 2rem; border-top: 1px solid #c8d1dc; padding-top: 1.25rem; }
+.proposal-review > h4, .review-decision > h4 { color: #8a3f12; }
+.review-field { margin-bottom: 1.25rem; }
+.review-field > label { display: block; margin-bottom: 0.5rem; }
+.proposal-review textarea, .proposal-review select {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  font: inherit;
+  color: #172033;
+  background: #fff;
+  border: 1px solid #68768b;
+  border-radius: 0.375rem;
+  padding: 0.625rem 0.75rem;
+  min-height: 2.75rem;
+}
+.proposal-review textarea { min-height: 6rem; resize: vertical; overflow-wrap: anywhere; }
+.proposal-review [aria-invalid="true"] { border-color: #a52222; }
+.proposal-review [readonly], .proposal-review select[aria-disabled="true"] { background: #eef2f6; }
+.review-actions label, .review-reference-options label, .review-confirmation label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 0;
+}
+.review-reference-options label { font-weight: 400; }
+.review-reference-options span, .review-confirmation span { overflow-wrap: anywhere; }
+.proposal-review input[type="checkbox"] { width: 1.125rem; height: 1.125rem; flex-shrink: 0; margin: 0.2rem 0 0; accent-color: #1457c8; }
+.review-actions input { margin-top: 0.2rem; }
+.proposal-editor { border-top: 1px solid #c8d1dc; border-bottom: 1px solid #c8d1dc; padding: 1rem 0; }
+.proposal-editor > legend { color: #8a3f12; }
+.review-feedback { margin-top: 1rem; }
+.review-decision p, .review-decision li, .review-decision dd { white-space: pre-wrap; overflow-wrap: anywhere; max-width: 75ch; }
+.proposal-content h5, .proposal-content h6 { font-size: 1rem; margin: 1rem 0 0.5rem; }
+.proposal-content h6 { color: #4a586d; font-weight: 600; }
+.proposal-content ul { padding-left: 1.5rem; }
+
 @media (max-width: 48rem) {
   main { padding: 1rem; }
   .setup, .results { padding: 1rem; }

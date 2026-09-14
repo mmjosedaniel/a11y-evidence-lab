@@ -11,8 +11,10 @@ import type { GuidanceIntent } from './finding-guidance-admission.ts';
 import type { GuidancePresentation } from './components/results/FindingGuidance.tsx';
 import { admitGeneration } from './finding-generation-admission.ts';
 import type { GenerationIntent } from './finding-generation-admission.ts';
-import { generationAnnouncement } from './components/results/FindingGeneration.tsx';
+import { finalReviewStatus, generationAnnouncement, reviewedAnnouncement } from './components/results/FindingGeneration.tsx';
 import type { GenerationPresentation } from './components/results/FindingGeneration.tsx';
+import { createReviewRequest, reviewRefusalText } from './review-request.ts';
+import type { ReviewCallback, ReviewPresentation } from './review-request.ts';
 
 export type { AnalyzeIntent } from './components/analysis/analysisTypes.ts';
 
@@ -21,6 +23,7 @@ export interface AppProps {
   readonly configuration?: AnalysisConfiguration;
   readonly retrieveFinding?: (intent: GuidanceIntent) => Promise<unknown>;
   readonly generateFinding?: (intent: GenerationIntent, signal: AbortSignal) => Promise<unknown>;
+  readonly reviewFinding?: ReviewCallback;
 }
 
 type CompleteRun = Extract<PageAnalysisRun, { status: 'completed' }>;
@@ -47,6 +50,12 @@ export function App(props: AppProps): ReactElement {
   const [generation, setGeneration] = useState<Readonly<Record<string, GenerationPresentation>>>({});
   const generationRef = useRef<Readonly<Record<string, GenerationPresentation>>>({});
   const stopGeneration = useRef<(() => void) | null>(null);
+  const stopReview = useRef<(() => void) | null>(null);
+  const reviewOwner = useRef(false);
+  const [reviewLocked, setReviewLocked] = useState(false);
+  const [reviews, setReviews] = useState<Readonly<Record<string, ReviewPresentation>>>({});
+  const savedFocus = useRef<string | null>(null);
+  const currentReviewForm = useRef<{ findingId: string; element: HTMLFormElement } | null>(null);
   const mounted = useRef(true);
   const resultsContent = useRef<HTMLDivElement>(null);
   const resultsHeading = useRef<HTMLHeadingElement>(null);
@@ -60,6 +69,8 @@ export function App(props: AppProps): ReactElement {
       continuation.current = null;
       stopGeneration.current?.();
       stopGeneration.current = null;
+      stopReview.current?.();
+      stopReview.current = null;
     };
   }, []);
 
@@ -77,8 +88,7 @@ export function App(props: AppProps): ReactElement {
   }
 
   function operationIsReserved(): boolean {
-    if (!reservation.current) return false;
-    return true;
+    return !!reservation.current || reviewOwner.current;
   }
 
   function retainOwner(): void {
@@ -96,6 +106,8 @@ export function App(props: AppProps): ReactElement {
       if (run.runId !== held.current.complete?.runId) {
         moveResultsFocus.current = !!resultsContent.current?.contains(document.activeElement);
         setSelectedResult(null);
+        setReviews({});
+        savedFocus.current = null;
         guidanceRef.current = {};
         setGuidance(guidanceRef.current);
         continuation.current = null;
@@ -169,7 +181,7 @@ export function App(props: AppProps): ReactElement {
   async function retrieveFinding(findingId: string, label: string): Promise<void> {
     const run = held.current.complete;
     const finding = run?.scan.findings.find(item => item.findingId === findingId);
-    if (reservation.current || retainedOwner.current || !run || !finding || finding.state !== 'unprocessed' ||
+    if (reservation.current || reviewOwner.current || retainedOwner.current || !run || !finding || finding.state !== 'unprocessed' ||
         guidanceRef.current[findingId]?.attempted) return;
     const callback = props.retrieveFinding;
     if (!callback) return;
@@ -219,7 +231,7 @@ export function App(props: AppProps): ReactElement {
 
   async function generateFinding(findingId: string, label: string): Promise<void> {
     const run = held.current.complete;
-    if (!mounted.current || reservation.current || !run || generationRef.current[findingId]
+    if (!mounted.current || reservation.current || reviewOwner.current || !run || generationRef.current[findingId]
         || continuation.current?.run !== run || continuation.current.findingId !== findingId) return;
     const token = {};
     const controller = new AbortController();
@@ -285,6 +297,66 @@ export function App(props: AppProps): ReactElement {
     }
   }
 
+  function reviewBlocked(): boolean {
+    return !mounted.current || !!reservation.current || reviewOwner.current || retainedOwner.current;
+  }
+
+  function attachReviewForm(findingId: string, element: HTMLFormElement): () => void {
+    currentReviewForm.current = { findingId, element };
+    return () => {
+      if (currentReviewForm.current?.element === element) currentReviewForm.current = null;
+    };
+  }
+
+  function reviewFinding(findingId: string, label: string, review: unknown): void {
+    const run = held.current.complete;
+    if (reviewBlocked() || !run) return;
+    const token = {};
+    reservation.current = token;
+    reviewOwner.current = true;
+    setReviewLocked(true);
+    setBusy(true);
+    setReviews(previous => ({ ...previous, [findingId]: { status: 'pending' } }));
+    const provider = run.providerContext;
+    const provenance = `${provider.mode}, ${provider.provider}, ${provider.model}. The original proposal and provider invocation remain saved.`;
+    setAnnouncement(`${label}. Saving decision. ${provenance}`);
+    const request = createReviewRequest({ baseline: run, intent: { runId: run.runId, findingId, review },
+      current: () => mounted.current && reservation.current === token && held.current.complete === run,
+      readCallback: () => props.reviewFinding,
+      settle: result => {
+        // The request owner terminalizes before this shared state publication.
+        reservation.current = null;
+        stopReview.current = null;
+        setBusy(false);
+        const retained = result.status === 'unknown' || (result.status === 'refused' && !result.released);
+        reviewOwner.current = retained;
+        setReviewLocked(retained);
+        if (result.status === 'saved') {
+          const currentForm = currentReviewForm.current;
+          savedFocus.current = currentForm?.findingId === findingId
+            && currentForm.element.contains(document.activeElement) ? findingId : null;
+          held.current = { ...held.current, complete: result.run };
+          setComplete(result.run);
+          const finding = result.run.scan.findings.find(item => item.findingId === findingId)!;
+          setAnnouncement(`${label}. Saved review decision. ${reviewedAnnouncement(finding, provider)}`);
+        } else {
+          setReviews(previous => ({ ...previous, [findingId]: result }));
+          setAnnouncement(`${label}. ${result.status === 'unknown'
+            ? 'Save outcome unknown. The decision may have been saved. Further actions are blocked.'
+            : `Review refused. ${reviewRefusalText(result)}`} ${provenance}`);
+        }
+      },
+    });
+    stopReview.current = request.stop;
+    request.start();
+  }
+
+  function takeSavedFocus(findingId: string): boolean {
+    const take = savedFocus.current === findingId;
+    savedFocus.current = null;
+    return take;
+  }
+
   function selectResult(selection: ResultSelection, label: string): void {
     if (!complete) return;
     const exists = selection.kind === 'finding'
@@ -300,6 +372,8 @@ export function App(props: AppProps): ReactElement {
     const eligible = finding && continuation.current?.run === complete && continuation.current.findingId === finding.findingId;
     setAnnouncement(finding?.state === 'abstained'
       ? `Selected ${label}. No proposal generated. Unused generation configuration: ${provider.mode}, ${provider.provider}, ${provider.model}. No generation provider was called.`
+      : finding && finalReviewStatus(finding)
+        ? `Selected ${label}. ${reviewedAnnouncement(finding, provider)}`
       : finding && (generationState || eligible)
         ? `Selected ${label}. ${generationAnnouncement(provider, finding.findingId, generationState ?? null)}`
         : `Selected ${label}.`);
@@ -310,16 +384,18 @@ export function App(props: AppProps): ReactElement {
   const failedIsDisplayed = displayedRun?.status === 'failed';
 
   return <main>
-    <AnalyzeSection available={!!props.analyze} busy={busy} capability={capability}
+    <AnalyzeSection available={!!props.analyze} busy={busy || reviewLocked} capability={capability}
       configuration={props.configuration} error={failedIsDisplayed ? null : error}
       announcement={announcement} onOperationReserved={operationIsReserved}
       onAnalyze={analyze} onAnnounce={setAnnouncement} />
     {displayedRun && <ResultsSection run={displayedRun}
       selectedResult={selectedResult} failure={failedIsDisplayed ? error : null}
-      guidance={{ available: !!props.retrieveFinding, busy, ownerKnown, presentations: guidance,
+      guidance={{ available: !!props.retrieveFinding, busy: busy || reviewLocked, ownerKnown, presentations: guidance,
         onRetrieve: (findingId, label) => { void retrieveFinding(findingId, label); } }}
-      generation={{ busy, eligibleFindingId: continuation.current?.run === complete ? continuation.current.findingId : null,
+      generation={{ busy: busy || reviewLocked, eligibleFindingId: continuation.current?.run === complete ? continuation.current.findingId : null,
         presentations: generation, onGenerate: (findingId, label) => { void generateFinding(findingId, label); } }}
+      review={{ busy: busy || reviewLocked || ownerKnown, presentations: reviews, isBlocked: reviewBlocked,
+        onSubmit: reviewFinding, onAnnounce: setAnnouncement, takeSavedFocus, attachForm: attachReviewForm }}
       headingRef={resultsHeading} contentRef={resultsContent} onSelect={selectResult} />}
   </main>;
 }

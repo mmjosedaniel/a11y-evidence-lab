@@ -4,6 +4,7 @@ import { App } from './App.tsx';
 import type { AnalyzeIntent } from './App.tsx';
 import type { GuidanceIntent } from './finding-guidance-admission.ts';
 import type { GenerationIntent } from './finding-generation-admission.ts';
+import type { ReviewIntent } from './finding-review-admission.ts';
 import './styles.css';
 
 const root = document.getElementById('root');
@@ -25,4 +26,10 @@ async function generateFinding(intent: GenerationIntent, signal: AbortSignal): P
   return response.json() as Promise<unknown>;
 }
 
-if (root) createRoot(root).render(<App analyze={analyze} retrieveFinding={retrieveFinding} generateFinding={generateFinding} />);
+async function reviewFinding(intent: ReviewIntent, signal: AbortSignal): Promise<unknown> {
+  const response = await fetch('/api/finding-review', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ runId: intent.runId, findingId: intent.findingId, review: intent.review }), signal });
+  return { status: response.status, body: await response.json() };
+}
+
+if (root) createRoot(root).render(<App analyze={analyze} retrieveFinding={retrieveFinding} generateFinding={generateFinding} reviewFinding={reviewFinding} />);
