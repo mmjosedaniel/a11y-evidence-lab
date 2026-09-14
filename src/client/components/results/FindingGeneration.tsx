@@ -16,6 +16,19 @@ export interface GenerationControls {
 
 type FailedGeneration = Extract<GenerationOutcome, { ok: false }>;
 
+export function finalReviewStatus(finding: Finding): string | null {
+  switch (finding.state) {
+    case 'accepted': return 'Accepted';
+    case 'edited-and-accepted': return 'Edited and accepted';
+    case 'rejected': return 'Rejected';
+    default: return null;
+  }
+}
+
+export function reviewedAnnouncement(finding: Finding, provider: ProviderContext): string {
+  return `${finalReviewStatus(finding)}. ${provider.mode}, ${provider.provider}, ${provider.model}. A generation provider call was attempted. The original validated proposal and invocation remain saved.`;
+}
+
 function callState(outcome: FailedGeneration, findingId: string): 'attempted' | 'not-attempted' | 'unknown' {
   if (outcome.invocation) return 'attempted';
   // Admission binds a persisted failure to its complete durable invocation record.
@@ -92,6 +105,19 @@ export function FindingGeneration({ finding, label, providerContext, controls }:
   readonly finding: Finding; readonly label: string; readonly providerContext: ProviderContext;
   readonly controls: GenerationControls;
 }): ReactElement | null {
+  const finalStatus = finalReviewStatus(finding);
+  if (finalStatus && 'generation' in finding && finding.generation.status === 'completed') {
+    const invocation = finding.generation.invocation;
+    return <div className="finding-generation">
+      <h4>Generation provenance</h4>
+      <p>{finalStatus}. The original model-generated proposal and provider invocation remain saved.</p>
+      <p>{providerContext.mode}, {providerContext.provider}, {providerContext.model}. A generation provider call was attempted.</p>
+      <dl className="evidence-facts">
+        <div><dt>Provider-call outcome</dt><dd>{invocation.outcome}</dd></div>
+        <div><dt>Response validation</dt><dd>{invocation.validation}</dd></div>
+      </dl>
+    </div>;
+  }
   const state = controls.presentations[finding.findingId];
   const eligible = controls.eligibleFindingId === finding.findingId;
   if (!state && !eligible) return null;

@@ -4,12 +4,13 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-- [M4-02 — Accessible review UI](m4-02-accessible-review-ui.md) — In progress for planning only; transport/interaction freeze, implementation and browser verification remain pending.
 - [M3-03 — Qwen adapter and capacity screen](m3-03-qwen-adapter-and-capacity-screen.md) — Blocked on its required full-stack capacity proof; G and A/B implementation/reviews are accepted.
 
 ## Completed plans
 
 These archives preserve each task's execution, review, failures, and closure evidence. The roadmap remains the status authority.
+
+- [M4-02 — Accessible review UI](completed/m4-02-accessible-review-ui.md)
 
 - [M4-01 — Review behavior and persistence](completed/m4-01-review-behavior-and-persistence.md)
 

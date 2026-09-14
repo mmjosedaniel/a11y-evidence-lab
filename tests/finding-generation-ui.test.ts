@@ -283,6 +283,8 @@ describe('M3-05 explicit Finding generation UI', { concurrency: false, timeout: 
       assert.equal(await generationCalls(), expectedCalls);
       assert.ok(!(await page.locator('body').innerText()).includes('PRIVATE'));
       await page.getByRole('region', { name: 'Findings', exact: true }).getByRole('button').first().click();
+      assert.equal(await page.getByRole('radio', { name: /Approve|Edit and accept|Reject/ }).count(), 0,
+        'Failed, malformed, and missing generation outcomes must remain non-reviewable');
       assert.match(await status().innerText(), /local.*ollama.*qwen3\.5:4b/i);
       assert.match(await status().innerText(), /unknown|uncertain/i);
       await assertTerminalControl();
@@ -439,7 +441,10 @@ describe('M3-05 explicit Finding generation UI', { concurrency: false, timeout: 
     }, { newScan, newGuidance });
     await page.getByLabel('Target URL').fill(newScan.requestedUrl);
     await page.getByLabel('Local (recommended)').check();
+    const analyzeBeforeNewRun = await page.evaluate(() => window.m104.calls.filter(call => call.stage === 'analyze').length);
     await analyzeButton().click();
+    assert.equal(await page.evaluate(() => window.m104.calls.filter(call => call.stage === 'analyze').length),
+      analyzeBeforeNewRun + 1, 'A generation-unknown owner must still allow a new independent Analyze');
     await detail().waitFor({ state: 'detached' });
     await page.getByRole('region', { name: 'Findings', exact: true }).getByRole('button').first().click();
     await page.getByRole('button', { name: 'Get guidance', exact: true }).click();
@@ -471,6 +476,8 @@ describe('M3-05 explicit Finding generation UI', { concurrency: false, timeout: 
     assert.equal(await generationButton().count(), 0);
     await page.getByRole('button', { name: /review 1/i }).first().click();
     assert.equal(await generationButton().count(), 0);
+    assert.equal(await page.getByRole('radio', { name: /Approve|Edit and accept|Reject/ }).count(), 0,
+      'Scanner review observations must remain non-reviewable');
 
     await openEligible('generation-accessibility');
     const selectedCard = page.getByRole('region', { name: 'Findings', exact: true }).getByRole('button').first();

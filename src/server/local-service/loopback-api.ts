@@ -1,7 +1,8 @@
 import http from 'node:http';
 import type { ClientResponseTable } from './client-assets.ts';
-import type { GenerationServiceOutcome, ReadResult, RetrievalOutcome, ScanOutcome } from './contracts.ts';
+import type { GenerationServiceOutcome, ReadResult, RetrievalOutcome, ReviewOutcome, ScanOutcome } from './contracts.ts';
 import { receiveGeneration } from './generation-api.ts';
+import { receiveReview } from './review-api.ts';
 
 export interface LoopbackApiCallbacks {
   isStopping(): boolean;
@@ -11,6 +12,7 @@ export interface LoopbackApiCallbacks {
   runScan?(input: unknown): Promise<ScanOutcome>;
   retrieveFinding?(input: unknown): Promise<RetrievalOutcome>;
   generateFinding?(input: unknown): Promise<GenerationServiceOutcome>;
+  reviewFinding?(input: unknown): Promise<ReviewOutcome>;
 }
 
 export function createLoopbackApiServer(callbacks: LoopbackApiCallbacks): http.Server {
@@ -27,6 +29,11 @@ export function createLoopbackApiServer(callbacks: LoopbackApiCallbacks): http.S
     const scanError = (status: number, code: 'invalid-request' | 'scan-failed') => send(status,
       { ok: false, error: code, run: null, persisted: false, cleanupFailed: false });
     const target = request.url ?? '';
+    if (request.method === 'POST' && callbacks.reviewFinding
+        && target.split(/[?#]/, 1)[0] === '/api/finding-review') {
+      receiveReview(request, input => callbacks.reviewFinding!(input), send);
+      return;
+    }
     if (request.method === 'POST' && callbacks.generateFinding
         && target.split(/[?#]/, 1)[0] === '/api/finding-generation') {
       receiveGeneration(request, input => callbacks.generateFinding!(input), send);

@@ -1,8 +1,8 @@
 # Analyze and results presentation
 
 - **Status:** Accepted and implemented M1-04 presentation contract through OD-027
-- **Last reviewed:** 2026-09-12
-- **Scope:** Analysis input and deterministic scan results, with the M2-03 guidance and M3-05 generation extensions below
+- **Last reviewed:** 2026-09-14
+- **Scope:** Analysis input and deterministic scan results, with the M2-03 guidance, M3-05 generation and M4-02 review extensions below. M4-02 verification remains in its owning plan.
 
 ## Document role
 
@@ -157,7 +157,7 @@ Each selectable automated Finding shows only:
    - form label: element and input type, such as **Input · text**;
    - color contrast: foreground color, background color, font size, and weight.
 3. A programmatic selected state that does not rely only on color.
-4. For a processed M2-03 Finding, concise workflow text: **Eligible for generation**, **No proposal generated**, **Guidance failed**, or **Guidance unfinished**. It stays visible when another item is selected. M3-05 also projects **Generating proposal**, **Generation failed**, **Generation outcome unknown**, and **Proposal pending review**. Unprocessed Findings retain their scan-only presentation.
+4. For a processed M2-03 Finding, concise workflow text: **Eligible for generation**, **No proposal generated**, **Guidance failed**, or **Guidance unfinished**. It stays visible when another item is selected. M3-05 also projects **Generating proposal**, **Generation failed**, **Generation outcome unknown**, and **Proposal pending review**. M4-02 gives saved **Accepted**, **Edited and accepted**, or **Rejected** decisions precedence over prior pending-generation text. Unprocessed Findings retain their scan-only presentation.
 
 The whole card is the evidence-selection button. Do not add **View evidence** or another redundant action label inside the card.
 
@@ -270,7 +270,21 @@ Use the existing shared announcement region for generation changes. Selecting th
 
 Present the original validated eleven-field proposal under **AI interpretation — proposal pending review**. Keep each summary, impact and remediation claim adjacent to its own evidence references or authenticated guidance citations. Show output type and selected Finding reference, deterministic evidence sufficiency separately from categorical model confidence, uncertainty, assumptions including an empty list, blocking manual judgment and the post-change verification reminder. Render all values as inert text. Preserve complete earlier guidance and source notices; external citation links retain their visible new-tab notice and protection.
 
-Abstentions and ScannerReviewObservations have no Generate or review action. Approve, edit, reject and comparison remain later work. The [owning plan](../plans/completed/m3-05-generation-checkpoint.md) records automated keyboard/focus/announcement/axe checks, desktop and narrow captures, native zoom verification and their actual status. This extension does not close M2-03's carried full-guidance/detail zoom item for M6-03 or establish spoken screen-reader behavior or a support matrix.
+Abstentions and ScannerReviewObservations have no Generate or review action. Review is the separate M4-02 extension below; comparison remains later work. The [owning plan](../plans/completed/m3-05-generation-checkpoint.md) records automated keyboard/focus/announcement/axe checks, desktop and narrow captures, native zoom verification and their actual status. This extension does not close M2-03's carried full-guidance/detail zoom item for M6-03 or establish spoken screen-reader behavior or a support matrix.
+
+## M4-02 selected-Finding review
+
+The [M4-02 task](../DEVELOPMENT_ROADMAP.md#m4-02--present-the-accessible-review-interaction) adds individual review after the selected valid proposal. Its [owning plan](../plans/completed/m4-02-accessible-review-ui.md) records implementation and verification status. Keep the complete original AI interpretation, confidence, uncertainty, assumptions, citations, blocking judgment and post-change reminder inspectable. Abstentions, failed generation and ScannerReviewObservations remain non-reviewable.
+
+Offer native **Approve**, **Edit and accept**, and **Reject** radios with no initial action, followed by one **Save decision** action. A native blocking-judgment select begins **Unresolved**. Acceptance requires a supporting judgment or **Not applicable** with a nonblank reason of at most 500 characters, plus explicit confirmation of the resulting proposal's material claims against cited guidance, recorded evidence or both. Rejection permits unresolved or contradictory judgment and carries neither acceptance confirmation nor edited content. An optional reviewer note is limited to 1000 characters; omit a blank note and preserve other submitted text exactly.
+
+Edit and accept exposes all eleven proposal fields in a plain form. Original output type, Finding reference and evidence sufficiency are read-only. Claim text and available evidence/guidance references, confidence, uncertainty, assumptions, blocking judgment and reminder remain editable within the existing contract's bounds. Initialize from the original and preserve reference order. Every material draft change resets confirmation. Selection changes discard the unsaved draft, confirmation and errors. Associate validation errors with their controls and focus the first invalid control, or the named editor for a remaining authoritative content-validation error.
+
+Reserve the operation before callback inspection and keep pending controls mounted with guarded activation. Review ownership blocks Analyze and other mutations while the complete list and citations remain inspectable. A valid final response publishes only the captured decision. Local timeout, abort or an unusable response shows **Save outcome unknown**, explains that the decision may have been saved and retains the mutation block. A definite refusal says **Decision not saved**; allow explicit correction only when the admitted result establishes safe release. Never resubmit automatically or infer service cleanup from browser abort. The prior generation-unknown path retains its separately defined ability to request an independent Analyze.
+
+Use the existing shared status for review changes, naming the captured human-readable Finding and actual provider provenance. Preserve list or sibling focus on settlement. If the same selected review form owns focus immediately before its replacement, transfer focus to the saved-decision heading. Present the action, service-owned decision time, judgment/reason and optional note as human-authored content. Only edit-and-accept shows a complete **Reviewer-authored accepted proposal** and reviewer confidence; rejection states that no remediation plan was accepted. Keep original and edited reminders visible without a completion checkbox or gate.
+
+Apply the existing desktop, narrow and native-zoom readability and non-color requirements to controls, errors, original content and saved decisions. M4-02 verification includes desktop/narrow visual and reflow evidence; its native 200% test was omitted at the owner's explicit direction and is not claimed as passed. Bounded synthetic browser/service/disk evidence does not constitute actual human review of retained proposals; that remains M4-03. The M2-03 full-guidance/detail zoom item remains with M6-03.
 
 ## Manual-review evidence
 
@@ -407,7 +421,7 @@ Results
 
 The original Analyze/Results contract does not add a score, dashboard, chart, filter, sort, search, bulk action, page preview, code editor, remediation action, provider call, run history, Run ID entry, deep link, reload restoration, settings page, model manager, export, dark theme, or new dependency.
 
-The M2-03 extension defines retrieved guidance and abstention presentation. M3-05 adds the bounded generation and proposal presentation above. Human review and comparison remain later roadmap work and must reuse the evidence-first hierarchy.
+The M2-03 extension defines retrieved guidance and abstention presentation. M3-05 adds bounded generation and proposal presentation, and M4-02 adds individual review above. Comparison remains later roadmap work and must reuse the evidence-first hierarchy.
 
 ## Related guidance
 
