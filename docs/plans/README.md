@@ -4,6 +4,7 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
+- [M4-03 — Review checkpoint](m4-03-review-checkpoint.md) — In progress for owner-requested planning only; authentic-proposal decisions and execution remain pending.
 - [M3-03 — Qwen adapter and capacity screen](m3-03-qwen-adapter-and-capacity-screen.md) — Blocked on its required full-stack capacity proof; G and A/B implementation/reviews are accepted.
 
 ## Completed plans

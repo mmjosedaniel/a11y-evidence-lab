@@ -46,6 +46,7 @@ Add each new task record to this table in the same change that creates the file:
 | [M3-05](../DEVELOPMENT_ROADMAP.md#m3-05--present-integrate-and-verify-structured-generation) | [Generation checkpoint](m3-05-generation-checkpoint.md) | [Task plan](../plans/completed/m3-05-generation-checkpoint.md) | Complete | 2026-09-13 |
 | [M4-01](../DEVELOPMENT_ROADMAP.md#m4-01--implement-proposal-only-review-behavior-and-persistence) | [Review behavior and persistence](m4-01-review-behavior-and-persistence.md) | [Task plan](../plans/completed/m4-01-review-behavior-and-persistence.md) | Complete | 2026-09-14 |
 | [M4-02](../DEVELOPMENT_ROADMAP.md#m4-02--present-the-accessible-review-interaction) | [Accessible review UI](m4-02-accessible-review-ui.md) | [Task plan](../plans/completed/m4-02-accessible-review-ui.md) | Complete | 2026-09-14 |
+| [M4-03](../DEVELOPMENT_ROADMAP.md#m4-03--integrate-and-verify-human-review) | [Review checkpoint](m4-03-review-checkpoint.md) | [Task plan](../plans/m4-03-review-checkpoint.md) | In progress | 2026-09-14 |
 
 The mirrored status is a convenience snapshot only. The roadmap controls when a task is `Not started`, `In progress`, `Blocked`, or `Complete`.
 
