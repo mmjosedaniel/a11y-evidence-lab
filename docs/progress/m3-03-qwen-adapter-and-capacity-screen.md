@@ -1,6 +1,6 @@
 # M3-03 — Qwen adapter and capacity screen
 
-> This is a non-authoritative progress narrative. The development roadmap owns task status, and the task ExecPlan owns live execution and evidence.
+> This is a non-authoritative progress narrative. The development roadmap owns task status, and the task ExecPlan owns execution and evidence. Dated entries below preserve the state at each checkpoint; the status above those entries and the final capacity/closure entry reflect completion.
 
 - **Roadmap task:** [M3-03](../DEVELOPMENT_ROADMAP.md#m3-03--integrate-qwen-local-generation-and-run-its-capacity-screen)
 - **Mirrored roadmap status:** Complete
@@ -61,9 +61,9 @@ M3-03 is Blocked on [C's exact prerequisites](../plans/completed/m3-03-qwen-adap
 
 Complete M3-05 supplies the authentic supported generation path, and Complete M4-03 supplies the implemented reviewer interface. Fresh strict TypeScript and all 712 tests across the current 32-file suite pass. The existing client build matches M4-03's verified source and asset identities; an independent critical reviewer checked that correspondence and the unchanged frozen generation inputs.
 
-[Current capacity preparation](../plans/completed/m3-03-qwen-adapter-and-capacity-screen.md#m303-resume-03--capacity-preparation-after-m4-03) found the installed runtime and model identities unchanged, but Ollama stopped. Initial free RAM was below the approved preflight allowance; a fresh reading after unused applications were closed cleared it. The requested allowance to start the existing server remains pending.
+[Historical capacity preparation](../plans/completed/m3-03-qwen-adapter-and-capacity-screen.md#m303-resume-03--capacity-preparation-after-m4-03) found the installed runtime and model identities unchanged, but Ollama stopped. Initial free RAM was below the approved preflight allowance; a fresh reading after unused applications were closed cleared it. At this checkpoint, the requested allowance to start the existing server was pending.
 
-The single C activation is unused. The next boundary is runtime readiness followed by the bound fresh manual workflow, actual resource/UI observations, durable readback and final review. M3-03 remains Blocked; passing regression and resolving the interface prerequisite do not prove capacity or model quality.
+At this checkpoint, the single C activation was unused and M3-03 remained Blocked pending runtime readiness and the bound manual workflow. The completed observation and closure below supersede that blocker; passing regression and resolving the interface prerequisite alone did not prove capacity or model quality.
 
 ## 2026-09-16 UTC — Full-local-stack capacity passed
 
