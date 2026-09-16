@@ -4,7 +4,7 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-None.
+- [M5-01 — Intentional rescan](m5-01-intentional-rescan.md) — In progress for owner-requested planning only; implementation and controlled integration remain pending.
 
 ## Completed plans
 
