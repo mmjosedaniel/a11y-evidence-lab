@@ -270,7 +270,7 @@ Use the existing shared announcement region for generation changes. Selecting th
 
 Present the original validated eleven-field proposal under **AI interpretation — proposal pending review**. Keep each summary, impact and remediation claim adjacent to its own evidence references or authenticated guidance citations. Show output type and selected Finding reference, deterministic evidence sufficiency separately from categorical model confidence, uncertainty, assumptions including an empty list, blocking manual judgment and the post-change verification reminder. Render all values as inert text. Preserve complete earlier guidance and source notices; external citation links retain their visible new-tab notice and protection.
 
-Abstentions and ScannerReviewObservations have no Generate or review action. Review is the separate M4-02 extension below; comparison remains later work. The [owning plan](../plans/completed/m3-05-generation-checkpoint.md) records automated keyboard/focus/announcement/axe checks, desktop and narrow captures, native zoom verification and their actual status. This extension does not close M2-03's carried full-guidance/detail zoom item for M6-03 or establish spoken screen-reader behavior or a support matrix.
+Abstentions and ScannerReviewObservations have no Generate or review action. Review is the separate M4-02 extension below; comparison remains later work. The [owning plan](../plans/completed/m3-05-generation-checkpoint.md) records automated keyboard/focus/announcement/axe checks, desktop and narrow captures, native zoom verification and their actual status. This extension does not establish spoken screen-reader behavior or a support matrix. All 200% zoom testing, including the former M2-03 carry to M6-03, is now [Deferred until after MVP](../requirements/quality-security-and-operations/APPLICATION_ACCESSIBILITY.md#200-zoom-verification-deferral--2026-09-15-utc).
 
 ## M4-02 selected-Finding review
 
@@ -284,7 +284,7 @@ Reserve the operation before callback inspection and keep pending controls mount
 
 Use the existing shared status for review changes, naming the captured human-readable Finding and actual provider provenance. Preserve list or sibling focus on settlement. If the same selected review form owns focus immediately before its replacement, transfer focus to the saved-decision heading. Present the action, service-owned decision time, judgment/reason and optional note as human-authored content. Only edit-and-accept shows a complete **Reviewer-authored accepted proposal** and reviewer confidence; rejection states that no remediation plan was accepted. Keep original and edited reminders visible without a completion checkbox or gate.
 
-Apply the existing desktop, narrow and native-zoom readability and non-color requirements to controls, errors, original content and saved decisions. M4-02 verification includes desktop/narrow visual and reflow evidence; its native 200% test was omitted at the owner's explicit direction and is not claimed as passed. Bounded synthetic browser/service/disk evidence does not constitute actual human review of retained proposals; that remains M4-03. The M2-03 full-guidance/detail zoom item remains with M6-03.
+Apply the existing desktop, narrow and native-zoom readability and non-color requirements to controls, errors, original content and saved decisions. M4-02 verification includes desktop/narrow visual and reflow evidence; its native 200% test was omitted at the owner's explicit direction and is not claimed as passed. M4-02's bounded synthetic browser/service/disk evidence is separate from the [M4-03 observations](../plans/completed/m4-03-review-checkpoint.md#m403-b-edit-observation-01--complete-edit-saved-and-read-back), which save all three human-authorized outcomes on isolated copies of one authentic retained proposal. Original evidence remains unchanged; these are controlled review branches, with no new upstream executions. The later owner-directed REQ-A11Y-006 amendment defers all 200% zoom testing until after MVP, including the former M2-03 carry to M6-03.
 
 ## Manual-review evidence
 
@@ -358,6 +358,8 @@ Removing these elements from the visible UI does not authorize deleting them fro
 - Do not make the evidence column narrower merely to preserve equal columns.
 
 ### Narrow layout and 200% browser zoom
+
+These are behavior requirements. [All 200% zoom testing is Deferred until after MVP](../requirements/quality-security-and-operations/APPLICATION_ACCESSIBILITY.md#200-zoom-verification-deferral--2026-09-15-utc); desktop and narrow-layout verification remain required.
 
 - Use one column in DOM and visual order: overview, unified Findings list, selected evidence.
 - Keep the Findings panel's own maximum height and vertical scrolling at narrow widths and 200% browser zoom so navigating its cards does not lengthen the application page.

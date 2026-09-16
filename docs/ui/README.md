@@ -1,10 +1,11 @@
 # UI design documentation
 
-- **Status:** M1-04 Analyze/Results and M2-03 guidance retain their recorded verification limits. M3-05 adds generation and original proposal presentation. M4-02 completes individual review with automated and desktop/narrow verification; native 200% was omitted at owner direction. Comparison remains planning guidance.
-- **Last reviewed:** 2026-09-14
+- **Status:** M1-04 Analyze/Results and M2-03 guidance retain their recorded verification limits. M3-05 adds generation and original proposal presentation. M4-02 implements individual review; M4-03 verifies human decisions on isolated authentic-source copies. Comparison remains planning guidance.
+- **Last reviewed:** 2026-09-15
 - **Analyze and Results contract:** [Analyze and results presentation](ANALYZE_AND_RESULTS_PRESENTATION.md)
 - **Implemented guidance evidence and limits:** [M2-03 renewed closure](../plans/completed/m2-03-sufficiency-abstention-and-detail-ui.md#m203-c-post01-closure--renewed-task-closure)
-- **Implemented review evidence and limits:** [M4-02 closure](../plans/completed/m4-02-accessible-review-ui.md#m402-final-01--integrated-review-and-task-closure)
+- **Implemented review evidence and limits:** [M4-02 closure](../plans/completed/m4-02-accessible-review-ui.md#m402-final-01--integrated-review-and-task-closure) and [M4-03 authentic-proposal checkpoint](../plans/completed/m4-03-review-checkpoint.md#m403-final-01--integrated-review-and-task-closure)
+- **Zoom verification timing:** [All 200% zoom tests are Deferred until after MVP](../requirements/quality-security-and-operations/APPLICATION_ACCESSIBILITY.md#200-zoom-verification-deferral--2026-09-15-utc); accessible zoom/reflow behavior remains required, and historical results and omissions remain in their evidence records.
 - **Visual direction:** [Visual foundations](VISUAL_FOUNDATIONS.md)
 
 ## Document role
