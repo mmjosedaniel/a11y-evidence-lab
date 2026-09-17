@@ -4,11 +4,13 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-- [M5-02 — Conservative comparison](m5-02-conservative-comparison.md)
+None.
 
 ## Completed plans
 
 These archives preserve each task's execution, review, failures, and closure evidence. The roadmap remains the status authority.
+
+- [M5-02 — Conservative comparison](completed/m5-02-conservative-comparison.md)
 
 - [M5-01 — Intentional rescan](completed/m5-01-intentional-rescan.md)
 

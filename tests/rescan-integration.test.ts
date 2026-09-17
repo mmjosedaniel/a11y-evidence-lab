@@ -5,8 +5,18 @@ import nodeTest from 'node:test';
 import type { TestContext } from 'node:test';
 import { validateRun } from '../src/server/domain/run-contract.ts';
 import type { PageAnalysisRun } from '../src/server/domain/run-contract.ts';
+import type { RunningRun } from '../src/server/persistence/run-repository.ts';
+import type { NativeRule } from '../src/server/scan/normalization/native-rule-evidence.ts';
+import { openRunRepository } from '../src/server/persistence/run-repository.ts';
+import { prepareRunningRun } from '../src/server/local-service/input-validation.ts';
+import { prepareScanRequest } from '../src/server/scan/scan-request.ts';
+import { executeRescanScan, executeScan } from '../src/server/scan/scan-page.ts';
+import { executeRescanComparison } from '../src/server/local-service/rescan-comparison.ts';
+import { prepareRescan } from '../src/server/local-service/rescan-operation.ts';
+import type { ScanOperationDependencies } from '../src/server/local-service/scan-operation.ts';
+import { compareControlledScanPair, controlledComparisonFixtures } from './helpers/comparison-fixtures.ts';
 import {
-  installManagedScan, repo, startBrowserHarness, targetUrl,
+  createIntegrationRoot, installManagedFixtureScan, installManagedScan, repo, startBrowserHarness, targetUrl,
 } from './helpers/m105-walking-skeleton-harness.ts';
 
 const test = (name: string, run: (context: TestContext) => void | Promise<void>) =>
@@ -108,4 +118,70 @@ test('built client creates one linked later run through the real service, scanne
   }
   assert.equal(await page.getByRole('button', { name: 'Return to baseline', exact: true }).count(), 1);
   assert.equal(path.resolve(harness.runRoot), path.join(repo, 'temp/m105-integration/m501-rescan'));
+});
+
+test('six unchanged controlled buffers reach the actual comparison executor as three declared same-target pairs', async t => {
+  const fixtures = controlledComparisonFixtures();
+  assert.equal(fixtures.length, 6);
+  const runRoot = createIntegrationRoot(t, 'm502-comparison');
+  const opened = openRunRepository(runRoot); assert.ok(opened.ok); const repository = opened.value;
+  const request = prepareScanRequest(targetUrl, 'local'); assert.ok(request.ok);
+  const revision = 'c'.repeat(40);
+  for (const baseline of fixtures.filter(item => item.stateRole === 'failing')) {
+    const later = fixtures.find(item => item.scenario === baseline.scenario && item.ruleId === baseline.ruleId &&
+      item.targetKey === baseline.targetKey && item.stateRole === 'corrected');
+    assert.ok(later);
+    const calls: string[] = [];
+    installManagedFixtureScan(t, baseline, calls);
+    const baselineRunning = prepareRunningRun(request.value, revision); assert.ok(baselineRunning);
+    const created = repository.create(baselineRunning); assert.ok(created.ok);
+    const baselineTerminal = await executeScan(created.value, new AbortController().signal);
+    assert.equal(baselineTerminal.status, 'completed');
+    const baselinePublished = repository.finish(baselineTerminal); assert.ok(baselinePublished.ok);
+    const baselineBytes = fs.readFileSync(path.join(runRoot, baselinePublished.value.runId, 'run.json'));
+    t.mock.restoreAll();
+
+    installManagedFixtureScan(t, later, calls);
+    const selected = baselinePublished.value.status === 'completed' && baselinePublished.value.scan.findings.find(finding =>
+      finding.ruleId === baseline.ruleId && 'value' in finding.locator && finding.locator.value === baseline.expectedLocator);
+    assert.ok(selected);
+    const prepared = prepareRescan({ runId: `later-${baseline.targetKey}`, baselineRunId: baselinePublished.value.runId,
+      findingId: selected.findingId, mode: 'local' }, repository, revision, () => false);
+    assert.equal(prepared.ok, true); if (!prepared.ok) continue;
+    const dependencies = {
+      repository,
+      isStopping: () => false, deadlineExpired: () => false, markStopFailed: () => assert.fail('stop failure'),
+    } as unknown as ScanOperationDependencies;
+    let laterEnvelope: Awaited<ReturnType<typeof executeRescanScan>> | undefined;
+    const result = await executeRescanComparison(dependencies, prepared, new AbortController().signal,
+      async (run: RunningRun, signal: AbortSignal, rule: NativeRule) =>
+        (laterEnvelope = await executeRescanScan(run, signal, rule)));
+    assert.equal(result.outcome.ok, true);
+    assert.equal(result.comparison.ok, true);
+    assert.ok(laterEnvelope && 'candidates' in laterEnvelope);
+    const controlled = compareControlledScanPair({ definitionVersion: 'm502-comparison-v1',
+      baseline: { scenario: baseline.scenario, ruleId: baseline.ruleId, targetKey: baseline.targetKey,
+        revision: baseline.revision, stateRole: baseline.stateRole, run: baselinePublished.value },
+      later: { scenario: later.scenario, ruleId: later.ruleId, targetKey: later.targetKey,
+        revision: later.revision, stateRole: later.stateRole, run: laterEnvelope.run },
+      candidates: laterEnvelope.candidates });
+    assert.equal(controlled.kind, 'comparison');
+    if (controlled.kind === 'comparison') assert.deepEqual(result.comparison, controlled.result);
+    if (result.comparison.ok) {
+      assert.equal(result.comparison.value.pair, 'comparable');
+      if (result.comparison.value.pair === 'comparable') {
+        assert.equal(result.comparison.value.match, 'unique-pass');
+        assert.equal(result.comparison.value.outcome, 'resolved');
+      }
+    }
+    assert.equal(calls.filter(value => value === 'launch').length, 2);
+    assert.equal(calls.filter(value => value.startsWith('target:')).length, 2);
+    assert.equal(calls.some(value => value.startsWith('unexpected:')), false);
+    assert.deepEqual(fs.readFileSync(path.join(runRoot, baselinePublished.value.runId, 'run.json')), baselineBytes);
+    assertNoPrivateHandoff(result.outcome);
+    const laterReadback = repository.read(`later-${baseline.targetKey}`);
+    assert.ok(laterReadback.ok);
+    assertNoPrivateHandoff(laterReadback.value);
+    t.mock.restoreAll();
+  }
 });

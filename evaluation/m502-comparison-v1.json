@@ -1,0 +1,193 @@
+{
+  "version": "m502-comparison-v1",
+  "scope": "Comparison-only companion definition. Existing scan and generation manifests, fixture bytes and historical observations remain unchanged. No implementation or native observation is established by this definition.",
+  "sources": [
+    {
+      "path": "evaluation/rd003-scan-v1.json",
+      "sha256": "13c9722be9ea2e3b0aaf020ea91f429a701180a83814fe7ab21baf2ddad57459"
+    },
+    {
+      "path": "evaluation/m301-generation-v1.json",
+      "sha256": "63770583a97e1d0517337474dadc706c1047d78e026e22c7a745ce7674ed9e6b"
+    }
+  ],
+  "profile": {
+    "requestedUrl": "https://m105.test/",
+    "finalUrl": "https://m105.test/",
+    "rules": [
+      "image-alt",
+      "label",
+      "color-contrast"
+    ],
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "locale": "en-US",
+    "browserVersion": "151.0.7922.34",
+    "scannerVersion": "4.13.0",
+    "evidencePolicyVersion": "m1-public-v1",
+    "scope": "current-rendered-top-level-document",
+    "readiness": "load",
+    "freshContext": true,
+    "importedState": false,
+    "interaction": false,
+    "crawling": false,
+    "iframes": false,
+    "contrastProfile": "axe-core-4.13.0-default"
+  },
+  "endpoints": [
+    {
+      "scenario": "informative-image-alt",
+      "ruleId": "image-alt",
+      "targetKey": "rd3-image",
+      "revision": "informative-image-alt-v1-failing",
+      "stateRole": "failing",
+      "elementKind": "img",
+      "path": "fixtures/rd003/informative-image-alt/failing.html",
+      "sha256": "bc54dd14df90931d8a5c75544e97a61f15d070550aa8602e850d1255749c308e",
+      "expectedLocator": ":root > :nth-child(2) > :nth-child(1) > :nth-child(3)"
+    },
+    {
+      "scenario": "informative-image-alt",
+      "ruleId": "image-alt",
+      "targetKey": "rd3-image",
+      "revision": "informative-image-alt-v1-corrected",
+      "stateRole": "corrected",
+      "elementKind": "img",
+      "path": "fixtures/rd003/informative-image-alt/corrected.html",
+      "sha256": "e6b9aea2773848540ac247063860690298dc05c886ae29f8627d4e6be93246e1",
+      "expectedLocator": ":root > :nth-child(2) > :nth-child(1) > :nth-child(3)"
+    },
+    {
+      "scenario": "form-input-label",
+      "ruleId": "label",
+      "targetKey": "rd3-email",
+      "revision": "form-input-label-v1-failing",
+      "stateRole": "failing",
+      "elementKind": "input",
+      "path": "fixtures/rd003/form-input-label/failing.html",
+      "sha256": "5cc916a6e9b497019ebdd962c5676ea9e8687a2ddf8b027a92912beafd6fe17b",
+      "expectedLocator": ":root > :nth-child(2) > :nth-child(1) > :nth-child(2) > :nth-child(2)"
+    },
+    {
+      "scenario": "form-input-label",
+      "ruleId": "label",
+      "targetKey": "rd3-email",
+      "revision": "form-input-label-v1-corrected",
+      "stateRole": "corrected",
+      "elementKind": "input",
+      "path": "fixtures/rd003/form-input-label/corrected.html",
+      "sha256": "6c0c66389d368e201af3a8ce83558abb15df86e5c5eb99d317bfdf2e82a09d43",
+      "expectedLocator": ":root > :nth-child(2) > :nth-child(1) > :nth-child(2) > :nth-child(2)"
+    },
+    {
+      "scenario": "text-contrast",
+      "ruleId": "color-contrast",
+      "targetKey": "rd3-text",
+      "revision": "text-contrast-v1-failing",
+      "stateRole": "failing",
+      "elementKind": "p",
+      "path": "fixtures/rd003/text-contrast/failing.html",
+      "sha256": "bbf242eeb12489801db17978e059045c587a6be239d51d53b59212548788fc4b",
+      "expectedLocator": ":root > :nth-child(2) > :nth-child(1) > :nth-child(2)"
+    },
+    {
+      "scenario": "text-contrast",
+      "ruleId": "color-contrast",
+      "targetKey": "rd3-text",
+      "revision": "text-contrast-v1-corrected",
+      "stateRole": "corrected",
+      "elementKind": "p",
+      "path": "fixtures/rd003/text-contrast/corrected.html",
+      "sha256": "01f9bb19f6bd0612ad01a4fbc5f93f766a5a66a55b626271601b75c60b7c2436",
+      "expectedLocator": ":root > :nth-child(2) > :nth-child(1) > :nth-child(2)"
+    }
+  ],
+  "pairs": [
+    {
+      "scenario": "informative-image-alt",
+      "ruleId": "image-alt",
+      "targetKey": "rd3-image",
+      "baselineRevision": "informative-image-alt-v1-failing",
+      "laterRevision": "informative-image-alt-v1-corrected",
+      "expectedOutcome": "resolved"
+    },
+    {
+      "scenario": "form-input-label",
+      "ruleId": "label",
+      "targetKey": "rd3-email",
+      "baselineRevision": "form-input-label-v1-failing",
+      "laterRevision": "form-input-label-v1-corrected",
+      "expectedOutcome": "resolved"
+    },
+    {
+      "scenario": "text-contrast",
+      "ruleId": "color-contrast",
+      "targetKey": "rd3-text",
+      "baselineRevision": "text-contrast-v1-failing",
+      "laterRevision": "text-contrast-v1-corrected",
+      "expectedOutcome": "resolved"
+    }
+  ],
+  "policyCases": [
+    {
+      "kind": "reused-failure",
+      "inputType": "policy-only",
+      "rules": [
+        "image-alt",
+        "label",
+        "color-contrast"
+      ],
+      "expectedOutcome": "persistent"
+    },
+    {
+      "kind": "binary-reversal",
+      "inputType": "policy-only",
+      "rules": [
+        "image-alt",
+        "label"
+      ],
+      "baselineNativeResult": "pass",
+      "laterNativeResult": "violation",
+      "expectedOutcome": "regressed"
+    },
+    {
+      "kind": "contrast-margin",
+      "inputType": "policy-only",
+      "ruleId": "color-contrast",
+      "baselineRatio": 3.54,
+      "laterRatio": 4.0,
+      "expectedRatio": 4.5,
+      "foregroundColors": [
+        "#888888",
+        "#7f7f7f"
+      ],
+      "backgroundColor": "#ffffff",
+      "fontSize": "12.0pt (16px)",
+      "fontWeight": "normal",
+      "forwardOutcome": "improved",
+      "reverseOutcome": "regressed",
+      "equalOutcome": "persistent"
+    },
+    {
+      "kind": "adverse-evidence",
+      "inputType": "policy-only",
+      "cases": [
+        "missing-target",
+        "duplicate-target",
+        "unavailable-locator",
+        "withheld-evidence",
+        "profile-drift"
+      ],
+      "limit": "Derived witnesses are not new native observations or declared scan directions."
+    }
+  ],
+  "limitations": [
+    "Expected locators are static derivations from exact frozen element trees and the current production locator algorithm; real scanner verification remains required.",
+    "The harness fulfills the same verified bytes and asserts stable target key and locator identify one identical element of the declared kind.",
+    "For selected binary rules, project contrastProfile to null before shared profile comparison.",
+    "Historical RD-003 evidence uses its original profile; fresh controlled integration uses the declared production profile and test-only HTTPS interception.",
+    "Policy-only vectors create no scan, positive-baseline Finding identity, persisted comparison, third fixture or model call."
+  ]
+}

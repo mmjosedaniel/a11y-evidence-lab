@@ -40,7 +40,7 @@ import type {
   Unavailable,
 } from './run-types.ts';
 
-function readLocator(input: unknown): Locator {
+export function readLocator(input: unknown): Locator {
   return readFact(input, value => {
     const locator = readPattern(value, /^:root(?: > :nth-child\([1-9][0-9]*\))*$/, 2048);
     for (const match of locator.matchAll(/:nth-child\(([0-9]+)\)/g)) readInteger(Number(match[1]), 1);
@@ -119,7 +119,7 @@ function readContrastEvidence(input: unknown): ContrastEvidence {
   });
 }
 
-function readRuleDetails(record: Record<string, unknown>): RuleDetails {
+export function readRuleDetails(record: Record<string, unknown>): RuleDetails {
   const ruleId = readChoice(record.ruleId, rules);
   switch (ruleId) {
     case 'image-alt': return { ruleId, checks: readChecks(record.checks, imageAnyChecks, imageNoneChecks), evidence: readImageEvidence(record.evidence) };
