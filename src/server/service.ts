@@ -3,17 +3,19 @@ import { createReviewOperation } from './local-service/review-operation.ts';
 import type { ReviewOutcome } from './local-service/contracts.ts';
 import type { Server } from 'node:http';
 import { openRunRepository } from './persistence/run-repository.ts';
-import type { RunningRun, FailedRun } from './persistence/run-repository.ts';
+import type { RunningRun } from './persistence/run-repository.ts';
 import { parseServiceConfiguration, prepareRunningRun, prepareServiceScan } from './local-service/input-validation.ts';
-import { createFailedRun, createRejectedScanOutcome, matchTerminalRun } from './local-service/scan-run-records.ts';
-import type { ScanFailure } from './local-service/scan-run-records.ts';
+import { createRejectedScanOutcome } from './local-service/scan-run-records.ts';
+import { startScanOperation } from './local-service/scan-operation.ts';
+import { prepareRescan, rejectedRescan } from './local-service/rescan-operation.ts';
+import type { RescanOutcome, RescanExecutor } from './local-service/contracts.ts';
 import { createLoopbackApiServer } from './local-service/loopback-api.ts';
 import { loadClientResponses } from './local-service/client-assets.ts';
 import type { ClientResponseTable } from './local-service/client-assets.ts';
 import type { GenerationServiceOutcome, LocalService, ReadResult, RetrievalOutcome, ScanOutcome, ServiceOptions, StartResult, StopResult } from './local-service/contracts.ts';
 import { createRetrievalOperation } from './local-service/retrieval-operation.ts';
 import type { RetrievalReservation } from './local-service/retrieval-operation.ts';
-import { executeScan } from './scan/scan-page.ts';
+import { executeRescanScan, executeScan } from './scan/scan-page.ts';
 import { createExactRetrieval } from './retrieval/exact-retrieval.ts';
 
 export type { GenerationServiceOutcome, ReadResult, RetrievalOutcome, ScanOutcome, StopResult, LocalService, StartResult, ServiceOptions } from './local-service/contracts.ts';
@@ -110,7 +112,7 @@ export async function startLocalService(options: ServiceOptions): Promise<StartR
 
   const review = createReviewOperation({ repository, isStopping: () => stopStarted, closeAdmission });
 
-  function reserveFinding<T extends RetrievalOutcome | GenerationServiceOutcome | ReviewOutcome>() {
+  function reserveFinding<T extends RetrievalOutcome | GenerationServiceOutcome | ReviewOutcome | RescanOutcome>() {
     const completion = Promise.withResolvers<T>();
     const active: Operation = { controller: new AbortController(), settled: false, completion: completion.promise };
     operation = active;
@@ -174,6 +176,26 @@ export async function startLocalService(options: ServiceOptions): Promise<StartR
     } finally { reading = false; finishStop(); }
   }
 
+  const scanDependencies = { repository, isStopping: () => stopStarted, deadlineExpired: () => deadlineExpired,
+    markStopFailed: () => { stopFailed = true; } };
+
+  function rescanFinding(input: unknown, execute: RescanExecutor = async (run, signal, rule) =>
+    (await executeRescanScan(run, signal, rule)).run): Promise<RescanOutcome> {
+    if (admissionClosed) return Promise.resolve(rejectedRescan('stopping'));
+    if (busy()) return Promise.resolve(rejectedRescan('busy'));
+    const reservation = reserveFinding<RescanOutcome>();
+    const prepared = prepareRescan(input, repository, applicationRevision, () => stopStarted);
+    if (stopStarted) reservation.settle(rejectedRescan('shutdown'));
+    else if (typeof execute !== 'function') reservation.settle(rejectedRescan('invalid-request'));
+    else if (!prepared.ok) reservation.settle(prepared);
+    else startScanOperation(scanDependencies, prepared.run,
+      (run, signal) => execute(run, signal, prepared.rule), reservation.controller.signal, outcome => {
+        if (!outcome.ok && outcome.cleanupFailed) closeAdmission();
+        reservation.settle(outcome);
+      }, () => { retrieval.discardSettledOwner(); generation.discardSettledOwner(); });
+    return reservation.promise;
+  }
+
   function runScan(input: unknown, execute: (run: RunningRun, signal: AbortSignal) => Promise<unknown>): Promise<ScanOutcome> {
     if (admissionClosed) return Promise.resolve(createRejectedScanOutcome('stopping'));
     if (busy()) return Promise.resolve(createRejectedScanOutcome('busy'));
@@ -195,54 +217,14 @@ export async function startLocalService(options: ServiceOptions): Promise<StartR
       completion.resolve(outcome);
       finishStop();
     }
-    const created = repository.create(initial);
-    if (!created.ok) {
-      settle(createRejectedScanOutcome('create-failed', created.cleanupFailed));
-      return completion.promise;
-    }
-    const running = created.value;
-    async function executeAndFinish(): Promise<void> {
-      let returned: unknown;
-      let callbackFailed = false;
-      try { returned = await execute(running, active.controller.signal); }
-      catch { callbackFailed = true; }
-      const terminal = callbackFailed ? undefined : matchTerminalRun(running, returned);
-      let error: ScanFailure['error'];
-      let failure: FailedRun;
-      let writeCleanupFailed = false;
-      if (stopStarted) {
-        error = 'shutdown';
-        failure = createFailedRun(running, 'shutdown', terminal);
-      } else if (!terminal) {
-        error = callbackFailed ? 'scan-failed' : 'result-validation';
-        failure = createFailedRun(running, callbackFailed ? 'scanner' : 'result-validation');
-      } else if (terminal.status === 'failed') {
-        error = 'scan-failed';
-        failure = terminal;
-      } else {
-        const completed = repository.finish(terminal);
-        if (completed.ok && completed.value.status === 'completed') {
-          settle({ ok: true, run: completed.value });
-          return;
-        }
-        writeCleanupFailed = !completed.ok && completed.cleanupFailed;
-        error = 'initial-persistence';
-        failure = createFailedRun(running, 'initial-persistence', terminal);
-      }
-      const persisted = deadlineExpired ? undefined : repository.finish(failure);
-      const cleanupFailed = writeCleanupFailed || (!persisted?.ok && !!persisted?.cleanupFailed)
-        || failure.scanContext.cleanup === 'failed';
-      if (error === 'shutdown' && !persisted?.ok) stopFailed = true;
-      settle({ ok: false, error, run: failure, persisted: persisted?.ok === true, cleanupFailed });
-    }
-    void executeAndFinish();
+    startScanOperation(scanDependencies, initial, execute, active.controller.signal, settle);
     return completion.promise;
   }
 
   let server: Server;
   try {
     server = createLoopbackApiServer({ isStopping: () => admissionClosed, isBusy: busy, readRun,
-      ...(clientResponses ? { clientResponses, retrieveFinding, generateFinding, reviewFinding, runScan: (input: unknown) => {
+      ...(clientResponses ? { clientResponses, retrieveFinding, generateFinding, reviewFinding, rescanFinding, runScan: (input: unknown) => {
         const prepared = prepareServiceScan(input);
         return prepared ? runScan(prepared, executeScan) : Promise.resolve(createRejectedScanOutcome('invalid-request'));
       } } : {}) });
@@ -270,7 +252,7 @@ export async function startLocalService(options: ServiceOptions): Promise<StartR
       startupSettled = true;
       started = true;
       resolve({ ok: true, service: { url: `http://127.0.0.1:${address.port}`, whenStopping: stopping.promise,
-        whenStopped: stopped.promise, readRun, runScan, retrieveFinding, generateFinding, reviewFinding, stop } });
+        whenStopped: stopped.promise, readRun, runScan, retrieveFinding, generateFinding, reviewFinding, rescanFinding, stop } });
     });
     try { server.listen(config.port, '127.0.0.1'); }
     catch { startupFailure(); }

@@ -259,5 +259,6 @@ export function createRetrievalOperation(dependencies: Dependencies) {
     supportedSnapshot = undefined;
     return true;
   }
-  return Object.freeze({ start, owns, takeOwner, hasOwner: () => owner !== undefined });
+  function discardSettledOwner(): void { owner = undefined; supportedSnapshot = undefined; }
+  return Object.freeze({ start, owns, takeOwner, discardSettledOwner, hasOwner: () => owner !== undefined });
 }

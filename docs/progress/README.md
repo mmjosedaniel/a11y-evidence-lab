@@ -47,6 +47,7 @@ Add each new task record to this table in the same change that creates the file:
 | [M4-01](../DEVELOPMENT_ROADMAP.md#m4-01--implement-proposal-only-review-behavior-and-persistence) | [Review behavior and persistence](m4-01-review-behavior-and-persistence.md) | [Task plan](../plans/completed/m4-01-review-behavior-and-persistence.md) | Complete | 2026-09-14 |
 | [M4-02](../DEVELOPMENT_ROADMAP.md#m4-02--present-the-accessible-review-interaction) | [Accessible review UI](m4-02-accessible-review-ui.md) | [Task plan](../plans/completed/m4-02-accessible-review-ui.md) | Complete | 2026-09-14 |
 | [M4-03](../DEVELOPMENT_ROADMAP.md#m4-03--integrate-and-verify-human-review) | [Review checkpoint](m4-03-review-checkpoint.md) | [Task plan](../plans/completed/m4-03-review-checkpoint.md) | Complete | 2026-09-15 |
+| [M5-01](../DEVELOPMENT_ROADMAP.md#m5-01--start-an-intentional-later-scan) | [Intentional rescan](m5-01-intentional-rescan.md) | [Task plan](../plans/completed/m5-01-intentional-rescan.md) | Complete | 2026-09-16 |
 
 The mirrored status is a convenience snapshot only. The roadmap controls when a task is `Not started`, `In progress`, `Blocked`, or `Complete`.
 

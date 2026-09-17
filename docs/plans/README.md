@@ -10,6 +10,8 @@ None.
 
 These archives preserve each task's execution, review, failures, and closure evidence. The roadmap remains the status authority.
 
+- [M5-01 — Intentional rescan](completed/m5-01-intentional-rescan.md)
+
 - [M3-03 — Qwen adapter and capacity screen](completed/m3-03-qwen-adapter-and-capacity-screen.md)
 
 - [M4-03 — Review checkpoint](completed/m4-03-review-checkpoint.md)

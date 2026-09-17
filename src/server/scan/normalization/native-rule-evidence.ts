@@ -6,6 +6,9 @@ import {
 import type { Fact, Source, Unavailable } from './native-value-reader.ts';
 
 export type NativeRule = Finding['ruleId'];
+export type NativeCandidate = { [R in NativeRule]:
+  Readonly<Pick<Extract<Finding, { ruleId: R }>, 'ruleId' | 'checks' | 'evidence' | 'locator'> & { nativeResult: 'pass' }>
+}[NativeRule];
 type Details = { [R in NativeRule]: Pick<Extract<Finding, { ruleId: R }>, 'ruleId' | 'checks' | 'evidence'> }[NativeRule];
 const imageChecks = ['has-alt', 'aria-label', 'aria-labelledby', 'non-empty-title', 'presentational-role'] as const;
 const labelChecks = ['implicit-label', 'explicit-label', 'aria-label', 'aria-labelledby', 'non-empty-title', 'non-empty-placeholder', 'presentational-role'] as const;

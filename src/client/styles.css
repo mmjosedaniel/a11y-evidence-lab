@@ -218,3 +218,9 @@ dd { margin: 0; }
   }
   .results-overview { padding: 1rem; }
 }
+
+.intentional-rescan { margin-top: 2rem; border-top: 1px solid #c8d1dc; padding-top: 1.25rem; }
+.intentional-rescan > h4 { margin-top: 0; }
+.intentional-rescan select { display: block; width: 100%; max-width: 24rem; font: inherit; color: #172033; background: #fff; border: 1px solid #68768b; border-radius: 0.375rem; min-height: 2.75rem; padding: 0.625rem 0.75rem; margin-bottom: 1rem; }
+.intentional-rescan select:disabled { background: #eef2f6; }
+.rescan-status, .rescan-navigation { margin-bottom: 1rem; }

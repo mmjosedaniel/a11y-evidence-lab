@@ -13,6 +13,9 @@ import { admitGeneration } from './finding-generation-admission.ts';
 import type { GenerationIntent } from './finding-generation-admission.ts';
 import { finalReviewStatus, generationAnnouncement, reviewedAnnouncement } from './components/results/FindingGeneration.tsx';
 import type { GenerationPresentation } from './components/results/FindingGeneration.tsx';
+import { createRescanRequest } from './rescan-request.ts';
+import type { RescanCallback, RescanPresentation } from './rescan-request.ts';
+import { rescanAnnouncement } from './components/results/IntentionalRescanForm.tsx';
 import { createReviewRequest, reviewRefusalText } from './review-request.ts';
 import type { ReviewCallback, ReviewPresentation } from './review-request.ts';
 
@@ -24,10 +27,18 @@ export interface AppProps {
   readonly retrieveFinding?: (intent: GuidanceIntent) => Promise<unknown>;
   readonly generateFinding?: (intent: GenerationIntent, signal: AbortSignal) => Promise<unknown>;
   readonly reviewFinding?: ReviewCallback;
+  readonly rescanFinding?: RescanCallback;
 }
 
 type CompleteRun = Extract<PageAnalysisRun, { status: 'completed' }>;
 type FailedRun = Extract<PageAnalysisRun, { status: 'failed' }>;
+interface BaselinePreview {
+  readonly run: CompleteRun;
+  readonly selection: ResultSelection | null;
+  readonly guidance: Readonly<Record<string, GuidancePresentation>>;
+  readonly generation: Readonly<Record<string, GenerationPresentation>>;
+}
+const baselineNotice = 'Baseline evidence — read-only. Return to later results to continue.';
 
 function countText(count: number, singular: string): string {
   return `${count} ${count === 1 ? singular : `${singular}s`}`;
@@ -56,6 +67,17 @@ export function App(props: AppProps): ReactElement {
   const [reviews, setReviews] = useState<Readonly<Record<string, ReviewPresentation>>>({});
   const savedFocus = useRef<string | null>(null);
   const currentReviewForm = useRef<{ findingId: string; element: HTMLFormElement } | null>(null);
+  const [rescan, setRescan] = useState<RescanPresentation | null>(null);
+  const [submittedRescan, setSubmittedRescan] = useState<{
+    baselineRunId: string; findingId: string; mode: 'local' | 'groq';
+  } | null>(null);
+  const rescanOwner = useRef(false);
+  const [rescanLocked, setRescanLocked] = useState(false);
+  const stopRescan = useRef<(() => void) | null>(null);
+  const [baselinePreview, setBaselinePreview] = useState<BaselinePreview | null>(null);
+  const [preview, setPreview] = useState(false);
+  const previewing = useRef(false);
+  const [previewSelection, setPreviewSelection] = useState<ResultSelection | null>(null);
   const mounted = useRef(true);
   const resultsContent = useRef<HTMLDivElement>(null);
   const resultsHeading = useRef<HTMLHeadingElement>(null);
@@ -71,6 +93,8 @@ export function App(props: AppProps): ReactElement {
       stopGeneration.current = null;
       stopReview.current?.();
       stopReview.current = null;
+      stopRescan.current?.();
+      stopRescan.current = null;
     };
   }, []);
 
@@ -79,7 +103,7 @@ export function App(props: AppProps): ReactElement {
       moveResultsFocus.current = false;
       resultsHeading.current?.focus();
     }
-  }, [complete]);
+  }, [complete, preview]);
 
   function showError(code: string, unsaved = false, cleanup = false): void {
     const text = `Analyze failed: ${code}.`;
@@ -88,7 +112,7 @@ export function App(props: AppProps): ReactElement {
   }
 
   function operationIsReserved(): boolean {
-    return !!reservation.current || reviewOwner.current;
+    return !!reservation.current || reviewOwner.current || rescanOwner.current;
   }
 
   function retainOwner(): void {
@@ -156,7 +180,16 @@ export function App(props: AppProps): ReactElement {
         showError('invalid-result');
         return;
       }
-      if (run) publish(run);
+      if (run) {
+        if (run.status === 'completed') {
+          previewing.current = false;
+          setPreview(false);
+          setBaselinePreview(null);
+          setRescan(null);
+          setSubmittedRescan(null);
+        }
+        publish(run);
+      }
       if (!outcome.ok) {
         if (outcome.cleanupFailed) retainOwner();
         showError(outcome.error, !outcome.persisted, outcome.cleanupFailed);
@@ -181,7 +214,7 @@ export function App(props: AppProps): ReactElement {
   async function retrieveFinding(findingId: string, label: string): Promise<void> {
     const run = held.current.complete;
     const finding = run?.scan.findings.find(item => item.findingId === findingId);
-    if (reservation.current || reviewOwner.current || retainedOwner.current || !run || !finding || finding.state !== 'unprocessed' ||
+    if (previewing.current || rescanOwner.current || reservation.current || reviewOwner.current || retainedOwner.current || !run || !finding || finding.state !== 'unprocessed' ||
         guidanceRef.current[findingId]?.attempted) return;
     const callback = props.retrieveFinding;
     if (!callback) return;
@@ -231,7 +264,7 @@ export function App(props: AppProps): ReactElement {
 
   async function generateFinding(findingId: string, label: string): Promise<void> {
     const run = held.current.complete;
-    if (!mounted.current || reservation.current || reviewOwner.current || !run || generationRef.current[findingId]
+    if (!mounted.current || previewing.current || rescanOwner.current || reservation.current || reviewOwner.current || !run || generationRef.current[findingId]
         || continuation.current?.run !== run || continuation.current.findingId !== findingId) return;
     const token = {};
     const controller = new AbortController();
@@ -298,7 +331,7 @@ export function App(props: AppProps): ReactElement {
   }
 
   function reviewBlocked(): boolean {
-    return !mounted.current || !!reservation.current || reviewOwner.current || retainedOwner.current;
+    return !mounted.current || previewing.current || rescanOwner.current || !!reservation.current || reviewOwner.current || retainedOwner.current;
   }
 
   function attachReviewForm(findingId: string, element: HTMLFormElement): () => void {
@@ -351,13 +384,103 @@ export function App(props: AppProps): ReactElement {
     request.start();
   }
 
+  function rescanBlocked(): boolean {
+    return !mounted.current || previewing.current || operationIsReserved()
+      || Object.values(guidanceRef.current).some(state => state.cleanup)
+      || Object.values(generationRef.current).some(state => state.status === 'unknown'
+        || (state.status === 'settled' && !state.outcome.ok && state.outcome.cleanupFailed));
+  }
+
+  function rescanFinding(baselineRunId: string, findingId: string, mode: 'local' | 'groq'): void {
+    const run = held.current.complete;
+    if (rescanBlocked() || !run || run.runId !== baselineRunId
+        || !run.scan.findings.some(finding => finding.findingId === findingId)) return;
+    const token = {};
+    reservation.current = token;
+    rescanOwner.current = true;
+    setRescanLocked(true);
+    setBusy(true);
+    const current = (): boolean => mounted.current && reservation.current === token && held.current.complete === run;
+    // Capture data only; preview never owns a continuation or a request capability.
+    const captured: BaselinePreview = { run, selection: selectedResult,
+      guidance: guidanceRef.current, generation: generationRef.current };
+    const pending: RescanPresentation = { status: 'pending' };
+    setSubmittedRescan({ baselineRunId, findingId, mode });
+    setRescan(pending);
+    setAnnouncement(rescanAnnouncement(pending));
+    let runId: string;
+    try {
+      runId = `run-${crypto.randomUUID()}`;
+      if (!current()) return;
+    } catch {
+      if (!current()) return;
+      const refused: RescanPresentation = { status: 'refused', error: 'invalid-request', cleanup: false,
+        released: true, run: null, persisted: false };
+      reservation.current = null;
+      rescanOwner.current = false;
+      setRescanLocked(false);
+      setBusy(false);
+      setRescan(refused);
+      setSubmittedRescan(null);
+      setAnnouncement(rescanAnnouncement(refused));
+      return;
+    }
+    const request = createRescanRequest({ baseline: run, intent: { runId, baselineRunId, findingId, mode },
+      current, readCallback: () => props.rescanFinding,
+      settle: result => {
+        reservation.current = null;
+        stopRescan.current = null;
+        setBusy(false);
+        const retained = result.status === 'unknown' || (result.status === 'refused' && !result.released);
+        rescanOwner.current = retained;
+        setRescanLocked(retained);
+        if (!retained) setSubmittedRescan(null);
+        if (result.status !== 'completed') {
+          setRescan(result);
+          setAnnouncement(rescanAnnouncement(result));
+          return;
+        }
+        continuation.current = null;
+        retainedOwner.current = false;
+        setOwnerKnown(false);
+        reviewOwner.current = false;
+        setReviewLocked(false);
+        currentReviewForm.current = null;
+        savedFocus.current = null;
+        setRescan(null);
+        setError(null);
+        setBaselinePreview(captured);
+        previewing.current = false;
+        setPreview(false);
+        publish(result.run);
+      },
+    });
+    stopRescan.current = request.stop;
+    request.start();
+  }
+
+  function navigatePreview(show: boolean): void {
+    if (!baselinePreview) return;
+    previewing.current = show;
+    if (show) setPreviewSelection(baselinePreview.selection);
+    moveResultsFocus.current = true;
+    setPreview(show);
+    setAnnouncement(show ? baselineNotice : 'Later results.');
+  }
+
   function takeSavedFocus(findingId: string): boolean {
-    const take = savedFocus.current === findingId;
+    if (previewing.current) return false;
+    const take = !moveResultsFocus.current && savedFocus.current === findingId;
     savedFocus.current = null;
     return take;
   }
 
   function selectResult(selection: ResultSelection, label: string): void {
+    if (previewing.current && baselinePreview) {
+      setPreviewSelection(selection);
+      setAnnouncement(`Selected ${label}. ${baselineNotice}`);
+      return;
+    }
     if (!complete) return;
     const exists = selection.kind === 'finding'
       ? complete.scan.findings.some(item => item.findingId === selection.findingId)
@@ -380,21 +503,29 @@ export function App(props: AppProps): ReactElement {
   }
 
   const capability = !props.analyze ? 'Analyze is unavailable in this build; service integration is pending.' : '';
-  const displayedRun = complete ?? failed;
+  const displayedRun = preview && baselinePreview ? baselinePreview.run : complete ?? failed;
   const failedIsDisplayed = displayedRun?.status === 'failed';
 
   return <main>
-    <AnalyzeSection available={!!props.analyze} busy={busy || reviewLocked} capability={capability}
+    <AnalyzeSection available={!!props.analyze} busy={busy || reviewLocked || rescanLocked} capability={capability}
       configuration={props.configuration} error={failedIsDisplayed ? null : error}
       announcement={announcement} onOperationReserved={operationIsReserved}
       onAnalyze={analyze} onAnnounce={setAnnouncement} />
     {displayedRun && <ResultsSection run={displayedRun}
-      selectedResult={selectedResult} failure={failedIsDisplayed ? error : null}
-      guidance={{ available: !!props.retrieveFinding, busy: busy || reviewLocked, ownerKnown, presentations: guidance,
+      selectedResult={preview ? previewSelection : selectedResult} readOnly={preview}
+      navigation={baselinePreview && <div className="rescan-navigation">
+        {preview && <p>{baselineNotice}</p>}
+        <button type="button" onClick={() => navigatePreview(!preview)}>{preview ? 'Return to later results' : 'Return to baseline'}</button>
+      </div>}
+      rescan={{ blocked: rescanBlocked(), presentation: rescan, onAnnounce: setAnnouncement,
+        submitted: submittedRescan?.baselineRunId === displayedRun.runId ? submittedRescan : null,
+        onSubmit: (findingId, mode) => { if (displayedRun.status === 'completed') rescanFinding(displayedRun.runId, findingId, mode); } }}
+      failure={failedIsDisplayed ? error : null}
+      guidance={{ available: !!props.retrieveFinding, busy: busy || reviewLocked || rescanLocked, ownerKnown, presentations: preview && baselinePreview ? baselinePreview.guidance : guidance,
         onRetrieve: (findingId, label) => { void retrieveFinding(findingId, label); } }}
-      generation={{ busy: busy || reviewLocked, eligibleFindingId: continuation.current?.run === complete ? continuation.current.findingId : null,
-        presentations: generation, onGenerate: (findingId, label) => { void generateFinding(findingId, label); } }}
-      review={{ busy: busy || reviewLocked || ownerKnown, presentations: reviews, isBlocked: reviewBlocked,
+      generation={{ busy: busy || reviewLocked || rescanLocked, eligibleFindingId: !preview && continuation.current?.run === complete ? continuation.current.findingId : null,
+        presentations: preview && baselinePreview ? baselinePreview.generation : generation, onGenerate: (findingId, label) => { void generateFinding(findingId, label); } }}
+      review={{ busy: busy || reviewLocked || rescanLocked || ownerKnown, presentations: reviews, isBlocked: reviewBlocked,
         onSubmit: reviewFinding, onAnnounce: setAnnouncement, takeSavedFocus, attachForm: attachReviewForm }}
       headingRef={resultsHeading} contentRef={resultsContent} onSelect={selectResult} />}
   </main>;

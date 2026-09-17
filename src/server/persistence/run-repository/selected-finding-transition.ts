@@ -12,7 +12,7 @@ function sameNativeFinding(before: Finding, after: Finding): boolean {
 
 export function selectedFindingTransition(expected: CompletedRun, current: CompletedRun, next: CompletedRun): { before: Finding; after: Finding } {
   if (!isDeepStrictEqual(expected, current)) reject('invalid-transition');
-  for (const key of ['formatVersion', 'runId', 'createdAt', 'applicationRevision', 'requestedUrl',
+  for (const key of ['formatVersion', 'runId', 'baselineRunId', 'createdAt', 'applicationRevision', 'requestedUrl',
     'providerContext', 'status', 'finishedAt'] as const) {
     if (!isDeepStrictEqual(current[key], next[key])) reject('invalid-transition');
   }

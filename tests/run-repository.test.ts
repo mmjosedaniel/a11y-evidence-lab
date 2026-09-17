@@ -27,6 +27,7 @@ import {
   proposalGenerationRun,
   runningGenerationRun,
 } from './helpers/m302-generation-fixture.ts';
+import { reviewedRun } from './helpers/m401-review-fixture.ts';
 
 // M102-STORE-01: one real publish-or-preserve boundary, no service/scanner behavior.
 const repo = fileURLToPath(new URL('../', import.meta.url));
@@ -117,6 +118,9 @@ function changed(input: unknown, keys: readonly (string | number)[], value: unkn
   current[keys[keys.length - 1]!] = value;
   return clone;
 }
+function linked<T>(input: T, baselineRunId = 'run-baseline'): T {
+  return { ...structuredClone(input), baselineRunId } as T;
+}
 function valid(input: unknown): void { assert.ok(validateRun(input).ok, 'Transition candidate must be domain-valid'); }
 function residue(root: string, id = 'run-01'): string[] {
   return fs.readdirSync(path.join(root, id)).filter(name => name !== 'run.json');
@@ -167,6 +171,56 @@ test('running records reopen as retained data; both failed cleanup states can fi
       failure(store.finish(completedRun(id)), 'invalid-transition');
       assert.deepEqual(bytes(runs, id), before);
     }
+  });
+});
+
+test('optional baseline lineage round trips and cannot be added, removed or changed at a terminal transition', options, async () => {
+  await withSandbox(({ runs }) => {
+    const store = open(runs);
+    const running = linked(runningRun('run-linked'));
+    const completed = linked(completedRun('run-linked'));
+    assert.deepEqual(success(store.create(running)), running);
+    assert.deepEqual(success(store.finish(completed)), completed);
+    assert.deepEqual(success(open(runs).read('run-linked')), completed);
+
+    success(store.create(runningRun('run-added')));
+    failure(store.finish(linked(completedRun('run-added'))), 'invalid-transition');
+    success(store.create(linked(runningRun('run-removed'))));
+    failure(store.finish(completedRun('run-removed')), 'invalid-transition');
+    success(store.create(linked(runningRun('run-changed'), 'run-before')));
+    failure(store.finish(linked(completedRun('run-changed'), 'run-after')), 'invalid-transition');
+  });
+});
+
+test('every selected-Finding publisher preserves the immutable baseline lineage', options, async () => {
+  await withSandbox(({ runs }) => {
+    const store = open(runs);
+    const original = linked(completedScanRun() as unknown as CompletedRun);
+    success(store.create(linked(runningRun())));
+    success(store.finish(original));
+
+    const retrievalRunning = linked(runningRetrievalRun() as unknown as CompletedRun);
+    for (const candidate of [
+      { ...structuredClone(retrievalRunning), baselineRunId: 'run-other' },
+      (() => { const value = structuredClone(retrievalRunning) as Record<string, unknown>; delete value.baselineRunId; return value; })(),
+    ]) {
+      failure(store.updateRetrieval(original, candidate), 'invalid-transition');
+    }
+    success(store.updateRetrieval(original, retrievalRunning));
+
+    const supported = linked(assessedSupportedRetrievalRun() as unknown as CompletedRun);
+    success(store.updateRetrieval(retrievalRunning, supported));
+    const generationRunning = linked(runningGenerationRun() as unknown as CompletedRun);
+    failure(store.updateGeneration(supported,
+      { ...structuredClone(generationRunning), baselineRunId: 'run-other' }), 'invalid-transition');
+    success(store.updateGeneration(supported, generationRunning));
+
+    const pending = linked(proposalGenerationRun() as unknown as CompletedRun);
+    success(store.updateGeneration(generationRunning, pending));
+    const reviewed = linked(reviewedRun('approve') as unknown as CompletedRun);
+    failure(store.updateReview(pending,
+      { ...structuredClone(reviewed), baselineRunId: 'run-other' }), 'invalid-transition');
+    assert.deepEqual(success(store.updateReview(pending, reviewed)), reviewed);
   });
 });
 

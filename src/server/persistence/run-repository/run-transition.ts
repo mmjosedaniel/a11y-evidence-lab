@@ -6,7 +6,7 @@ import { reject } from './store-errors.ts';
 export function checkTransition(previous: PageAnalysisRun, next: TerminalRun): void {
   if (previous.status !== 'running') reject('invalid-transition');
   if (next.status === 'completed' && next.scan.findings.some(finding => finding.state !== 'unprocessed')) reject('invalid-transition');
-  for (const key of ['formatVersion', 'runId', 'createdAt', 'applicationRevision', 'requestedUrl', 'providerContext'] as const) {
+  for (const key of ['formatVersion', 'runId', 'baselineRunId', 'createdAt', 'applicationRevision', 'requestedUrl', 'providerContext'] as const) {
     if (!isDeepStrictEqual(previous[key], next[key])) reject('invalid-transition');
   }
   const before = previous.scanContext;

@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import type { Finding, ScanResult, ScannerReviewObservation } from '../domain/run-contract.ts';
 import { nativeBuckets, reporterId, scanRules, scannerVersion } from './scan-profile.ts';
 import { projectNativeNode } from './normalization/native-rule-evidence.ts';
+import type { NativeCandidate, NativeRule } from './normalization/native-rule-evidence.ts';
 import { choice, denseArray, exactKeys, own, record, requireValid } from './normalization/native-value-reader.ts';
 
 type ScanCollection = Pick<ScanResult, 'coverage' | 'findings' | 'scannerReviewObservations'>;
@@ -22,9 +23,15 @@ function validateOptions(input: unknown): void {
   for (const key of ['ancestry', 'xpath', 'absolutePaths', 'iframes']) requireValid(own(options, key) === false);
 }
 
-export function normalizeNativeScan(input: unknown): NormalizationResult {
+type SelectedNormalizationResult =
+  | { readonly ok: true; readonly value: ScanCollection; readonly candidates: readonly NativeCandidate[] }
+  | Extract<NormalizationResult, { ok: false }>;
+export function normalizeNativeScan(input: unknown): NormalizationResult;
+export function normalizeNativeScan(input: unknown, selectedRule: NativeRule): SelectedNormalizationResult;
+export function normalizeNativeScan(input: unknown, selectedRule?: NativeRule): NormalizationResult | SelectedNormalizationResult {
   let failure: Extract<NormalizationResult, { ok: false }>['error'] = 'result-validation';
   try {
+    if (selectedRule !== undefined) choice(selectedRule, scanRules);
     const root = record(input);
     if (own(root, 'captureFailure') === 'evidence-capture') {
       exactKeys(root, ['captureFailure']);
@@ -61,15 +68,19 @@ export function normalizeNativeScan(input: unknown): NormalizationResult {
     }
 
     const findings: Finding[] = [];
+    const candidates: NativeCandidate[] = [];
     const scannerReviewObservations: ScannerReviewObservation[] = [];
     const ids = new Set<string>();
     for (const { bucket, entries } of validated) {
-      if (bucket !== 'violations' && bucket !== 'incomplete') continue;
+      if (bucket !== 'violations' && bucket !== 'incomplete' && bucket !== 'passes') continue;
       for (const { rule, nodes } of entries) for (const node of nodes) {
+        if (bucket === 'passes' && rule !== selectedRule) continue;
         failure = 'evidence-capture';
         const projected = projectNativeNode(rule, node);
         const { details, locator } = projected;
-        if (bucket === 'violations') {
+        if (bucket === 'passes') {
+          candidates.push(Object.freeze({ ...details, locator, nativeResult: 'pass' }));
+        } else if (bucket === 'violations') {
           failure = 'result-validation';
           const findingId = crypto.randomUUID();
           requireValid(typeof findingId === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.exec(findingId)?.[0] === findingId && !ids.has(findingId));
@@ -82,7 +93,9 @@ export function normalizeNativeScan(input: unknown): NormalizationResult {
         }
       }
     }
-    return Object.freeze({ ok: true, value: Object.freeze({ coverage: Object.freeze(coverage), findings: Object.freeze(findings), scannerReviewObservations: Object.freeze(scannerReviewObservations) }) });
+    const value = Object.freeze({ coverage: Object.freeze(coverage), findings: Object.freeze(findings), scannerReviewObservations: Object.freeze(scannerReviewObservations) });
+    return selectedRule === undefined ? Object.freeze({ ok: true, value })
+      : Object.freeze({ ok: true, value, candidates: Object.freeze(candidates) });
   } catch {
     return Object.freeze({ ok: false, error: failure });
   }

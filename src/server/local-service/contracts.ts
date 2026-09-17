@@ -1,3 +1,4 @@
+import type { NativeRule } from '../scan/normalization/native-rule-evidence.ts';
 import type { GenerationAdapter, GenerationErrorCode, ProviderInvocation } from '../generation/generation-contract.ts';
 import type { Finding, PageAnalysisRun } from '../domain/run-contract.ts';
 import type { CompletedRun, FailedRun, RunningRun } from '../persistence/run-repository.ts';
@@ -14,6 +15,11 @@ export type ScanOutcome =
   | { ok: false; error: 'invalid-request' | 'busy' | 'stopping' | 'create-failed'
       | 'scan-failed' | 'result-validation' | 'initial-persistence' | 'shutdown';
       run: FailedRun | null; persisted: boolean; cleanupFailed: boolean };
+
+export type RescanOutcome = ScanOutcome | { ok: false; error: 'not-found' | 'not-eligible'
+  | 'invalid-run' | 'stored-run-unavailable' | 'read-failed';
+  run: FailedRun | null; persisted: boolean; cleanupFailed: boolean };
+export type RescanExecutor = (run: RunningRun, signal: AbortSignal, selectedRule: NativeRule) => Promise<unknown>;
 
 export type RetrievalServiceError =
   | 'invalid-request' | 'busy' | 'stopping' | 'not-found' | 'invalid-run'
@@ -47,6 +53,7 @@ export interface LocalService {
   readonly whenStopped: Promise<StopResult>;
   readRun(id: unknown): ReadResult;
   runScan(input: unknown, execute: (run: RunningRun, signal: AbortSignal) => Promise<unknown>): Promise<ScanOutcome>;
+  rescanFinding(input: unknown, execute?: RescanExecutor): Promise<RescanOutcome>;
   retrieveFinding(input: unknown, execute?: RetrievalExecutor): Promise<RetrievalOutcome>;
   generateFinding(input: unknown, adapter?: GenerationAdapter): Promise<GenerationServiceOutcome>;
   reviewFinding(input: unknown): Promise<ReviewOutcome>;

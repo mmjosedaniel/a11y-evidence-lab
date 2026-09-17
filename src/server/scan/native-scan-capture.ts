@@ -1,10 +1,11 @@
 import axe from 'axe-core';
 import { AxeBuilder } from '@axe-core/playwright';
 import type { Page } from 'playwright';
-import { nativeBuckets, nativeScanOptions, reporterId } from './scan-profile.ts';
+import { nativeBuckets, nativeScanOptions, reporterId, scanRules } from './scan-profile.ts';
+import type { NativeRule } from './normalization/native-rule-evidence.ts';
 
 // This function is serialized into the analyzed document, with no Node closure.
-function registerReporter(engine: typeof axe, reporterName: string, buckets: readonly string[]): void {
+function registerReporter(engine: typeof axe, reporterName: string, buckets: readonly string[], selectedRule?: string): void {
   type Fact = { value: string | boolean } | { unavailable: string };
   type NativeNode = { element?: unknown; capturedDom?: unknown;
     any?: { relatedNodes?: NativeNode[] }[]; all?: { relatedNodes?: NativeNode[] }[];
@@ -100,7 +101,7 @@ function registerReporter(engine: typeof axe, reporterName: string, buckets: rea
       try {
         for (const bucket of buckets) {
           for (const rule of report[bucket]) for (const node of rule.nodes) {
-            if (bucket === 'violations' || bucket === 'incomplete') node.capturedDom = capture(node, rule.id);
+            if (bucket === 'violations' || bucket === 'incomplete' || bucket === 'passes' && rule.id === selectedRule) node.capturedDom = capture(node, rule.id);
             delete node.element;
             for (const group of ['any', 'all', 'none'] as const) {
               for (const check of node[group] ?? []) for (const related of check.relatedNodes ?? []) delete related.element;
@@ -113,8 +114,9 @@ function registerReporter(engine: typeof axe, reporterName: string, buckets: rea
   });
 }
 
-export async function captureNativeScan(page: Page): Promise<unknown> {
-  const reporterRegistration = `;(${registerReporter.toString()})(axe, ${JSON.stringify(reporterId)}, ${JSON.stringify(nativeBuckets)});`;
+export async function captureNativeScan(page: Page, selectedRule?: NativeRule): Promise<unknown> {
+  if (selectedRule !== undefined && !scanRules.includes(selectedRule)) throw new Error('invalid-rule');
+  const reporterRegistration = `;(${registerReporter.toString()})(axe, ${JSON.stringify(reporterId)}, ${JSON.stringify(nativeBuckets)}, ${JSON.stringify(selectedRule)});`;
   return new AxeBuilder({ page, axeSource: axe.source + reporterRegistration })
     .setLegacyMode(true).exclude('iframe').exclude('frame').options(nativeScanOptions()).analyze();
 }
