@@ -4,7 +4,7 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-None.
+- [M5-02 — Conservative comparison](m5-02-conservative-comparison.md)
 
 ## Completed plans
 
