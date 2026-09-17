@@ -1,8 +1,8 @@
 # Analyze and results presentation
 
 - **Status:** Accepted and implemented M1-04 presentation contract through OD-027
-- **Last reviewed:** 2026-09-14
-- **Scope:** Analysis input and deterministic scan results, with the M2-03 guidance, M3-05 generation and M4-02 review extensions below. M4-02 verification remains in its owning plan.
+- **Last reviewed:** 2026-09-16
+- **Scope:** Analysis input and deterministic scan results, with the M2-03 guidance, M3-05 generation, M4-02 review and M5-01 intentional-rescan extensions below. Each task's verification remains in its owning plan.
 
 ## Document role
 
@@ -286,6 +286,18 @@ Use the existing shared status for review changes, naming the captured human-rea
 
 Apply the existing desktop, narrow and native-zoom readability and non-color requirements to controls, errors, original content and saved decisions. M4-02 verification includes desktop/narrow visual and reflow evidence; its native 200% test was omitted at the owner's explicit direction and is not claimed as passed. M4-02's bounded synthetic browser/service/disk evidence is separate from the [M4-03 observations](../plans/completed/m4-03-review-checkpoint.md#m403-b-edit-observation-01--complete-edit-saved-and-read-back), which save all three human-authorized outcomes on isolated copies of one authentic retained proposal. Original evidence remains unchanged; these are controlled review branches, with no new upstream executions. The later owner-directed REQ-A11Y-006 amendment defers all 200% zoom testing until after MVP, including the former M2-03 carry to M6-03.
 
+## M5-01 intentional rescan
+
+For a selected Finding in the current completed run, a native **New scan mode** select starts unselected and **Start intentional rescan** submits the explicit choice. Either Local or Groq is allowed, including the baseline's mode. Retrieval, generation and review are not prerequisites. ScannerReviewObservations have no rescan action. Missing mode focuses the select and announces **Choose a new scan mode.**
+
+The baseline evidence and current selection remain inspectable during pending, refusal and unknown outcomes. Submitted mode survives navigation back to that same run/Finding; it is not inherited by another intent. Run-scoped status remains visible when no Finding or a manual-review observation is selected. Bounded failure messages describe the actual refusal, persistence and cleanup state. An uncertain outcome announces **Rescan outcome unknown. The service may have created a later run. Further actions are blocked.** There is no automatic retry or cancellation claim.
+
+Active operations and uncertain review/rescan publication block competing mutations. Generation uncertainty prevents rescan while preserving the existing independently submitted Analyze behavior. A known settled historical owner alone does not disqualify a Finding. Successful publication opens the independent later run, including a valid zero result, and retires prior transient capabilities without changing baseline evidence. Focus moves to Results only when the outgoing Results contained focus.
+
+**Return to baseline** shows one captured read-only baseline snapshot; **Return to later results** shows the same active later workflow. Both controls focus Results and announce navigation. Preview has separate selection, no mutation controls or service action, and no present-tense claim that historical operations still reserve the service. It preserves visible evidence, invocation and unsaved-result information. Later operations may settle while preview is visible; navigation neither cancels them nor restores historical capabilities. Another successful rescan replaces the immediate pair; successful independent Analyze clears it.
+
+The [M5-01 plan](../plans/completed/m5-01-intentional-rescan.md) owns verification: desktop 1366x900 and narrow 390x844 ready, pending, error and complete views, keyboard activation, visible focus, shared announcements, axe and overflow checks. No 200% or spoken screen-reader verification is claimed. Comparison outcomes, history browsing and reopening retained runs remain outside this extension.
+
 ## Manual-review evidence
 
 A selected manual-review item uses the shared selected-evidence area. Its one-sentence explanation uses a plain-language reason such as **Alternative text could not be inspected**, **Label information was not available**, **Label information was withheld**, or **Background imagery prevented a reliable contrast result**. A retained `missing` label reason must not be presented as `withheld`.
@@ -423,7 +435,7 @@ Results
 
 The original Analyze/Results contract does not add a score, dashboard, chart, filter, sort, search, bulk action, page preview, code editor, remediation action, provider call, run history, Run ID entry, deep link, reload restoration, settings page, model manager, export, dark theme, or new dependency.
 
-The M2-03 extension defines retrieved guidance and abstention presentation. M3-05 adds bounded generation and proposal presentation, and M4-02 adds individual review above. Comparison remains later roadmap work and must reuse the evidence-first hierarchy.
+The M2-03 extension defines retrieved guidance and abstention presentation. M3-05 adds bounded generation and proposal presentation, M4-02 adds individual review, and M5-01 adds intentional rescan and immediate read-only baseline navigation above. Comparison remains later roadmap work and must reuse the evidence-first hierarchy.
 
 ## Related guidance
 

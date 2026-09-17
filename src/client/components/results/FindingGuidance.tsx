@@ -20,8 +20,9 @@ export interface GuidanceControls {
   readonly onRetrieve: (findingId: string, label: string) => void;
 }
 
-export function FindingGuidance({ finding, label, providerContext, controls, generationConsumed = false }: {
+export function FindingGuidance({ finding, label, providerContext, controls, generationConsumed = false, readOnly = false }: {
   readonly generationConsumed?: boolean;
+  readonly readOnly?: boolean;
   readonly finding: Finding; readonly label: string; readonly providerContext: ProviderContext;
   readonly controls: GuidanceControls;
 }): ReactElement {
@@ -30,20 +31,20 @@ export function FindingGuidance({ finding, label, providerContext, controls, gen
     finding.state !== 'unprocessed' || !!state?.attempted;
   return <div className="finding-guidance">
     <h4>Finding guidance</h4>
-    <button type="button" aria-disabled={disabled} onClick={() => {
+    {!readOnly && <button type="button" aria-disabled={disabled} onClick={() => {
       if (!disabled) controls.onRetrieve(finding.findingId, label);
-    }}>Get guidance</button>
+    }}>Get guidance</button>}
     {state?.pending && <p>Retrieving guidance…</p>}
     {state?.error && <div className="error">
       <p>Guidance failed: {state.error}.</p>
       {state.unsaved && <p>This guidance attempt was not saved.</p>}
       {state.cleanup && <p>Resource cleanup is uncertain.</p>}
     </div>}
-    {!controls.available && <p>Guidance is unavailable in this build.</p>}
-    {controls.ownerKnown && !state?.pending && <p>A Finding workflow remains active or resource cleanup is uncertain.</p>}
+    {!readOnly && !controls.available && <p>Guidance is unavailable in this build.</p>}
+    {!readOnly && controls.ownerKnown && !state?.pending && <p>A Finding workflow remains active or resource cleanup is uncertain.</p>}
     {state?.view && <GuidancePassages view={state.view}
       selectionPolicy={'retrieval' in finding && finding.retrieval?.status === 'completed'
         ? finding.retrieval.result.selectionPolicy : undefined} />}
-    <FindingOutcome finding={finding} providerContext={providerContext} generationConsumed={generationConsumed} />
+    <FindingOutcome finding={finding} providerContext={providerContext} generationConsumed={generationConsumed || readOnly} />
   </div>;
 }

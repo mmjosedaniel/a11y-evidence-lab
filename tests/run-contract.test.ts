@@ -923,7 +923,7 @@ test('every declared object key is required and synthetic prohibited content can
       rejectRun(run);
     }
   }
-  for (const key of ['scanId', 'evidenceId', 'providerInvocation', 'retrieval', 'proposal', 'review', 'comparison', 'baselineRunId']) {
+  for (const key of ['scanId', 'evidenceId', 'providerInvocation', 'retrieval', 'proposal', 'review', 'comparison']) {
     const run = completeRun();
     run[key] = { secret };
     rejectRun(run);
@@ -936,6 +936,24 @@ test('every declared object key is required and synthetic prohibited content can
   const selectedProvider = scanFixture();
   put(selectedProvider, ['findings', 0, 'providerContext'], completeRun().providerContext);
   rejectScan(selectedProvider);
+});
+
+test('optional baseline lineage is closed, non-self, detached and valid for every parent state', () => {
+  for (const source of [runningRun(), completeRun(), failedRun()]) {
+    const linked = { ...source, baselineRunId: 'run-baseline' };
+    const accepted = accept(validateRun, linked) as RecordValue;
+    assert.equal(accepted.baselineRunId, 'run-baseline');
+    assert.equal(Object.isFrozen(accepted), true);
+  }
+
+  for (const invalid of [undefined, null, '', '../baseline', 'run-01', 'x'.repeat(65)]) {
+    const linked = { ...completeRun(), baselineRunId: invalid };
+    rejectRun(linked);
+  }
+
+  const ordinary = completeRun();
+  accept(validateRun, ordinary);
+  assert.equal(Object.hasOwn(ordinary, 'baselineRunId'), false);
 });
 
 // I7-I8: readonly ownership, JSON boundaries and non-JSON object rejection.

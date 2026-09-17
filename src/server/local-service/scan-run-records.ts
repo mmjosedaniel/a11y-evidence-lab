@@ -10,7 +10,7 @@ export function matchTerminalRun(running: RunningRun, input: unknown): TerminalR
   if (!checked.ok || checked.value.status === 'running') return;
   const terminal = checked.value;
   if (terminal.status === 'completed' && !validateScan(terminal.scan).ok) return;
-  for (const key of ['formatVersion', 'runId', 'createdAt', 'applicationRevision', 'requestedUrl', 'providerContext'] as const) {
+  for (const key of ['formatVersion', 'runId', 'baselineRunId', 'createdAt', 'applicationRevision', 'requestedUrl', 'providerContext'] as const) {
     if (!isDeepStrictEqual(running[key], terminal[key])) return;
   }
   const before = running.scanContext;

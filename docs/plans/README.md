@@ -4,11 +4,13 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-- [M5-01 — Intentional rescan](m5-01-intentional-rescan.md) — In progress for owner-requested planning only; implementation and controlled integration remain pending.
+None.
 
 ## Completed plans
 
 These archives preserve each task's execution, review, failures, and closure evidence. The roadmap remains the status authority.
+
+- [M5-01 — Intentional rescan](completed/m5-01-intentional-rescan.md)
 
 - [M3-03 — Qwen adapter and capacity screen](completed/m3-03-qwen-adapter-and-capacity-screen.md)
 

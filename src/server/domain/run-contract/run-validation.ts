@@ -38,7 +38,7 @@ function requireChronology(createdAt: string, context: ScanContext, finishedAt?:
 
 function readRun(input: unknown): PageAnalysisRun {
   const record = readObject(input);
-  const commonKeys = ['formatVersion', 'runId', 'createdAt', 'applicationRevision', 'requestedUrl', 'providerContext', 'status'];
+  const commonKeys = [...(Object.hasOwn(record, 'baselineRunId') ? ['baselineRunId'] : []), 'formatVersion', 'runId', 'createdAt', 'applicationRevision', 'requestedUrl', 'providerContext', 'status'];
   const status = readChoice(record.status, ['running', 'completed', 'failed']);
   requireKeys(record, [...commonKeys, ...(status === 'running' ? ['scanContext'] : status === 'completed' ? ['finishedAt', 'scan'] : ['scanContext', 'finishedAt', 'failure'])]);
   const common: RunContext = {
@@ -46,6 +46,11 @@ function readRun(input: unknown): PageAnalysisRun {
     createdAt: readTime(record.createdAt), applicationRevision: readPattern(record.applicationRevision, /^[0-9a-f]{40}$/),
     requestedUrl: readUrl(record.requestedUrl), providerContext: readProvider(record.providerContext),
   };
+  if (Object.hasOwn(record, 'baselineRunId')) {
+    const baselineRunId = readId(record.baselineRunId);
+    requireValid(baselineRunId !== common.runId);
+    Object.assign(common, { baselineRunId });
+  }
   if (status === 'completed') {
     const finishedAt = readTime(record.finishedAt);
     const scan = readStoredScan(record.scan, finishedAt);

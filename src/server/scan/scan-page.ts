@@ -10,7 +10,8 @@ import type { ScanResult } from '../domain/run-contract.ts';
 import type { RunningRun, TerminalRun } from '../persistence/run-repository.ts';
 import { captureNativeScan } from './native-scan-capture.ts';
 import { normalizeNativeScan } from './normalize-scan.ts';
-import { initialScanContext, nativeScanOptions, scannerVersion } from './scan-profile.ts';
+import type { NativeCandidate, NativeRule } from './normalization/native-rule-evidence.ts';
+import { initialScanContext, nativeScanOptions, scannerVersion, scanRules } from './scan-profile.ts';
 import { canonicalPublicHttpsUrl } from './scan-request.ts';
 
 export { captureNativeScan } from './native-scan-capture.ts';
@@ -78,6 +79,19 @@ function scratchEmpty(): boolean {
 }
 
 export async function executeScan(input: RunningRun, signal: AbortSignal): Promise<TerminalRun> {
+  return (await executeScanOperation(input, signal)).run;
+}
+
+type RescanScanResult =
+  | { readonly run: Extract<TerminalRun, { status: 'completed' }>; readonly candidates: readonly NativeCandidate[] }
+  | { readonly run: Extract<TerminalRun, { status: 'failed' }> };
+
+export async function executeRescanScan(input: RunningRun, signal: AbortSignal, selectedRule: NativeRule): Promise<RescanScanResult> {
+  if (!scanRules.includes(selectedRule)) throw new Error('invalid-rule');
+  return executeScanOperation(input, signal, selectedRule);
+}
+
+async function executeScanOperation(input: RunningRun, signal: AbortSignal, selectedRule?: NativeRule): Promise<RescanScanResult> {
   const checked = validateRun(input);
   if (!checked.ok || checked.value.status !== 'running') throw new Error('invalid-run');
   if (!(signal instanceof AbortSignal)) throw new Error('invalid-signal');
@@ -85,6 +99,7 @@ export async function executeScan(input: RunningRun, signal: AbortSignal): Promi
   const context = { ...run.scanContext, cleanup: 'closed' as 'closed' | 'failed' };
   let failure: Failure | undefined;
   let collection: Pick<ScanResult, 'coverage' | 'findings' | 'scannerReviewObservations'> | undefined;
+  let candidates: readonly NativeCandidate[] | undefined;
   let browser: Browser | undefined;
   let browserContext: BrowserContext | undefined;
   let page: Page | undefined;
@@ -171,7 +186,7 @@ export async function executeScan(input: RunningRun, signal: AbortSignal): Promi
         await operation(() => page!.goto(run.requestedUrl, { waitUntil: 'load', timeout: Math.max(1, workEnd - performance.now()) }));
         context.readinessReached = true;
         phase = 'scanner';
-        const native = await operation(() => captureNativeScan(page!));
+        const native = await operation(() => captureNativeScan(page!, selectedRule));
         if (reportBoundary(native)) {
           acceptedReport = true;
           context.finalUrl = observed(() => own(native, 'url'), validUrl);
@@ -179,9 +194,15 @@ export async function executeScan(input: RunningRun, signal: AbortSignal): Promi
             /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}Z$/.exec(value)?.[0] === value &&
             new Date(value).toISOString() === value && Date.parse(value) >= Date.parse(run.createdAt));
         }
-        const normalized = normalizeNativeScan(native);
-        if (!normalized.ok) failure ??= normalized.error;
-        else collection = normalized.value;
+        if (selectedRule === undefined) {
+          const normalized = normalizeNativeScan(native);
+          if (!normalized.ok) failure ??= normalized.error;
+          else collection = normalized.value;
+        } else {
+          const normalized = normalizeNativeScan(native, selectedRule);
+          if (!normalized.ok) failure ??= normalized.error;
+          else { collection = normalized.value; candidates = normalized.candidates; }
+        }
         active();
         if (!acceptedReport || !('value' in context.finalUrl) || !('value' in context.scannedAt)) failure ??= 'result-validation';
       } catch { failure ??= phase; }
@@ -214,15 +235,17 @@ export async function executeScan(input: RunningRun, signal: AbortSignal): Promi
       const scan = validateScan({ context, ...collection });
       if (scan.ok) {
         const terminal = validateRun({ ...common, status: 'completed', finishedAt, scan: scan.value });
-        if (terminal.ok && terminal.value.status === 'completed') return terminal.value;
+        if (terminal.ok && terminal.value.status === 'completed') return Object.freeze({ run: terminal.value, candidates: candidates ?? Object.freeze([]) });
       }
       failure = 'result-validation';
     }
     const terminal = validateRun({ ...common, status: 'failed', finishedAt, scanContext: context,
       failure: { category: failure ?? 'result-validation' } });
     if (!terminal.ok || terminal.value.status !== 'failed') throw new Error('invalid-run');
-    return terminal.value;
+    return Object.freeze({ run: terminal.value });
   } finally {
+    candidates = undefined;
+    collection = undefined;
     clearTimeout(workTimer);
     signal.removeEventListener('abort', onAbort);
   }

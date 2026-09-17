@@ -3,6 +3,7 @@ import crypto from 'node:crypto';
 import { syncBuiltinESMExports } from 'node:module';
 import test, { mock } from 'node:test';
 import { normalizeNativeScan } from '../src/server/scan/normalize-scan.ts';
+import type { NativeCandidate, NativeRule } from '../src/server/scan/normalization/native-rule-evidence.ts';
 import { validateScan } from '../src/server/domain/run-contract.ts';
 import type { ScanResult } from '../src/server/domain/run-contract.ts';
 
@@ -121,6 +122,17 @@ function assertDetached(input: unknown, output: unknown): void {
   }
   inspect(output);
 }
+function assertDeepFrozen(input: unknown): void {
+  if (input === null || typeof input !== 'object') return;
+  assert.equal(Object.isFrozen(input), true);
+  for (const child of Object.values(input)) assertDeepFrozen(child);
+}
+function selected(input: unknown, rule: NativeRule): readonly NativeCandidate[] {
+  const result = normalizeNativeScan(input, rule);
+  if (!result.ok) assert.fail(`Expected selected synthetic normalization success; got ${result.error}`);
+  assert.deepEqual(Object.keys(result).sort(), ['candidates', 'ok', 'value']);
+  return result.candidates;
+}
 
 test('preserves every node, native order and duplicate locator with exact four-bucket counts', () => {
   const input = native();
@@ -168,6 +180,73 @@ test('distinguishes absent buckets, explicit inapplicable zero, pass-only and in
       assert.equal(output.coverage[rule][key], key === bucket ? (bucket === 'inapplicable' ? 0 : 2) : null);
     }
   }
+});
+
+test('selected normalization returns only ordered exact detached deeply frozen pass candidates', () => {
+  const input = native();
+  const firstPass = node('image-alt');
+  const duplicatePass = structuredClone(firstPass);
+  const unavailablePass = node('image-alt');
+  put(unavailablePass, ['capturedDom', 'locator'], unavailable('unsupported'));
+  put(unavailablePass, ['capturedDom', 'evidence', 'elementKind'], unavailable('invalid'));
+  put(unavailablePass, ['capturedDom', 'evidence', 'altState'], unavailable('missing'));
+  input.passes = [
+    { id: 'label', nodes: [node('label')] },
+    { id: 'image-alt', nodes: [firstPass, duplicatePass, unavailablePass] },
+  ];
+  input.incomplete = [{ id: 'image-alt', nodes: [node('image-alt')] }];
+  const before = structuredClone(input);
+  const candidates = selected(input, 'image-alt');
+  assert.equal(candidates.length, 3);
+  assert.deepEqual(candidates.map(candidate => candidate.ruleId), ['image-alt', 'image-alt', 'image-alt']);
+  assert.deepEqual(candidates[0].locator, candidates[1].locator, 'Duplicate native locators remain separate ordered candidates');
+  assert.deepEqual(candidates[2].locator, unavailable('unsupported'));
+  assert.deepEqual(candidates[2].evidence, { elementKind: unavailable('invalid'), altState: unavailable('missing') });
+  for (const candidate of candidates) {
+    assert.deepEqual(Object.keys(candidate).sort(), ['checks', 'evidence', 'locator', 'nativeResult', 'ruleId']);
+    assert.equal(candidate.nativeResult, 'pass');
+    assert.equal(Object.hasOwn(candidate, 'findingId'), false);
+    assert.equal(Object.hasOwn(candidate, 'state'), false);
+    assert.equal(Object.hasOwn(candidate, 'incompleteReason'), false);
+  }
+  assert.deepEqual(input, before);
+  assertDetached(input, candidates);
+  assertDeepFrozen(candidates);
+  const serialized = JSON.stringify(candidates);
+  put(input, ['passes', 1, 'nodes', 0, 'capturedDom', 'evidence', 'altState', 'value'], 'non-empty');
+  assert.equal(JSON.stringify(candidates), serialized);
+  assert.equal(serialized.includes(canary), false);
+  assert.deepEqual(Object.keys(normalizeNativeScan(input)).sort(), ['ok', 'value'], 'Ordinary normalization remains candidate-free');
+});
+
+test('selected normalization excludes other native outcomes and rejects malformed unselected coverage', () => {
+  const incomplete = native();
+  incomplete.incomplete = [{ id: 'image-alt', nodes: [node('image-alt')] }];
+  incomplete.passes = [{ id: 'label', nodes: [node('label')] }];
+  assert.deepEqual(selected(incomplete, 'image-alt'), []);
+
+  const inapplicable = native();
+  inapplicable.violations = array(inapplicable.violations).filter(item => record(item).id !== 'image-alt');
+  inapplicable.inapplicable = [entry('image-alt', 2)];
+  assert.deepEqual(selected(inapplicable, 'image-alt'), []);
+  assert.equal(project(inapplicable).coverage['image-alt'].inapplicable, 2,
+    'Synthetic nonzero inapplicable coverage remains accepted without candidates');
+
+  const malformed = native();
+  malformed.passes = [{ id: 'image-alt', nodes: [node('image-alt')] }, { id: 'unexpected-rule', nodes: [{}] }];
+  assert.deepEqual(normalizeNativeScan(malformed, 'image-alt'), { ok: false, error: 'coverage-validation' });
+
+  const missingSelectedCapture = native();
+  const selectedPass = node('image-alt'); delete selectedPass.capturedDom;
+  missingSelectedCapture.passes = [{ id: 'image-alt', nodes: [selectedPass] }];
+  assert.deepEqual(normalizeNativeScan(missingSelectedCapture, 'image-alt'), { ok: false, error: 'evidence-capture' });
+
+  const malformedUnselectedNode = native();
+  malformedUnselectedNode.passes = [
+    { id: 'image-alt', nodes: [node('image-alt')] },
+    { id: 'label', nodes: [null] },
+  ];
+  assert.deepEqual(normalizeNativeScan(malformedUnselectedNode, 'image-alt'), { ok: false, error: 'result-validation' });
 });
 
 test('UUID acquisition errors or collisions fail the whole result without fallback identities', () => {

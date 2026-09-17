@@ -113,5 +113,6 @@ export function createGenerationOperation(dependencies: Dependencies) {
     })();
     return reservation.promise;
   }
-  return Object.freeze({ start, owns, hasOwner: () => owner !== undefined });
+  function discardSettledOwner(): void { owner = undefined; }
+  return Object.freeze({ start, owns, discardSettledOwner, hasOwner: () => owner !== undefined });
 }

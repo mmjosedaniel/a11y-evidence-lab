@@ -83,9 +83,10 @@ export function generationAnnouncement(provider: ProviderContext, findingId: str
   return `${context} ${status}: ${outcome.error}. ${providerCallText(outcome, findingId)} ${generationPersistenceText(outcome, findingId)}${outcome.cleanupFailed ? ' Resource cleanup is uncertain.' : ''}`;
 }
 
-function Failure({ outcome, findingId }: {
+function Failure({ outcome, findingId, readOnly }: {
   readonly outcome: FailedGeneration;
   readonly findingId: string;
+  readonly readOnly: boolean;
 }): ReactElement {
   return <div className="generation-failure">
     <p className="error">{generationStatus({ status: 'settled', outcome }, findingId)}: {outcome.error}.</p>
@@ -97,13 +98,14 @@ function Failure({ outcome, findingId }: {
       <div><dt>Invocation record</dt><dd>{outcome.invocationPersisted ? 'Saved with the run' : 'Not saved with the run'}</dd></div>
     </dl>}
     {outcome.cleanupFailed && <p>Resource cleanup is uncertain. The service or provider may still be working.</p>}
-    {outcome.error === 'generation-persistence' && <p>The generation workflow remains reserved.</p>}
+    {!readOnly && outcome.error === 'generation-persistence' && <p>The generation workflow remains reserved.</p>}
   </div>;
 }
 
-export function FindingGeneration({ finding, label, providerContext, controls }: {
+export function FindingGeneration({ finding, label, providerContext, controls, readOnly = false }: {
   readonly finding: Finding; readonly label: string; readonly providerContext: ProviderContext;
   readonly controls: GenerationControls;
+  readonly readOnly?: boolean;
 }): ReactElement | null {
   const finalStatus = finalReviewStatus(finding);
   if (finalStatus && 'generation' in finding && finding.generation.status === 'completed') {
@@ -127,9 +129,9 @@ export function FindingGeneration({ finding, label, providerContext, controls }:
     {providerContext.mode === 'local'
       ? <p>Local generation uses Ollama · {providerContext.model} on loopback. The complete input must fit the Local token limit.</p>
       : <p>Groq · {providerContext.model} runs externally. Only minimized selected-Finding facts and retrieved guidance are sent. Request byte admission does not guarantee hosted input fit.</p>}
-    <button className="primary" type="button" aria-disabled={disabled} onClick={() => {
+    {!readOnly && <button className="primary" type="button" aria-disabled={disabled} onClick={() => {
       if (!disabled) controls.onGenerate(finding.findingId, label);
-    }}>Generate</button>
+    }}>Generate</button>}
     {state?.status === 'pending' && <p>Generating a proposal… A submitted request does not yet confirm a provider call or saved outcome.</p>}
     {state?.status === 'unknown' && <div className="generation-failure">
       <p className="error">Generation outcome unknown: {state.error}.</p>
@@ -137,6 +139,6 @@ export function FindingGeneration({ finding, label, providerContext, controls }:
     </div>}
     {state?.status === 'settled' && (state.outcome.ok
       ? <p>Proposal pending review. The provider call and original validated proposal were saved.</p>
-      : <Failure outcome={state.outcome} findingId={finding.findingId} />)}
+      : <Failure outcome={state.outcome} findingId={finding.findingId} readOnly={readOnly} />)}
   </div>;
 }

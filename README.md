@@ -68,6 +68,8 @@ The [generation evaluation package](#frozen-generation-evaluation-package) freez
 
 See [how to inspect guidance in the UI](#inspecting-m2-02-retrieval-evidence), [how to generate and inspect one proposal](#inspecting-generation-for-one-finding), and [where to find the M2-04 checkpoint evidence](#inspecting-m2-04-checkpoint-evidence).
 
+M5-01 implements [intentional rescans](#intentional-rescans): an explicitly chosen mode starts a distinct linked run while preserving the baseline, with truthful uncertainty handling and one read-only baseline preview. Its [completed plan](docs/plans/completed/m5-01-intentional-rescan.md#m501-final-01--integrated-review-and-task-closure) records verification, independent review and closure. Comparison remains later work.
+
 ## Development toolchain
 
 Use exactly [Node.js 24.20.0 with its bundled npm 11.19.0](https://nodejs.org/en/download/archive/v24.20.0). Provision these developer prerequisites yourself; the project has no runtime installer. RD-002 used a temporary official Windows x64 distribution for verification and removed it and its task-specific cache after review; the machine's global runtime was not changed. The exact package pins live in [package.json](package.json), and [package-lock.json](package-lock.json) is the only authoritative dependency lock.
@@ -222,14 +224,15 @@ Invoke-M105Command {
 }
 ```
 
-Run the complete thirty-two-file suite sequentially, with no running application service or concurrent browser test. The production-entry and review integration tests also require the built client. The scanner and walking-skeleton suites use scanner scratch; all four UI suites and the synthetic review-checkpoint suite use separate UI scratch:
+Run the complete thirty-seven-file suite sequentially, with no running application service or concurrent browser test. Production-entry, review and rescan integration tests also require the built client. Scanner, walking-skeleton and rescan integration suites use scanner scratch; the six UI/checkpoint suites use separate UI scratch:
 
 ```powershell
 if ($null -ne [Environment]::GetEnvironmentVariable('A11Y_M305_CAPTURE_PROOF','Process') -or
-    $null -ne [Environment]::GetEnvironmentVariable('A11Y_M402_CAPTURE_PROOF','Process')) {
+    $null -ne [Environment]::GetEnvironmentVariable('A11Y_M402_CAPTURE_PROOF','Process') -or
+    $null -ne [Environment]::GetEnvironmentVariable('A11Y_M501_CAPTURE_PROOF','Process')) {
   throw 'Ordinary regression requires the synthetic capture flag absent.'
 }
-foreach ($m105Test in @('tests/run-contract.test.ts','tests/run-repository.test.ts','tests/local-service.test.ts','tests/scan-normalization.test.ts','tests/retrieval-contract.test.ts','tests/embedding-retrieval.test.ts','tests/retrieval-service.test.ts','tests/finding-sufficiency.test.ts','tests/finding-guidance-api.test.ts','tests/generation-contract.test.ts','tests/generation-stage.test.ts','tests/generation-service.test.ts','tests/ollama-generation-contract.test.ts','tests/ollama-generation.test.ts','tests/ollama-generation-service.test.ts','tests/groq-generation-contract.test.ts','tests/groq-generation.test.ts','tests/groq-generation-service.test.ts','tests/finding-generation-admission.test.ts','tests/review-contract.test.ts','tests/review-repository.test.ts','tests/review-service.test.ts')) {
+foreach ($m105Test in @('tests/run-contract.test.ts','tests/run-repository.test.ts','tests/local-service.test.ts','tests/scan-normalization.test.ts','tests/retrieval-contract.test.ts','tests/embedding-retrieval.test.ts','tests/retrieval-service.test.ts','tests/finding-sufficiency.test.ts','tests/finding-guidance-api.test.ts','tests/generation-contract.test.ts','tests/generation-stage.test.ts','tests/generation-service.test.ts','tests/ollama-generation-contract.test.ts','tests/ollama-generation.test.ts','tests/ollama-generation-service.test.ts','tests/groq-generation-contract.test.ts','tests/groq-generation.test.ts','tests/groq-generation-service.test.ts','tests/finding-generation-admission.test.ts','tests/review-contract.test.ts','tests/review-repository.test.ts','tests/review-service.test.ts','tests/rescan-service.test.ts')) {
   Invoke-M105Command {
     & $m105Node --test --test-timeout=120000 $m105Test
     if ($LASTEXITCODE -ne 0) { throw 'Browser-free suite failed.' }
@@ -239,13 +242,13 @@ Invoke-M105Command {
   & $m105Node --experimental-test-module-mocks --test --test-timeout=120000 tests/finding-generation-api.test.ts
   if ($LASTEXITCODE -ne 0) { throw 'Generation API suite failed.' }
 }
-foreach ($m105Test in @('tests/finding-review-api.test.ts','tests/finding-review-admission.test.ts')) {
+foreach ($m105Test in @('tests/finding-review-api.test.ts','tests/finding-review-admission.test.ts','tests/rescan-api.test.ts','tests/rescan-admission.test.ts')) {
   Invoke-M105Command {
     & $m105Node --experimental-test-module-mocks --test --test-timeout=120000 $m105Test
-    if ($LASTEXITCODE -ne 0) { throw 'Review transport or admission suite failed.' }
+    if ($LASTEXITCODE -ne 0) { throw 'Review or rescan transport/admission suite failed.' }
   }
 }
-foreach ($m105Test in @('tests/scan-page.test.ts','tests/walking-skeleton.test.ts')) {
+foreach ($m105Test in @('tests/scan-page.test.ts','tests/walking-skeleton.test.ts','tests/rescan-integration.test.ts')) {
   Assert-M105EmptyDirectory $m105ScanTemp
   Assert-M105EmptyDirectory $m105IntegrationTemp
   Invoke-M105Command {
@@ -253,7 +256,7 @@ foreach ($m105Test in @('tests/scan-page.test.ts','tests/walking-skeleton.test.t
     if ($LASTEXITCODE -ne 0) { throw 'Scanner or integration suite failed.' }
   } $m105ScanTemp
 }
-foreach ($m105Test in @('tests/target-results-ui.test.ts','tests/finding-guidance-ui.test.ts','tests/finding-generation-ui.test.ts','tests/finding-review-ui.test.ts','tests/review-checkpoint.test.ts')) {
+foreach ($m105Test in @('tests/target-results-ui.test.ts','tests/finding-guidance-ui.test.ts','tests/finding-generation-ui.test.ts','tests/finding-review-ui.test.ts','tests/review-checkpoint.test.ts','tests/intentional-rescan-ui.test.ts')) {
   Assert-M105EmptyDirectory $m105UiTemp
   Invoke-M105Command {
     & $m105Node --test --test-timeout=120000 $m105Test
@@ -325,6 +328,16 @@ This filtered demonstration does not replace either the core subset or the compl
 ## Current scope
 
 The [capability summary](#project-status) distinguishes implemented behavior from later work. Source entry points are the [domain contract](src/server/domain/run-contract.ts), [run repository](src/server/persistence/run-repository.ts), [local service](src/server/service.ts), [scanner](src/server/scan/scan-page.ts), and [scan minimization](src/server/scan/normalize-scan.ts). Internal retrieval APIs and their boundaries are described with the [closed corpus](#closed-corpus-snapshot).
+
+### Intentional rescans
+
+For a selected Finding, choose **New scan mode** and use **Start intentional rescan**. Either mode must be chosen explicitly, including when repeating the previous mode. Retrieval, generation and review are not prerequisites; scanner manual-review observations have no rescan action. The service scans the baseline's requested page with all three supported checks and saves a separate run with immutable `baselineRunId`. It preserves the baseline's evidence and human work.
+
+The client-enabled service accepts `POST /api/rescans` with exactly `{runId, baselineRunId, findingId, mode}`, JSON content type, a 4096-byte body limit and a 30000-ms body deadline. The service validates the retained completed baseline and selected Finding under its existing operation reservation. Success returns `{ok:true,run}` after publication; known failures retain truthful later-run, persistence and cleanup information. Malformed or lost replies do not prove that no run was created.
+
+Pending or failed rescans preserve the visible baseline. An unknown outcome blocks further mutations, with no automatic retry or recovery read. Validated success opens the later run and retires prior transient workflow capabilities. **Return to baseline** shows one read-only snapshot; **Return to later results** resumes viewing the same active later workflow. Navigation performs no service action. A new successful rescan replaces that pair, and successful independent Analyze clears it.
+
+Selected-rule native pass candidates remain transient inside the scanner and are discarded by the service. They are absent from saved records, HTTP responses and client state. Comparison, history browsing and reopening retained runs remain later work. The [M5-01 verification](docs/plans/completed/m5-01-intentional-rescan.md#m501-final-01--integrated-review-and-task-closure) records controlled browser, scanner and disk evidence; it adds no actual public-page or provider observation.
 
 ### Shared generation APIs
 

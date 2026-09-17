@@ -1,6 +1,7 @@
+import { receiveRescan } from './rescan-api.ts';
 import http from 'node:http';
 import type { ClientResponseTable } from './client-assets.ts';
-import type { GenerationServiceOutcome, ReadResult, RetrievalOutcome, ReviewOutcome, ScanOutcome } from './contracts.ts';
+import type { GenerationServiceOutcome, ReadResult, RetrievalOutcome, ReviewOutcome, ScanOutcome, RescanOutcome } from './contracts.ts';
 import { receiveGeneration } from './generation-api.ts';
 import { receiveReview } from './review-api.ts';
 
@@ -12,6 +13,7 @@ export interface LoopbackApiCallbacks {
   runScan?(input: unknown): Promise<ScanOutcome>;
   retrieveFinding?(input: unknown): Promise<RetrievalOutcome>;
   generateFinding?(input: unknown): Promise<GenerationServiceOutcome>;
+  rescanFinding?(input: unknown): Promise<RescanOutcome>;
   reviewFinding?(input: unknown): Promise<ReviewOutcome>;
 }
 
@@ -29,6 +31,11 @@ export function createLoopbackApiServer(callbacks: LoopbackApiCallbacks): http.S
     const scanError = (status: number, code: 'invalid-request' | 'scan-failed') => send(status,
       { ok: false, error: code, run: null, persisted: false, cleanupFailed: false });
     const target = request.url ?? '';
+    if (request.method === 'POST' && callbacks.rescanFinding
+        && target.split(/[?#]/, 1)[0] === '/api/rescans') {
+      receiveRescan(request, input => callbacks.rescanFinding!(input), send);
+      return;
+    }
     if (request.method === 'POST' && callbacks.reviewFinding
         && target.split(/[?#]/, 1)[0] === '/api/finding-review') {
       receiveReview(request, input => callbacks.reviewFinding!(input), send);

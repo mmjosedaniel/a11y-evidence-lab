@@ -87,6 +87,8 @@ The MVP has no in-place retry, regeneration, provider switch, or resume. Startin
 
 An intentional later verification scan is also a new PageAnalysisRun, but its aggregate records `baselineRunId`. It parses and navigates the same trusted developer-supplied page and reruns the exact provider-independent three-rule scan. Any retained baseline Finding may be selected for comparison regardless of downstream state. Finding-level comparison data is nested in the later aggregate. Retrieval, generation or abstention, ProviderInvocation, proposal, and review are not comparison prerequisites, and the rescan does not automatically perform or change any of them.
 
+M5-01 implements the independent later scan and immutable baseline linkage through the existing service and aggregate writer; [its plan](../plans/completed/m5-01-intentional-rescan.md) owns verification. The UI keeps one immediate baseline as a read-only presentation snapshot while the later run remains active. Successful rescan publication retires the earlier transient workflow capabilities without altering the baseline aggregate. Native selected-rule pass candidates are operation-local scanner data discarded by the service, not persisted comparison records. Comparison calculation and presentation remain later roadmap work.
+
 The MVP has no `created`, `queued`, `cancelled`, `paused`, `resuming`, or parent partial-success state. It also has no automatic fan-out, combined prompt, checkpoint, cancellation controller, background worker, replacement-in-flight behavior, or workflow engine.
 
 ## Comparison lifecycle

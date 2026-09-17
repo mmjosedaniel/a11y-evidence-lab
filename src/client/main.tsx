@@ -5,6 +5,7 @@ import type { AnalyzeIntent } from './App.tsx';
 import type { GuidanceIntent } from './finding-guidance-admission.ts';
 import type { GenerationIntent } from './finding-generation-admission.ts';
 import type { ReviewIntent } from './finding-review-admission.ts';
+import { postRescan } from './rescan-transport.ts';
 import './styles.css';
 
 const root = document.getElementById('root');
@@ -32,4 +33,4 @@ async function reviewFinding(intent: ReviewIntent, signal: AbortSignal): Promise
   return { status: response.status, body: await response.json() };
 }
 
-if (root) createRoot(root).render(<App analyze={analyze} retrieveFinding={retrieveFinding} generateFinding={generateFinding} reviewFinding={reviewFinding} />);
+if (root) createRoot(root).render(<App analyze={analyze} retrieveFinding={retrieveFinding} generateFinding={generateFinding} reviewFinding={reviewFinding} rescanFinding={postRescan} />);

@@ -161,6 +161,7 @@ export type ScanResult = {
 };
 export type NativeScanResult = Omit<ScanResult, 'findings'> & { readonly findings: readonly NativeFinding[] };
 export type RunContext = {
+  readonly baselineRunId?: string;
   readonly formatVersion: 1;
   readonly runId: string;
   readonly createdAt: string;

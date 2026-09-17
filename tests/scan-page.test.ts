@@ -9,8 +9,9 @@ import nodeTest from 'node:test';
 import type { TestContext } from 'node:test';
 import { chromium } from 'playwright';
 import type { Browser, BrowserContext, BrowserContextOptions, LaunchOptions, Page } from 'playwright';
-import { prepareScanRequest, captureNativeScan, executeScan } from '../src/server/scan/scan-page.ts';
+import { prepareScanRequest, captureNativeScan, executeRescanScan, executeScan } from '../src/server/scan/scan-page.ts';
 import { normalizeNativeScan } from '../src/server/scan/normalize-scan.ts';
+import type { NativeCandidate } from '../src/server/scan/normalization/native-rule-evidence.ts';
 import { validateRun, validateScan } from '../src/server/domain/run-contract.ts';
 import type { ScanResult } from '../src/server/domain/run-contract.ts';
 import type { RunningRun, TerminalRun } from '../src/server/persistence/run-repository.ts';
@@ -131,6 +132,12 @@ function projected(input: unknown): Collection {
   assert.equal(JSON.stringify(output.value).includes(canary), false);
   return output.value;
 }
+function selected(input: unknown, rule: Rule): readonly NativeCandidate[] {
+  const output = normalizeNativeScan(input, rule);
+  assert.ok(output.ok, 'The bounded selected native collection must normalize');
+  assert.deepEqual(Object.keys(output).sort(), ['candidates', 'ok', 'value']);
+  return output.candidates;
+}
 function nativeNode(rule: Rule): RecordValue {
   return {
     target: [`#${canary}`], html: `<input value="${canary}">`, failureSummary: canary,
@@ -158,6 +165,15 @@ function nativeReport(): RecordValue {
     violations: rules.map(id => ({ id, nodes: [nativeNode(id)] })),
     incomplete: [], passes: [], inapplicable: [],
   };
+}
+function candidateReport(): RecordValue {
+  const report = nativeReport();
+  const first = nativeNode('image-alt');
+  const duplicate = structuredClone(first);
+  const unavailable = nativeNode('image-alt');
+  record(unavailable.capturedDom).locator = { unavailable: 'unsupported' };
+  report.passes = [{ id: 'label', nodes: [nativeNode('label')] }, { id: 'image-alt', nodes: [first, duplicate, unavailable] }];
+  return report;
 }
 function nodes(report: unknown, bucket: Bucket, rule?: Rule): RecordValue[] {
   return list(record(report)[bucket]).flatMap(entry => {
@@ -239,6 +255,10 @@ function lifecycle(t: TestContext, report: unknown = nativeReport()) {
   return { ...state, state, browser: browser as unknown as Browser, context: context as unknown as BrowserContext,
     page: page as unknown as Page };
 }
+function failedRescan(run: RunningRun, result: Awaited<ReturnType<typeof executeRescanScan>>, category: string, cleanup = 'closed') {
+  assert.deepEqual(Object.keys(result), ['run'], 'Failed scanner envelopes never expose candidates');
+  return failed(run, result.run, category, cleanup);
+}
 function clock(t: TestContext): void {
   t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: Date.parse('2026-08-31T00:00:02.000Z') });
   t.mock.method(performance, 'now', () => Date.now() - Date.parse('2026-08-31T00:00:02.000Z'));
@@ -294,6 +314,92 @@ test('execution rejects malformed/nonrunning records and invalid signals before 
     await assert.rejects(executeScan(running(), signal as AbortSignal), { name: 'Error', message: 'invalid-signal' });
   }
   assert.equal(launch.mock.callCount(), 0);
+});
+
+test('rescan execution rejects an invalid selected rule before browser acquisition', async t => {
+  const launch = t.mock.method(chromium, 'launch', () => { assert.fail('Invalid selected rule acquired a browser'); });
+  await assert.rejects(executeRescanScan(running(), new AbortController().signal, 'document-title' as Rule));
+  assert.equal(launch.mock.callCount(), 0);
+});
+
+test('rescan completion exposes exact candidates only after successful cleanup while ordinary output stays run-only', async t => {
+  const report = candidateReport();
+  const h = lifecycle(t, report);
+  const closing = deferred<void>();
+  const ordinaryClose = h.state.pageClose;
+  h.state.pageClose = async () => { await closing.promise; await ordinaryClose(); };
+  const run = running();
+  let settled = false;
+  const operation = executeRescanScan(run, new AbortController().signal, 'image-alt').then((result: Awaited<ReturnType<typeof executeRescanScan>>) => {
+    settled = true;
+    return result;
+  });
+  await h.entered.pageClose.promise;
+  assert.equal(settled, false, 'Candidates cannot leave the operation before resource cleanup');
+  closing.resolve();
+  const result = await operation;
+  if (!('candidates' in result)) assert.fail('Successful rescan scan must expose its private candidate envelope');
+  assert.equal(result.run.status, 'completed');
+  assert.deepEqual(Object.keys(result).sort(), ['candidates', 'run']);
+  assert.equal(result.candidates.length, 3);
+  assert.deepEqual(result.candidates[0].locator, result.candidates[1].locator);
+  assert.deepEqual(result.candidates[2].locator, { unavailable: 'unsupported' });
+  for (const candidate of result.candidates) {
+    assert.deepEqual(Object.keys(candidate).sort(), ['checks', 'evidence', 'locator', 'nativeResult', 'ruleId']);
+    assert.equal(candidate.ruleId, 'image-alt');
+    assert.equal(candidate.nativeResult, 'pass');
+  }
+  assertFrozen(result.candidates);
+  const before = JSON.stringify(result);
+  record(list(record(list(report.passes)[1]).nodes)[0]).capturedDom = { locator: missing() };
+  assert.equal(JSON.stringify(result), before, 'The completed envelope is detached from the native report');
+  assert.equal(before.includes(canary), false);
+  const runOnly: TerminalRun = result.run;
+  assert.equal(Object.hasOwn(runOnly, 'candidates'), false, 'Immediate adapter unwrapping has no candidate edge');
+  assert.equal(JSON.stringify(runOnly).includes(canary), false);
+});
+
+test('rescan failure, abort, timeout, cleanup failure and late settlement never expose candidates', async t => {
+  await t.test('malformed unselected bucket', async child => {
+    const report = candidateReport();
+    report.passes = [...list(report.passes), { id: 'unexpected-rule', nodes: [{}] }];
+    lifecycle(child, report);
+    const run = running();
+    failedRescan(run, await executeRescanScan(run, new AbortController().signal, 'image-alt'), 'coverage-validation');
+  });
+  await t.test('abort and late native report', async child => {
+    const h = lifecycle(child); const pending = deferred<unknown>(); const controller = new AbortController();
+    h.state.capture = () => pending.promise;
+    const run = running(); const operation = executeRescanScan(run, controller.signal, 'image-alt');
+    await h.entered.capture.promise; controller.abort(); await h.entered.pageClose.promise;
+    pending.resolve(candidateReport());
+    const result = await operation;
+    failedRescan(run, result, 'shutdown');
+    const before = JSON.stringify(result); await turns(); assert.equal(JSON.stringify(result), before);
+  });
+  await t.test('timeout and report after cleanup deadline', async child => {
+    clock(child); const h = lifecycle(child); const pending = deferred<unknown>(); h.state.capture = () => pending.promise;
+    const run = running(); const operation = executeRescanScan(run, new AbortController().signal, 'image-alt');
+    await h.entered.capture.promise; await advance(child, 10000); await advance(child, 4000);
+    const result = await operation;
+    failedRescan(run, result, 'timeout', 'failed');
+    const before = JSON.stringify(result); pending.resolve(candidateReport()); await turns();
+    assert.equal(JSON.stringify(result), before);
+  });
+  await t.test('cleanup rejection after valid report', async child => {
+    const h = lifecycle(child, candidateReport()); h.state.pageClose = async () => { throw new Error(canary); };
+    const run = running();
+    failedRescan(run, await executeRescanScan(run, new AbortController().signal, 'image-alt'), 'cleanup', 'failed');
+  });
+  await t.test('abort during cleanup after candidate projection', async child => {
+    const h = lifecycle(child, candidateReport()); const closing = deferred<void>(); const controller = new AbortController();
+    const originalClose = h.state.pageClose; h.state.pageClose = async () => { await closing.promise; await originalClose(); };
+    const run = running(); const operation = executeRescanScan(run, controller.signal, 'image-alt');
+    await h.entered.pageClose.promise; controller.abort(); closing.resolve();
+    const context = failedRescan(run, await operation, 'shutdown');
+    assert.deepEqual(context.finalUrl, value('https://m103.test/a'));
+    assert.deepEqual(context.scannedAt, value(reportedAt));
+  });
 });
 
 test('unsupported valid initial profiles fail closed and preserve every immutable/monotonic field', async t => {
@@ -535,6 +641,29 @@ test('deadline and abort are rechecked after synchronous normalization before su
   });
 });
 
+test('rescan candidates are withheld when synchronous normalization consumes the deadline or abort', async t => {
+  for (const cancellation of ['timeout', 'shutdown'] as const) await t.test(cancellation, async child => {
+    clock(child); lifecycle(child, candidateReport());
+    const controller = new AbortController(); const uuid = crypto.randomUUID.bind(crypto);
+    let first = true;
+    child.mock.method(crypto, 'randomUUID', () => {
+      if (first) {
+        first = false;
+        if (cancellation === 'timeout') child.mock.timers.tick(10000); else controller.abort();
+      }
+      return uuid();
+    });
+    syncBuiltinESMExports();
+    try {
+      const run = running();
+      const result = await executeRescanScan(run, controller.signal, 'image-alt');
+      const context = failedRescan(run, result, cancellation);
+      assert.deepEqual(context.finalUrl, value('https://m103.test/a'));
+      assert.deepEqual(context.scannedAt, value(reportedAt));
+    } finally { child.mock.restoreAll(); syncBuiltinESMExports(); }
+  });
+});
+
 test('late browser, context and page acquisition is registered and disposed without starting later work', async t => {
   for (const phase of ['launch', 'context', 'page'] as const) await t.test(phase, async child => {
     const h = lifecycle(child); const controller = new AbortController();
@@ -685,12 +814,16 @@ function assertNativeProfile(report: unknown): void {
     }
   }
 }
-async function assertCorrespondence(page: Page, locator: unknown, selector: string): Promise<void> {
-  const fact = record(locator); assert.equal(typeof fact.value, 'string');
-  const matches = await page.evaluate(({ structural, authored }) => {
+async function corresponds(page: Page, locator: unknown, selector: string): Promise<boolean> {
+  const fact = record(locator);
+  if (typeof fact.value !== 'string') return false;
+  return page.evaluate(({ structural, authored }) => {
     const selected = document.querySelectorAll(structural);
     return selected.length === 1 && selected[0] === document.querySelector(authored);
   }, { structural: fact.value as string, authored: selector });
+}
+async function assertCorrespondence(page: Page, locator: unknown, selector: string): Promise<void> {
+  const matches = await corresponds(page, locator, selector);
   assert.equal(matches, true, 'Structural locator must identify the actual intended element');
 }
 
@@ -712,7 +845,7 @@ test('six frozen states execute production capture once each, including native c
       assert.equal(await page.locator(fixture.selector).count(), 1);
       assert.equal(await page.locator(fixture.selector).evaluate(element => element.tagName.toLowerCase()), fixture.elementKind);
       assert.equal(await page.evaluate(() => [...document.images].every(image => image.complete && image.naturalWidth > 0)), true);
-      const native = await captureNativeScan(page); assertNativeProfile(native);
+      const native = await captureNativeScan(page, fixture.rule); assertNativeProfile(native);
       assert.equal(record(native).url, 'about:blank');
       const targets = nodes(native, fixture.expected.nativeBucket, fixture.rule).filter(node =>
         Array.isArray(node.target) && node.target.length === 1 && node.target[0] === fixture.selector);
@@ -720,6 +853,19 @@ test('six frozen states execute production capture once each, including native c
       assert.equal(nodes(native, 'incomplete').length, fixture.expected.incompleteCount);
       assert.equal(nodes(native, 'violations').filter(node => !nodes(native, 'violations', fixture.rule).includes(node)).length, fixture.expected.otherViolationCount);
       const collection = projected(native);
+      const candidates = selected(native, fixture.rule);
+      assert.equal(candidates.length, nodes(native, 'passes', fixture.rule).length);
+      for (const candidate of candidates) {
+        assert.deepEqual(Object.keys(candidate).sort(), ['checks', 'evidence', 'locator', 'nativeResult', 'ruleId']);
+        assert.equal(candidate.ruleId, fixture.rule);
+        assert.equal(candidate.nativeResult, 'pass');
+      }
+      assertFrozen(candidates);
+      assert.equal(JSON.stringify(candidates).includes(canary), false);
+      const matchingCandidates = (await Promise.all(candidates.map(candidate =>
+        corresponds(page, candidate.locator, fixture.selector)))).filter(Boolean).length;
+      assert.equal(matchingCandidates, fixture.stateRole === 'failing' ? 0 : 1,
+        'Only the corrected same-target native pass may become a selected candidate');
       assert.equal(collection.findings.length, nodes(native, 'violations').length);
       assert.equal(collection.scannerReviewObservations.length, nodes(native, 'incomplete').length);
       for (const rule of rules) for (const bucket of buckets) {
@@ -798,6 +944,34 @@ test('missing, wrong, shadow, overlong and nonunique actual reference conditions
       assert.deepEqual(collection.findings[0].evidence, control.fact === 'available'
         ? { elementKind: value('img'), altState: value('absent') }
         : { elementKind: { unavailable: control.fact }, altState: { unavailable: control.fact } });
+    });
+  });
+});
+
+test('selected pass capture uses the actual reference and never substitutes a matching replacement', async t => {
+  const passHtml = '<!doctype html><html lang="en"><head><title>Control</title></head><body><img id="target" alt="available" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%222%22 height=%222%22/%3E"></body></html>';
+  const cases = [
+    { name: 'replacement', code: "const old=node.element;const replacement=old.cloneNode(true);old.replaceWith(replacement);", locator: 'invalid', fact: 'invalid' },
+    { name: 'missing', code: 'delete node.element;', locator: 'missing', fact: 'missing' },
+    { name: 'shadow', code: "const host=document.createElement('div');document.body.append(host);host.attachShadow({mode:'open'}).append(node.element);", locator: 'unsupported', fact: 'available' },
+    { name: 'overlong', code: "let parent=document.body;for(let i=0;i<150;i++){const child=document.createElement('div');parent.append(child);parent=child;}parent.append(node.element);", locator: 'too-long', fact: 'available' },
+    { name: 'nonunique', code: "const original=document.querySelectorAll.bind(document);document.querySelectorAll=selector=>selector.startsWith(':root')?[node.element,node.element]:original(selector);", locator: 'invalid', fact: 'available' },
+  ];
+  for (const control of cases) await t.test(control.name, async child => {
+    await offline(passHtml, async page => {
+      beforeProjection(child, page, `const node=report.passes.find(rule=>rule.id==='image-alt').nodes[0];${control.code}`);
+      const candidates = selected(await captureNativeScan(page, 'image-alt'), 'image-alt');
+      assert.equal(candidates.length, 1);
+      assert.deepEqual(candidates[0].locator, { unavailable: control.locator });
+      assert.deepEqual(candidates[0].evidence, control.fact === 'available'
+        ? { elementKind: value('img'), altState: value('non-empty') }
+        : { elementKind: { unavailable: control.fact }, altState: { unavailable: control.fact } });
+      assert.equal(candidates[0].nativeResult, 'pass');
+      if (control.name === 'replacement') {
+        assert.equal(await page.locator('#target').count(), 1);
+        assert.equal(await corresponds(page, candidates[0].locator, '#target'), false,
+          'A replacement matching native target data must not repair a stale reference');
+      }
     });
   });
 });

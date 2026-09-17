@@ -1,6 +1,8 @@
 import { useId } from 'react';
 import type { ReactElement, ReactNode, RefObject } from 'react';
 import type { PageAnalysisRun } from '../../../server/domain/run-contract.ts';
+import { RescanStatus } from './IntentionalRescanForm.tsx';
+import type { RescanControls } from './IntentionalRescanForm.tsx';
 import { FindingsPanel } from './FindingsPanel.tsx';
 import { ResultDetail } from './ResultDetail.tsx';
 import { ResultsOverview } from './ResultsOverview.tsx';
@@ -19,6 +21,9 @@ interface FailureNotice {
 }
 
 interface ResultsSectionProps {
+  readonly readOnly?: boolean;
+  readonly rescan?: RescanControls;
+  readonly navigation?: ReactNode;
   readonly review: ReviewControls;
   readonly generation: GenerationControls;
   readonly guidance: GuidanceControls;
@@ -62,7 +67,9 @@ function FailedResults({ run, failure }: {
   </div>;
 }
 
-function CompletedResults({ run, selectedResult, onSelect, guidance, generation, review }: {
+function CompletedResults({ run, selectedResult, onSelect, guidance, generation, review, readOnly, rescan }: {
+  readonly readOnly: boolean;
+  readonly rescan?: RescanControls;
   readonly review: ReviewControls;
   readonly generation: GenerationControls;
   readonly guidance: GuidanceControls;
@@ -80,19 +87,21 @@ function CompletedResults({ run, selectedResult, onSelect, guidance, generation,
     <ResultsOverview run={run} />
     <div className="finding-workspace">
       <FindingsPanel idPrefix={idPrefix} results={results} selectedResult={selectedResult} onSelect={onSelect} />
-      {selected && <ResultDetail key={selected.key} idPrefix={idPrefix} result={selected} providerContext={run.providerContext} guidance={guidance} generation={generation} review={review} />}
+      {selected && <ResultDetail key={selected.key} idPrefix={idPrefix} result={selected} providerContext={run.providerContext} guidance={guidance} generation={generation} review={review} readOnly={readOnly} rescan={rescan} />}
     </div>
   </div>;
 }
 
-export function ResultsSection({ run, selectedResult = null, failure = null, headingRef, contentRef, onSelect, guidance, generation, review }:
+export function ResultsSection({ run, selectedResult = null, failure = null, headingRef, contentRef, onSelect, guidance, generation, review, readOnly = false, rescan, navigation }:
   ResultsSectionProps): ReactElement {
   return <section aria-labelledby="results-heading" className="results">
     <h2 id="results-heading" tabIndex={-1} ref={headingRef}>Results</h2>
     <div ref={contentRef}>
+      {navigation}
+      <RescanStatus state={rescan?.presentation ?? null} />
       {run.status === 'failed'
         ? <FailedResults key={run.runId} run={run} failure={failure} />
-        : <CompletedResults key={run.runId} run={run} selectedResult={selectedResult} onSelect={onSelect} guidance={guidance} generation={generation} review={review} />}
+        : <CompletedResults key={run.runId} run={run} selectedResult={selectedResult} onSelect={onSelect} guidance={guidance} generation={generation} review={review} readOnly={readOnly} rescan={rescan} />}
     </div>
   </section>;
 }
