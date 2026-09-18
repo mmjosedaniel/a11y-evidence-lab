@@ -98,6 +98,12 @@ function linkedFailure(run: RunningRun, cleanup: 'closed' | 'failed'): FailedRun
   if (!checked.ok || checked.value.status !== 'failed') assert.fail('Linked failure fixture must be valid');
   return checked.value as FailedRun;
 }
+function linkedEnvelope(run: RunningRun, kind: 'populated' | 'zero' = 'populated') {
+  return { run: linkedTerminal(run, kind), candidates: [] };
+}
+function failedEnvelope(run: RunningRun, cleanup: 'closed' | 'failed') {
+  return { run: linkedFailure(run, cleanup) };
+}
 function seedCompleted(root: string, runId = 'run-baseline', kind: 'populated' | 'unavailable' = 'populated'): CompletedRun {
   const store = open(root);
   success(store.create(runningRun(runId)));
@@ -150,7 +156,7 @@ test('creates an independent exact-ID linked run from baseline evidence without 
       assert.equal(running.requestedUrl, baseline.requestedUrl);
       assert.deepEqual(running.providerContext,
         { mode: 'groq', provider: 'groq', model: 'openai/gpt-oss-20b' });
-      return linkedTerminal(running);
+      return linkedEnvelope(running);
     });
     assert.equal(outcome.ok, true);
     assert.equal(calls, 1);
@@ -186,7 +192,7 @@ test('reserves before reflection, reads only actual Findings, and accepts downst
         if (reentered) return;
         reentered = true;
         reentry = service.rescanFinding(intent(`nested-${suffix}`, baselineId),
-          async (run: RunningRun) => linkedTerminal(run));
+          async (run: RunningRun) => linkedEnvelope(run));
       };
       const requested = intent(`later-${suffix}`, baselineId, suffix === 'unprocessed' ? 'local' : 'groq');
       const raw = new Proxy(requested, {
@@ -199,7 +205,7 @@ test('reserves before reflection, reads only actual Findings, and accepts downst
           return Reflect.ownKeys(target);
         },
       });
-      const result = await service.rescanFinding(raw, async (run: RunningRun) => linkedTerminal(run));
+      const result = await service.rescanFinding(raw, async (run: RunningRun) => linkedEnvelope(run));
       assert.equal(result.ok, true);
       assert.equal(result.ok && result.run.scan.findings.every((finding: Finding) => finding.state === 'unprocessed'), true);
       assert.equal((await reentry!).ok, false);
@@ -211,7 +217,7 @@ test('reserves before reflection, reads only actual Findings, and accepts downst
     seedCompleted(box.runs);
     const service = await start(box);
     let calls = 0;
-    const execute: RescanExecutor = async (run: RunningRun) => { calls++; return linkedTerminal(run); };
+    const execute: RescanExecutor = async (run: RunningRun) => { calls++; return linkedEnvelope(run); };
     assert.deepEqual(failed(await service.rescanFinding({ ...intent(), findingId: 'observation-only' }, execute), 'not-found'),
       { ok: false, error: 'not-found', run: null, persisted: false, cleanupFailed: false });
     assert.deepEqual(failed(await service.rescanFinding({ ...intent(), findingId: 'missing-finding' }, execute), 'not-found'),
@@ -232,7 +238,7 @@ test('rejects malformed, missing, noncompleted and colliding work without retry 
       JSON.stringify({ ...malformed, unexpected: true }, null, 2) + '\n');
     let calls = 0;
     const service = await start(box);
-    const execute: RescanExecutor = async (run: RunningRun) => { calls++; return linkedTerminal(run); };
+    const execute: RescanExecutor = async (run: RunningRun) => { calls++; return linkedEnvelope(run); };
     for (const [raw, error] of [
       [null, 'invalid-request'],
       [{ ...intent(), extra: true }, 'invalid-request'],
@@ -257,11 +263,11 @@ test('validates immutable linked terminal identity and preserves truthful failur
     ['throw', async () => { throw new Error('SYNTHETIC_SCAN_FAILURE'); }, 'scan-failed'],
     ['malformed', async () => null, 'result-validation'],
     ['removed-link', async (run: RunningRun) => {
-      const terminal = structuredClone(linkedTerminal(run)) as unknown as Record<string, unknown>;
-      delete terminal.baselineRunId;
+      const terminal = structuredClone(linkedEnvelope(run)) as unknown as { run: Record<string, unknown> };
+      delete terminal.run.baselineRunId;
       return terminal;
     }, 'result-validation'],
-    ['changed-link', async (run: RunningRun) => ({ ...linkedTerminal(run), baselineRunId: 'run-other' }), 'result-validation'],
+    ['changed-link', async (run: RunningRun) => ({ run: { ...linkedTerminal(run), baselineRunId: 'run-other' }, candidates: [] }), 'result-validation'],
   ] as const) {
     await withReviewSandbox('service', async box => {
       seedCompleted(box.runs);
@@ -275,7 +281,7 @@ test('validates immutable linked terminal identity and preserves truthful failur
       if (name === 'throw') {
         assert.equal(outcome.cleanupFailed, true);
         assert.deepEqual(await service.rescanFinding(intent('run-after-throw'),
-          async (run: RunningRun) => linkedTerminal(run)),
+          async (run: RunningRun) => linkedEnvelope(run)),
         { ok: false, error: 'stopping', run: null, persisted: false, cleanupFailed: false });
       }
     });
@@ -286,7 +292,7 @@ test('validates immutable linked terminal identity and preserves truthful failur
     const service = await start(box, { stopTimeoutMs: 1000 });
     const operation = service.rescanFinding(intent('run-shutdown'), async (run: RunningRun, signal: AbortSignal) => {
       await new Promise<void>(resolve => signal.addEventListener('abort', () => resolve(), { once: true }));
-      return linkedTerminal(run);
+      return linkedEnvelope(run);
     });
     const stopping = service.stop();
     const outcome = failed(await operation, 'shutdown');
@@ -301,12 +307,12 @@ test('cleanup uncertainty closes admission and a late stop deadline cannot publi
     seedCompleted(box.runs);
     const service = await start(box);
     const uncertain = failed(await service.rescanFinding(intent('run-cleanup'),
-      async (run: RunningRun) => linkedFailure(run, 'failed')),
+      async (run: RunningRun) => failedEnvelope(run, 'failed')),
       'scan-failed');
     assert.equal(uncertain.persisted, true);
     assert.equal(uncertain.cleanupFailed, true);
     assert.deepEqual(failed(await service.rescanFinding(intent('run-after-cleanup'),
-      async (run: RunningRun) => linkedTerminal(run)), 'stopping'),
+      async (run: RunningRun) => linkedEnvelope(run)), 'stopping'),
       { ok: false, error: 'stopping', run: null, persisted: false, cleanupFailed: false });
     assert.equal((await service.stop()).ok, false);
   });
@@ -327,7 +333,7 @@ test('cleanup uncertainty closes admission and a late stop deadline cannot publi
     await started;
     const stopping = service.stop();
     assert.deepEqual(await stopping, { ok: false, error: 'stop-failed' });
-    finish(linkedTerminal(running));
+    finish(linkedEnvelope(running));
     const outcome = failed(await operation, 'shutdown');
     assert.equal(outcome.run?.runId, 'run-late');
     assert.equal(outcome.persisted, false);
@@ -340,7 +346,7 @@ test('durable success retires supported retrieval ownership and permits the late
     seedCompleted(box.runs);
     const service = await start(box);
     assert.equal((await retrieve(service, 'run-baseline')).ok, true);
-    const result = await service.rescanFinding(intent(), async (run: RunningRun) => linkedTerminal(run));
+    const result = await service.rescanFinding(intent(), async (run: RunningRun) => linkedEnvelope(run));
     assert.equal(result.ok, true);
     const oldGeneration = await service.generateFinding({ runId: 'run-baseline', findingId: 'finding-0' },
       generationAdapterHarness().adapter);
@@ -369,7 +375,7 @@ test('durable success retires a settled unsaved generation owner while failures 
       if (!generation.ok) assert.equal(generation.error, 'generation-persistence');
     } finally { t.mock.restoreAll(); }
 
-    assert.equal((await service.rescanFinding(intent(), async (run: RunningRun) => linkedTerminal(run))).ok, true);
+    assert.equal((await service.rescanFinding(intent(), async (run: RunningRun) => linkedEnvelope(run))).ok, true);
     const oldGeneration = await service.generateFinding({ runId: 'run-baseline', findingId: 'finding-0' },
       generationAdapterHarness().adapter);
     assert.equal(oldGeneration.ok, false);
@@ -379,13 +385,13 @@ test('durable success retires a settled unsaved generation owner while failures 
 
   for (const [raw, prepare, execute, expected] of [
     [{ ...intent('run-invalid'), extra: true }, () => undefined,
-      async (run: RunningRun) => linkedTerminal(run), 'invalid-request'],
+      async (run: RunningRun) => linkedEnvelope(run), 'invalid-request'],
     [intent('run-missing', 'missing-baseline'), () => undefined,
-      async (run: RunningRun) => linkedTerminal(run), 'not-found'],
+      async (run: RunningRun) => linkedEnvelope(run), 'not-found'],
     [intent('run-collision'), (root: string) => success(open(root).create(runningRun('run-collision'))),
-      async (run: RunningRun) => linkedTerminal(run), 'create-failed'],
+      async (run: RunningRun) => linkedEnvelope(run), 'create-failed'],
     [intent('run-scan-failure'), () => undefined,
-      async (run: RunningRun) => linkedFailure(run, 'closed'), 'scan-failed'],
+      async (run: RunningRun) => failedEnvelope(run, 'closed'), 'scan-failed'],
   ] as const) {
     await withReviewSandbox('service', async box => {
       seedCompleted(box.runs);
@@ -416,7 +422,7 @@ test('durable success retires a settled unsaved generation owner while failures 
     try {
       const before = bytes(box.runs, 'run-baseline');
       const result = failed(await service.rescanFinding(intent('run-publication'),
-        async (run: RunningRun) => linkedTerminal(run)),
+        async (run: RunningRun) => linkedEnvelope(run)),
         'initial-persistence');
       assert.equal(result.persisted, true);
       assert.deepEqual(bytes(box.runs, 'run-baseline'), before);
@@ -445,7 +451,7 @@ test('durable success retires a settled unsaved generation owner while failures 
     } finally { t.mock.restoreAll(); }
     const before = bytes(box.runs, 'run-baseline');
     assert.equal(failed(await service.rescanFinding(intent('run-retained-owner-failure'),
-      async (run: RunningRun) => linkedFailure(run, 'closed')), 'scan-failed').ok, false);
+      async (run: RunningRun) => failedEnvelope(run, 'closed')), 'scan-failed').ok, false);
     assert.deepEqual(bytes(box.runs, 'run-baseline'), before);
     const stillOwned = await service.generateFinding({ runId: 'run-baseline', findingId: 'finding-0' },
       generationAdapterHarness().adapter);

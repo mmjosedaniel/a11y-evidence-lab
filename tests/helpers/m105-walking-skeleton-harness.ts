@@ -144,6 +144,75 @@ export function installManagedScan(t: TestContext, scenario: Scenario, calls: st
   });
 }
 
+export function createIntegrationRoot(t: TestContext, name: string): string {
+  const root = uniqueRunRoot(name);
+  t.after(() => {
+    try {
+      ordinaryDirectory(root);
+      assert.deepEqual(fs.readdirSync(integrationScratch), [path.basename(root)]);
+      for (const entry of fs.readdirSync(root, { recursive: true })) {
+        const owned = path.join(root, entry.toString());
+        const stat = fs.lstatSync(owned);
+        assert.equal(stat.isSymbolicLink(), false, 'Owned integration descendants must be ordinary');
+        assert.ok(stat.isDirectory() || stat.isFile(), 'Owned integration descendants must be files or directories');
+        if (stat.isFile()) assert.equal(stat.nlink, 1, 'Owned integration files must have one link');
+      }
+      assert.deepEqual(fs.readdirSync(path.join(repo, 'temp/m103-scan')), []);
+      assert.deepEqual(fs.readdirSync(uiScratch), []);
+      fs.rmSync(root, { recursive: true });
+    } catch (error) {
+      assert.equal(fs.existsSync(root), true, 'Uncertain integration residue must be preserved');
+      throw error;
+    }
+    assert.deepEqual(fs.readdirSync(integrationScratch), []);
+  });
+  return root;
+}
+
+export function installManagedFixtureScan(t: TestContext, fixture: {
+  readonly bytes: Buffer; readonly targetKey: string; readonly expectedLocator: string; readonly elementKind: string;
+}, calls: string[]): void {
+  t.mock.method(chromium, 'launch', async (options: LaunchOptions) => {
+    calls.push('launch');
+    const browser = await originalLaunch(options);
+    const wrapped = {
+      version: () => { const value = browser.version(); assert.equal(value, '151.0.7922.34'); return value; },
+      isConnected: () => browser.isConnected(),
+      close: () => browser.close(),
+      newContext: async (contextOptions: Parameters<Browser['newContext']>[0]) => {
+        const context = await browser.newContext(contextOptions);
+        await context.route('**/*', async route => {
+          const url = new URL(route.request().url());
+          if (url.origin !== 'https://m105.test') { calls.push(`unexpected:${url.origin}`); await route.abort(); return; }
+          calls.push(`target:${url.pathname}`);
+          await route.fulfill({ status: 200, contentType: 'text/html', body: fixture.bytes });
+        });
+        const originalNewPage = context.newPage.bind(context);
+        const original = await originalNewPage();
+        const originalGoto = original.goto.bind(original);
+        original.goto = async (...args: Parameters<Page['goto']>) => {
+          const response = await originalGoto(...args);
+          const keyed = original.locator(`#${fixture.targetKey}`);
+          const located = original.locator(fixture.expectedLocator);
+          assert.equal(await keyed.count(), 1, 'Stable key must select exactly one fixture element');
+          assert.equal(await located.count(), 1, 'Declared locator must select exactly one fixture element');
+          assert.equal(await keyed.evaluate((element, selector) => element === document.querySelector(selector),
+            fixture.expectedLocator), true,
+            'Stable key and declared locator must identify the same element');
+          assert.equal(await keyed.evaluate(element => element.localName), fixture.elementKind);
+          return response;
+        };
+        return new Proxy(context, { get(target, property) {
+          if (property === 'newPage') return async () => original;
+          const value = Reflect.get(target, property, target);
+          return typeof value === 'function' ? value.bind(target) : value;
+        } });
+      },
+    };
+    return wrapped as unknown as Browser;
+  });
+}
+
 export interface ServiceHarness {
   service: LocalService;
   runRoot: string;

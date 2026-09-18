@@ -320,7 +320,7 @@ test('a dropped durable-success reply cannot restore the retired server capabili
         committed = service.rescanFinding(input, async (run: RunningRun) => {
           entered();
           await continueScan;
-          return terminalFrom(run);
+          return { run: terminalFrom(run), candidates: [] };
         });
         return committed;
       },

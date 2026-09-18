@@ -8,6 +8,7 @@ import { parseServiceConfiguration, prepareRunningRun, prepareServiceScan } from
 import { createRejectedScanOutcome } from './local-service/scan-run-records.ts';
 import { startScanOperation } from './local-service/scan-operation.ts';
 import { prepareRescan, rejectedRescan } from './local-service/rescan-operation.ts';
+import { executeRescanComparison } from './local-service/rescan-comparison.ts';
 import type { RescanOutcome, RescanExecutor } from './local-service/contracts.ts';
 import { createLoopbackApiServer } from './local-service/loopback-api.ts';
 import { loadClientResponses } from './local-service/client-assets.ts';
@@ -179,8 +180,7 @@ export async function startLocalService(options: ServiceOptions): Promise<StartR
   const scanDependencies = { repository, isStopping: () => stopStarted, deadlineExpired: () => deadlineExpired,
     markStopFailed: () => { stopFailed = true; } };
 
-  function rescanFinding(input: unknown, execute: RescanExecutor = async (run, signal, rule) =>
-    (await executeRescanScan(run, signal, rule)).run): Promise<RescanOutcome> {
+  function rescanFinding(input: unknown, execute: RescanExecutor = executeRescanScan): Promise<RescanOutcome> {
     if (admissionClosed) return Promise.resolve(rejectedRescan('stopping'));
     if (busy()) return Promise.resolve(rejectedRescan('busy'));
     const reservation = reserveFinding<RescanOutcome>();
@@ -188,11 +188,11 @@ export async function startLocalService(options: ServiceOptions): Promise<StartR
     if (stopStarted) reservation.settle(rejectedRescan('shutdown'));
     else if (typeof execute !== 'function') reservation.settle(rejectedRescan('invalid-request'));
     else if (!prepared.ok) reservation.settle(prepared);
-    else startScanOperation(scanDependencies, prepared.run,
-      (run, signal) => execute(run, signal, prepared.rule), reservation.controller.signal, outcome => {
+    else void executeRescanComparison(scanDependencies, prepared, reservation.controller.signal, execute,
+      () => { retrieval.discardSettledOwner(); generation.discardSettledOwner(); }).then(({ outcome }) => {
         if (!outcome.ok && outcome.cleanupFailed) closeAdmission();
         reservation.settle(outcome);
-      }, () => { retrieval.discardSettledOwner(); generation.discardSettledOwner(); });
+      });
     return reservation.promise;
   }
 

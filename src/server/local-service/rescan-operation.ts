@@ -1,11 +1,14 @@
 import { validateRun } from '../domain/run-contract.ts';
 import { readChoice, readId, readObject, requireValid } from '../domain/run-contract/contract-value-reader.ts';
-import type { RunRepository, RunningRun } from '../persistence/run-repository.ts';
+import type { CompletedRun, RunRepository, RunningRun } from '../persistence/run-repository.ts';
 import { prepareScanRequest } from '../scan/scan-page.ts';
 import type { NativeRule } from '../scan/normalization/native-rule-evidence.ts';
 import type { RescanOutcome } from './contracts.ts';
 
 type Failure = Extract<RescanOutcome, { ok: false }>;
+
+export type PreparedRescan = { ok: true; run: RunningRun; rule: NativeRule;
+  baselineRun: CompletedRun; baselineFindingId: string };
 
 export function rejectedRescan(error: Failure['error']): Failure {
   return { ok: false, error, run: null, persisted: false, cleanupFailed: false };
@@ -21,7 +24,7 @@ export function readRescanIntent(input: unknown) {
 }
 
 export function prepareRescan(input: unknown, repository: RunRepository, applicationRevision: string,
-  isStopping: () => boolean): { ok: true; run: RunningRun; rule: NativeRule } | Failure {
+  isStopping: () => boolean): PreparedRescan | Failure {
   let intent: ReturnType<typeof readRescanIntent>;
   try { intent = readRescanIntent(input); }
   catch { return rejectedRescan('invalid-request'); }
@@ -40,5 +43,6 @@ export function prepareRescan(input: unknown, repository: RunRepository, applica
   const checked = validateRun({ ...request.value, formatVersion: 1, runId: intent.runId,
     baselineRunId: intent.baselineRunId, createdAt: new Date().toISOString(), applicationRevision, status: 'running' });
   if (!checked.ok || checked.value.status !== 'running') return rejectedRescan('invalid-request');
-  return { ok: true, run: checked.value, rule: finding.ruleId };
+  return { ok: true, run: checked.value, rule: finding.ruleId,
+    baselineRun: baseline.value, baselineFindingId: finding.findingId };
 }

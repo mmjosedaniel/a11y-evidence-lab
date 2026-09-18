@@ -10,6 +10,8 @@ None.
 
 These archives preserve each task's execution, review, failures, and closure evidence. The roadmap remains the status authority.
 
+- [M5-02 — Conservative comparison](completed/m5-02-conservative-comparison.md)
+
 - [M5-01 — Intentional rescan](completed/m5-01-intentional-rescan.md)
 
 - [M3-03 — Qwen adapter and capacity screen](completed/m3-03-qwen-adapter-and-capacity-screen.md)

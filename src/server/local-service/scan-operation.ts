@@ -3,14 +3,14 @@ import type { ScanOutcome } from './contracts.ts';
 import { createFailedRun, createRejectedScanOutcome, matchTerminalRun } from './scan-run-records.ts';
 import type { ScanFailure } from './scan-run-records.ts';
 
-type Dependencies = {
+export type ScanOperationDependencies = {
   repository: RunRepository;
   isStopping(): boolean;
   deadlineExpired(): boolean;
   markStopFailed(): void;
 };
 
-export function startScanOperation(dependencies: Dependencies, initial: RunningRun,
+export function startScanOperation(dependencies: ScanOperationDependencies, initial: RunningRun,
   execute: (run: RunningRun, signal: AbortSignal) => Promise<unknown>, signal: AbortSignal,
   settle: (outcome: ScanOutcome) => void, onCompleted?: () => void): void {
   const { repository } = dependencies;

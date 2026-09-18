@@ -60,7 +60,7 @@ The [shared generation stage](#shared-generation-apis) validates selected-only i
 
 M3-05 adds the explicit Generate action, same-origin generation API and original proposal detail. The [review API](#proposal-review-apis) records one final decision through the existing aggregate writer. [M4-02](docs/plans/completed/m4-02-accessible-review-ui.md) is Complete after verified transport/admission, accessible individual review, all 706 tests, independent critical reviews and documentation closure.
 
-[M4-03](docs/plans/completed/m4-03-review-checkpoint.md#m403-final-01--integrated-review-and-task-closure) is Complete: all three human-authorized review outcomes passed actual publication/readback on isolated authentic-source copies, independent critical review and documentation closure. Originals are preserved, disposable copies are removed and evidence is retained. Comparison remains later work. The [completed M3-05 checkpoint](docs/plans/completed/m3-05-generation-checkpoint.md#m305-final-06--integrated-review-and-task-closure) records implementation verification and both successful real-provider observations with their limits.
+[M4-03](docs/plans/completed/m4-03-review-checkpoint.md#m403-final-01--integrated-review-and-task-closure) is Complete: all three human-authorized review outcomes passed actual publication/readback on isolated authentic-source copies, independent critical review and documentation closure. Originals are preserved, disposable copies are removed and evidence is retained. Comparison persistence and presentation remain later work. The [completed M3-05 checkpoint](docs/plans/completed/m3-05-generation-checkpoint.md#m305-final-06--integrated-review-and-task-closure) records implementation verification and both successful real-provider observations with their limits.
 
 M2-04 is complete. Its [checkpoint observations](docs/plans/completed/m2-04-retrieval-checkpoint.md#m204-b-accept-01--bounded-checkpoint-observations) exercise all three fixed synthetic Finding profiles through the real local retrieval path: each returns an acceptable gold passage, while missing guidance roles correctly produce no-generation-call abstention. Controlled cases separately demonstrate supported eligibility and adverse outcomes. The [final closure](docs/plans/completed/m2-04-retrieval-checkpoint.md#m204-final-01--integrated-review-and-task-closure) records verification and limitations; these observations are not general retrieval-quality qualification.
 
@@ -68,7 +68,9 @@ The [generation evaluation package](#frozen-generation-evaluation-package) freez
 
 See [how to inspect guidance in the UI](#inspecting-m2-02-retrieval-evidence), [how to generate and inspect one proposal](#inspecting-generation-for-one-finding), and [where to find the M2-04 checkpoint evidence](#inspecting-m2-04-checkpoint-evidence).
 
-M5-01 implements [intentional rescans](#intentional-rescans): an explicitly chosen mode starts a distinct linked run while preserving the baseline, with truthful uncertainty handling and one read-only baseline preview. Its [completed plan](docs/plans/completed/m5-01-intentional-rescan.md#m501-final-01--integrated-review-and-task-closure) records verification, independent review and closure. Comparison remains later work.
+M5-01 implements [intentional rescans](#intentional-rescans): an explicitly chosen mode starts a distinct linked run while preserving the baseline, with truthful uncertainty handling and one read-only baseline preview. Its [completed plan](docs/plans/completed/m5-01-intentional-rescan.md#m501-final-01--integrated-review-and-task-closure) records verification, independent review and closure. Comparison persistence and presentation remain later work.
+
+M5-02 implements conservative comparison at the [internal rescan boundary](#internal-comparison). It uses exact scan-profile compatibility, unique target correlation and sufficient native evidence, with bounded rationale and explicit limitations. The UI and durable comparison record remain M5-03 work.
 
 ## Development toolchain
 
@@ -224,7 +226,7 @@ Invoke-M105Command {
 }
 ```
 
-Run the complete thirty-seven-file suite sequentially, with no running application service or concurrent browser test. Production-entry, review and rescan integration tests also require the built client. Scanner, walking-skeleton and rescan integration suites use scanner scratch; the six UI/checkpoint suites use separate UI scratch:
+Run the complete forty-file suite sequentially, with no running application service or concurrent browser test. Production-entry, review and rescan integration tests also require the built client. Scanner, walking-skeleton and rescan integration suites use scanner scratch; the six UI/checkpoint suites use separate UI scratch:
 
 ```powershell
 if ($null -ne [Environment]::GetEnvironmentVariable('A11Y_M305_CAPTURE_PROOF','Process') -or
@@ -232,7 +234,7 @@ if ($null -ne [Environment]::GetEnvironmentVariable('A11Y_M305_CAPTURE_PROOF','P
     $null -ne [Environment]::GetEnvironmentVariable('A11Y_M501_CAPTURE_PROOF','Process')) {
   throw 'Ordinary regression requires the synthetic capture flag absent.'
 }
-foreach ($m105Test in @('tests/run-contract.test.ts','tests/run-repository.test.ts','tests/local-service.test.ts','tests/scan-normalization.test.ts','tests/retrieval-contract.test.ts','tests/embedding-retrieval.test.ts','tests/retrieval-service.test.ts','tests/finding-sufficiency.test.ts','tests/finding-guidance-api.test.ts','tests/generation-contract.test.ts','tests/generation-stage.test.ts','tests/generation-service.test.ts','tests/ollama-generation-contract.test.ts','tests/ollama-generation.test.ts','tests/ollama-generation-service.test.ts','tests/groq-generation-contract.test.ts','tests/groq-generation.test.ts','tests/groq-generation-service.test.ts','tests/finding-generation-admission.test.ts','tests/review-contract.test.ts','tests/review-repository.test.ts','tests/review-service.test.ts','tests/rescan-service.test.ts')) {
+foreach ($m105Test in @('tests/run-contract.test.ts','tests/run-repository.test.ts','tests/local-service.test.ts','tests/scan-normalization.test.ts','tests/retrieval-contract.test.ts','tests/embedding-retrieval.test.ts','tests/retrieval-service.test.ts','tests/finding-sufficiency.test.ts','tests/finding-guidance-api.test.ts','tests/generation-contract.test.ts','tests/generation-stage.test.ts','tests/generation-service.test.ts','tests/ollama-generation-contract.test.ts','tests/ollama-generation.test.ts','tests/ollama-generation-service.test.ts','tests/groq-generation-contract.test.ts','tests/groq-generation.test.ts','tests/groq-generation-service.test.ts','tests/finding-generation-admission.test.ts','tests/review-contract.test.ts','tests/review-repository.test.ts','tests/review-service.test.ts','tests/rescan-service.test.ts','tests/comparison-pair.test.ts')) {
   Invoke-M105Command {
     & $m105Node --test --test-timeout=120000 $m105Test
     if ($LASTEXITCODE -ne 0) { throw 'Browser-free suite failed.' }
@@ -242,10 +244,10 @@ Invoke-M105Command {
   & $m105Node --experimental-test-module-mocks --test --test-timeout=120000 tests/finding-generation-api.test.ts
   if ($LASTEXITCODE -ne 0) { throw 'Generation API suite failed.' }
 }
-foreach ($m105Test in @('tests/finding-review-api.test.ts','tests/finding-review-admission.test.ts','tests/rescan-api.test.ts','tests/rescan-admission.test.ts')) {
+foreach ($m105Test in @('tests/finding-review-api.test.ts','tests/finding-review-admission.test.ts','tests/rescan-api.test.ts','tests/rescan-admission.test.ts','tests/comparison-outcome.test.ts','tests/rescan-comparison.test.ts')) {
   Invoke-M105Command {
     & $m105Node --experimental-test-module-mocks --test --test-timeout=120000 $m105Test
-    if ($LASTEXITCODE -ne 0) { throw 'Review or rescan transport/admission suite failed.' }
+    if ($LASTEXITCODE -ne 0) { throw 'Review, rescan or comparison suite failed.' }
   }
 }
 foreach ($m105Test in @('tests/scan-page.test.ts','tests/walking-skeleton.test.ts','tests/rescan-integration.test.ts')) {
@@ -323,7 +325,7 @@ Invoke-M105Command {
 }
 ```
 
-This filtered demonstration does not replace either the core subset or the complete thirty-two-file suite. Tests use only project-owned synthetic records, isolated `temp/m102-*` roots, and bounded owned child processes; they never acquire or delete a real corpus or user run.
+This filtered demonstration does not replace either the core subset or the complete suite. Tests use only project-owned synthetic records, isolated `temp/m102-*` roots, and bounded owned child processes; they never acquire or delete a real corpus or user run.
 
 ## Current scope
 
@@ -337,7 +339,11 @@ The client-enabled service accepts `POST /api/rescans` with exactly `{runId, bas
 
 Pending or failed rescans preserve the visible baseline. An unknown outcome blocks further mutations, with no automatic retry or recovery read. Validated success opens the later run and retires prior transient workflow capabilities. **Return to baseline** shows one read-only snapshot; **Return to later results** resumes viewing the same active later workflow. Navigation performs no service action. A new successful rescan replaces that pair, and successful independent Analyze clears it.
 
-Selected-rule native pass candidates remain transient inside the scanner and are discarded by the service. They are absent from saved records, HTTP responses and client state. Comparison, history browsing and reopening retained runs remain later work. The [M5-01 verification](docs/plans/completed/m5-01-intentional-rescan.md#m501-final-01--integrated-review-and-task-closure) records controlled browser, scanner and disk evidence; it adds no actual public-page or provider observation.
+#### Internal comparison
+
+The [internal comparison executor](src/server/local-service/rescan-comparison.ts) consumes selected-rule native pass candidates during the rescan operation, then releases them. It delegates calculation to the pure [comparison policy](src/server/comparison/compare-finding.ts) and its [closed input/result contract](src/server/comparison/comparison-contract.ts). It validates both scans, checks exact page/scan-profile compatibility before target correlation, and requires a unique native non-failing observation with sufficient evidence to resolve a baseline Finding. Missing or ambiguous targets remain inconclusive. Comparable binary failures remain persistent; sufficient contrast failures use the retained margin ordering. The bounded result becomes authoritative only after successful completed-run publication without shutdown, abort or deadline expiry. Invalid comparison evidence or a comparison exception preserves an independently valid scan result.
+
+The service returns only the existing scan outcome. Candidate collections and comparison results are absent from saved records, HTTP responses and client state. M5-03 owns comparison persistence and presentation; history browsing and reopening retained runs remain later work. [M5-02 final verification](docs/plans/completed/m5-02-conservative-comparison.md#m502-final-01--integrated-review-and-task-closure) records three real controlled pairs over the six frozen states, separate policy-only cases and checkout-byte preservation for the [frozen comparison companion](evaluation/m502-comparison-v1.json). These observations establish neither public-site qualification nor accessibility, conformance or remediation causality.
 
 ### Shared generation APIs
 
@@ -447,7 +453,7 @@ In a new analysis, select a Finding and activate **Get guidance**. Complete capt
 
 The pending state keeps selection available. The result distinguishes a confirmed pre-call failure, an attempted call, durable publication, an unsaved attempt and an unknown outcome. A browser timeout or lost response does not prove that service/provider work stopped. The consumed action cannot be retried; ordinary Analyze can start an independent run when the service accepts it. Restart does not recover a supported workflow capability.
 
-A validated proposal keeps its original cited summary, user impact and remediation separate from scanner evidence and curated guidance. Evidence sufficiency, model confidence, uncertainty, assumptions, blocking human judgment and the post-change verification reminder remain visible. The [individual review controls](#reviewing-one-proposal) now support approve, edit-and-accept and reject. Comparison remains later work.
+A validated proposal keeps its original cited summary, user impact and remediation separate from scanner evidence and curated guidance. Evidence sufficiency, model confidence, uncertainty, assumptions, blocking human judgment and the post-change verification reminder remain visible. The [individual review controls](#reviewing-one-proposal) now support approve, edit-and-accept and reject. Comparison persistence and presentation remain later work.
 
 The [M3-05 plan](docs/plans/completed/m3-05-generation-checkpoint.md) records implementation verification and bounded actual-provider checks. The clarified runtime prompt preserves historical invocation identities. One Local and one Groq run saved and displayed original proposals that pass mechanical validation under the same runtime version. Both remain pending human review, including their judgment and remediation limitations. The successful Local diagnostic did not reproduce the earlier rejection; its exact cause remains unknown. The selection amendment also retains an informative-image relevance failure despite complete guidance-role coverage. These observations do not establish model capacity, semantic quality or release readiness.
 
