@@ -4,7 +4,7 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-None.
+- [M6-01 — Shared deterministic evaluation](m6-01-shared-deterministic-evaluation.md)
 
 ## Completed plans
 
