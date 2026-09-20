@@ -9,7 +9,7 @@ This ExecPlan is a living document. Maintain `Progress`, `Surprises & Discoverie
 - **Accepted evidence:** G/A, controlled and public B, 881-test regression, final caller checks and independent strict/build pass. The W3C baseline/rescan saved a persistent contrast comparison; the separate Ollama zero-Finding observation is preserved.
 - **Findings and allowances:** No open finding. All worker grants and G correction cycles are consumed. W3C used exactly 2/2 activations; Ollama used one activation and its lane is closed. Both isolated public roots remain preserved. No retry or further worker write is authorized. Active lease: None.
 - **Next boundary:** M6-01 is dependency-ready but not selected or started. This completed plan is historical evidence; its commands and consumed grants are not permission to replay.
-- **Resumption:** Read the current slice, [commands](#concrete-steps), [acceptance matrix](#validation-and-acceptance), [recovery](#idempotence-and-recovery) and [decision contract](#decision-review-contract) before assignment. Historical Git IDs below are provenance, not executable HEAD constants.
+- **Archive navigation:** Start with [final closure and limitations](#m504-final-01--integrated-review-and-task-closure), then the [evidence mapping](#m504-verify-02--final-evidence-mapping) and [actual public comparison](#m504-public-02--actual-selected-finding-comparison-accepted). The [commands](#concrete-steps), [acceptance matrix](#validation-and-acceptance), [recovery](#idempotence-and-recovery) and [decision contract](#decision-review-contract) preserve the completed execution procedure. Historical Git IDs and consumed grants do not authorize a new assignment or replay.
 
 ## Progress
 
@@ -25,7 +25,7 @@ This ExecPlan is a living document. Maintain `Progress`, `Surprises & Discoverie
 ## Surprises & Discoveries
 
 - M5-03 already proves actual image-alt scanner/service/disk/browser publication and exact synthetic baseline deletion. Its separate valid-Finding service case proves refusal after lineage loss. Rebuilding either mechanism is unnecessary. Its actual-state observation is pinned to that execution, not a current live-state guarantee.
-- The three frozen native transitions currently stop at `executeRescanComparison` in `tests/rescan-integration.test.ts`; only the separate image-alt case crosses service publication and browser display. The controlled outcome browser matrix uses synthetic callback data. These are useful complementary evidence classes, not interchangeable end-to-end proof.
+- At task entry, the three frozen native transitions stopped at `executeRescanComparison` in `tests/rescan-integration.test.ts`; only the separate image-alt case crossed service publication and browser display. M5-04 added native label/contrast service/HTTP/disk/GET/UI coverage, as recorded in the [final evidence mapping](#m504-verify-02--final-evidence-mapping). The synthetic adverse-case matrix remains a separate evidence class.
 - The accepted `3.54 → 4.00` contrast vector is arithmetic-only: it must never become a canonical comparison record, third fixture or extra browser scan. The UI's separate `3 → 4/3/2` synthetic examples are not that frozen vector.
 - Earlier public scan observations do not authorize a new target or prove a current selectable Finding. A live zero-Finding result is valid scanning but cannot satisfy this selected-Finding comparison checkpoint.
 
@@ -188,6 +188,8 @@ On crash, timeout, shutdown uncertainty or unknown residue, preserve it; inspect
 
 ## Artifacts and Notes
 
+The entries below preserve the state at each execution checkpoint, including superseded blockers, pending gates and consumed allowances. [M504-FINAL-01](#m504-final-01--integrated-review-and-task-closure) owns the final accepted disposition; earlier entries are not current authorization or unresolved work.
+
 ### M504-EXEC-01 — Execution entry
 
 2026-09-20: owner-authorized execution of this exact task begins at clean HEAD `434d7de121472a076a02b6eca6027059480c6995`; historical planning HEAD is not the current baseline. No active `logs/agent-flow-leases/v2/active.json`. Permissions expose workspace-write with one guarded writer at a time. The configured primary default is Astra/high and callable role metadata exposes the prescribed custom roles/pins; actual primary model/effort is not exposed by runtime metadata, so configuration is not claimed as runtime verification. Pins remain unchanged.
@@ -204,7 +206,7 @@ G discovery froze two procedure candidates before comparative research: existing
 
 ### M504-G-CONTRACT — Proof and command contract
 
-Current public binding: the original Ollama execution below is preserved as history. The owner-authorized [M504-PUBLIC-02-CONTRACT](#m504-public-02-contract--owner-authorized-w3c-sequence) supersedes only its fixed target, isolated root and finite activation grant once its stated review/caller gates pass. All other I1–I9, command, timeout, ownership, cleanup and preservation rules remain controlling.
+Historical public binding: the owner-authorized [M504-PUBLIC-02-CONTRACT](#m504-public-02-contract--owner-authorized-w3c-sequence) superseded the original Ollama target, isolated root and finite activation grant after its review/caller gates passed. Other I1–I9, command, timeout, ownership, cleanup and preservation rules governed both executions. Both public lanes are now closed; their separate results remain preserved in [M504-PUBLIC-01](#m504-public-01--valid-zero-finding-baseline-comparison-unavailable) and [M504-PUBLIC-02](#m504-public-02--actual-selected-finding-comparison-accepted).
 
 2026-09-20, primary-authored after `/root/m504_g_research` returned RESEARCH COMPLETE, `/root/m504_g_analysis` returned DRAFT READY, and fresh `/root/m504_g_predraft` returned PASS with no findings. All three are read-only. Research source facts G-E1–G-E10 establish the current CLI/service boundary, native coverage gap, strict versus legacy cleanup, valid-Finding refusal and cooperative timeout limits; they do not establish runtime success. Research used one report, synthesis one turn and pre-draft zero corrections. A different authored-artifact review remains required.
 
