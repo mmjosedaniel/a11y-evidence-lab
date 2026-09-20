@@ -4,11 +4,13 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-- [M6-01 — Shared deterministic evaluation](m6-01-shared-deterministic-evaluation.md)
+None.
 
 ## Completed plans
 
 These archives preserve each task's execution, review, failures, and closure evidence. The roadmap remains the status authority.
+
+- [M6-01 — Shared deterministic evaluation](completed/m6-01-shared-deterministic-evaluation.md)
 
 - [M5-04 — Comparison checkpoint](completed/m5-04-comparison-checkpoint.md)
 
