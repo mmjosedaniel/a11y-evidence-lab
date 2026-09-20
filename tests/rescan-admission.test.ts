@@ -15,11 +15,13 @@ import type { RescanOutcome } from '../src/server/local-service/contracts.ts';
 import { completedRun, failedRun } from './helpers/m102-run-fixture.ts';
 import { selectedFinding } from './helpers/m202-retrieval-service-fixture.ts';
 import { pendingReviewRun, successfulReviewRun } from './helpers/m402-review-fixture.ts';
+import { expectedComparison } from './helpers/m503-comparison-fixture.ts';
 
 const serial = { concurrency: false };
 type CompleteRun = Extract<PageAnalysisRun, { status: 'completed' }>;
 type FailedRun = Extract<PageAnalysisRun, { status: 'failed' }>;
 type RescanFailure = Extract<RescanOutcome, { ok: false }>;
+type HistoricalRescanFailure = Extract<RescanFailure, { run: FailedRun | null }>;
 type Mode = RescanIntent['mode'];
 
 function checkedComplete(input: unknown): CompleteRun {
@@ -61,6 +63,18 @@ function linkedComplete(
   return checkedComplete(value);
 }
 
+function linkedCompared(
+  selected = intent(),
+  kind: 'populated' | 'zero' = 'populated',
+  requestedUrl = baseline(selected.baselineRunId).requestedUrl,
+  before: CompleteRun = baseline(selected.baselineRunId),
+): CompleteRun {
+  const later = linkedComplete(selected, kind, requestedUrl);
+  const comparison = expectedComparison({ baselineRun: before,
+    baselineFindingId: selected.findingId, laterRun: later, candidates: [] });
+  return checkedComplete({ ...later, comparison });
+}
+
 function linkedFailure(
   selected = intent(),
   cleanup: 'closed' | 'failed' = 'closed',
@@ -77,11 +91,11 @@ function transport(status: number, body: unknown): { status: number; body: unkno
 }
 
 function failure(
-  error: RescanFailure['error'],
+  error: HistoricalRescanFailure['error'],
   run: FailedRun | null = null,
   persisted = false,
   cleanupFailed = false,
-): RescanFailure {
+): HistoricalRescanFailure {
   return { ok: false, error, run, persisted, cleanupFailed };
 }
 
@@ -150,17 +164,21 @@ async function withMemoryWindow<T>(body: (clock: {
 test('admits exact linked success for both modes, arbitrary baseline Finding state, unavailable locator, and zero later Findings', serial, () => {
   const reviewed = successfulReviewRun('approve', 'run-reviewed', 'local');
   const pending = pendingReviewRun('run-pending', 'local');
+  const ordinary = baseline();
+  const zero = baseline('run-zero-baseline');
+  const unavailable = baseline('run-unavailable', 'unavailable');
   const cases: Array<{ before: CompleteRun; selected: RescanIntent; later: CompleteRun }> = [
-    { before: baseline(), selected: intent(), later: linkedComplete() },
-    { before: baseline('run-zero-baseline'), selected: intent('run-zero', 'run-zero-baseline', 'local'),
-      later: linkedComplete(intent('run-zero', 'run-zero-baseline', 'local'), 'zero') },
-    { before: baseline('run-unavailable', 'unavailable'),
+    { before: ordinary, selected: intent(), later: linkedCompared(intent(), 'populated', ordinary.requestedUrl, ordinary) },
+    { before: zero, selected: intent('run-zero', 'run-zero-baseline', 'local'),
+      later: linkedCompared(intent('run-zero', 'run-zero-baseline', 'local'), 'zero', zero.requestedUrl, zero) },
+    { before: unavailable,
       selected: intent('run-from-unavailable', 'run-unavailable', 'groq'),
-      later: linkedComplete(intent('run-from-unavailable', 'run-unavailable', 'groq')) },
+      later: linkedCompared(intent('run-from-unavailable', 'run-unavailable', 'groq'), 'populated',
+        unavailable.requestedUrl, unavailable) },
     { before: reviewed, selected: intent('run-from-reviewed', reviewed.runId, 'local'),
-      later: linkedComplete(intent('run-from-reviewed', reviewed.runId, 'local'), 'populated', reviewed.requestedUrl) },
+      later: linkedCompared(intent('run-from-reviewed', reviewed.runId, 'local'), 'populated', reviewed.requestedUrl, reviewed) },
     { before: pending, selected: intent('run-from-pending', pending.runId, 'groq'),
-      later: linkedComplete(intent('run-from-pending', pending.runId, 'groq'), 'populated', pending.requestedUrl) },
+      later: linkedCompared(intent('run-from-pending', pending.runId, 'groq'), 'populated', pending.requestedUrl, pending) },
   ];
 
   for (const entry of cases) {
@@ -182,27 +200,32 @@ test('rejects success with stale or mismatched status, later identity, lineage, 
   const before = baseline();
   const selected = intent();
   const candidates: unknown[] = [
-    transport(201, { ok: true, run: linkedComplete(selected) }),
-    transport(200, { ok: true, run: linkedComplete(intent('run-other')) }),
+    transport(201, { ok: true, run: linkedCompared(selected) }),
+    transport(200, { ok: true, run: linkedCompared(intent('run-other')) }),
+    transport(200, { ok: true, run: linkedComplete(selected) }),
     transport(200, { ok: true, run: completedRun(selected.runId, selected.mode) }),
-    transport(200, { ok: true, run: linkedComplete(intent(selected.runId, 'run-other')) }),
-    transport(200, { ok: true, run: linkedComplete(selected, 'populated', 'https://example.org/other') }),
-    transport(200, { ok: true, run: linkedComplete(intent(selected.runId, selected.baselineRunId, 'local')) }),
+    transport(200, { ok: true, run: linkedCompared(intent(selected.runId, 'run-other')) }),
+    transport(200, { ok: true, run: linkedCompared(selected, 'populated', 'https://example.org/other') }),
+    transport(200, { ok: true, run: linkedCompared(intent(selected.runId, selected.baselineRunId, 'local')) }),
   ];
 
-  const wrongProvider = structuredClone(linkedComplete(selected)) as Record<string, unknown>;
+  const wrongProvider = structuredClone(linkedCompared(selected)) as Record<string, unknown>;
   wrongProvider.providerContext = { mode: 'groq', provider: 'groq', model: 'unknown-model' };
   candidates.push(transport(200, { ok: true, run: wrongProvider }));
 
   const processed = structuredClone(pendingReviewRun(selected.runId, selected.mode)) as Record<string, unknown>;
   processed.baselineRunId = selected.baselineRunId;
   processed.requestedUrl = before.requestedUrl;
-  candidates.push(transport(200, { ok: true, run: checkedComplete(processed) }));
+  const processedRun = checkedComplete(processed);
+  const processedComparison = expectedComparison({ baselineRun: before,
+    baselineFindingId: selected.findingId, laterRun: processedRun, candidates: [] });
+  candidates.push(transport(200, { ok: true,
+    run: checkedComplete({ ...processedRun, comparison: processedComparison }) }));
 
   candidates.push(
-    transport(200, { ok: true, run: linkedComplete(selected), extra: true }),
-    { status: 200, body: { ok: true, run: linkedComplete(selected) }, extra: true },
-    transport(Number.NaN, { ok: true, run: linkedComplete(selected) }),
+    transport(200, { ok: true, run: linkedCompared(selected), extra: true }),
+    { status: 200, body: { ok: true, run: linkedCompared(selected) }, extra: true },
+    transport(Number.NaN, { ok: true, run: linkedCompared(selected) }),
     { status: 200 },
     null,
   );
@@ -223,6 +246,9 @@ test('admits only the exact closed failure/status/identity tuples', serial, () =
   }
   const uncertainCreate = failure('create-failed', null, false, true);
   assert.deepEqual(admitRescan(transport(500, uncertainCreate), before, selected), uncertainCreate);
+  const precreationLineage = { ok: false, error: 'comparison-lineage', run: null,
+    persisted: false, cleanupFailed: false };
+  assert.deepEqual(admitRescan(transport(409, precreationLineage), before, selected), precreationLineage);
 
   for (const error of ['scan-failed', 'result-validation', 'initial-persistence'] as const) {
     for (const persisted of [false, true]) {
@@ -234,6 +260,21 @@ test('admits only the exact closed failure/status/identity tuples', serial, () =
   }
   const shutdownAfterCreate = failure('shutdown', linkedFailure(selected), false, false);
   assert.deepEqual(admitRescan(transport(503, shutdownAfterCreate), before, selected), shutdownAfterCreate);
+
+  const completed = linkedComplete(selected);
+  for (const [status, error, cleanupFailed] of [
+    [500, 'comparison-calculation', false],
+    [409, 'comparison-lineage', false],
+    [500, 'comparison-persistence', false],
+    [500, 'comparison-persistence', true],
+    [409, 'comparison-aborted', false],
+    [503, 'comparison-shutdown', false],
+    [503, 'comparison-shutdown', true],
+  ] as const) {
+    const body = { ok: false, error, run: completed, persisted: true,
+      comparisonPersisted: false, cleanupFailed };
+    assert.deepEqual(admitRescan(transport(status, body), before, selected), body, error);
+  }
 });
 
 test('rejects contradictory failures, foreign failed runs, unknown errors, and outcome-unknown envelopes', serial, () => {
@@ -257,6 +298,14 @@ test('rejects contradictory failures, foreign failed runs, unknown errors, and o
     transport(500, failure('scan-failed', linkedFailure(selected, 'failed'), false, false)),
     transport(500, failure('scan-failed', linkedFailure(selected), false, true)),
     transport(500, { ...failure('scan-failed', linkedFailure(selected)), extra: true }),
+    transport(500, { ok: false, error: 'comparison-persistence', run: linkedComplete(selected),
+      persisted: true, cleanupFailed: false }),
+    transport(500, { ok: false, error: 'comparison-persistence', run: linkedComplete(selected),
+      persisted: true, comparisonPersisted: true, cleanupFailed: false }),
+    transport(500, { ok: false, error: 'comparison-persistence', run: linkedCompared(selected),
+      persisted: true, comparisonPersisted: false, cleanupFailed: false }),
+    transport(409, { ok: false, error: 'comparison-lineage', run: null,
+      persisted: false, comparisonPersisted: false, cleanupFailed: false }),
     transport(404, failure('not-found', null, true)),
     transport(500, { ok: false, error: 'private-error', run: null, persisted: false, cleanupFailed: false }),
     transport(500, { ok: false, error: 'rescan-outcome-unknown' }),
@@ -267,7 +316,7 @@ test('rejects contradictory failures, foreign failed runs, unknown errors, and o
 test('fails closed without evaluating accessors and handles symbols, cycles, prototypes, hostile proxies, and reentrant reflection', serial, () => {
   const before = baseline();
   const selected = intent();
-  const success = (): unknown => transport(200, { ok: true, run: linkedComplete(selected) });
+  const success = (): unknown => transport(200, { ok: true, run: linkedCompared(selected) });
   let reads = 0;
   const accessorRaw = Object.defineProperty({ status: 200 }, 'body', {
     enumerable: true, get() { reads++; throw new Error('SYNTHETIC_SECRET'); },
@@ -352,7 +401,8 @@ test('request accepts arbitrary baseline Finding state and starts exactly once',
   await withMemoryWindow(async clock => {
     const before = successfulReviewRun('approve', 'run-reviewed', 'local');
     const selected = intent('run-rescan-reviewed', before.runId, 'groq');
-    const result = transport(200, { ok: true, run: linkedComplete(selected, 'populated', before.requestedUrl) });
+    const result = transport(200, { ok: true,
+      run: linkedCompared(selected, 'populated', before.requestedUrl, before) });
     const pending = deferred<unknown>();
     const settlements: RescanSettlement[] = [];
     let reads = 0;
@@ -374,7 +424,8 @@ test('request accepts arbitrary baseline Finding state and starts exactly once',
     assert.deepEqual(clock.delays(), [30000]);
     pending.resolve(result);
     await turn();
-    assert.deepEqual(settlements, [{ status: 'completed', run: linkedComplete(selected, 'populated', before.requestedUrl) }]);
+    assert.deepEqual(settlements, [{ status: 'completed',
+      run: linkedCompared(selected, 'populated', before.requestedUrl, before) }]);
     request.start();
     assert.equal(calls, 1);
   });
@@ -436,6 +487,11 @@ test('request applies the exact release matrix and preserves failed-run and pers
     cases.push({ raw: transport(500, failure('create-failed', null, false, true)), expected: {
       status: 'refused', error: 'create-failed', cleanup: true, released: false, run: null, persisted: false,
     } });
+    cases.push({ raw: transport(409, { ok: false, error: 'comparison-lineage', run: null,
+      persisted: false, cleanupFailed: false }), expected: {
+      status: 'refused', error: 'comparison-lineage', cleanup: false,
+      released: true, run: null, persisted: false,
+    } as RescanSettlement });
     for (const error of ['scan-failed', 'result-validation', 'initial-persistence'] as const) {
       for (const persisted of [false, true]) {
         const run = linkedFailure(selected);
@@ -447,6 +503,21 @@ test('request applies the exact release matrix and preserves failed-run and pers
       cases.push({ raw: transport(500, failure(error, run, false, true)), expected: {
         status: 'refused', error, cleanup: true, released: false, run, persisted: false,
       } });
+    }
+    for (const [status, error, cleanupFailed, released] of [
+      [500, 'comparison-calculation', false, true],
+      [409, 'comparison-lineage', false, true],
+      [500, 'comparison-persistence', false, true],
+      [500, 'comparison-persistence', true, false],
+      [409, 'comparison-aborted', false, true],
+      [503, 'comparison-shutdown', false, false],
+      [503, 'comparison-shutdown', true, false],
+    ] as const) {
+      const run = linkedComplete(selected);
+      cases.push({ raw: transport(status, { ok: false, error, run, persisted: true,
+        comparisonPersisted: false, cleanupFailed }), expected: {
+        status: 'completed', run, comparisonFailure: { error, cleanupFailed, released },
+      } as RescanSettlement });
     }
 
     for (const entry of cases) {
@@ -466,7 +537,7 @@ test('malformed, rejected, timed-out, late, stopped, and stale results never cla
     const before = baseline();
     const selected = intent();
     for (const raw of [null, transport(500, { ok: false, error: 'rescan-outcome-unknown' }),
-      transport(200, { ok: true, run: linkedComplete(intent('run-other')) })]) {
+      transport(200, { ok: true, run: linkedCompared(intent('run-other')) })]) {
       const settlements: RescanSettlement[] = [];
       let signal: AbortSignal | undefined;
       let calls = 0;
@@ -507,7 +578,7 @@ test('malformed, rejected, timed-out, late, stopped, and stale results never cla
     clock.fire();
     assert.deepEqual(timed, [{ status: 'unknown' }]);
     assert.equal(timedSignal?.aborted, true);
-    late.resolve(transport(200, { ok: true, run: linkedComplete(selected) }));
+    late.resolve(transport(200, { ok: true, run: linkedCompared(selected) }));
     await turn();
     assert.deepEqual(timed, [{ status: 'unknown' }]);
     assert.equal(timedCalls, 1);
@@ -539,7 +610,7 @@ test('monotonic expiry during hostile snapshot prevents dispatch and settles unk
     const settlements: RescanSettlement[] = [];
     const request = createRescanRequest({ baseline: before, intent: reflected, current: () => true,
       readCallback: (): RescanCallback => async (_submitted: RescanIntent, _signal: AbortSignal): Promise<unknown> => {
-        calls++; return transport(200, { ok: true, run: linkedComplete(rawIntent) });
+        calls++; return transport(200, { ok: true, run: linkedCompared(rawIntent) });
       }, settle: (value: RescanSettlement): void => { settlements.push(value); } });
     request.start();
     await turn();
@@ -582,8 +653,13 @@ test('request presentation and settlement exports retain the frozen closed shape
   const unknown: RescanPresentation = { status: 'unknown' };
   const refused: RescanPresentation = { status: 'refused', error: 'busy', cleanup: false,
     released: false, run: null, persisted: false };
-  const completed: RescanSettlement = { status: 'completed', run: linkedComplete() };
-  assert.deepEqual([pending, unknown, refused, completed].map(value => Object.keys(value).sort()), [
+  const completed: RescanSettlement = { status: 'completed', run: linkedCompared() };
+  const comparisonFailed: RescanSettlement = { status: 'completed', run: linkedComplete(),
+    comparisonFailure: { error: 'comparison-persistence', cleanupFailed: true, released: false } } as RescanSettlement;
+  assert.deepEqual([pending, unknown, refused, completed, comparisonFailed].map(value => Object.keys(value).sort()), [
     ['status'], ['status'], ['cleanup', 'error', 'persisted', 'released', 'run', 'status'], ['run', 'status'],
+    ['comparisonFailure', 'run', 'status'],
   ]);
+  assert.deepEqual(Object.keys((comparisonFailed as unknown as { comparisonFailure: object }).comparisonFailure).sort(),
+    ['cleanupFailed', 'error', 'released']);
 });

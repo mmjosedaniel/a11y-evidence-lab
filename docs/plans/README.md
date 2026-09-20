@@ -4,11 +4,13 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-None.
+None. M5-04 remains unselected.
 
 ## Completed plans
 
 These archives preserve each task's execution, review, failures, and closure evidence. The roadmap remains the status authority.
+
+- [M5-03 — Comparison persistence and UI](completed/m5-03-comparison-persistence-and-ui.md)
 
 - [M5-02 — Conservative comparison](completed/m5-02-conservative-comparison.md)
 

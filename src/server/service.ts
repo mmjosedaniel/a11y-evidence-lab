@@ -9,6 +9,8 @@ import { createRejectedScanOutcome } from './local-service/scan-run-records.ts';
 import { startScanOperation } from './local-service/scan-operation.ts';
 import { prepareRescan, rejectedRescan } from './local-service/rescan-operation.ts';
 import { executeRescanComparison } from './local-service/rescan-comparison.ts';
+import { publishComparison } from './local-service/comparison-publication.ts';
+import { comparisonLineage } from './local-service/comparison-lineage.ts';
 import type { RescanOutcome, RescanExecutor } from './local-service/contracts.ts';
 import { createLoopbackApiServer } from './local-service/loopback-api.ts';
 import { loadClientResponses } from './local-service/client-assets.ts';
@@ -165,7 +167,11 @@ export async function startLocalService(options: ServiceOptions): Promise<StartR
           && result.value.scan.findings.some(finding => finding.state === 'active'
             && !retrieval.owns(result.value.runId, finding.findingId)
             && !generation.owns(result.value.runId, finding.findingId)));
-        return { ok: true, run: result.value, interrupted };
+        const lineage = result.value.status === 'completed' && result.value.comparison
+          ? comparisonLineage(repository, result.value) : undefined;
+        if (admissionClosed) return { ok: false, error: 'stopping' };
+        return { ok: true, run: result.value, interrupted,
+          ...(lineage ? { comparisonLineage: lineage } : {}) };
       }
       switch (result.error) {
         case 'invalid-id': case 'not-found': case 'invalid-run': case 'read-failed':
@@ -189,7 +195,8 @@ export async function startLocalService(options: ServiceOptions): Promise<StartR
     else if (typeof execute !== 'function') reservation.settle(rejectedRescan('invalid-request'));
     else if (!prepared.ok) reservation.settle(prepared);
     else void executeRescanComparison(scanDependencies, prepared, reservation.controller.signal, execute,
-      () => { retrieval.discardSettledOwner(); generation.discardSettledOwner(); }).then(({ outcome }) => {
+      () => { retrieval.discardSettledOwner(); generation.discardSettledOwner(); }).then(result => {
+        const outcome = publishComparison(scanDependencies, prepared, reservation.controller.signal, result);
         if (!outcome.ok && outcome.cleanupFailed) closeAdmission();
         reservation.settle(outcome);
       });

@@ -1,13 +1,27 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import type { RescanPresentation } from '../../rescan-request.ts';
+import type { RescanSettlement } from '../../rescan-request.ts';
 
 export interface RescanControls {
   readonly blocked: boolean;
+  readonly blockedReason?: string | null;
+  readonly comparisonFeedback?: string | null;
   readonly presentation: RescanPresentation | null;
   readonly submitted: { readonly findingId: string; readonly mode: 'local' | 'groq' } | null;
   readonly onSubmit: (findingId: string, mode: 'local' | 'groq') => void;
   readonly onAnnounce: (text: string) => void;
+}
+
+export function comparisonFeedback(result: Extract<RescanSettlement, { status: 'completed' }>): string {
+  switch (result.comparisonFailure?.error) {
+    case 'comparison-calculation': return 'Scan completed. Comparison could not be calculated.';
+    case 'comparison-persistence': return 'Scan completed. Comparison could not be saved.';
+    case 'comparison-lineage': return 'Scan completed. The baseline is unavailable for comparison.';
+    case 'comparison-aborted': return 'Scan completed. Comparison was cancelled before saving.';
+    case 'comparison-shutdown': return 'Scan completed. The service stopped before comparison was saved.';
+    default: return 'Comparison saved.';
+  }
 }
 
 export function rescanAnnouncement(state: RescanPresentation): string {
@@ -22,6 +36,7 @@ export function rescanAnnouncement(state: RescanPresentation): string {
       case 'Rescan is unavailable': return 'Rescan is unavailable.';
       case 'invalid-request': return 'The rescan request could not be accepted.';
       case 'not-found': return 'The baseline run could not be found.';
+      case 'comparison-lineage': return 'The baseline is unavailable for comparison.';
       case 'invalid-run': case 'stored-run-unavailable': case 'read-failed': return 'The saved baseline could not be read safely.';
       case 'initial-persistence': return 'The later run could not be saved.';
       case 'result-validation': return 'The later scan returned an invalid result.';
@@ -59,6 +74,7 @@ export function IntentionalRescanForm({ findingId, controls }: {
     controls.onSubmit(findingId, mode);
   }}>
     <h4>Intentional rescan</h4>
+    {controls.blockedReason && <p>{controls.blockedReason}</p>}
     <label htmlFor={`${id}-mode`}>New scan mode</label>
     <select id={`${id}-mode`} ref={select} value={displayedMode} disabled={controls.blocked}
       aria-invalid={invalid || undefined} aria-describedby={invalid ? `${id}-error` : undefined}

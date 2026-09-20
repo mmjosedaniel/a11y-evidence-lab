@@ -15,7 +15,10 @@ import { finalReviewStatus, generationAnnouncement, reviewedAnnouncement } from 
 import type { GenerationPresentation } from './components/results/FindingGeneration.tsx';
 import { createRescanRequest } from './rescan-request.ts';
 import type { RescanCallback, RescanPresentation } from './rescan-request.ts';
-import { rescanAnnouncement } from './components/results/IntentionalRescanForm.tsx';
+import { comparisonFeedback, rescanAnnouncement } from './components/results/IntentionalRescanForm.tsx';
+import { availabilityText } from './components/results/comparisonPresentation.ts';
+import { createComparisonRequest } from './comparison-request.ts';
+import type { ComparisonAvailability, ComparisonReadCallback } from './comparison-request.ts';
 import { createReviewRequest, reviewRefusalText } from './review-request.ts';
 import type { ReviewCallback, ReviewPresentation } from './review-request.ts';
 
@@ -28,6 +31,7 @@ export interface AppProps {
   readonly generateFinding?: (intent: GenerationIntent, signal: AbortSignal) => Promise<unknown>;
   readonly reviewFinding?: ReviewCallback;
   readonly rescanFinding?: RescanCallback;
+  readonly readComparisonRun?: ComparisonReadCallback;
 }
 
 type CompleteRun = Extract<PageAnalysisRun, { status: 'completed' }>;
@@ -45,6 +49,8 @@ function countText(count: number, singular: string): string {
 }
 
 export function App(props: AppProps): ReactElement {
+  const currentProps = useRef(props);
+  currentProps.current = props;
   const [busy, setBusy] = useState(false);
   const [announcement, setAnnouncement] = useState('');
   const [error, setError] = useState<AnalysisError | null>(null);
@@ -75,6 +81,11 @@ export function App(props: AppProps): ReactElement {
   const [rescanLocked, setRescanLocked] = useState(false);
   const stopRescan = useRef<(() => void) | null>(null);
   const [baselinePreview, setBaselinePreview] = useState<BaselinePreview | null>(null);
+  const [comparisonAvailability, setComparisonAvailability] = useState<ComparisonAvailability>({ status: 'unverified' });
+  const availability = useRef<ComparisonAvailability>({ status: 'unverified' });
+  const comparisonReadOwner = useRef<object | null>(null);
+  const stopComparison = useRef<(() => void) | null>(null);
+  const [completedComparisonFeedback, setCompletedComparisonFeedback] = useState<string | null>(null);
   const [preview, setPreview] = useState(false);
   const previewing = useRef(false);
   const [previewSelection, setPreviewSelection] = useState<ResultSelection | null>(null);
@@ -82,6 +93,7 @@ export function App(props: AppProps): ReactElement {
   const resultsContent = useRef<HTMLDivElement>(null);
   const resultsHeading = useRef<HTMLHeadingElement>(null);
   const moveResultsFocus = useRef(false);
+  const comparisonFocus = useRef<Element | null>(null);
 
   useEffect(() => {
     mounted.current = true;
@@ -95,15 +107,20 @@ export function App(props: AppProps): ReactElement {
       stopReview.current = null;
       stopRescan.current?.();
       stopRescan.current = null;
+      comparisonReadOwner.current = null;
+      stopComparison.current?.();
+      stopComparison.current = null;
     };
   }, []);
 
   useLayoutEffect(() => {
-    if (moveResultsFocus.current) {
-      moveResultsFocus.current = false;
+    const removedFocus = comparisonFocus.current;
+    comparisonFocus.current = null;
+    if (moveResultsFocus.current || (removedFocus && !removedFocus.isConnected)) {
       resultsHeading.current?.focus();
     }
-  }, [complete, preview]);
+    moveResultsFocus.current = false;
+  }, [complete, preview, comparisonAvailability]);
 
   function showError(code: string, unsaved = false, cleanup = false): void {
     const text = `Analyze failed: ${code}.`;
@@ -125,9 +142,50 @@ export function App(props: AppProps): ReactElement {
     setGuidance(guidanceRef.current);
   }
 
-  function publish(run: CompleteRun | FailedRun): void {
+  function stopComparisonRead(): void {
+    comparisonReadOwner.current = null;
+    stopComparison.current?.();
+    stopComparison.current = null;
+  }
+
+  function refreshComparison(run: CompleteRun): void {
+    stopComparisonRead();
+    if (!run.comparison) return;
+    const token = {};
+    comparisonReadOwner.current = token;
+    // The active run identity survives legitimate downstream aggregate replacement.
+    // The read request validates its captured native evidence and returns metadata only.
+    const request = createComparisonRequest({ run,
+      current: () => mounted.current && comparisonReadOwner.current === token
+        && held.current.complete?.runId === run.runId,
+      readCallback: () => currentProps.current.readComparisonRun,
+      settle: result => {
+        comparisonReadOwner.current = null;
+        stopComparison.current = null;
+        availability.current = result;
+        setComparisonAvailability(result);
+        if (result.status !== 'available') {
+          // Restore only focus whose actual DOM owner disappears in this update.
+          const focused = document.activeElement;
+          comparisonFocus.current = resultsContent.current?.contains(focused) ? focused : null;
+          previewing.current = false;
+          setPreview(false);
+          if (result.status === 'unavailable') setBaselinePreview(null);
+        }
+        const notice = availabilityText(result);
+        if (notice) setAnnouncement(notice);
+      },
+    });
+    stopComparison.current = request.stop;
+    request.start();
+  }
+
+  function publish(run: CompleteRun | FailedRun, completionAnnouncement?: string): void {
     if (run.status === 'completed') {
       if (run.runId !== held.current.complete?.runId) {
+        stopComparisonRead();
+        availability.current = { status: 'unverified' };
+        setComparisonAvailability(availability.current);
         moveResultsFocus.current = !!resultsContent.current?.contains(document.activeElement);
         setSelectedResult(null);
         setReviews({});
@@ -148,7 +206,8 @@ export function App(props: AppProps): ReactElement {
       held.current = { complete: run, failed: null };
       setComplete(run);
       setFailed(null);
-      setAnnouncement(`Analysis completed: ${countText(run.scan.findings.length, 'finding')} and ${countText(run.scan.scannerReviewObservations.length, 'item')} need manual review.`);
+      setAnnouncement(completionAnnouncement ?? `Analysis completed: ${countText(run.scan.findings.length, 'finding')} and ${countText(run.scan.scannerReviewObservations.length, 'item')} need manual review.`);
+      if (run.comparison) refreshComparison(run);
       return;
     }
 
@@ -162,6 +221,7 @@ export function App(props: AppProps): ReactElement {
     const known = held.current;
     held.current = { complete: known.complete, failed: null };
     reservation.current = token;
+    stopComparisonRead();
     setBusy(true);
     setError(null);
     setFailed(null);
@@ -187,6 +247,7 @@ export function App(props: AppProps): ReactElement {
           setBaselinePreview(null);
           setRescan(null);
           setSubmittedRescan(null);
+          setCompletedComparisonFeedback(null);
         }
         publish(run);
       }
@@ -386,6 +447,7 @@ export function App(props: AppProps): ReactElement {
 
   function rescanBlocked(): boolean {
     return !mounted.current || previewing.current || operationIsReserved()
+      || (!!held.current.complete?.comparison && availability.current.status !== 'available')
       || Object.values(guidanceRef.current).some(state => state.cleanup)
       || Object.values(generationRef.current).some(state => state.status === 'unknown'
         || (state.status === 'settled' && !state.outcome.ok && state.outcome.cleanupFailed));
@@ -396,6 +458,7 @@ export function App(props: AppProps): ReactElement {
     if (rescanBlocked() || !run || run.runId !== baselineRunId
         || !run.scan.findings.some(finding => finding.findingId === findingId)) return;
     const token = {};
+    stopComparisonRead();
     reservation.current = token;
     rescanOwner.current = true;
     setRescanLocked(true);
@@ -407,6 +470,7 @@ export function App(props: AppProps): ReactElement {
     const pending: RescanPresentation = { status: 'pending' };
     setSubmittedRescan({ baselineRunId, findingId, mode });
     setRescan(pending);
+    setCompletedComparisonFeedback(null);
     setAnnouncement(rescanAnnouncement(pending));
     let runId: string;
     try {
@@ -431,7 +495,8 @@ export function App(props: AppProps): ReactElement {
         reservation.current = null;
         stopRescan.current = null;
         setBusy(false);
-        const retained = result.status === 'unknown' || (result.status === 'refused' && !result.released);
+        const retained = result.status === 'unknown' || (result.status === 'refused' && !result.released)
+          || (result.status === 'completed' && !!result.comparisonFailure && !result.comparisonFailure.released);
         rescanOwner.current = retained;
         setRescanLocked(retained);
         if (!retained) setSubmittedRescan(null);
@@ -452,7 +517,10 @@ export function App(props: AppProps): ReactElement {
         setBaselinePreview(captured);
         previewing.current = false;
         setPreview(false);
-        publish(result.run);
+        const feedback = comparisonFeedback(result);
+        setCompletedComparisonFeedback(result.comparisonFailure ? feedback : null);
+        // Finalize this settlement before the reader can settle or start a newer operation.
+        publish(result.run, feedback);
       },
     });
     stopRescan.current = request.stop;
@@ -461,11 +529,13 @@ export function App(props: AppProps): ReactElement {
 
   function navigatePreview(show: boolean): void {
     if (!baselinePreview) return;
+    if (show && held.current.complete?.comparison && availability.current.status !== 'available') return;
     previewing.current = show;
     if (show) setPreviewSelection(baselinePreview.selection);
     moveResultsFocus.current = true;
     setPreview(show);
     setAnnouncement(show ? baselineNotice : 'Later results.');
+    if (held.current.complete?.comparison) refreshComparison(held.current.complete);
   }
 
   function takeSavedFocus(findingId: string): boolean {
@@ -505,6 +575,7 @@ export function App(props: AppProps): ReactElement {
   const capability = !props.analyze ? 'Analyze is unavailable in this build; service integration is pending.' : '';
   const displayedRun = preview && baselinePreview ? baselinePreview.run : complete ?? failed;
   const failedIsDisplayed = displayedRun?.status === 'failed';
+  const verifiedPreview = !complete?.comparison || comparisonAvailability.status === 'available';
 
   return <main>
     <AnalyzeSection available={!!props.analyze} busy={busy || reviewLocked || rescanLocked} capability={capability}
@@ -513,11 +584,14 @@ export function App(props: AppProps): ReactElement {
       onAnalyze={analyze} onAnnounce={setAnnouncement} />
     {displayedRun && <ResultsSection run={displayedRun}
       selectedResult={preview ? previewSelection : selectedResult} readOnly={preview}
-      navigation={baselinePreview && <div className="rescan-navigation">
+      comparison={{ availability: comparisonAvailability, baseline: verifiedPreview ? baselinePreview?.run : undefined }}
+      navigation={baselinePreview && verifiedPreview && <div className="rescan-navigation">
         {preview && <p>{baselineNotice}</p>}
         <button type="button" onClick={() => navigatePreview(!preview)}>{preview ? 'Return to later results' : 'Return to baseline'}</button>
       </div>}
       rescan={{ blocked: rescanBlocked(), presentation: rescan, onAnnounce: setAnnouncement,
+        comparisonFeedback: completedComparisonFeedback,
+        blockedReason: complete?.comparison ? availabilityText(comparisonAvailability) : null,
         submitted: submittedRescan?.baselineRunId === displayedRun.runId ? submittedRescan : null,
         onSubmit: (findingId, mode) => { if (displayedRun.status === 'completed') rescanFinding(displayedRun.runId, findingId, mode); } }}
       failure={failedIsDisplayed ? error : null}

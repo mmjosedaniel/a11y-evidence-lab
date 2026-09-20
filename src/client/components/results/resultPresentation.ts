@@ -1,8 +1,9 @@
 import type { Finding, ScannerReviewObservation } from '../../../server/domain/run-contract.ts';
+import type { Locator, RuleDetails } from '../../../server/domain/run-contract/run-types.ts';
 import { finalReviewStatus, generationStatus } from './FindingGeneration.tsx';
 import type { GenerationPresentation } from './FindingGeneration.tsx';
 
-export type EvidenceItem = Finding | ScannerReviewObservation;
+export type EvidenceItem = RuleDetails & { readonly locator: Locator };
 export type RuleId = Finding['ruleId'];
 
 export type ResultSelection =

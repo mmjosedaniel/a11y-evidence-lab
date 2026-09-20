@@ -224,3 +224,17 @@ dd { margin: 0; }
 .intentional-rescan select { display: block; width: 100%; max-width: 24rem; font: inherit; color: #172033; background: #fff; border: 1px solid #68768b; border-radius: 0.375rem; min-height: 2.75rem; padding: 0.625rem 0.75rem; margin-bottom: 1rem; }
 .intentional-rescan select:disabled { background: #eef2f6; }
 .rescan-status, .rescan-navigation { margin-bottom: 1rem; }
+
+.comparison-detail { margin-top: 2rem; border-top: 1px solid #c8d1dc; padding-top: 1.25rem; }
+.comparison-detail > h3 { margin-top: 0; }
+.comparison-evidence { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem; }
+.comparison-detail h5 { font-size: 1rem; margin: 1rem 0 0.5rem; }
+.comparison-detail dd, .comparison-detail p, .comparison-detail li { overflow-wrap: anywhere; white-space: pre-wrap; }
+.comparison-context { margin-top: 1.5rem; }
+.comparison-proposal p:last-child { margin-bottom: 0; }
+@media (max-width: 48rem) {
+  .comparison-evidence { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+  .comparison-detail .evidence-facts > div, .comparison-detail .evidence-context > div {
+    grid-template-columns: minmax(0, 1fr); gap: 0.125rem;
+  }
+}

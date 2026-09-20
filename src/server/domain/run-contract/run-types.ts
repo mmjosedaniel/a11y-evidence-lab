@@ -13,6 +13,7 @@ import type { RetrievalResult } from '../../retrieval/retrieval-contract.ts';
 import type { RetrievalErrorCode } from '../../retrieval/retrieval-error.ts';
 import type { FindingAnalysisDecision, GuidanceSupport } from '../finding-analysis-types.ts';
 import type { ReviewDecision } from '../review-contract.ts';
+import type { StoredComparison } from './comparison-types.ts';
 
 export type DeepReadonly<T> = T extends object
   ? { readonly [K in keyof T]: DeepReadonly<T[K]> }
@@ -172,7 +173,7 @@ export type RunContext = {
 export type PageAnalysisRun = RunContext & (
   | { readonly status: 'running'; readonly scanContext: ScanContext & { readonly cleanup: 'pending' } }
   | { readonly status: 'failed'; readonly scanContext: ScanContext & { readonly cleanup: 'closed' | 'failed' }; readonly finishedAt: string; readonly failure: { readonly category: FailureCategory } }
-  | { readonly status: 'completed'; readonly finishedAt: string; readonly scan: ScanResult }
+  | { readonly status: 'completed'; readonly finishedAt: string; readonly scan: ScanResult; readonly comparison?: StoredComparison }
 );
 export type ValidationResult<T> =
   | { readonly ok: true; readonly value: DeepReadonly<T> }

@@ -16,6 +16,7 @@ import { completedRun, failedRun, runningRun } from './helpers/m102-run-fixture.
 import { expectedRetrievalResult } from './helpers/m202-retrieval-service-fixture.ts';
 import { generationAdapterHarness } from './helpers/m302-generation-fixture.ts';
 import { withReviewSandbox } from './helpers/m401-review-sandbox.ts';
+import { expectedComparison } from './helpers/m503-comparison-fixture.ts';
 
 mock.module(new URL('../src/server/generation/ollama-generation.ts', import.meta.url).href, {
   namedExports: { createOllamaGenerationAdapter: () => { throw new Error('Rescan invoked Local provider'); } },
@@ -28,6 +29,7 @@ const { receiveRescan } = await import('../src/server/local-service/rescan-api.t
 const { createLoopbackApiServer } = await import('../src/server/local-service/loopback-api.ts');
 
 type RescanFailure = Extract<RescanOutcome, { ok: false }>;
+type HistoricalRescanFailure = Extract<RescanFailure, { run: FailedRun | null }>;
 type RescanService = LocalService & {
   rescanFinding(input: unknown, execute?: RescanExecutor): Promise<RescanOutcome>;
 };
@@ -42,6 +44,15 @@ function intent() {
 }
 function linkedCompleted(): CompletedRun {
   return { ...completedRun('run-rescan', 'groq'), baselineRunId: 'run-baseline' } as CompletedRun;
+}
+function linkedCompared(): CompletedRun {
+  const baseline = completedRun('run-baseline');
+  const later = linkedCompleted();
+  const comparison = expectedComparison({ baselineRun: baseline,
+    baselineFindingId: baseline.scan.findings[0]!.findingId, laterRun: later, candidates: [] });
+  const checked = validateRun({ ...later, comparison });
+  assert.ok(checked.ok && checked.value.status === 'completed');
+  return checked.value;
 }
 function linkedFailed(): FailedRun {
   return { ...failedRun('run-rescan', 'groq'), baselineRunId: 'run-baseline' } as FailedRun;
@@ -68,8 +79,8 @@ function terminalFrom(run: RunningRun): CompletedRun {
   return checked.value as CompletedRun;
 }
 function stored<T>(result: StoreResult<T>): T { assert.ok(result.ok, JSON.stringify(result)); return result.value; }
-function failure(error: RescanFailure['error'], run: FailedRun | null = null, persisted = false,
-  cleanupFailed = false): RescanFailure {
+function failure(error: HistoricalRescanFailure['error'], run: FailedRun | null = null, persisted = false,
+  cleanupFailed = false): HistoricalRescanFailure {
   return { ok: false, error, run, persisted, cleanupFailed };
 }
 function invalidRequest() { return failure('invalid-request'); }
@@ -233,7 +244,7 @@ test('checks monotonic expiry and owns one dispatch despite later disconnect', s
   let now = 0;
   t.mock.method(performance, 'now', () => now);
   let calls = 0;
-  const execute = async (): Promise<RescanOutcome> => { calls++; return { ok: true, run: linkedCompleted() }; };
+  const execute = async (): Promise<RescanOutcome> => { calls++; return { ok: true, run: linkedCompared() }; };
   const delayed = direct(undefined, execute);
   now = 30001;
   Object.defineProperty(delayed.request, 'complete', { value: true, writable: true });
@@ -247,14 +258,14 @@ test('checks monotonic expiry and owns one dispatch despite later disconnect', s
   await new Promise<void>(resolve => setImmediate(resolve));
   dispatched.request.emit('aborted');
   dispatched.request.emit('close');
-  finish({ ok: true, run: linkedCompleted() });
-  assert.deepEqual(await dispatched.response, { status: 200, body: { ok: true, run: linkedCompleted() } });
+  finish({ ok: true, run: linkedCompared() });
+  assert.deepEqual(await dispatched.response, { status: 200, body: { ok: true, run: linkedCompared() } });
   assert.equal(dispatched.replies.length, 1);
   assert.equal(calls, 1);
 });
 
 test('maps every closed service outcome and bounds rejected or malformed results as unknown', serial, async () => {
-  const success = { ok: true as const, run: linkedCompleted() };
+  const success = { ok: true as const, run: linkedCompared() };
   assert.deepEqual(await direct(JSON.stringify(intent()), async () => success).response,
     { status: 200, body: success });
   const mappings = [
@@ -280,11 +291,37 @@ test('maps every closed service outcome and bounds rejected or malformed results
     assert.deepEqual(await direct(JSON.stringify(intent()), async () => shutdown).response,
       { status: 503, body: shutdown });
   }
+  const precreationLineage = {
+    ok: false as const, error: 'comparison-lineage' as const, run: null,
+    persisted: false, cleanupFailed: false,
+  };
+  assert.deepEqual(await direct(JSON.stringify(intent()), async () => precreationLineage as RescanOutcome).response,
+    { status: 409, body: precreationLineage });
+  const completed = linkedCompleted();
+  for (const [status, error, cleanupFailed] of [
+    [500, 'comparison-calculation', false],
+    [409, 'comparison-lineage', false],
+    [500, 'comparison-persistence', false],
+    [500, 'comparison-persistence', true],
+    [409, 'comparison-aborted', false],
+    [503, 'comparison-shutdown', false],
+    [503, 'comparison-shutdown', true],
+  ] as const) {
+    const outcome = { ok: false as const, error, run: completed, persisted: true,
+      comparisonPersisted: false as const, cleanupFailed };
+    assert.deepEqual(await direct(JSON.stringify(intent()), async () => outcome as unknown as RescanOutcome).response,
+      { status, body: outcome });
+  }
   const unknown = { ok: false, error: 'rescan-outcome-unknown' };
   for (const execute of [
     async () => { throw new Error('SYNTHETIC_CALLBACK_SECRET'); },
     async () => null as never,
     async () => ({ ok: true }) as never,
+    async () => ({ ok: true, run: linkedCompleted() }) as never,
+    async () => ({ ok: false, error: 'comparison-persistence', run: linkedCompleted(), persisted: true,
+      cleanupFailed: false }) as never,
+    async () => ({ ok: false, error: 'comparison-lineage', run: null, persisted: false,
+      comparisonPersisted: false, cleanupFailed: false }) as never,
     async () => failure('not-found', linkedFailed(), false, false),
     async () => failure('busy', null, true, false),
     async () => failure('scan-failed', null, false, true),

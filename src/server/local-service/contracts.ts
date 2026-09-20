@@ -5,8 +5,15 @@ import type { CompletedRun, FailedRun, RunningRun } from '../persistence/run-rep
 import type { RetrievalErrorCode } from '../retrieval/retrieval-error.ts';
 import type { FindingGuidanceView } from '../domain/finding-analysis-types.ts';
 
+export type ComparisonLineage = { readonly status: 'available' }
+  | { readonly status: 'unavailable'; readonly reason: 'not-found' | 'invalid-run'
+      | 'read-failed' | 'stored-run-unavailable' | 'baseline-mismatch' };
+export type ComparisonFailure = { ok: false; error: 'comparison-calculation' | 'comparison-lineage'
+  | 'comparison-persistence' | 'comparison-aborted' | 'comparison-shutdown';
+  run: CompletedRun; persisted: true; comparisonPersisted: false; cleanupFailed: boolean };
+
 export type ReadResult =
-  | { ok: true; run: PageAnalysisRun; interrupted: boolean }
+  | { ok: true; run: PageAnalysisRun; interrupted: boolean; comparisonLineage?: ComparisonLineage }
   | { ok: false; error: 'invalid-id' | 'busy' | 'stopping' | 'not-found'
       | 'invalid-run' | 'stored-run-unavailable' | 'read-failed' };
 
@@ -16,7 +23,7 @@ export type ScanOutcome =
       | 'scan-failed' | 'result-validation' | 'initial-persistence' | 'shutdown';
       run: FailedRun | null; persisted: boolean; cleanupFailed: boolean };
 
-export type RescanOutcome = ScanOutcome | { ok: false; error: 'not-found' | 'not-eligible'
+export type RescanOutcome = ScanOutcome | ComparisonFailure | { ok: false; error: 'not-found' | 'not-eligible' | 'comparison-lineage'
   | 'invalid-run' | 'stored-run-unavailable' | 'read-failed';
   run: FailedRun | null; persisted: boolean; cleanupFailed: boolean };
 export type RescanExecutor = (run: RunningRun, signal: AbortSignal, selectedRule: NativeRule) => Promise<unknown>;

@@ -33,6 +33,14 @@ import {
   reviewDecidedAt,
   reviewedRun,
 } from './helpers/m401-review-fixture.ts';
+import {
+  comparisonRun,
+  comparisonScenario,
+  contrastComparisonRun,
+  mutate as mutateComparison,
+  remove as removeComparison,
+  type ComparisonBranch,
+} from './helpers/m503-comparison-fixture.ts';
 
 // M101-CONTRACT-01: synthetic records prove the frozen L1 contract only.
 // They do not prove native capture, DOM correspondence, persistence, or provider execution.
@@ -1549,4 +1557,189 @@ test('reviewed Findings reject unknown, input-only, action-inapplicable and inva
   };
   invalid.push(reasonOnSupporting);
   for (const run of invalid) rejectRun(run);
+});
+
+const comparisonBranches: readonly ComparisonBranch[] = [
+  'not-comparable', 'baseline-locator-unavailable', 'ambiguous', 'later-locator-unavailable',
+  'no-exact-match', 'unique-violation', 'unique-incomplete', 'unique-pass',
+];
+
+test('historical completed runs remain valid without a comparison', () => {
+  accept(validateRun, completeRun());
+});
+
+for (const branch of comparisonBranches) {
+  test(`closed durable ${branch} comparison round trips`, () => {
+    const submitted = comparisonRun(branch);
+    const before = structuredClone(submitted);
+    const accepted = accept(validateRun, submitted) as RecordValue;
+    assert.deepEqual(submitted, before);
+    assert.notStrictEqual(accepted, submitted);
+    assert.deepEqual(accept(validateRun, JSON.parse(JSON.stringify(accepted))), accepted);
+    assert.equal(Object.isFrozen(accepted), true);
+    assert.equal(Object.isFrozen(accepted.comparison), true);
+  });
+}
+
+test('durable comparison is limited to a linked completed run and every nested object is closed', () => {
+  const valid = comparisonRun();
+  for (const candidate of [
+    { ...structuredClone(valid), baselineRunId: undefined },
+    (() => { const value = structuredClone(valid); delete value.baselineRunId; return value; })(),
+    { ...runningRun(), baselineRunId: 'baseline-run', comparison: structuredClone(valid.comparison) },
+    { ...failedRun(), baselineRunId: 'baseline-run', comparison: structuredClone(valid.comparison) },
+    mutateComparison(valid, ['comparison'], null),
+    mutateComparison(valid, ['comparison'], []),
+    mutateComparison(valid, ['comparison', 'unexpected'], secret),
+    mutateComparison(valid, ['comparison', 'baseline', 'unexpected'], secret),
+    mutateComparison(valid, ['comparison', 'baseline', 'observation', 'findingId'], 'duplicated-parent-field'),
+    mutateComparison(valid, ['comparison', 'baseline', 'scanContext', 'rawHtml'], secret),
+  ]) rejectRun(candidate);
+
+  for (const key of ['baseline', 'rationale', 'limitations', 'followUp', 'pair', 'match', 'after', 'outcome', 'reason']) {
+    rejectRun(removeComparison(valid, ['comparison', key]));
+  }
+  const accessor = comparisonRun();
+  let getterCalls = 0;
+  Object.defineProperty(accessor.comparison as object, 'pair', {
+    enumerable: true, get() { getterCalls++; return 'comparable'; },
+  });
+  rejectRun(accessor);
+  assert.equal(getterCalls, 0);
+});
+
+test('durable comparison rejects noncanonical policy values, malformed delta and contradictory branch fields', () => {
+  const unique = comparisonRun('unique-violation');
+  const mismatch = comparisonRun('not-comparable');
+  const contrast = contrastComparisonRun('improved');
+  const delta = ((contrast.comparison as RecordValue).delta as RecordValue);
+  for (const candidate of [
+    mutateComparison(unique, ['comparison', 'rationale'], 'A plausible but noncanonical explanation.'),
+    mutateComparison(unique, ['comparison', 'limitations'], ['A different limitation.']),
+    mutateComparison(unique, ['comparison', 'followUp'], 'A different follow-up.'),
+    mutateComparison(unique, ['comparison', 'outcome'], 'resolved'),
+    mutateComparison(unique, ['comparison', 'reason'], 'native-pass'),
+    mutateComparison(contrast, ['comparison', 'delta', 'baselineMargin'], Number.NaN),
+    mutateComparison(contrast, ['comparison', 'delta', 'laterMargin'], Number.POSITIVE_INFINITY),
+    mutateComparison(contrast, ['comparison', 'delta', 'change'], -0),
+    mutateComparison(contrast, ['comparison', 'delta', 'change'], (delta.change as number) + 0.25),
+    mutateComparison(mismatch, ['comparison', 'mismatches'], ['locale', 'requested-url']),
+    mutateComparison(mismatch, ['comparison', 'after'], comparisonScenario().comparison.after),
+    mutateComparison(comparisonRun('ambiguous'), ['comparison', 'after'], comparisonScenario().comparison.after),
+    mutateComparison(comparisonRun('unique-pass'), ['comparison', 'after', 'findingId'], 'invented-pass-id'),
+  ]) rejectRun(candidate);
+});
+
+for (const direction of ['improved', 'persistent', 'regressed'] as const) {
+  test(`durable contrast ${direction} comparison retains its exact finite delta`, () => {
+    const run = contrastComparisonRun(direction);
+    const comparison = run.comparison as RecordValue;
+    const delta = comparison.delta as RecordValue;
+    assert.equal(Number.isFinite(delta.baselineMargin as number), true);
+    assert.equal(Number.isFinite(delta.laterMargin as number), true);
+    assert.equal(Number.isFinite(delta.change as number), true);
+    assert.equal(Object.is(delta.change, -0), false);
+    accept(validateRun, run);
+  });
+}
+
+test('durable snapshots retain only native baseline evidence and bind after evidence without an invented identity', () => {
+  const violation = comparisonRun('unique-violation');
+  const comparison = violation.comparison as RecordValue;
+  const baseline = comparison.baseline as RecordValue;
+  const baselineObservation = baseline.observation as RecordValue;
+  const after = comparison.after as RecordValue;
+  const laterFinding = ((violation.scan as RecordValue).findings as RecordValue[])[0]!;
+  assert.deepEqual(Object.keys(baselineObservation).sort(),
+    ['checks', 'evidence', 'locator', 'nativeResult', 'ruleId']);
+  assert.equal(Object.hasOwn(baselineObservation, 'findingId'), false);
+  assert.equal(Object.hasOwn(baselineObservation, 'state'), false);
+  assert.deepEqual((after.observation as RecordValue), {
+    ruleId: laterFinding.ruleId, nativeResult: laterFinding.nativeResult,
+    checks: laterFinding.checks, locator: laterFinding.locator, evidence: laterFinding.evidence,
+  });
+  assert.equal(after.findingId, laterFinding.findingId);
+
+  const pass = (comparisonRun('unique-pass').comparison as RecordValue).after as RecordValue;
+  assert.deepEqual(Object.keys(pass).sort(), ['kind', 'observation']);
+  assert.equal(Object.hasOwn(pass.observation as object, 'findingId'), false);
+  accept(validateRun, violation);
+});
+
+for (const [name, input] of [
+  ['no-exact permits unrelated pass counts', (() => {
+    const run = comparisonRun('no-exact-match');
+    Object.assign((((run.scan as RecordValue).coverage as RecordValue)['image-alt'] as RecordValue),
+      { passes: 1, inapplicable: null });
+    return run;
+  })()],
+  ['ambiguous accepts one exact retained item plus one discarded pass', (() => {
+    const run = comparisonRun('unique-violation');
+    Object.assign((((run.scan as RecordValue).coverage as RecordValue)['image-alt'] as RecordValue),
+      { passes: 1 });
+    run.comparison = structuredClone(comparisonScenario('ambiguous').comparison);
+    return run;
+  })()],
+  ['ambiguous takes precedence with two exact and one unavailable item', comparisonRun('ambiguous')],
+] as const) {
+  test(`D7 positive: ${name}`, () => {
+    accept(validateRun, input);
+  });
+}
+
+test('D7 durable match admission counts both native collections without deduplication', () => {
+  const ambiguous = comparisonRun('ambiguous');
+  const ambiguousFindings = ((ambiguous.scan as RecordValue).findings as RecordValue[]);
+  ambiguousFindings.splice(1, 1);
+  (((ambiguous.scan as RecordValue).coverage as RecordValue)['image-alt'] as RecordValue).violations = 1;
+
+  const laterUnavailable = comparisonRun('later-locator-unavailable');
+  for (const source of [
+    ...((laterUnavailable.scan as RecordValue).findings as RecordValue[]),
+    ...((laterUnavailable.scan as RecordValue).scannerReviewObservations as RecordValue[]),
+  ]) source.locator = { value: ':root > :nth-child(9)' };
+
+  const noExact = comparisonRun('no-exact-match');
+  (noExact.scan as RecordValue).scannerReviewObservations = [
+    structuredClone(comparisonScenario('unique-incomplete').laterRun.scan.scannerReviewObservations[0]),
+  ];
+  (((noExact.scan as RecordValue).coverage as RecordValue)['image-alt'] as RecordValue).incomplete = 1;
+
+  const duplicateViolation = comparisonRun('unique-violation');
+  const duplicateFindings = (duplicateViolation.scan as RecordValue).findings as RecordValue[];
+  duplicateFindings.push({ ...structuredClone(duplicateFindings[0]!), findingId: 'finding-duplicate' });
+  (((duplicateViolation.scan as RecordValue).coverage as RecordValue)['image-alt'] as RecordValue).violations = 2;
+
+  const mixedUnique = comparisonRun('unique-incomplete');
+  const source = comparisonScenario('unique-violation').laterRun.scan.findings[0]!;
+  (mixedUnique.scan as RecordValue).findings = [structuredClone(source)];
+  (((mixedUnique.scan as RecordValue).coverage as RecordValue)['image-alt'] as RecordValue).violations = 1;
+
+  const passWithoutCount = comparisonRun('unique-pass');
+  Object.assign((((passWithoutCount.scan as RecordValue).coverage as RecordValue)['image-alt'] as RecordValue),
+    { passes: null, inapplicable: 0 });
+
+  const availableBaseline = mutateComparison(comparisonRun('baseline-locator-unavailable'),
+    ['comparison', 'baseline', 'observation', 'locator'], { value: ':root > :nth-child(1)' });
+  const wrongBinding = mutateComparison(comparisonRun('unique-violation'),
+    ['comparison', 'after', 'findingId'], 'finding-elsewhere');
+
+  const exactTwoAsUnavailable = comparisonRun('ambiguous');
+  exactTwoAsUnavailable.comparison = structuredClone(comparisonScenario('later-locator-unavailable').comparison);
+
+  const exactAndUnavailableAsUnique = comparisonRun('unique-violation');
+  const unavailableObservation = structuredClone(
+    comparisonScenario('later-locator-unavailable').laterRun.scan.scannerReviewObservations[0]!,
+  );
+  (exactAndUnavailableAsUnique.scan as RecordValue).scannerReviewObservations = [unavailableObservation];
+  (((exactAndUnavailableAsUnique.scan as RecordValue).coverage as RecordValue)['image-alt'] as RecordValue)
+    .incomplete = 1;
+
+  for (const candidate of [
+    ambiguous, laterUnavailable, noExact, duplicateViolation, mixedUnique,
+    passWithoutCount, availableBaseline, wrongBinding, exactTwoAsUnavailable, exactAndUnavailableAsUnique,
+  ]) {
+    accept(validateRun, removeComparison(candidate, ['comparison']));
+    rejectRun(candidate);
+  }
 });

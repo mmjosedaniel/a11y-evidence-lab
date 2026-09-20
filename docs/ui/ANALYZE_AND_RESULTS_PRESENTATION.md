@@ -1,8 +1,8 @@
 # Analyze and results presentation
 
 - **Status:** Accepted and implemented M1-04 presentation contract through OD-027
-- **Last reviewed:** 2026-09-16
-- **Scope:** Analysis input and deterministic scan results, with the M2-03 guidance, M3-05 generation, M4-02 review and M5-01 intentional-rescan extensions below. Each task's verification remains in its owning plan.
+- **Last reviewed:** 2026-09-20
+- **Scope:** Analysis input and deterministic scan results, with the implemented M2-03 guidance, M3-05 generation, M4-02 review, M5-01 intentional-rescan and M5-03 comparison extensions below. M5-03 UI and integrated verification are accepted; its completed plan records the evidence and limits.
 
 ## Document role
 
@@ -294,9 +294,23 @@ The baseline evidence and current selection remain inspectable during pending, r
 
 Active operations and uncertain review/rescan publication block competing mutations. Generation uncertainty prevents rescan while preserving the existing independently submitted Analyze behavior. A known settled historical owner alone does not disqualify a Finding. Successful publication opens the independent later run, including a valid zero result, and retires prior transient capabilities without changing baseline evidence. Focus moves to Results only when the outgoing Results contained focus.
 
-**Return to baseline** shows one captured read-only baseline snapshot; **Return to later results** shows the same active later workflow. Both controls focus Results and announce navigation. Preview has separate selection, no mutation controls or service action, and no present-tense claim that historical operations still reserve the service. It preserves visible evidence, invocation and unsaved-result information. Later operations may settle while preview is visible; navigation neither cancels them nor restores historical capabilities. Another successful rescan replaces the immediate pair; successful independent Analyze clears it.
+**Return to baseline** shows one captured read-only baseline snapshot; **Return to later results** shows the same active later workflow. Both controls focus Results and announce navigation. Preview has separate selection, no mutation controls, and no present-tense claim that historical operations still reserve the service. M5-01 navigation performs no service action; the M5-03 extension below adds an availability read for saved comparisons. Preview preserves visible evidence, invocation and unsaved-result information. Later operations may settle while preview is visible; navigation neither cancels them nor restores historical capabilities. Another successful rescan replaces the immediate pair; successful independent Analyze clears it.
 
 The [M5-01 plan](../plans/completed/m5-01-intentional-rescan.md) owns verification: desktop 1366x900 and narrow 390x844 ready, pending, error and complete views, keyboard activation, visible focus, shared announcements, axe and overflow checks. No 200% or spoken screen-reader verification is claimed. Comparison outcomes, history browsing and reopening retained runs remain outside this extension.
+
+## M5-03 saved comparison
+
+This Accepted extension implements REQ-COMP-004–008 and the source distinctions in REQ-UX-002/004. The [accepted UI evidence](../plans/completed/m5-03-comparison-persistence-and-ui.md#m503-c-review-02--presentation-slice-accepted) records browser, visual and independent-review verification; integrated task status remains in the owning plan.
+
+Present a named **Comparison** region in the later run's Results independently of Finding selection, including when the completed later scan has zero Findings. Show bounded baseline/later references, pair comparability, applicable target-match disposition, **Before** and **After** deterministic evidence, the canonical outcome, rationale, limitations and non-blocking follow-up. Explain unavailable after-evidence without inventing a target. Label a uniquely retained pass **Native pass observation**; it is not a Finding. Contrast differences describe target evidence, not a page score.
+
+When current immediate-baseline context is verified and available, distinguish **AI original proposal**, **Human-edited proposal** and **Human decision**. These optional layers provide context; they do not determine comparison, and no human work is copied into its durable artifact.
+
+Keep completed scan results visible when comparison calculation or saving fails. Use the bounded feedback in the [accepted comparison contract](../plans/completed/m5-03-comparison-persistence-and-ui.md#m503-g-literals--primary-decision-artifact), and never announce an unsaved result as saved. An unknown transport outcome retains the existing warning and operation lock.
+
+Refresh baseline availability when inspecting comparison and on explicit **Return to baseline** or **Return to later results** navigation. Failed or missing verification disables new comparison and withholds baseline preview/context. Unavailable lineage retains the saved minimized comparison with its visible limitation, clears stale preview/context, and prohibits new comparison from that broken lineage. Readback supplies availability only; it cannot replace current human work or restore a consumed capability.
+
+Use the existing shared announcement region. Availability settlement does not move focus; explicit return navigation retains predictable Results focus. Preserve existing focus restoration when replacement removes the focused Results element. Keep source labels, outcomes, limitations and focus visible through text and semantics, independent of color. Lay out the comparison readably at desktop and narrow widths, wrapping full evidence values. Desktop/narrow browser checks remain required; all 200% zoom testing remains Deferred, and no screen-reader speech is implied.
 
 ## Manual-review evidence
 
@@ -360,6 +374,8 @@ The following data must not appear in the provider-independent scan interface. T
 - duplicate complete-coverage tables.
 
 Removing these elements from the visible UI does not authorize deleting them from `run.json`, validators, tests of canonical completeness, or future diagnostic tooling.
+
+The M5-03 comparison region is a bounded exception for its required before/later references, relevant provenance and explicit native-pass distinction. It does not restore the omitted metadata throughout the ordinary Results overview.
 
 ## Responsive behavior
 
@@ -435,7 +451,7 @@ Results
 
 The original Analyze/Results contract does not add a score, dashboard, chart, filter, sort, search, bulk action, page preview, code editor, remediation action, provider call, run history, Run ID entry, deep link, reload restoration, settings page, model manager, export, dark theme, or new dependency.
 
-The M2-03 extension defines retrieved guidance and abstention presentation. M3-05 adds bounded generation and proposal presentation, M4-02 adds individual review, and M5-01 adds intentional rescan and immediate read-only baseline navigation above. Comparison remains later roadmap work and must reuse the evidence-first hierarchy.
+The M2-03 extension defines retrieved guidance and abstention presentation. M3-05 adds bounded generation and proposal presentation, M4-02 adds individual review, M5-01 adds intentional rescan and immediate read-only baseline navigation, and the Accepted M5-03 extension adds saved comparison within the same evidence-first hierarchy. Each owning plan controls implementation status and verification.
 
 ## Related guidance
 

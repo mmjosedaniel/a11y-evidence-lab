@@ -9,6 +9,7 @@ import { selectedFinding } from './helpers/m202-retrieval-service-fixture.ts';
 import { proposalGenerationRun } from './helpers/m302-generation-fixture.ts';
 import { reviewedRun, type ReviewAction } from './helpers/m401-review-fixture.ts';
 import { withReviewSandbox } from './helpers/m401-review-sandbox.ts';
+import { mutate as mutateComparison, remove as removeComparison, withComparison } from './helpers/m503-comparison-fixture.ts';
 
 const options = { concurrency: false };
 type ReviewRepository = RunRepository & {
@@ -190,5 +191,27 @@ test('successful review rename is the commit point and no later filesystem obser
       t.mock.restoreAll();
     }
     assert.deepEqual(success(open(runs).read('run-01')), reviewedRun('approve'));
+  });
+});
+
+test('review publication preserves a saved comparison while changing only the selected Finding review state', options, async () => {
+  await withReviewSandbox('repository', ({ runs }) => {
+    const pending = writeSyntheticRun(runs, { ...proposalGenerationRun(), baselineRunId: 'baseline-run' });
+    const store = open(runs) as ReviewRepository & {
+      updateComparison(expected: CompletedRun, input: unknown): StoreResult<CompletedRun>;
+    };
+    const compared = success(store.updateComparison(pending, withComparison(pending)));
+    const reviewed = withComparison({ ...reviewedRun('approve'), baselineRunId: 'baseline-run' });
+    const committed = bytes(runs);
+    const changed = mutateComparison(reviewed,
+      ['comparison', 'baseline', 'findingId'], 'finding-changed');
+    assert.ok(validateRun(changed).ok);
+    failure(store.updateReview(compared, removeComparison(reviewed, ['comparison'])), 'invalid-transition');
+    failure(store.updateReview(compared, changed), 'invalid-transition');
+    assert.deepEqual(bytes(runs), committed);
+    const durable = success(store.updateReview(compared, reviewed));
+    assert.deepEqual((durable as unknown as Record<string, unknown>).comparison,
+      (compared as unknown as Record<string, unknown>).comparison);
+    assert.deepEqual(success(open(runs).read('run-01')), durable);
   });
 });

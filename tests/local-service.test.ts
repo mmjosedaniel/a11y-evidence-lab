@@ -15,6 +15,7 @@ import type { RunningRun, CompletedRun, FailedRun, RunRepository, StoreResult } 
 import { validateRun } from '../src/server/domain/run-contract.ts';
 import { runningRun, completedRun } from './helpers/m102-run-fixture.ts';
 import type { FixtureMode, FixtureScan } from './helpers/m102-run-fixture.ts';
+import { comparisonScenario } from './helpers/m503-comparison-fixture.ts';
 
 // M102-SERVICE-01: real HTTP and disk; synthetic internal collaborators only.
 const repo = fileURLToPath(new URL('../', import.meta.url));
@@ -87,6 +88,19 @@ function success<T>(result: StoreResult<T>): T { assert.ok(result.ok); return re
 function open(root: string): RunRepository { return success(openRunRepository(root)); }
 function disk(root: string, id: string): unknown { return JSON.parse(fs.readFileSync(path.join(root, id, 'run.json'), 'utf8')); }
 function bytes(root: string, id: string): Buffer { return fs.readFileSync(path.join(root, id, 'run.json')); }
+function seedComparedPair(root: string): { baseline: CompletedRun; later: CompletedRun } {
+  const repository = open(root);
+  const scenario = comparisonScenario();
+  success(repository.create(runningRun(scenario.baselineRun.runId)));
+  const baseline = success(repository.finish(scenario.baselineRun)) as CompletedRun;
+  const linked = validateRun({ ...runningRun(scenario.laterRun.runId), baselineRunId: baseline.runId });
+  assert.ok(linked.ok && linked.value.status === 'running');
+  success(repository.create(linked.value));
+  const completed = success(repository.finish(scenario.laterRun)) as CompletedRun;
+  const later = success(repository.updateComparison(completed,
+    { ...completed, comparison: scenario.comparison })) as CompletedRun;
+  return { baseline, later };
+}
 async function start(box: Sandbox, extra: Partial<ServiceOptions> = {}): Promise<LocalService> {
   const result: StartResult = await startLocalService({ runRoot: box.runs, applicationRevision: revision, ...extra });
   assert.ok(result.ok);
@@ -311,6 +325,62 @@ test('reads revalidate disk, distinguish terminal state and map failures without
     finally { fs.readFileSync = original; }
     assert.deepEqual(bytes(box.runs, 'complete'), Buffer.from(JSON.stringify(completedRun('complete'), null, 2) + '\n'));
   });
+});
+
+test('comparison reads independently preserve the saved later run and report exact immediate-lineage availability', serial, async () => {
+  await withSandbox(async box => {
+    const { later } = seedComparedPair(box.runs);
+    const service = await start(box);
+    const expected = { ok: true as const, run: later, interrupted: false,
+      comparisonLineage: { status: 'available' as const } };
+    assert.deepEqual(service.readRun(later.runId), expected);
+    assert.deepEqual((await get(service.url, `/api/runs/${later.runId}`)).body, expected);
+    const repository = open(box.runs);
+    success(repository.create(runningRun('historical-complete')));
+    const historical = success(repository.finish(completedRun('historical-complete'))) as CompletedRun;
+    const historicalRead = service.readRun(historical.runId);
+    assert.ok(historicalRead.ok);
+    assert.equal(Object.hasOwn(historicalRead, 'comparisonLineage'), false);
+  });
+
+  for (const reason of ['not-found', 'invalid-run', 'stored-run-unavailable', 'baseline-mismatch', 'read-failed'] as const) {
+    await withSandbox(async box => {
+      const { baseline, later } = seedComparedPair(box.runs);
+      const baselineFile = path.join(box.runs, baseline.runId, 'run.json');
+      if (reason === 'not-found') {
+        const source = path.resolve(path.dirname(baselineFile));
+        const hidden = path.resolve(box.runs, 'owned-not-found-baseline');
+        assert.equal(path.dirname(source), path.resolve(box.runs));
+        assert.equal(path.dirname(hidden), path.resolve(box.runs));
+        assert.equal(fs.existsSync(hidden), false);
+        const sourceStat = fs.lstatSync(source);
+        assert.ok(sourceStat.isDirectory() && !sourceStat.isSymbolicLink());
+        fs.renameSync(source, hidden);
+      }
+      else if (reason === 'invalid-run') {
+        fs.writeFileSync(baselineFile, JSON.stringify({ ...baseline, unexpected: true }, null, 2) + '\n');
+      } else if (reason === 'stored-run-unavailable') {
+        fs.writeFileSync(baselineFile, JSON.stringify({ ...baseline, runId: 'other-run' }, null, 2) + '\n');
+      } else if (reason === 'baseline-mismatch') {
+        const mismatched = validateRun({ ...baseline, requestedUrl: 'https://mismatch.example/' });
+        assert.ok(mismatched.ok && mismatched.value.status === 'completed');
+        fs.writeFileSync(baselineFile, JSON.stringify(mismatched.value, null, 2) + '\n');
+      }
+      const service = await start(box);
+      const originalRead = fs.readFileSync;
+      if (reason === 'read-failed') fs.readFileSync = ((...args: Parameters<typeof fs.readFileSync>) => {
+        if (String(args[0]) === baselineFile) throw new Error('CONTROLLED_COMPARISON_BASELINE_READ_FAILURE');
+        return originalRead(...args);
+      }) as typeof fs.readFileSync;
+      try {
+        assert.deepEqual(service.readRun(later.runId), {
+          ok: true, run: later, interrupted: false,
+          comparisonLineage: { status: 'unavailable', reason },
+        });
+        assert.deepEqual(disk(box.runs, later.runId), later);
+      } finally { fs.readFileSync = originalRead; }
+    });
+  }
 });
 
 test('HTTP refuses a hard-linked canonical record as stored-run-unavailable', serial, async () => {

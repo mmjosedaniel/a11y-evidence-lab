@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import http from 'node:http';
 import net from 'node:net';
@@ -38,6 +39,68 @@ function ordinaryDirectory(target: string): void {
     if (current === repo) break;
     current = path.dirname(current);
   }
+}
+
+export interface OwnedRunEvidence {
+  readonly runId: string;
+  readonly directory: string;
+  readonly file: string;
+  readonly sha256: string;
+  readonly bytes: Buffer;
+}
+
+function samePath(left: string, right: string): boolean {
+  return path.normalize(left).toLowerCase() === path.normalize(right).toLowerCase();
+}
+
+export function inspectOwnedRunTree(runRoot: string, expectedRunIds?: readonly string[]): readonly OwnedRunEvidence[] {
+  const root = path.resolve(runRoot);
+  ordinaryDirectory(root);
+  assert.ok(samePath(fs.realpathSync.native(root), root), 'Owned run root must not be aliased');
+  const rootStat = fs.lstatSync(root);
+  assert.ok(rootStat.isDirectory() && !rootStat.isSymbolicLink(), 'Owned run root must be an ordinary directory');
+  const runIds = fs.readdirSync(root).sort();
+  if (expectedRunIds) assert.deepEqual(runIds, [...expectedRunIds].sort(), 'Owned run inventory must match exactly');
+  return runIds.map(runId => {
+    const directory = path.resolve(root, runId);
+    assert.equal(path.dirname(directory), root, 'Owned run directory must be a direct child');
+    assert.ok(samePath(fs.realpathSync.native(directory), directory), 'Owned run directory must not be aliased');
+    const directoryStat = fs.lstatSync(directory);
+    assert.ok(directoryStat.isDirectory() && !directoryStat.isSymbolicLink(), 'Owned run must be an ordinary directory');
+    assert.deepEqual(fs.readdirSync(directory), ['run.json'], 'Owned run must contain only run.json');
+    const file = path.join(directory, 'run.json');
+    assert.ok(samePath(fs.realpathSync.native(file), file), 'Owned run file must not be aliased');
+    const fileStat = fs.lstatSync(file);
+    assert.ok(fileStat.isFile() && !fileStat.isSymbolicLink(), 'Owned run record must be an ordinary file');
+    assert.equal(fileStat.nlink, 1, 'Owned run record must have exactly one link');
+    const bytes = fs.readFileSync(file);
+    const checked = validateRun(JSON.parse(bytes.toString('utf8')));
+    assert.ok(checked.ok && checked.value.runId === runId, 'Owned directory and validated run identity must agree');
+    return Object.freeze({ runId, directory, file,
+      sha256: createHash('sha256').update(bytes).digest('hex'), bytes });
+  });
+}
+
+export function removeOwnedRun(runRoot: string, expected: OwnedRunEvidence,
+  expectedRunIds: readonly string[]): void {
+  const current = inspectOwnedRunTree(runRoot, expectedRunIds).find(item => item.runId === expected.runId);
+  assert.ok(current, 'Expected owned run must still exist');
+  assert.equal(current.directory, expected.directory);
+  assert.equal(current.file, expected.file);
+  assert.equal(current.sha256, expected.sha256, 'Owned run bytes must remain unchanged before deletion');
+  fs.rmSync(current.directory, { recursive: true, force: false });
+  assert.equal(fs.existsSync(current.directory), false, 'Only the verified owned run directory is removed');
+}
+
+function removeValidatedRunTree(runRoot: string, expectedRunIds: readonly string[]): void {
+  const runs = inspectOwnedRunTree(runRoot, expectedRunIds);
+  const remaining = [...expectedRunIds];
+  for (const run of runs) {
+    removeOwnedRun(runRoot, run, remaining);
+    remaining.splice(remaining.indexOf(run.runId), 1);
+  }
+  assert.deepEqual(fs.readdirSync(runRoot), [], 'Owned run root must be empty after exact child cleanup');
+  fs.rmdirSync(runRoot);
 }
 
 function uniqueRunRoot(name: string): string {
@@ -255,7 +318,8 @@ export interface BrowserHarness extends ServiceHarness {
   scannerCalls: string[];
 }
 
-export async function startBrowserHarness(t: TestContext, name: string, scenario: Scenario): Promise<BrowserHarness> {
+export async function startBrowserHarness(t: TestContext, name: string, scenario: Scenario,
+  expectedRunCleanup?: () => readonly string[]): Promise<BrowserHarness> {
   const scannerCalls: string[] = [];
   const runRoot = uniqueRunRoot(name);
   let service: LocalService | undefined;
@@ -275,7 +339,10 @@ export async function startBrowserHarness(t: TestContext, name: string, scenario
       await attempt(async () => assert.deepEqual(await service!.stop(), { ok: true, status: 'stopped' }));
       await attempt(() => portClosed(service!.url));
     }
-    await attempt(() => { ordinaryDirectory(runRoot); fs.rmSync(runRoot, { recursive: true }); });
+    if (!expectedRunCleanup || errors.length === 0) await attempt(() => {
+      if (expectedRunCleanup) removeValidatedRunTree(runRoot, expectedRunCleanup());
+      else { ordinaryDirectory(runRoot); fs.rmSync(runRoot, { recursive: true }); }
+    });
     await attempt(() => assert.deepEqual(fs.readdirSync(integrationScratch), []));
     await attempt(() => assert.deepEqual(fs.readdirSync(path.join(repo, 'temp/m103-scan')), []));
     if (errors.length) throw new AggregateError(errors, 'Browser harness teardown failed');

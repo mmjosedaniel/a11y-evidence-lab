@@ -89,9 +89,10 @@ function ContrastEvidence({ item }: { readonly item: Extract<EvidenceItem, { rul
   </dl>;
 }
 
-export function RuleEvidence({ item, explanation }: {
+export function RuleEvidence({ item, explanation, nested = false }: {
   readonly item: EvidenceItem;
   readonly explanation: string;
+  readonly nested?: boolean;
 }): ReactElement {
   return <div className="rule-evidence">
     <p className="evidence-explanation">{explanation}</p>
@@ -99,7 +100,7 @@ export function RuleEvidence({ item, explanation }: {
       <Field label="Affected element">{affectedElementText(item)}</Field>
       <Field label="Where on the page"><Location locator={item.locator} /></Field>
     </dl>
-    <h4>Evidence</h4>
+    {nested ? <h5>Evidence</h5> : <h4>Evidence</h4>}
     {item.ruleId === 'image-alt' && <ImageEvidence item={item} />}
     {item.ruleId === 'label' && <LabelEvidence item={item} />}
     {item.ruleId === 'color-contrast' && <ContrastEvidence item={item} />}
