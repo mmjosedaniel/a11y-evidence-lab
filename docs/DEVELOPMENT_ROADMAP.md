@@ -5,8 +5,8 @@
 - **Repository stage:** Development ready
 - **Roadmap status:** Accepted implementation sequence on 2026-08-28 through OD-025
 - **Implementation status:** RD-001 through RD-003, M1-01 through M1-05, M2-01 through M2-04, M3-01 through M3-05, M4-01 through M4-03 and M5-01 through M5-04 are Complete. Shared generation and both fixed adapters are implemented with controlled verification. The user-facing generation interface has accepted controlled verification; one real proposal per provider passes mechanical validation and its original record remains preserved in the pending state. M4-03 verifies human review on isolated copies of one authentic proposal. The exact-configuration Qwen full-stack capacity observation, independent review and documentation closure pass.
-- **Latest fully closed task:** [M5-04 — Comparison checkpoint](plans/completed/m5-04-comparison-checkpoint.md#m504-final-01--integrated-review-and-task-closure). Controlled and actual public comparison evidence, all 881 tests, refreshed caller checks, independent strict/build, different final critical review and documentation closure pass. All 200% zoom testing remains Deferred until after MVP.
-- **Current tasks:** [M6-01 — Shared deterministic evaluation](plans/completed/m6-01-shared-deterministic-evaluation.md) is Complete after shared evaluation, final critical PASS and documentation closure. Twenty-five tasks are Complete; M6-02 through M6-04 remain Not started.
+- **Latest fully closed task:** [M6-01 — Shared deterministic evaluation](plans/completed/m6-01-shared-deterministic-evaluation.md#m601-final-01--integrated-review-and-documentation-closure). Shared evaluation, maintained regression, independent strict/build, different final critical review and documentation closure pass, with the G1 retrieval relevance limitation preserved. All 200% zoom testing remains Deferred until after MVP.
+- **Current tasks:** None active. Twenty-five tasks are Complete; M6-02 through M6-04 remain Not started.
 - **Scope:** The accepted local portfolio MVP only
 
 This roadmap turns the accepted planning baseline into an implementation order. It owns milestone order, task dependencies, integration checkpoints, and progress status. It does not create or override a product requirement, architecture decision, behavioral contract, evaluation result, or release claim. If this roadmap conflicts with an identified requirement or Accepted ADR, the requirement or ADR controls and the roadmap must be corrected.
@@ -522,7 +522,7 @@ M6 is a final verification and evidence gate, not another vertical implementatio
 - **Parent gate / role / status:** M6 / verification / **Complete**.
 - **Planning activation (2026-09-20):** The owner selected current-state review and ExecPlan creation only. Complete M5-04 and verified frozen inputs satisfy the planning prerequisites. [Planning evidence](plans/completed/m6-01-shared-deterministic-evaluation.md#m601-entry-01--planning-evidence) records strict TypeScript and 162 passing focused tests; shared evaluation, any required caller characterization and task closure remain pending. No browser/model/public call, retained review, deletion or Git mutation is authorized by this planning request.
 - **Execution activation (2026-09-20):** The owner authorizes the existing plan through G/A/B/C, required delegation, guarded characterization, bounded corrections, verification and documentation closure. The [current contract](plans/completed/m6-01-shared-deterministic-evaluation.md#m601-g-contract-01--execution-binding) preserves frozen inputs, original evidence and all exclusions. No generation, credential access, fresh public scan, retained human decision, later task or Git publication is selected.
-- **Accepted checkpoint (2026-09-20):** [Shared observations](plans/completed/m6-01-shared-deterministic-evaluation.md#m601-b-matrix-01--separate-shared-observations) include exact frozen abstention, current maintained verification, strict/build and preserved evidence. [G1 renewal](plans/completed/m6-01-shared-deterministic-evaluation.md#m601-b-retrieval-01--prerequisite-failure-no-retry) failed before embeddings because the runtime was unavailable; its allowance is consumed. G2/G3 are unexecuted. A replacement G1 allowance and available developer-managed runtime are required; no completion or archive is claimed.
+- **Earlier accepted checkpoint (2026-09-20; resolved by re-entry and completion below):** [Shared observations](plans/completed/m6-01-shared-deterministic-evaluation.md#m601-b-matrix-01--separate-shared-observations) include exact frozen abstention, current maintained verification, strict/build and preserved evidence. [G1 renewal](plans/completed/m6-01-shared-deterministic-evaluation.md#m601-b-retrieval-01--prerequisite-failure-no-retry) failed before embeddings because the runtime was unavailable; its allowance is consumed. G2/G3 are unexecuted. A replacement G1 allowance and available developer-managed runtime are required; no completion or archive is claimed.
 - **Authorized re-entry (2026-09-20):** The owner authorized existing Ollama startup and one replacement G1; critical contract review passed and [three current actual observations](plans/completed/m6-01-shared-deterministic-evaluation.md#m601-b-retrieval-02--three-current-actual-observations) completed within unchanged bounds. Original failure and G1 semantic limitation remain preserved. This resolved the retrieval prerequisite; completion evidence below owns final acceptance.
 - **Completion evidence (2026-09-20):** [Integrated final acceptance](plans/completed/m6-01-shared-deterministic-evaluation.md#m601-final-01--integrated-review-and-documentation-closure) records 883 maintained tests, strict/build, exact frozen abstention, three current actual retrievals, preservation checks, different critical PASS and documentation closure. G1 relevance failure and the first runtime-prerequisite failure remain explicit. No later task is activated.
 - **Execution plan:** [M6-01 — Shared deterministic evaluation](plans/completed/m6-01-shared-deterministic-evaluation.md); [progress summary](progress/m6-01-shared-deterministic-evaluation.md).
@@ -611,13 +611,13 @@ If future work requires a temporary substitute, the coordinator must first add t
 
 ## Scope that must remain separated
 
-### Accepted MVP work intentionally later in this roadmap
+### Accepted MVP work assigned to successive milestones
 
-- Closed-corpus retrieval and deterministic abstention wait for M2 rather than weakening M1.
-- Both real generation modes and their shared validated proposal contract wait for M3.
-- Proposal-only human review waits for M4.
-- Independent rescan comparison waits for M5.
-- Exactly six generation cases, shared deterministic checks, and compact application-accessibility verification wait for M6.
+- M2 owns closed-corpus retrieval and deterministic abstention after M1's scan-to-evidence boundary.
+- M3 owns both real generation modes and their shared validated proposal contract.
+- M4 owns proposal-only human review.
+- M5 owns independent rescan comparison.
+- M6-01 owns shared deterministic checks; M6-02 owns exactly six generation cases; M6-03 owns compact application-accessibility verification; M6-04 owns the bounded evidence review. Their task entries above record current status.
 
 Later placement does not make these capabilities optional. Their Accepted requirement rows remain required for MVP completion.
 
