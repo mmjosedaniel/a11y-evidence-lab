@@ -4,11 +4,13 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-- [M5-04 — Comparison checkpoint](m5-04-comparison-checkpoint.md) — In progress for planning only; execution and exact public-target authorization remain pending.
+None.
 
 ## Completed plans
 
 These archives preserve each task's execution, review, failures, and closure evidence. The roadmap remains the status authority.
+
+- [M5-04 — Comparison checkpoint](completed/m5-04-comparison-checkpoint.md)
 
 - [M5-03 — Comparison persistence and UI](completed/m5-03-comparison-persistence-and-ui.md)
 

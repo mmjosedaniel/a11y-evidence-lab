@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import type { TestContext } from 'node:test';
 import { chromium } from 'playwright';
 import type { Browser, BrowserContext, LaunchOptions, Page } from 'playwright';
+import { AxeBuilder } from '@axe-core/playwright';
 import { startLocalService } from '../../src/server/service.ts';
 import type { LocalService } from '../../src/server/service.ts';
 import { validateRun } from '../../src/server/domain/run-contract.ts';
@@ -234,12 +235,12 @@ export function createIntegrationRoot(t: TestContext, name: string): string {
 
 export function installManagedFixtureScan(t: TestContext, fixture: {
   readonly bytes: Buffer; readonly targetKey: string; readonly expectedLocator: string; readonly elementKind: string;
-}, calls: string[]): void {
+}, calls: string[], browserVersion = '151.0.7922.34'): void {
   t.mock.method(chromium, 'launch', async (options: LaunchOptions) => {
     calls.push('launch');
     const browser = await originalLaunch(options);
     const wrapped = {
-      version: () => { const value = browser.version(); assert.equal(value, '151.0.7922.34'); return value; },
+      version: () => { const value = browser.version(); assert.equal(value, '151.0.7922.34'); return browserVersion; },
       isConnected: () => browser.isConnected(),
       close: () => browser.close(),
       newContext: async (contextOptions: Parameters<Browser['newContext']>[0]) => {
@@ -274,6 +275,13 @@ export function installManagedFixtureScan(t: TestContext, fixture: {
     };
     return wrapped as unknown as Browser;
   });
+}
+
+export function installManagedNativeReport(t: TestContext, fixture: {
+  readonly bytes: Buffer; readonly targetKey: string; readonly expectedLocator: string; readonly elementKind: string;
+}, report: unknown, calls: string[], browserVersion = '151.0.7922.34'): void {
+  installManagedFixtureScan(t, fixture, calls, browserVersion);
+  t.mock.method(AxeBuilder.prototype, 'analyze', async () => structuredClone(report));
 }
 
 export interface ServiceHarness {

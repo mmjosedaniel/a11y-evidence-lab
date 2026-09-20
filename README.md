@@ -72,6 +72,8 @@ M5-01 implements [intentional rescans](#intentional-rescans): an explicitly chos
 
 M5-02 implements conservative comparison at the [internal rescan boundary](#internal-comparison). It uses exact scan-profile compatibility, unique target correlation and sufficient native evidence, with bounded rationale and explicit limitations. M5-03 saves and presents that result, preserves completed scans when comparison fails, and validates immediate-lineage readback. Its native scanner/service/disk/browser proof also preserves saved comparison after exact synthetic baseline deletion. Verification and final critical PASS are recorded in the [completed plan](docs/plans/completed/m5-03-comparison-persistence-and-ui.md).
 
+M5-04 comparison verification exercises controlled native transitions, conservative uncertainty, preserved baseline/downstream state and exact synthetic deletion. Its [actual public observation](docs/plans/completed/m5-04-comparison-checkpoint.md#m504-public-02--actual-selected-finding-comparison-accepted) saved a persistent contrast comparison from a selected W3C demo Finding, with no retrieval or generation request. The 45-file regression passes 881 tests, and final independent critical review and documentation closure pass. M5-04 is Complete; M6 remains unstarted. This bounded observation is not whole-page accessibility or release qualification.
+
 ## Development toolchain
 
 Use exactly [Node.js 24.20.0 with its bundled npm 11.19.0](https://nodejs.org/en/download/archive/v24.20.0). Provision these developer prerequisites yourself; the project has no runtime installer. RD-002 used a temporary official Windows x64 distribution for verification and removed it and its task-specific cache after review; the machine's global runtime was not changed. The exact package pins live in [package.json](package.json), and [package-lock.json](package-lock.json) is the only authoritative dependency lock.
@@ -226,13 +228,14 @@ Invoke-M105Command {
 }
 ```
 
-Run the complete forty-four-file suite sequentially, with no running application service or concurrent browser test. Production-entry, review and rescan integration tests also require the built client. Scanner, walking-skeleton and rescan integration suites use scanner scratch; the seven UI/checkpoint suites use separate UI scratch:
+Run the complete forty-five-file suite sequentially, with no running application service or concurrent browser test. Production-entry, review and rescan integration tests also require the built client. Scanner, walking-skeleton and rescan integration suites use scanner scratch; the seven UI/checkpoint suites use separate UI scratch:
 
 ```powershell
 if ($null -ne [Environment]::GetEnvironmentVariable('A11Y_M305_CAPTURE_PROOF','Process') -or
     $null -ne [Environment]::GetEnvironmentVariable('A11Y_M402_CAPTURE_PROOF','Process') -or
     $null -ne [Environment]::GetEnvironmentVariable('A11Y_M501_CAPTURE_PROOF','Process') -or
-    $null -ne [Environment]::GetEnvironmentVariable('A11Y_M503_CAPTURE_PROOF','Process')) {
+    $null -ne [Environment]::GetEnvironmentVariable('A11Y_M503_CAPTURE_PROOF','Process') -or
+    $null -ne [Environment]::GetEnvironmentVariable('A11Y_M504_CAPTURE_PROOF','Process')) {
   throw 'Ordinary regression requires the synthetic capture flag absent.'
 }
 foreach ($m105Test in @('tests/run-contract.test.ts','tests/run-repository.test.ts','tests/local-service.test.ts','tests/scan-normalization.test.ts','tests/retrieval-contract.test.ts','tests/embedding-retrieval.test.ts','tests/retrieval-service.test.ts','tests/finding-sufficiency.test.ts','tests/finding-guidance-api.test.ts','tests/generation-contract.test.ts','tests/generation-stage.test.ts','tests/generation-service.test.ts','tests/ollama-generation-contract.test.ts','tests/ollama-generation.test.ts','tests/ollama-generation-service.test.ts','tests/groq-generation-contract.test.ts','tests/groq-generation.test.ts','tests/groq-generation-service.test.ts','tests/finding-generation-admission.test.ts','tests/review-contract.test.ts','tests/review-repository.test.ts','tests/review-service.test.ts','tests/rescan-service.test.ts','tests/comparison-pair.test.ts')) {
@@ -245,7 +248,7 @@ Invoke-M105Command {
   & $m105Node --experimental-test-module-mocks --test --test-timeout=120000 tests/finding-generation-api.test.ts
   if ($LASTEXITCODE -ne 0) { throw 'Generation API suite failed.' }
 }
-foreach ($m105Test in @('tests/finding-review-api.test.ts','tests/finding-review-admission.test.ts','tests/rescan-api.test.ts','tests/rescan-admission.test.ts','tests/comparison-outcome.test.ts','tests/rescan-comparison.test.ts','tests/comparison-persistence.test.ts','tests/comparison-service.test.ts','tests/comparison-admission.test.ts')) {
+foreach ($m105Test in @('tests/finding-review-api.test.ts','tests/finding-review-admission.test.ts','tests/rescan-api.test.ts','tests/rescan-admission.test.ts','tests/comparison-outcome.test.ts','tests/rescan-comparison.test.ts','tests/comparison-persistence.test.ts','tests/comparison-service.test.ts','tests/comparison-admission.test.ts','tests/m504-public-comparison.test.ts')) {
   Invoke-M105Command {
     & $m105Node --experimental-test-module-mocks --test --test-timeout=120000 $m105Test
     if ($LASTEXITCODE -ne 0) { throw 'Review, rescan or comparison suite failed.' }
