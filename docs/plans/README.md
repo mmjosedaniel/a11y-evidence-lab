@@ -10,6 +10,8 @@ None.
 
 These archives preserve each task's execution, review, failures, and closure evidence. The roadmap remains the status authority.
 
+- [M6-01 — Shared deterministic evaluation](completed/m6-01-shared-deterministic-evaluation.md)
+
 - [M5-04 — Comparison checkpoint](completed/m5-04-comparison-checkpoint.md)
 
 - [M5-03 — Comparison persistence and UI](completed/m5-03-comparison-persistence-and-ui.md)

@@ -72,7 +72,9 @@ M5-01 implements [intentional rescans](#intentional-rescans): an explicitly chos
 
 M5-02 implements conservative comparison at the [internal rescan boundary](#internal-comparison). It uses exact scan-profile compatibility, unique target correlation and sufficient native evidence, with bounded rationale and explicit limitations. M5-03 saves and presents that result, preserves completed scans when comparison fails, and validates immediate-lineage readback. Its native scanner/service/disk/browser proof also preserves saved comparison after exact synthetic baseline deletion. Verification and final critical PASS are recorded in the [completed plan](docs/plans/completed/m5-03-comparison-persistence-and-ui.md).
 
-M5-04 comparison verification exercises controlled native transitions, conservative uncertainty, preserved baseline/downstream state and exact synthetic deletion. Its [actual public observation](docs/plans/completed/m5-04-comparison-checkpoint.md#m504-public-02--actual-selected-finding-comparison-accepted) saved a persistent contrast comparison from a selected W3C demo Finding, with no retrieval or generation request. The 45-file regression passes 881 tests, and final independent critical review and documentation closure pass. M5-04 is Complete; M6 remains unstarted. This bounded observation is not whole-page accessibility or release qualification.
+M5-04 comparison verification exercises controlled native transitions, conservative uncertainty, preserved baseline/downstream state and exact synthetic deletion. Its [actual public observation](docs/plans/completed/m5-04-comparison-checkpoint.md#m504-public-02--actual-selected-finding-comparison-accepted) saved a persistent contrast comparison from a selected W3C demo Finding, with no retrieval or generation request. Its recorded 45-file regression passed 881 tests, followed by final independent critical review and documentation closure. M5-04 is Complete.
+
+[M6-01](docs/plans/completed/m6-01-shared-deterministic-evaluation.md#m601-final-01--integrated-review-and-documentation-closure) is Complete after shared evaluation, all 883 maintained tests, strict TypeScript, the current build, independent review and documentation closure. Its [shared result matrix](docs/plans/completed/m6-01-shared-deterministic-evaluation.md#m601-b-matrix-01--separate-shared-observations) separates controlled native, synthetic, policy-only and historical public evidence. The [three actual retrieval observations](docs/plans/completed/m6-01-shared-deterministic-evaluation.md#m601-b-retrieval-02--three-current-actual-observations) retain G1's unsuitable decorative-image guidance despite complete roles; G2/G3 return their frozen gold passages. M6-02 through M6-04 remain Not started. These bounded observations are not whole-page accessibility or release qualification.
 
 ## Development toolchain
 
@@ -228,15 +230,16 @@ Invoke-M105Command {
 }
 ```
 
-Run the complete forty-five-file suite sequentially, with no running application service or concurrent browser test. Production-entry, review and rescan integration tests also require the built client. Scanner, walking-skeleton and rescan integration suites use scanner scratch; the seven UI/checkpoint suites use separate UI scratch:
+Run the complete forty-six-file suite sequentially, with no running application service or concurrent browser test. Production-entry, review and rescan integration tests also require the built client. Scanner, walking-skeleton and rescan integration suites use scanner scratch; the eight UI/checkpoint suites use separate UI scratch:
 
 ```powershell
 if ($null -ne [Environment]::GetEnvironmentVariable('A11Y_M305_CAPTURE_PROOF','Process') -or
     $null -ne [Environment]::GetEnvironmentVariable('A11Y_M402_CAPTURE_PROOF','Process') -or
     $null -ne [Environment]::GetEnvironmentVariable('A11Y_M501_CAPTURE_PROOF','Process') -or
     $null -ne [Environment]::GetEnvironmentVariable('A11Y_M503_CAPTURE_PROOF','Process') -or
-    $null -ne [Environment]::GetEnvironmentVariable('A11Y_M504_CAPTURE_PROOF','Process')) {
-  throw 'Ordinary regression requires the synthetic capture flag absent.'
+    $null -ne [Environment]::GetEnvironmentVariable('A11Y_M504_CAPTURE_PROOF','Process') -or
+    $null -ne [Environment]::GetEnvironmentVariable('A11Y_M601_FROZEN_NO_CALL','Process')) {
+  throw 'Ordinary regression requires capture and frozen-case flags absent.'
 }
 foreach ($m105Test in @('tests/run-contract.test.ts','tests/run-repository.test.ts','tests/local-service.test.ts','tests/scan-normalization.test.ts','tests/retrieval-contract.test.ts','tests/embedding-retrieval.test.ts','tests/retrieval-service.test.ts','tests/finding-sufficiency.test.ts','tests/finding-guidance-api.test.ts','tests/generation-contract.test.ts','tests/generation-stage.test.ts','tests/generation-service.test.ts','tests/ollama-generation-contract.test.ts','tests/ollama-generation.test.ts','tests/ollama-generation-service.test.ts','tests/groq-generation-contract.test.ts','tests/groq-generation.test.ts','tests/groq-generation-service.test.ts','tests/finding-generation-admission.test.ts','tests/review-contract.test.ts','tests/review-repository.test.ts','tests/review-service.test.ts','tests/rescan-service.test.ts','tests/comparison-pair.test.ts')) {
   Invoke-M105Command {
@@ -262,7 +265,7 @@ foreach ($m105Test in @('tests/scan-page.test.ts','tests/walking-skeleton.test.t
     if ($LASTEXITCODE -ne 0) { throw 'Scanner or integration suite failed.' }
   } $m105ScanTemp
 }
-foreach ($m105Test in @('tests/target-results-ui.test.ts','tests/finding-guidance-ui.test.ts','tests/finding-generation-ui.test.ts','tests/finding-review-ui.test.ts','tests/review-checkpoint.test.ts','tests/intentional-rescan-ui.test.ts','tests/comparison-ui.test.ts')) {
+foreach ($m105Test in @('tests/target-results-ui.test.ts','tests/finding-guidance-ui.test.ts','tests/finding-generation-ui.test.ts','tests/finding-review-ui.test.ts','tests/review-checkpoint.test.ts','tests/intentional-rescan-ui.test.ts','tests/comparison-ui.test.ts','tests/m601-frozen-abstention.test.ts')) {
   Assert-M105EmptyDirectory $m105UiTemp
   Invoke-M105Command {
     & $m105Node --test --test-timeout=120000 $m105Test
@@ -431,6 +434,8 @@ The [M3-01 manifest](evaluation/m301-generation-v1.json) defines three shared co
 In the original development checkout, the nine exact files under `temp/m301-generation-freeze-v1/` contain the inputs, separate provenance, instruction, schema and no-call definition. They are ignored and absent from a fresh checkout; the manifest records their identities without publishing raw prompts or payloads. The [freeze receipt](docs/plans/completed/m3-01-generation-evaluation-package.md#m301-freeze-01--exact-static-package-and-verification) and [final acceptance](docs/plans/completed/m3-01-generation-evaluation-package.md#m301-final-01--final-review-and-documentation-closure) preserve the evidence and its limits.
 
 For read-only verification, load only the [development command definitions](#development-command-preparation), then run the preserved verification block in [M301-COMMAND-02](docs/plans/completed/m3-01-generation-evaluation-package.md#m301-command-02--resolved-preparation-validation-and-closure-callers) from the repository root. It also requires the retained M2-04 run/seed files named there and makes no model request. Historical creation and task-closure instructions are not steps to replay. Missing or mismatched exact files block downstream use until the existing [recovery conditions](docs/plans/completed/m3-01-generation-evaluation-package.md#idempotence-and-recovery) are satisfied; do not regenerate or overwrite the frozen package merely to make a check pass.
+
+M6-01 executed the [exact frozen no-call case](docs/plans/completed/m6-01-shared-deterministic-evaluation.md#m601-b-no-call-01--exact-frozen-abstention-accepted), verifying application-authored abstention, durable aggregate preservation, rendered manual guidance and zero generation effects. That proof uses the frozen controlled retrieval result and does not establish actual embedding behavior; the [actual retrieval observations](docs/plans/completed/m6-01-shared-deterministic-evaluation.md#m601-b-retrieval-02--three-current-actual-observations) are separate. These records identify retained local artifacts for inspection without inference. Their bounded execution allowances are consumed, and archived commands are not replay instructions. The ordinary regression command above requires the frozen-case flag to remain absent. Exactly six Local/Groq generation cases remain assigned to [M6-02](docs/DEVELOPMENT_ROADMAP.md#m6-02--execute-exactly-six-fixed-generation-cases).
 
 ## Closed corpus snapshot
 
