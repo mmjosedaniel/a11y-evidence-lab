@@ -15,8 +15,10 @@ import { executeRescanComparison } from '../src/server/local-service/rescan-comp
 import { prepareRescan } from '../src/server/local-service/rescan-operation.ts';
 import type { ScanOperationDependencies } from '../src/server/local-service/scan-operation.ts';
 import { compareControlledScanPair, controlledComparisonFixtures } from './helpers/comparison-fixtures.ts';
+import { assertCanonicalComparisonUi } from './helpers/m504-public-comparison.ts';
 import {
-  createIntegrationRoot, inspectOwnedRunTree, installManagedFixtureScan, installManagedScan, removeOwnedRun, repo,
+  createIntegrationRoot, inspectOwnedRunTree, installManagedFixtureScan, installManagedNativeReport, installManagedScan,
+  removeOwnedRun, repo,
   requestJson, startBrowserHarness, targetUrl,
 } from './helpers/m105-walking-skeleton-harness.ts';
 
@@ -53,6 +55,125 @@ function approvedComparisonRun(value: unknown): Extract<PageAnalysisRun, { statu
   const { comparison: _comparison, ...scanOnly } = checked.value;
   assertNoPrivateHandoff(scanOnly);
   return checked.value;
+}
+
+type ControlledFixture = ReturnType<typeof controlledComparisonFixtures>[number];
+type AdverseBranch = 'persistent' | 'missing' | 'ambiguous' | 'profile-mismatch';
+
+function nativeOptions(): Record<string, unknown> {
+  return {
+    runOnly: { type: 'rule', values: ['image-alt', 'label', 'color-contrast'] }, reporter: 'm103-native-dom-v1',
+    resultTypes: ['violations', 'incomplete', 'passes', 'inapplicable'], selectors: true, ancestry: false,
+    xpath: false, absolutePaths: false, elementRef: true, iframes: false,
+  };
+}
+
+function labelNode(locator: string): Record<string, unknown> {
+  return {
+    any: [{ id: 'explicit-label' }], all: [], none: [],
+    capturedDom: { locator: { value: locator }, evidence: {
+      elementKind: { value: 'input' }, inputType: { value: 'email' }, nameSources: {
+        explicitLabel: { value: false }, implicitLabel: { value: false }, ariaLabel: { value: 'absent' },
+        ariaLabelledby: { value: 'absent' }, title: { value: 'absent' }, placeholder: { value: 'absent' },
+        presentationalRole: { value: false },
+      },
+    } },
+  };
+}
+
+function imageNode(locator: string): Record<string, unknown> {
+  return {
+    any: [{ id: 'has-alt' }], all: [], none: [],
+    capturedDom: { locator: { value: locator }, evidence: {
+      elementKind: { value: 'img' }, altState: { value: 'absent' },
+    } },
+  };
+}
+
+function adverseNativeReport(branch: AdverseBranch, locator: string): Record<string, unknown> {
+  const labelNodes = branch === 'missing' ? [] : branch === 'ambiguous'
+    ? [labelNode(locator), labelNode(locator)] : [labelNode(locator)];
+  const violations = [
+    ...(labelNodes.length ? [{ id: 'label', nodes: labelNodes }] : []),
+    ...(branch === 'persistent' ? [{ id: 'image-alt', nodes: [imageNode(':root > :nth-child(2) > :nth-child(9)')] }] : []),
+  ];
+  const covered = new Set(violations.map(entry => entry.id));
+  const inapplicable = ['image-alt', 'label', 'color-contrast']
+    .filter(rule => !covered.has(rule)).map(id => ({ id, nodes: [] }));
+  return {
+    url: targetUrl, timestamp: new Date(Date.now() + 1000).toISOString(),
+    testEngine: { name: 'axe-core', version: '4.13.0' }, toolOptions: nativeOptions(),
+    violations, incomplete: [], passes: [], inapplicable,
+  };
+}
+
+function fixture(ruleId: 'label' | 'color-contrast', stateRole: 'failing' | 'corrected'): ControlledFixture {
+  const found = controlledComparisonFixtures().find(item => item.ruleId === ruleId && item.stateRole === stateRole);
+  assert.ok(found);
+  return found;
+}
+
+async function activateBaseline(t: TestContext, harness: Awaited<ReturnType<typeof startBrowserHarness>>,
+  failing: ControlledFixture): Promise<{ readonly bytes: Buffer; readonly run: Extract<PageAnalysisRun, { status: 'completed' }>;
+    readonly findingId: string }> {
+  t.mock.restoreAll();
+  installManagedFixtureScan(t, failing, harness.scannerCalls);
+  await harness.page.getByLabel('Target URL').fill(targetUrl);
+  await harness.page.getByLabel('Local (recommended)').check();
+  await harness.page.getByRole('button', { name: 'Analyze', exact: true }).click();
+  await harness.page.getByRole('heading', { name: 'Results', exact: true }).waitFor();
+  const runs = readRuns(harness.runRoot);
+  assert.equal(runs.length, 1);
+  const baseline = runs[0]!;
+  assert.ok(baseline.run.status === 'completed');
+  const selected = baseline.run.scan.findings.find(item => item.ruleId === failing.ruleId &&
+    'value' in item.locator && item.locator.value === failing.expectedLocator);
+  assert.ok(selected, `Frozen ${failing.ruleId} baseline must publish the declared Finding`);
+  return { bytes: baseline.bytes, run: baseline.run, findingId: selected.findingId };
+}
+
+async function openSelectedFindingByKeyboard(harness: Awaited<ReturnType<typeof startBrowserHarness>>): Promise<void> {
+  const button = harness.page.getByRole('region', { name: 'Findings', exact: true }).getByRole('button').first();
+  await button.focus();
+  assert.equal(await button.evaluate(node => node === document.activeElement), true);
+  await harness.page.keyboard.press('Enter');
+  await harness.page.getByRole('region', { name: /evidence/i }).waitFor();
+}
+
+async function activateRescanByKeyboard(harness: Awaited<ReturnType<typeof startBrowserHarness>>): Promise<Record<string, unknown>> {
+  const mode = harness.page.getByLabel('New scan mode', { exact: true });
+  await mode.selectOption('local');
+  await mode.focus();
+  await harness.page.keyboard.press('Tab');
+  const button = harness.page.getByRole('button', { name: 'Start intentional rescan', exact: true });
+  assert.equal(await button.evaluate(node => node === document.activeElement), true);
+  const responsePromise = harness.page.waitForResponse(response => {
+    const url = new URL(response.url());
+    return url.pathname === '/api/rescans' && response.request().method() === 'POST';
+  });
+  await harness.page.keyboard.press('Enter');
+  const response = await responsePromise;
+  assert.equal(response.status(), 200);
+  return await response.json() as Record<string, unknown>;
+}
+
+async function assertPublishedComparison(harness: Awaited<ReturnType<typeof startBrowserHarness>>,
+  baseline: { readonly bytes: Buffer; readonly run: Extract<PageAnalysisRun, { status: 'completed' }> },
+  responseBody: Record<string, unknown>): Promise<{ readonly bytes: Buffer; readonly run: Extract<PageAnalysisRun, { status: 'completed' }> }> {
+  assert.deepEqual(Object.keys(responseBody).sort(), ['ok', 'run']);
+  assert.equal(responseBody.ok, true);
+  const responseRun = approvedComparisonRun(responseBody.run);
+  const persisted = readRuns(harness.runRoot);
+  assert.equal(persisted.length, 2);
+  const baselineReadback = persisted.find(item => item.run.runId === baseline.run.runId);
+  const later = persisted.find(item => item.run.runId === responseRun.runId);
+  assert.ok(baselineReadback && later);
+  assert.deepEqual(baselineReadback.bytes, baseline.bytes, 'Comparison must preserve the complete baseline scan bytes');
+  assert.deepEqual(later.run, responseRun, 'HTTP success must equal the validated canonical disk aggregate');
+  const get = await requestJson(harness.service.url, 'GET', `/api/runs/${later.run.runId}`);
+  assert.equal(get.status, 200);
+  assert.deepEqual((get.body as { run: unknown }).run, later.run, 'Service GET must return the same canonical aggregate');
+  return { bytes: later.bytes, run: later.run };
 }
 
 test('built client creates one linked later run through the real service, scanner and disk without mutating its baseline', async t => {
@@ -250,6 +371,125 @@ test('native corrected image-alt persists a resolved comparison and remains insp
   assert.equal(await page.getByText('resolved', { exact: true }).count() > 0, true);
   assert.deepEqual(fs.readFileSync(ownedLater.file), later.bytes);
   await harness.close();
+});
+
+test('native corrected label and contrast cross the actual service, HTTP, disk and built comparison UI', async t => {
+  assert.equal(process.env.A11Y_M504_CAPTURE_PROOF === undefined || process.env.A11Y_M504_CAPTURE_PROOF === '1', true);
+  for (const ruleId of ['label', 'color-contrast'] as const) {
+    let cleanupRunIds: readonly string[] = [];
+    const harness = await startBrowserHarness(t, `m504-${ruleId === 'label' ? 'label' : 'contrast'}`, 'populated',
+      () => cleanupRunIds);
+    const failing = fixture(ruleId, 'failing');
+    const corrected = fixture(ruleId, 'corrected');
+    const baseline = await activateBaseline(t, harness, failing);
+    cleanupRunIds = [baseline.run.runId];
+    await openSelectedFindingByKeyboard(harness);
+    t.mock.restoreAll();
+    installManagedFixtureScan(t, corrected, harness.scannerCalls);
+    const responseBody = await activateRescanByKeyboard(harness);
+    const later = await assertPublishedComparison(harness, baseline, responseBody);
+    cleanupRunIds = [baseline.run.runId, later.run.runId];
+    assert.equal(later.run.baselineRunId, baseline.run.runId);
+    assert.ok(later.run.comparison && later.run.comparison.pair === 'comparable');
+    assert.equal(later.run.comparison.baseline.findingId, baseline.findingId);
+    assert.equal(later.run.comparison.match, 'unique-pass');
+    assert.equal(later.run.comparison.outcome, 'resolved');
+    assert.equal(later.run.scan.findings.length, 0);
+    await assertCanonicalComparisonUi(harness.page, later.run);
+    await harness.page.getByRole('status').getByText('Comparison saved.', { exact: true }).waitFor();
+    const returnBaseline = harness.page.getByRole('button', { name: 'Return to baseline', exact: true });
+    await returnBaseline.focus();
+    await harness.page.keyboard.press('Enter');
+    await harness.page.getByRole('region', { name: 'Results', exact: true })
+      .getByText('Baseline evidence — read-only. Return to later results to continue.', { exact: true }).waitFor();
+    const returnLater = harness.page.getByRole('button', { name: 'Return to later results', exact: true });
+    await returnLater.focus();
+    await harness.page.keyboard.press('Enter');
+    await harness.page.getByRole('heading', { name: 'Comparison', exact: true }).waitFor();
+    if (ruleId === 'label' && process.env.A11Y_M504_CAPTURE_PROOF === '1') {
+      const proofRoot = path.join(repo, 'temp/m504-ui-proof-02');
+      assert.equal(fs.existsSync(proofRoot), false, 'M504 proof output must be fresh');
+      fs.mkdirSync(proofRoot, { recursive: false });
+      await harness.page.setViewportSize({ width: 1366, height: 900 });
+      await harness.page.getByRole('heading', { name: 'Comparison', exact: true }).scrollIntoViewIfNeeded();
+      await returnBaseline.focus();
+      assert.equal(await returnBaseline.evaluate(node => node === document.activeElement), true);
+      await harness.page.screenshot({ path: path.join(proofRoot, 'comparison-desktop.png'), fullPage: true });
+      await harness.page.setViewportSize({ width: 390, height: 844 });
+      await harness.page.getByRole('heading', { name: 'Comparison', exact: true }).scrollIntoViewIfNeeded();
+      await returnBaseline.focus();
+      assert.equal(await returnBaseline.evaluate(node => node === document.activeElement), true);
+      await harness.page.screenshot({ path: path.join(proofRoot, 'comparison-narrow.png'), fullPage: true });
+    }
+    assert.equal(harness.requests.some(value => /retriev|generat|review/i.test(value)), false,
+      'Comparison proof must not activate downstream provider work');
+    const owned = inspectOwnedRunTree(harness.runRoot, cleanupRunIds);
+    const ownedBaseline = owned.find(item => item.runId === baseline.run.runId);
+    const ownedLater = owned.find(item => item.runId === later.run.runId);
+    assert.ok(ownedBaseline && ownedLater);
+    t.diagnostic(JSON.stringify({ ruleId, baseline: { runId: ownedBaseline.runId, sha256: ownedBaseline.sha256 },
+      later: { runId: ownedLater.runId, sha256: ownedLater.sha256 } }));
+    await harness.close();
+    t.mock.restoreAll();
+  }
+});
+
+test('constructed scanner inputs publish persistent, missing, ambiguous and profile-mismatch comparisons', async t => {
+  const failing = fixture('label', 'failing');
+  for (const branch of ['persistent', 'missing', 'ambiguous', 'profile-mismatch'] as const) {
+    let cleanupRunIds: readonly string[] = [];
+    const harness = await startBrowserHarness(t, `m504-${branch === 'profile-mismatch' ? 'profile' : branch}`,
+      'populated', () => cleanupRunIds);
+    const baseline = await activateBaseline(t, harness, failing);
+    cleanupRunIds = [baseline.run.runId];
+    await openSelectedFindingByKeyboard(harness);
+    t.mock.restoreAll();
+    installManagedNativeReport(t, failing, adverseNativeReport(branch, failing.expectedLocator), harness.scannerCalls,
+      branch === 'profile-mismatch' ? '150.0.0.0' : '151.0.7922.34');
+    const responseBody = await activateRescanByKeyboard(harness);
+    const later = await assertPublishedComparison(harness, baseline, responseBody);
+    cleanupRunIds = [baseline.run.runId, later.run.runId];
+    const comparison = later.run.comparison;
+    assert.ok(comparison);
+    assert.equal(comparison.baseline.findingId, baseline.findingId);
+    if (branch === 'profile-mismatch') {
+      assert.equal(comparison.pair, 'not-comparable');
+      if (comparison.pair === 'not-comparable') {
+        assert.deepEqual(comparison.mismatches, ['browser-version']);
+        assert.equal(comparison.reason, 'pair-mismatch');
+        assert.equal(Object.hasOwn(comparison, 'match'), false, 'Profile mismatch must skip target correlation');
+      }
+    } else {
+      assert.equal(comparison.pair, 'comparable');
+      if (comparison.pair === 'comparable') {
+        const expectedMatch = branch === 'persistent' ? 'unique-violation'
+          : branch === 'missing' ? 'no-exact-match' : 'ambiguous';
+        assert.equal(comparison.match, expectedMatch);
+        assert.equal(comparison.outcome, branch === 'persistent' ? 'persistent' : 'inconclusive');
+        assert.equal(comparison.reason, branch === 'persistent' ? 'binary-still-failing' : expectedMatch);
+        assert.equal(Object.hasOwn(comparison, 'after'), branch === 'persistent',
+          'Only the positive persistent observation may publish after-evidence');
+      }
+    }
+    if (branch === 'persistent') {
+      assert.equal(later.run.scan.findings.some(item => item.ruleId === 'image-alt'), true,
+        'A later-only Finding must remain in the canonical scan alongside the comparison');
+      const imageGroup = harness.page.getByRole('group', { name: 'Image alternatives', exact: true });
+      await imageGroup.getByRole('button').waitFor();
+      assert.equal(await imageGroup.getByText(/new|regressed/i).count(), 0,
+        'Later-only Findings remain Findings and are not relabeled as comparison outcomes');
+    }
+    await assertCanonicalComparisonUi(harness.page, later.run);
+    assert.equal(harness.requests.some(value => /retriev|generat|review/i.test(value)), false);
+    const owned = inspectOwnedRunTree(harness.runRoot, cleanupRunIds);
+    const ownedBaseline = owned.find(item => item.runId === baseline.run.runId);
+    const ownedLater = owned.find(item => item.runId === later.run.runId);
+    assert.ok(ownedBaseline && ownedLater);
+    t.diagnostic(JSON.stringify({ branch, baseline: { runId: ownedBaseline.runId, sha256: ownedBaseline.sha256 },
+      later: { runId: ownedLater.runId, sha256: ownedLater.sha256 } }));
+    await harness.close();
+    t.mock.restoreAll();
+  }
 });
 
 test('six unchanged controlled buffers reach the actual comparison executor as three declared same-target pairs', async t => {
