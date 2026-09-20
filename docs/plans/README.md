@@ -4,7 +4,7 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-None. M5-04 remains unselected.
+- [M5-04 — Comparison checkpoint](m5-04-comparison-checkpoint.md) — In progress for planning only; execution and exact public-target authorization remain pending.
 
 ## Completed plans
 
