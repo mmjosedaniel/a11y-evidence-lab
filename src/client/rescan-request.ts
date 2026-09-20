@@ -1,4 +1,5 @@
 import type { PageAnalysisRun } from '../server/domain/run-contract.ts';
+import type { ComparisonFailure } from '../server/local-service/contracts.ts';
 import { admitRescan, readRescanSelection } from './rescan-admission.ts';
 import type { RescanIntent } from './rescan-admission.ts';
 import { snapshot } from './finding-response-snapshot.ts';
@@ -12,7 +13,9 @@ export type RescanPresentation =
   | { readonly status: 'refused'; readonly error: string; readonly cleanup: boolean;
       readonly released: boolean; readonly run: FailedRun | null; readonly persisted: boolean };
 export type RescanSettlement = Exclude<RescanPresentation, { status: 'pending' }>
-  | { readonly status: 'completed'; readonly run: CompleteRun };
+  | { readonly status: 'completed'; readonly run: CompleteRun;
+      readonly comparisonFailure?: { readonly error: ComparisonFailure['error'];
+        readonly cleanupFailed: boolean; readonly released: boolean } };
 
 // Construction is inert: App installs stop before start can reflect caller-owned values.
 export function createRescanRequest(options: {
@@ -74,7 +77,12 @@ export function createRescanRequest(options: {
       if (!outcome) { unknown(); return; }
       if (outcome.ok) { finish({ status: 'completed', run: outcome.run }); return; }
       const released = !outcome.cleanupFailed
-        && !['busy', 'stopping', 'shutdown'].includes(outcome.error);
+        && !['busy', 'stopping', 'shutdown', 'comparison-shutdown'].includes(outcome.error);
+      if ('comparisonPersisted' in outcome) {
+        finish({ status: 'completed', run: outcome.run, comparisonFailure: {
+          error: outcome.error, cleanupFailed: outcome.cleanupFailed, released } });
+        return;
+      }
       finish({ status: 'refused', error: outcome.error, cleanup: outcome.cleanupFailed,
         released, run: outcome.run, persisted: outcome.persisted });
     } catch { unknown(); }

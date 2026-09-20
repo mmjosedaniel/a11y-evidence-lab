@@ -12,6 +12,7 @@ export type StoreResult<T> =
   | { ok: true; value: T }
   | { ok: false; error: StoreError; cleanupFailed: boolean };
 export interface RunRepository {
+  updateComparison(expected: CompletedRun, input: unknown): StoreResult<CompletedRun>;
   create(input: unknown): StoreResult<RunningRun>;
   read(runId: unknown): StoreResult<PageAnalysisRun>;
   finish(input: unknown): StoreResult<TerminalRun>;

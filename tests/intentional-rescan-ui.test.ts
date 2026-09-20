@@ -13,6 +13,7 @@ import {
 import { reviewProfileStages, reviewedProfileRun } from './helpers/m402-review-fixture.ts';
 import { repo, richRun, startHarness, valid } from './helpers/m104-ui-harness.ts';
 import type { Harness } from './helpers/m104-ui-harness.ts';
+import { comparisonForRuns, resolvedZeroComparisonForRuns } from './helpers/m503-comparison-fixture.ts';
 
 type CompleteRun = Extract<PageAnalysisRun, { status: 'completed' }>;
 type FailedRun = Extract<PageAnalysisRun, { status: 'failed' }>;
@@ -37,14 +38,21 @@ async function paint(): Promise<void> {
   await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
 }
 
-function laterRun(before: CompleteRun, runId: string, mode: Mode, zero = false): CompleteRun {
+function laterRun(before: CompleteRun, runId: string, mode: Mode, zero = false,
+  baselineFindingId = before.scan.findings[0]!.findingId): CompleteRun {
   const template = structuredClone(completedRun(runId, mode, zero ? 'zero' : 'populated')) as CompleteRun;
-  return valid<CompleteRun>({
+  if (zero) (template.scan.coverage as any)['image-alt'] = {
+    violations: null, incomplete: null, passes: 1, inapplicable: null,
+  };
+  const later = valid<CompleteRun>({
     ...template,
     baselineRunId: before.runId,
     requestedUrl: before.requestedUrl,
     scan: { ...template.scan, context: { ...template.scan.context, finalUrl: before.scan.context.finalUrl } },
   });
+  return valid<CompleteRun>(zero
+    ? resolvedZeroComparisonForRuns(before, later, baselineFindingId)
+    : comparisonForRuns(before, later, [], baselineFindingId));
 }
 
 function laterFailure(before: CompleteRun, runId: string, mode: Mode,
@@ -56,11 +64,12 @@ function laterFailure(before: CompleteRun, runId: string, mode: Mode,
 async function mountBaseline(run = richRun('m501-baseline-01'), accessor = false): Promise<CompleteRun> {
   baseline = run;
   await page.evaluate(({ run, accessor }) => {
+    window.m104.raw = structuredClone(run);
     window.m104.analyze = () => Promise.resolve({ ok: true, run: structuredClone(run) });
     window.m104.rescan = () => Promise.resolve({ status: 400,
       body: { ok: false, error: 'invalid-request', run: null, persisted: false, cleanupFailed: false } });
     window.m104.mount(true, { localModelInstalled: true, groqApiUrlConfigured: true }, true, true,
-      false, true, false, true, accessor);
+      false, true, false, true, accessor, true, false);
   }, { run, accessor });
   await page.getByLabel('Target URL').fill(run.requestedUrl);
   await page.getByLabel(run.providerContext.mode === 'local' ? 'Local (recommended)' : 'Groq').check();
@@ -88,6 +97,9 @@ async function configureRescan(value: unknown | 'hold', accessor = false, key = 
 async function configureSuccessfulRescan(before: CompleteRun, mode: Mode, zero = false): Promise<void> {
   const template = laterRun(before, 'run-m501-template', mode, zero);
   await page.evaluate(template => {
+    window.m104.comparison = runId => Promise.resolve({ status: 200, body: { ok: true,
+      run: { ...structuredClone(template), runId }, interrupted: false,
+      comparisonLineage: { status: 'available' } } });
     window.m104.rescan = intent => Promise.resolve({ status: 200, body: { ok: true, run: {
       ...structuredClone(template), runId: intent.runId, baselineRunId: intent.baselineRunId,
     } } });
@@ -97,10 +109,21 @@ async function configureSuccessfulRescan(before: CompleteRun, mode: Mode, zero =
   await paint();
 }
 
+async function prepareAvailableComparison(run: CompleteRun): Promise<void> {
+  await page.evaluate(run => {
+    window.m104.comparison = () => Promise.resolve({ status: 200, body: { ok: true,
+      run: structuredClone(run), interrupted: false, comparisonLineage: { status: 'available' } } });
+    window.m104.rerender(true, { localModelInstalled: true, groqApiUrlConfigured: true }, true, true,
+      false, true, false, true, false, true, false);
+  }, run);
+  await paint();
+}
+
 async function resolveSuccessfulRescan(key: string, before: CompleteRun, mode: Mode, zero = false): Promise<CompleteRun> {
   const calls = await rescanCalls();
-  const intent = calls.at(-1)!.value as { runId: string };
-  const linked = laterRun(before, intent.runId, mode, zero);
+  const intent = calls.at(-1)!.value as { runId: string; findingId: string };
+  const linked = laterRun(before, intent.runId, mode, zero, intent.findingId);
+  await prepareAvailableComparison(linked);
   await page.evaluate(({ key, linked }) => window.m104.resolveKey(key, {
     status: 200, body: { ok: true, run: structuredClone(linked) },
   }), { key, linked });
@@ -424,6 +447,7 @@ describe('M5-01 intentional rescan UI', { concurrency: false, timeout: 120000 },
     const knownBaseline = valid<CompleteRun>(knownUnsaved.run);
     const knownIntent = knownCalls[0]!.value as { runId: string };
     const linked = laterRun(knownBaseline, knownIntent.runId, 'groq');
+    await prepareAvailableComparison(linked);
     await page.evaluate(linked => window.m104.resolveKey('known-unsaved-rescan', {
       status: 200, body: { ok: true, run: structuredClone(linked) },
     }), linked);
@@ -487,8 +511,10 @@ describe('M5-01 intentional rescan UI', { concurrency: false, timeout: 120000 },
     await submit('groq');
     const intent = (await rescanCalls()).at(-1)!.value as { runId: string };
     const template = valid<CompleteRun>(generationScanRun(intent.runId, 'groq'));
-    const next = valid<CompleteRun>({ ...template, baselineRunId: scan.runId, requestedUrl: scan.requestedUrl,
+    const linkedNext = valid<CompleteRun>({ ...template, baselineRunId: scan.runId, requestedUrl: scan.requestedUrl,
       scan: { ...template.scan, context: { ...template.scan.context, finalUrl: scan.scan.context.finalUrl } } });
+    const next = valid<CompleteRun>(comparisonForRuns(scan, linkedNext));
+    await prepareAvailableComparison(next);
     await page.evaluate(next => window.m104.resolveKey('retrieval-retirement', {
       status: 200, body: { ok: true, run: structuredClone(next) },
     }), next);
@@ -496,7 +522,8 @@ describe('M5-01 intentional rescan UI', { concurrency: false, timeout: 120000 },
     await selectFinding();
     const laterGuidance = await supportedGuidanceEnvelope(next.runId, 'groq');
     const linkedGuidance = { ...laterGuidance,
-      run: valid<CompleteRun>({ ...laterGuidance.run, baselineRunId: scan.runId }) };
+      run: valid<CompleteRun>({ ...laterGuidance.run, baselineRunId: scan.runId,
+        comparison: structuredClone(next.comparison) }) };
     await page.evaluate(linkedGuidance => {
       window.m104.guidance = () => Promise.resolve(structuredClone(linkedGuidance));
       window.m104.rerender(true, { groqApiUrlConfigured: true }, true, true, false, true, false, true, false);
@@ -522,7 +549,8 @@ describe('M5-01 intentional rescan UI', { concurrency: false, timeout: 120000 },
       assert.equal(await results().getByText(zero ? 'No automated findings in the three supported checks' : /findings? need review/).count(), 1);
       assert.equal(await page.getByRole('heading', { name: 'Results', exact: true }).evaluate(node => node === document.activeElement), focusInside);
       assert.equal(await page.getByRole('button', { name: 'Return to baseline', exact: true }).count(), 1);
-      assert.equal(await results().getByText(next.scan.context.finalUrl.value, { exact: true }).count(), 1);
+      assert.equal(await results().locator('dl.results-context')
+        .getByText(next.scan.context.finalUrl.value, { exact: true }).count(), 1);
     }
   });
 
@@ -535,12 +563,14 @@ describe('M5-01 intentional rescan UI', { concurrency: false, timeout: 120000 },
     await modeSelect().selectOption('groq');
     await saveRescanSubmitHandler('oldRescan');
     await rescanButton().click();
-    const previewIntent = (await rescanCalls()).at(-1)!.value as { runId: string };
+    const previewIntent = (await rescanCalls()).at(-1)!.value as { runId: string; findingId: string };
     const generationTemplate = valid<CompleteRun>(generationScanRun(previewIntent.runId, 'groq'));
-    const next = valid<CompleteRun>({ ...generationTemplate, baselineRunId: before.runId,
+    const linkedNext = valid<CompleteRun>({ ...generationTemplate, baselineRunId: before.runId,
       requestedUrl: before.requestedUrl,
       scan: { ...generationTemplate.scan, context: { ...generationTemplate.scan.context,
         finalUrl: before.scan.context.finalUrl } } });
+    const next = valid<CompleteRun>(comparisonForRuns(before, linkedNext, [], previewIntent.findingId));
+    await prepareAvailableComparison(next);
     await page.evaluate(next => window.m104.resolveKey('preview-rescan', {
       status: 200, body: { ok: true, run: structuredClone(next) },
     }), next);
@@ -553,7 +583,8 @@ describe('M5-01 intentional rescan UI', { concurrency: false, timeout: 120000 },
     const laterGuidance = await supportedGuidanceEnvelope(next.runId, 'groq');
     const linkedGuidance = {
       ...laterGuidance,
-      run: valid<CompleteRun>({ ...laterGuidance.run, baselineRunId: baseline.runId }),
+      run: valid<CompleteRun>({ ...laterGuidance.run, baselineRunId: baseline.runId,
+        comparison: structuredClone(next.comparison) }),
     };
     await page.evaluate(() => {
       window.m104.guidance = () => window.m104.hold('later-guidance');
@@ -580,7 +611,8 @@ describe('M5-01 intentional rescan UI', { concurrency: false, timeout: 120000 },
     assert.equal(await page.evaluate(() => window.m104.calls.length), callsBefore);
     await page.getByRole('button', { name: 'Return to later results', exact: true }).click();
     assert.ok(await page.getByRole('heading', { name: 'Results', exact: true }).evaluate(node => node === document.activeElement));
-    assert.equal(await results().getByText(next.scan.context.finalUrl.value, { exact: true }).count(), 1);
+    assert.equal(await results().locator('dl.results-context')
+      .getByText(next.scan.context.finalUrl.value, { exact: true }).count(), 1);
     await page.getByRole('heading', { name: 'Eligible for generation', exact: true }).waitFor();
     await page.getByRole('button', { name: 'Return to baseline', exact: true }).click();
     assert.equal(await findings().getByRole('button').nth(1).getAttribute('aria-pressed'), 'true',
@@ -609,9 +641,14 @@ describe('M5-01 intentional rescan UI', { concurrency: false, timeout: 120000 },
     await submit('groq');
     const intent = (await rescanCalls()).at(-1)!.value as { runId: string };
     const later = laterRun(reviewed, intent.runId, 'groq');
+    await prepareAvailableComparison(later);
     await page.evaluate(later => window.m104.resolveKey('reviewed-preview-rescan', {
       status: 200, body: { ok: true, run: structuredClone(later) },
     }), later);
+    await page.getByRole('heading', { name: 'Comparison', exact: true }).waitFor();
+    const comparisonText = await page.getByRole('heading', { name: 'Comparison', exact: true }).locator('xpath=..').innerText();
+    assert.match(comparisonText, /AI original proposal/i);
+    assert.match(comparisonText, /Human decision/i);
     await page.getByRole('button', { name: 'Return to baseline', exact: true }).click();
     await page.getByText('This is the original model-generated proposal, preserved after human review.', { exact: true }).waitFor();
     await page.getByText('Saved review decision', { exact: true }).waitFor();
@@ -630,9 +667,11 @@ describe('M5-01 intentional rescan UI', { concurrency: false, timeout: 120000 },
     await submit('groq');
     const intent = (await rescanCalls()).at(-1)!.value as { runId: string };
     const stages = reviewProfileStages('image-alt', intent.runId, 'groq');
-    const linkedScan = valid<CompleteRun>({ ...stages.scan, baselineRunId: original.runId,
+    const comparisonInput = valid<CompleteRun>({ ...stages.scan, baselineRunId: original.runId,
       requestedUrl: original.requestedUrl,
       scan: { ...stages.scan.scan, context: { ...stages.scan.scan.context, finalUrl: original.scan.context.finalUrl } } });
+    const linkedScan = valid<CompleteRun>(comparisonForRuns(original, comparisonInput));
+    await prepareAvailableComparison(linkedScan);
     await page.evaluate(linkedScan => window.m104.resolveKey('review-during-preview-rescan', {
       status: 200, body: { ok: true, run: structuredClone(linkedScan) },
     }), linkedScan);
@@ -640,10 +679,12 @@ describe('M5-01 intentional rescan UI', { concurrency: false, timeout: 120000 },
     await selectFinding();
     const linkedGuidance = { ...stages.guidance,
       run: valid<CompleteRun>({ ...stages.guidance.run, baselineRunId: original.runId,
+        comparison: structuredClone(linkedScan.comparison),
         requestedUrl: original.requestedUrl,
         scan: { ...stages.guidance.run.scan, context: { ...stages.guidance.run.scan.context,
           finalUrl: original.scan.context.finalUrl } } }) };
     const linkedPending = valid<CompleteRun>({ ...stages.pending, baselineRunId: original.runId,
+      comparison: structuredClone(linkedScan.comparison),
       requestedUrl: original.requestedUrl,
       scan: { ...stages.pending.scan, context: { ...stages.pending.scan.context, finalUrl: original.scan.context.finalUrl } } });
     const reviewed = reviewedProfileRun('approve', 'image-alt', intent.runId, 'groq', undefined, linkedPending);
@@ -714,7 +755,7 @@ describe('M5-01 intentional rescan UI', { concurrency: false, timeout: 120000 },
     assert.equal(await page.getByRole('button', { name: 'Return to baseline', exact: true }).count(), 0);
   });
 
-  it('composes the built main transport as one exact same-origin JSON POST', async () => {
+  it('composes the built main transport as one exact same-origin rescan POST and comparison GET', async () => {
     await harness.close();
     harness = await startHarness(false, 'main');
     page = harness.page;
@@ -725,10 +766,18 @@ describe('M5-01 intentional rescan UI', { concurrency: false, timeout: 120000 },
         window.m104.fetch = (input, init = {}) => {
           const pathname = new URL(typeof input === 'string' ? input : input instanceof URL ? input.href : input.url,
             location.href).pathname;
-          const run = pathname === '/api/runs' ? before : (() => {
+          if (pathname === '/api/runs') return Promise.resolve(new Response(JSON.stringify({ ok: true, run: before }), {
+            status: 200, headers: { 'Content-Type': 'application/json' },
+          }));
+          if (pathname.startsWith('/api/runs/')) return Promise.resolve(new Response(JSON.stringify({ ok: true,
+            run: structuredClone(window.m104.raw), interrupted: false, comparisonLineage: { status: 'available' } }), {
+            status: 200, headers: { 'Content-Type': 'application/json' },
+          }));
+          const run = (() => {
             const intent = JSON.parse(typeof init.body === 'string' ? init.body : '{}');
             return { ...structuredClone(next), runId: intent.runId, baselineRunId: intent.baselineRunId };
           })();
+          window.m104.raw = structuredClone(run);
           return Promise.resolve(new Response(JSON.stringify({ ok: true, run }), {
             status: 200, headers: { 'Content-Type': 'application/json' },
           }));
@@ -743,11 +792,14 @@ describe('M5-01 intentional rescan UI', { concurrency: false, timeout: 120000 },
       await submit('groq');
       const posts = await page.evaluate(() => window.m104.calls.filter(call => call.stage === 'http')
         .map(call => call.stage === 'http' ? call.value : null));
-      assert.equal(posts.length, 2);
+      assert.equal(posts.length, 3);
       const rescan = posts[1]!;
       assert.deepEqual({ url: rescan.url, method: rescan.method, contentType: rescan.contentType },
         { url: '/api/rescans', method: 'POST', contentType: 'application/json' });
-      assert.deepEqual(Object.keys(JSON.parse(rescan.body!)).sort(), ['baselineRunId', 'findingId', 'mode', 'runId']);
+      const rescanIntent = JSON.parse(rescan.body!) as { runId: string };
+      assert.deepEqual(Object.keys(rescanIntent).sort(), ['baselineRunId', 'findingId', 'mode', 'runId']);
+      assert.deepEqual({ url: posts[2]!.url, method: posts[2]!.method, body: posts[2]!.body },
+        { url: `/api/runs/${encodeURIComponent(rescanIntent.runId)}`, method: 'GET', body: null });
     } finally {
       await harness.close();
       harness = await startHarness(false, 'app');

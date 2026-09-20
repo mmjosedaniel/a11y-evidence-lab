@@ -1,17 +1,18 @@
 # UI design documentation
 
-- **Status:** M1-04 Analyze/Results and M2-03 guidance retain their recorded verification limits. M3-05 adds generation and original proposal presentation. M4-02 implements individual review; M4-03 verifies human decisions on isolated authentic-source copies. M5-01 adds intentional rescan and read-only immediate baseline navigation. Comparison remains planning guidance.
-- **Last reviewed:** 2026-09-16
+- **Status:** M1-04 Analyze/Results and M2-03 guidance retain their recorded verification limits. M3-05 adds generation and original proposal presentation. M4-02 implements individual review; M4-03 verifies human decisions on isolated authentic-source copies. M5-01 adds intentional rescan and read-only immediate baseline navigation. M5-03 is Complete with saved comparison, accepted UI verification, native deletion/readback proof and final critical review in its owning plan.
+- **Last reviewed:** 2026-09-20
 - **Analyze and Results contract:** [Analyze and results presentation](ANALYZE_AND_RESULTS_PRESENTATION.md)
 - **Implemented guidance evidence and limits:** [M2-03 renewed closure](../plans/completed/m2-03-sufficiency-abstention-and-detail-ui.md#m203-c-post01-closure--renewed-task-closure)
 - **Implemented review evidence and limits:** [M4-02 closure](../plans/completed/m4-02-accessible-review-ui.md#m402-final-01--integrated-review-and-task-closure) and [M4-03 authentic-proposal checkpoint](../plans/completed/m4-03-review-checkpoint.md#m403-final-01--integrated-review-and-task-closure)
 - **Intentional rescan evidence:** [M5-01 task plan](../plans/completed/m5-01-intentional-rescan.md)
+- **Implemented comparison evidence and limits:** [Saved comparison presentation](ANALYZE_AND_RESULTS_PRESENTATION.md#m5-03-saved-comparison) and [M5-03 UI acceptance](../plans/completed/m5-03-comparison-persistence-and-ui.md#m503-c-review-02--presentation-slice-accepted)
 - **Zoom verification timing:** [All 200% zoom tests are Deferred until after MVP](../requirements/quality-security-and-operations/APPLICATION_ACCESSIBILITY.md#200-zoom-verification-deferral--2026-09-15-utc); accessible zoom/reflow behavior remains required, and historical results and omissions remain in their evidence records.
 - **Visual direction:** [Visual foundations](VISUAL_FOUNDATIONS.md)
 
 ## Document role
 
-This directory describes the smallest coherent interface for the accepted portfolio MVP. [Analyze and results presentation](ANALYZE_AND_RESULTS_PRESENTATION.md) preserves the accepted M1-04 visible contract through OD-027 and documents the [M2-03 guidance](ANALYZE_AND_RESULTS_PRESENTATION.md#m2-03-selected-finding-guidance), [M3-05 generation](ANALYZE_AND_RESULTS_PRESENTATION.md#m3-05-selected-finding-generation), [M4-02 review](ANALYZE_AND_RESULTS_PRESENTATION.md#m4-02-selected-finding-review) and [M5-01 rescan](ANALYZE_AND_RESULTS_PRESENTATION.md#m5-01-intentional-rescan) extensions. Other material in this directory remains reversible guidance for information hierarchy, minimum visible regions, and visual foundations. This directory does not select packages or components, define a second workflow state model, or prove that an interface passes its verification gates.
+This directory describes the smallest coherent interface for the accepted portfolio MVP. [Analyze and results presentation](ANALYZE_AND_RESULTS_PRESENTATION.md) preserves the accepted M1-04 visible contract through OD-027 and documents the [M2-03 guidance](ANALYZE_AND_RESULTS_PRESENTATION.md#m2-03-selected-finding-guidance), [M3-05 generation](ANALYZE_AND_RESULTS_PRESENTATION.md#m3-05-selected-finding-generation), [M4-02 review](ANALYZE_AND_RESULTS_PRESENTATION.md#m4-02-selected-finding-review) [M5-01 rescan](ANALYZE_AND_RESULTS_PRESENTATION.md#m5-01-intentional-rescan), and [M5-03 saved comparison](ANALYZE_AND_RESULTS_PRESENTATION.md#m5-03-saved-comparison) extensions. Other material in this directory remains reversible guidance for information hierarchy, minimum visible regions, and visual foundations. This directory does not select packages or components, define a second workflow state model, or prove that an interface passes its verification gates.
 
 The identified rows in the [project requirements](../PROJECT_REQUIREMENTS.md) and their focused modules remain authoritative. [OD-027](../requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-027--simplify-analysis-and-results-presentation) reconciles the Analyze/Results presentation contract with those authorities. [ADR-0012](../architecture/decisions/ADR-0012-react-as-initial-user-interface-library.md) owns React's presentation-only boundary, the [development roadmap](../DEVELOPMENT_ROADMAP.md) owns implementation order, and the [documentation-only Gherkin specifications](../specs/README.md) provide derived behavior examples.
 
@@ -40,7 +41,7 @@ Use one responsive application shell. On wider layouts, the complete results lis
 | Selected-finding workspace | Human-readable Finding identity, deterministic explanation, affected element, page location, and direct rule-specific evidence. M2-03 adds explicit guidance, complete citations/notices, evidence sufficiency, supported eligibility, abstention and retrieval failure. M3-05 adds explicit generation, truthful invocation status and the original proposal. M4-02 adds individual review and distinct saved human decisions. Only one FindingWorkflow is selected at a time; sibling states remain visible and unchanged. | After a Finding is selected |
 | Failed analysis | Requested page, **Analysis could not be completed**, one safe stage-specific explanation, and any actionable persistence or cleanup uncertainty. It never presents partial success or a completed-results overview. | Only after failure |
 | Human decision | The original AI proposal, confidence and uncertainty, assumptions, blocking pre-acceptance judgment, non-blocking post-change reminder, support confirmation, and one approve, edit-and-accept, or reject path. Reviewer-authored content and the final decision remain distinct from the proposal. | Only for a validated proposal |
-| Comparison | Baseline and later references, pair comparability, target-match disposition when applicable, before/after deterministic evidence, outcome, rationale, limitations, and follow-up checks. Proposal or review information may appear only as context. | After an intentional later scan and comparison |
+| Comparison | Baseline and later references, pair comparability, target-match disposition when applicable, before/after deterministic evidence, outcome, rationale, limitations, and follow-up checks. Proposal or review information may appear only as context. | When saved comparison exists, including zero later Findings |
 
 Retained-run navigation is Deferred until after the portfolio MVP through `REQ-UX-014` and OD-026. The MVP provides no manual Run ID field, reload restoration, deep-link loading, run-history dashboard, project browser, or generalized work queue. Durable service-owned evidence remains available to later selected-Finding and comparison work.
 
@@ -60,6 +61,8 @@ Use explicit headings and source labels before color. Preserve this reading orde
 | Comparison | Label outcomes as deterministic evidence comparison. Keep limitations visible and never translate an outcome into accessibility, compliance, certification, or remediation-causality claims. |
 
 The semantic source colors in [Visual foundations](VISUAL_FOUNDATIONS.md) may reinforce these layers, but a heading, text label, icon, border treatment, or other non-color cue must carry the distinction.
+
+M5-03 comparison is a run-level region outside selected Finding detail so that valid zero-Finding results retain their saved evidence. Optional proposal and human context remain distinctly labeled and require verified baseline availability.
 
 ## Essential interaction and state rules
 

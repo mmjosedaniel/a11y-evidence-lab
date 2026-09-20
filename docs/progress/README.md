@@ -49,7 +49,7 @@ Add each new task record to this table in the same change that creates the file:
 | [M4-03](../DEVELOPMENT_ROADMAP.md#m4-03--integrate-and-verify-human-review) | [Review checkpoint](m4-03-review-checkpoint.md) | [Task plan](../plans/completed/m4-03-review-checkpoint.md) | Complete | 2026-09-15 |
 | [M5-01](../DEVELOPMENT_ROADMAP.md#m5-01--start-an-intentional-later-scan) | [Intentional rescan](m5-01-intentional-rescan.md) | [Task plan](../plans/completed/m5-01-intentional-rescan.md) | Complete | 2026-09-16 |
 | [M5-02](../DEVELOPMENT_ROADMAP.md#m5-02--apply-comparability-correlation-and-outcome-rules) | [Conservative comparison](m5-02-conservative-comparison.md) | [Task plan](../plans/completed/m5-02-conservative-comparison.md) | Complete | 2026-09-17 |
-| [M5-03](../DEVELOPMENT_ROADMAP.md#m5-03--persist-and-present-comparison-evidence) | [Comparison persistence and UI](m5-03-comparison-persistence-and-ui.md) | [Task plan](../plans/m5-03-comparison-persistence-and-ui.md) | In progress | 2026-09-19 |
+| [M5-03](../DEVELOPMENT_ROADMAP.md#m5-03--persist-and-present-comparison-evidence) | [Comparison persistence and UI](m5-03-comparison-persistence-and-ui.md) | [Task plan](../plans/completed/m5-03-comparison-persistence-and-ui.md) | Complete | 2026-09-20 |
 
 The mirrored status is a convenience snapshot only. The roadmap controls when a task is `Not started`, `In progress`, `Blocked`, or `Complete`.
 

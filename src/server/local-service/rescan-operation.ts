@@ -4,8 +4,9 @@ import type { CompletedRun, RunRepository, RunningRun } from '../persistence/run
 import { prepareScanRequest } from '../scan/scan-page.ts';
 import type { NativeRule } from '../scan/normalization/native-rule-evidence.ts';
 import type { RescanOutcome } from './contracts.ts';
+import { comparisonLineage } from './comparison-lineage.ts';
 
-type Failure = Extract<RescanOutcome, { ok: false }>;
+type Failure = Exclude<Extract<RescanOutcome, { ok: false }>, { comparisonPersisted: false }>;
 
 export type PreparedRescan = { ok: true; run: RunningRun; rule: NativeRule;
   baselineRun: CompletedRun; baselineFindingId: string };
@@ -38,6 +39,11 @@ export function prepareRescan(input: unknown, repository: RunRepository, applica
   if (baseline.value.status !== 'completed') return rejectedRescan('not-eligible');
   const finding = baseline.value.scan.findings.find(value => value.findingId === intent.findingId);
   if (!finding) return rejectedRescan('not-found');
+  if (baseline.value.comparison) {
+    const lineage = comparisonLineage(repository, baseline.value);
+    if (isStopping()) return rejectedRescan('shutdown');
+    if (lineage.status !== 'available') return rejectedRescan('comparison-lineage');
+  }
   const request = prepareScanRequest(baseline.value.requestedUrl, intent.mode);
   if (!request.ok) return rejectedRescan('invalid-request');
   const checked = validateRun({ ...request.value, formatVersion: 1, runId: intent.runId,

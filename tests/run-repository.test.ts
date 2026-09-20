@@ -28,6 +28,7 @@ import {
   runningGenerationRun,
 } from './helpers/m302-generation-fixture.ts';
 import { reviewedRun } from './helpers/m401-review-fixture.ts';
+import { mutate as mutateComparison, remove as removeComparison, withComparison } from './helpers/m503-comparison-fixture.ts';
 
 // M102-STORE-01: one real publish-or-preserve boundary, no service/scanner behavior.
 const repo = fileURLToPath(new URL('../', import.meta.url));
@@ -1059,6 +1060,44 @@ for (const phase of ['open', 'partial-write', 'flush', 'close', 'rename'] as con
     });
   });
 }
+
+test('selected-Finding retrieval and generation publishers preserve a saved comparison', options, async () => {
+  await withSandbox(({ runs }) => {
+    const store = open(runs) as RunRepository & {
+      updateComparison(expected: CompletedRun, input: unknown): StoreResult<CompletedRun>;
+    };
+    const original = linked(completedScanRun() as unknown as CompletedRun);
+    success(store.create(linked(runningRun())));
+    success(store.finish(original));
+    const compared = success(store.updateComparison(original, withComparison(original)));
+
+    const retrievalRunning = withComparison(linked(runningRetrievalRun() as unknown as CompletedRun));
+    const supported = withComparison(linked(assessedSupportedRetrievalRun() as unknown as CompletedRun));
+    const generationRunning = withComparison(linked(runningGenerationRun() as unknown as CompletedRun));
+    const pending = withComparison(linked(proposalGenerationRun() as unknown as CompletedRun));
+    const comparedBytes = bytes(runs);
+    const changedRetrieval = mutateComparison(retrievalRunning,
+      ['comparison', 'baseline', 'findingId'], 'finding-changed');
+    assert.ok(validateRun(changedRetrieval).ok);
+    failure(store.updateRetrieval(compared, removeComparison(retrievalRunning, ['comparison'])), 'invalid-transition');
+    failure(store.updateRetrieval(compared, changedRetrieval), 'invalid-transition');
+    assert.deepEqual(bytes(runs), comparedBytes);
+    success(store.updateRetrieval(compared, retrievalRunning));
+    success(store.updateRetrieval(retrievalRunning, supported));
+    const supportedBytes = bytes(runs);
+    const changedGeneration = mutateComparison(generationRunning,
+      ['comparison', 'baseline', 'findingId'], 'finding-changed');
+    assert.ok(validateRun(changedGeneration).ok);
+    failure(store.updateGeneration(supported, removeComparison(generationRunning, ['comparison'])), 'invalid-transition');
+    failure(store.updateGeneration(supported, changedGeneration), 'invalid-transition');
+    assert.deepEqual(bytes(runs), supportedBytes);
+    success(store.updateGeneration(supported, generationRunning));
+    const durable = success(store.updateGeneration(generationRunning, pending));
+    assert.deepEqual((durable as unknown as Record<string, unknown>).comparison,
+      (compared as unknown as Record<string, unknown>).comparison);
+    assert.deepEqual(success(open(runs).read('run-01')), durable);
+  });
+});
 
 // M302-C-RED-01: generation uses the same expected-current, publish-or-preserve boundary.
 test('updateGeneration publishes only running then terminal generation and preserves the aggregate', options, async () => {

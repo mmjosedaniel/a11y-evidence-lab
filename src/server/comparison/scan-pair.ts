@@ -1,5 +1,5 @@
 import type { Rule } from '../domain/run-contract/run-policy.ts';
-import type { CompletedRun } from './comparison-contract.ts';
+import type { CompleteScanContext } from '../domain/run-contract/run-types.ts';
 
 export type ComparisonProfile = {
   readonly requestedUrl: string;
@@ -24,7 +24,7 @@ export type PairMismatch =
   | 'browser-version' | 'scanner-version' | 'evidence-policy' | 'document-scope'
   | 'readiness' | 'scan-context' | 'contrast-profile';
 
-export function comparisonProfile(run: CompletedRun, selectedRule: Rule): ComparisonProfile {
+export function comparisonProfile(run: { readonly requestedUrl: string; readonly scan: { readonly context: CompleteScanContext } }, selectedRule: Rule): ComparisonProfile {
   const context = run.scan.context;
   return Object.freeze({
     requestedUrl: run.requestedUrl,

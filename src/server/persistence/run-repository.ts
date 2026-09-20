@@ -1,5 +1,6 @@
 import { checkGenerationTransition } from './run-repository/generation-transition.ts';
 import { checkReviewTransition } from './run-repository/review-transition.ts';
+import { checkComparisonTransition } from './run-repository/comparison-transition.ts';
 import fs from 'node:fs';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -132,7 +133,7 @@ export function openRunRepository(rootDirectory: string): StoreResult<RunReposit
     }
   }
 
-  function updateFinding(expected: CompletedRun, input: unknown,
+  function updateAggregate(expected: CompletedRun, input: unknown,
     check: (expected: CompletedRun, current: CompletedRun, next: CompletedRun) => void): StoreResult<CompletedRun> {
     const expectedResult = validateRun(expected);
     const validated = validateRun(input);
@@ -202,9 +203,10 @@ export function openRunRepository(rootDirectory: string): StoreResult<RunReposit
         return publish(success, buffer, current.directory, false, current.canonical);
       } catch (error) { return failure(error, 'read-failed'); }
     },
-    updateRetrieval(expected, input) { return updateFinding(expected, input, checkRetrievalTransition); },
-    updateGeneration(expected, input) { return updateFinding(expected, input, checkGenerationTransition); },
-    updateReview(expected, input) { return updateFinding(expected, input, checkReviewTransition); },
+    updateComparison(expected, input) { return updateAggregate(expected, input, checkComparisonTransition); },
+    updateRetrieval(expected, input) { return updateAggregate(expected, input, checkRetrievalTransition); },
+    updateGeneration(expected, input) { return updateAggregate(expected, input, checkGenerationTransition); },
+    updateReview(expected, input) { return updateAggregate(expected, input, checkReviewTransition); },
   };
   return { ok: true, value: repository };
 }

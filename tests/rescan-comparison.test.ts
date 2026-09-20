@@ -139,21 +139,24 @@ test('contains comparator exceptions and maps failed scan, publication and lifet
   assert.equal(failedResult.outcome.ok, false);
   assert.deepEqual(failedResult.comparison, { ok: false, error: 'scan-unavailable' });
   assert.equal(failedCompleted, 0);
-  for (const boundary of ['create', 'publication', 'abort', 'reflection-stop', 'commit-stop', 'deadline'] as const) {
+  for (const boundary of ['create', 'publication', 'abort', 'reflection-stop', 'commit-stop',
+    'commit-deadline', 'deadline'] as const) {
     const f = setup('zero'); const controller = new AbortController();
     if (boundary === 'create') f.repository.create = () => ({ ok: false, value: f.run });
     if (boundary === 'publication') f.repository.finish = () => ({ ok: false, cleanupFailed: false, value: undefined });
     if (boundary === 'abort') controller.abort();
     if (boundary === 'deadline') f.state.deadline = true;
     if (boundary === 'commit-stop') f.repository.finish = value => { f.state.stopping = true; return { ok: true, value }; };
+    if (boundary === 'commit-deadline') f.repository.finish = value => { f.state.deadline = true; return { ok: true, value }; };
     const envelope = boundary === 'reflection-stop' ? new Proxy({}, {
       ownKeys: () => { f.state.stopping = true; return ['run', 'candidates']; },
       getOwnPropertyDescriptor: (_target, key) => ({ configurable: true, enumerable: true, writable: true,
         value: key === 'run' ? f.terminal : [imagePassCandidate()] }),
     }) : { run: f.terminal, candidates: [imagePassCandidate()] };
     const result = await executeRescanComparison(f.dependencies, f.prepared, controller.signal, async () => envelope);
-    if (boundary === 'commit-stop') assert.equal(result.outcome.ok, true);
+    if (boundary === 'commit-stop' || boundary === 'commit-deadline') assert.equal(result.outcome.ok, true);
     assert.deepEqual(result.comparison, { ok: false,
-      error: ['abort', 'reflection-stop', 'commit-stop', 'deadline'].includes(boundary) ? 'shutdown' : 'scan-unavailable' });
+      error: ['abort', 'reflection-stop', 'commit-stop', 'commit-deadline', 'deadline'].includes(boundary)
+        ? 'shutdown' : 'scan-unavailable' });
   }
 });

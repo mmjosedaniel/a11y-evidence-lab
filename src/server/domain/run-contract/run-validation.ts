@@ -1,4 +1,5 @@
 import { invocationMatchesProvider } from '../../generation/generation-contract.ts';
+import { readStoredComparison } from './comparison-validation.ts';
 import { failureCategories } from './run-policy.ts';
 import {
   readChoice,
@@ -40,7 +41,7 @@ function readRun(input: unknown): PageAnalysisRun {
   const record = readObject(input);
   const commonKeys = [...(Object.hasOwn(record, 'baselineRunId') ? ['baselineRunId'] : []), 'formatVersion', 'runId', 'createdAt', 'applicationRevision', 'requestedUrl', 'providerContext', 'status'];
   const status = readChoice(record.status, ['running', 'completed', 'failed']);
-  requireKeys(record, [...commonKeys, ...(status === 'running' ? ['scanContext'] : status === 'completed' ? ['finishedAt', 'scan'] : ['scanContext', 'finishedAt', 'failure'])]);
+  requireKeys(record, [...commonKeys, ...(status === 'running' ? ['scanContext'] : status === 'completed' ? ['finishedAt', 'scan', ...(Object.hasOwn(record, 'comparison') ? ['comparison'] : [])] : ['scanContext', 'finishedAt', 'failure'])]);
   const common: RunContext = {
     formatVersion: readChoice(record.formatVersion, [1]), runId: readId(record.runId),
     createdAt: readTime(record.createdAt), applicationRevision: readPattern(record.applicationRevision, /^[0-9a-f]{40}$/),
@@ -61,6 +62,11 @@ function readRun(input: unknown): PageAnalysisRun {
       }
     }
     requireChronology(common.createdAt, scan.context, finishedAt);
+    if (Object.hasOwn(record, 'comparison')) {
+      requireValid(common.baselineRunId !== undefined);
+      const comparison = readStoredComparison(record.comparison, { requestedUrl: common.requestedUrl, scan });
+      return Object.freeze({ ...common, status, finishedAt, scan, comparison });
+    }
     return Object.freeze({ ...common, status, finishedAt, scan });
   }
   const context = readContext(record.scanContext);

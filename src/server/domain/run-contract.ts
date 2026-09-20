@@ -14,3 +14,4 @@ export type {
 
 export { validateScan } from './run-contract/scan-validation.ts';
 export { validateRun } from './run-contract/run-validation.ts';
+export type { StoredComparison, ComparisonViolation, ComparisonPass } from './run-contract/comparison-types.ts';
