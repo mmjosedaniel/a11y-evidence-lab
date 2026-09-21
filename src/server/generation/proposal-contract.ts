@@ -1,3 +1,4 @@
+import { emitGenerationRejection, type GenerationRejectionSink } from './generation-diagnostics.ts';
 import { assessFindingEvidence } from '../domain/finding-sufficiency.ts';
 import type { EvidencePath } from '../domain/finding-analysis-types.ts';
 import { readArray, readChoice, readObject, requireValid } from '../domain/run-contract/contract-value-reader.ts';
@@ -90,21 +91,33 @@ export function validateProposal(
     const support = classifyGuidanceSupport(finding, retrieval.value);
     requireValid(support.ok && support.value.state === 'supported');
 
+    return validateProposalCandidate(candidate, { findingId: finding.findingId,
+      availableEvidenceReferences: evidence.availableReferences,
+      passageIds: retrieval.value.passages.map(passage => passage.passageId) });
+  } catch { return failure; }
+}
+
+export function validateProposalCandidate(candidate: unknown, context: {
+  readonly findingId: string;
+  readonly availableEvidenceReferences: readonly EvidencePath[];
+  readonly passageIds: readonly string[];
+}, onRejection?: GenerationRejectionSink): ProposalValidationResult {
+  try {
     const root = readObject(candidate, [
       'type', 'findingId', 'findingSummary', 'userImpact', 'remediation',
       'evidenceSufficiency', 'confidence', 'uncertainty', 'assumptions',
       'blockingManualJudgment', 'postChangeVerificationReminder',
     ]);
-    requireValid(root.type === 'proposal' && root.findingId === finding.findingId);
+    requireValid(root.type === 'proposal' && root.findingId === context.findingId);
     const sufficiency = readObject(root.evidenceSufficiency, ['findingEvidence', 'guidance']);
     requireValid(sufficiency.findingEvidence === 'complete' && sufficiency.guidance === 'supported');
     const assumptions = readArray(root.assumptions, item => readProse(item, 500));
     requireValid(assumptions.length <= 5);
-    const passages = retrieval.value.passages.map(passage => passage.passageId);
-    const available = evidence.availableReferences;
+    const passages = context.passageIds;
+    const available = context.availableEvidenceReferences;
     const value: Proposal = Object.freeze({
       type: 'proposal',
-      findingId: finding.findingId,
+      findingId: context.findingId,
       findingSummary: readSupportedText(root.findingSummary, available, passages, 1, 0),
       userImpact: readSupportedText(root.userImpact, available, passages, 0, 1),
       remediation: readSupportedText(root.remediation, available, passages, 0, 1, 2000),
@@ -117,6 +130,7 @@ export function validateProposal(
     });
     return Object.freeze({ ok: true, value });
   } catch {
+    emitGenerationRejection(onRejection, 'candidate/contract');
     return failure;
   }
 }

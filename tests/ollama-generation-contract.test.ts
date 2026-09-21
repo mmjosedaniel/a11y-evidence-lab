@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { GENERATION_INSTRUCTIONS, GENERATION_SCHEMA, LOCAL_PARAMETERS } from '../src/server/generation/generation-artifacts.ts';
-import type { AttemptTransport, GenerationConfiguration, GenerationRequest } from '../src/server/generation/generation-contract.ts';
+import type { AttemptTransport, GenerationConfiguration, GenerationRequest, PreparedGeneration } from '../src/server/generation/generation-contract.ts';
 import { buildGenerationInput, createGenerationRequest } from '../src/server/generation/generation-input.ts';
 import { QWEN_CONFIGURATION, validateOllamaGenerationMetadata } from '../src/server/generation/ollama-generation-model.ts';
 import { prepareOllamaGenerationWire } from '../src/server/generation/ollama-generation-fit.ts';
 import { dispatchOllamaGeneration, requestOllamaGenerationMetadata } from '../src/server/generation/ollama-generation-http.ts';
+import { createOllamaGenerationAdapter } from '../src/server/generation/ollama-generation.ts';
 import { readCorpusBytes } from '../src/server/retrieval/corpus-catalog.ts';
 import { generationFixture } from './helpers/m302-generation-fixture.ts';
 import { generationRequest, manuallySettledNativeHarness, nativeHarness, ollamaChatBody, QWEN_DIGEST, validMetadata } from './helpers/m303-ollama-fixture.ts';
@@ -315,6 +316,82 @@ test('dispatch admits only one complete exact-model assistant stop response and 
     assert.equal(result.ok, false);
     if (!result.ok) assert.equal(result.error, 'incomplete-output');
   }
+});
+
+test('reports only frozen content-free Local rejection codes without changing dispatch behavior', async () => {
+  const vectors = [
+    [{ body: '{' }, 'adapter-response/body'],
+    [{ body: ollamaChatBody({}, { model: 'SECRET-model' }) }, 'adapter-response/envelope'],
+    [{ body: ollamaChatBody('SECRET-content') }, 'adapter-response/content'],
+    [{ body: Buffer.from([0xc3, 0x28]) }, 'adapter-response/body'],
+    [{ body: '{}', complete: false }, 'adapter-response/body'],
+  ] as const;
+  for (const [reply, code] of vectors) {
+    const events: unknown[] = [];
+    const harness = nativeHarness([reply]);
+    const result = await dispatchOllamaGeneration('{}', new AbortController().signal, start => start(), harness.request,
+      (event: unknown) => { events.push(event); });
+    assert.deepEqual(result, { ok: false, error: 'incomplete-output', cleanup: 'complete' });
+    assert.equal(events.length, 1, code);
+    assert.deepEqual(events[0], { code }, code);
+    assert.equal(Object.isFrozen(events[0]), true, code);
+    assert.deepEqual(Object.keys(events[0] as object), ['code'], code);
+    assert.equal(JSON.stringify(events).includes('SECRET'), false, code);
+  }
+
+  for (const sink of [
+    () => { throw new Error('SECRET synchronous sink failure'); },
+    () => Promise.reject(new Error('SECRET asynchronous sink failure')),
+    () => Object.defineProperty({}, 'then', { get() { throw new Error('SECRET thenable failure'); } }),
+  ]) {
+    const harness = nativeHarness([{ body: '{' }]);
+    assert.deepEqual(await dispatchOllamaGeneration('{}', new AbortController().signal, start => start(), harness.request, sink),
+      { ok: false, error: 'incomplete-output', cleanup: 'complete' });
+    await Promise.resolve();
+  }
+
+  const successfulEvents: unknown[] = [];
+  const successful = nativeHarness([{ body: ollamaChatBody({ accepted: true }) }]);
+  assert.deepEqual(await dispatchOllamaGeneration('{}', new AbortController().signal, start => start(), successful.request,
+    (event: unknown) => { successfulEvents.push(event); }),
+  { ok: true, candidate: { accepted: true }, complete: true, cleanup: 'complete' });
+  const unrelated = nativeHarness([{ status: 500, body: 'SECRET provider body' }]);
+  assert.deepEqual(await dispatchOllamaGeneration('{}', new AbortController().signal, start => start(), unrelated.request,
+    (event: unknown) => { successfulEvents.push(event); }),
+  { ok: false, error: 'provider', cleanup: 'complete' });
+  assert.deepEqual(successfulEvents, []);
+
+  const metadata = validMetadata();
+  const forwarded: unknown[] = [];
+  const adapterNative = nativeHarness([
+    { body: JSON.stringify(metadata.version) }, { body: JSON.stringify(metadata.show) },
+    { body: JSON.stringify(metadata.tags) }, { body: ollamaChatBody({}, { model: 'SECRET-model' }) },
+  ]);
+  const adapter = createOllamaGenerationAdapter(adapterNative.request, (event: unknown) => { forwarded.push(event); });
+  const unknownPrepared = await adapter.prepare(generationRequest(), new AbortController().signal);
+  assert.ok(unknownPrepared !== null && typeof unknownPrepared === 'object' && Object.hasOwn(unknownPrepared, 'ok'));
+  const prepared = unknownPrepared as PreparedGeneration;
+  assert.equal(prepared.ok, true);
+  if (!prepared.ok) throw new Error('Expected prepared Local adapter');
+  assert.deepEqual(await prepared.dispatch(new AbortController().signal, <T>(start: () => T) => start()),
+    { ok: false, error: 'incomplete-output', cleanup: 'complete' });
+  assert.deepEqual(forwarded, [{ code: 'adapter-response/envelope' }]);
+});
+
+test('retains a detailed envelope event when a later response error wins terminal precedence', async () => {
+  const secret = 'SECRET invalid envelope';
+  const base = nativeHarness([{ body: ollamaChatBody({}, { model: secret }) }]);
+  const request: typeof base.request = (options, callback) => base.request(options, response => {
+    callback(response);
+    response.once('end', () => { response.emit('error', new Error('later response failure')); });
+  });
+  const events: unknown[] = [];
+  const result = await dispatchOllamaGeneration('{}', new AbortController().signal, start => start(), request,
+    (event: unknown) => { events.push(event); });
+  assert.deepEqual(result, { ok: false, error: 'network', cleanup: 'uncertain' });
+  assert.deepEqual(events, [{ code: 'adapter-response/envelope' }]);
+  assert.equal(JSON.stringify(events).includes(secret), false);
+  assert.equal(base.calls.length, 1);
 });
 
 test('dispatch normalizes HTTP and terminal transport failures without retaining diagnostics', async () => {
