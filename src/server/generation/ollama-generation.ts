@@ -1,10 +1,11 @@
+import { emitGenerationRejection, type GenerationRejectionSink } from './generation-diagnostics.ts';
 import type { GenerationAdapter, GenerationRequest, PreparedGeneration } from './generation-contract.ts';
 import { prepareOllamaGenerationWire } from './ollama-generation-fit.ts';
 import { dispatchOllamaGeneration, requestOllamaGenerationMetadata } from './ollama-generation-http.ts';
 import type { OllamaNativeRequest } from './ollama-generation-http.ts';
 import { QWEN_CONFIGURATION, validateOllamaGenerationMetadata } from './ollama-generation-model.ts';
 
-export function createOllamaGenerationAdapter(requestImplementation?: OllamaNativeRequest): GenerationAdapter {
+export function createOllamaGenerationAdapter(requestImplementation?: OllamaNativeRequest, onRejection?: GenerationRejectionSink): GenerationAdapter {
   return Object.freeze({
     configuration: QWEN_CONFIGURATION,
     async prepare(request: GenerationRequest, signal: AbortSignal): Promise<PreparedGeneration> {
@@ -26,7 +27,7 @@ export function createOllamaGenerationAdapter(requestImplementation?: OllamaNati
         configuration: QWEN_CONFIGURATION,
         fit: wire.fit,
         dispatch: (dispatchSignal, attemptTransport) =>
-          dispatchOllamaGeneration(wire.body, dispatchSignal, attemptTransport, requestImplementation),
+          dispatchOllamaGeneration(wire.body, dispatchSignal, attemptTransport, requestImplementation, onRejection),
         cleanup: 'complete',
       } satisfies PreparedGeneration);
     },

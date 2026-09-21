@@ -1,3 +1,4 @@
+import { emitGenerationRejection, type GenerationRejectionSink } from './generation-diagnostics.ts';
 import { request as nativeRequest } from 'node:http';
 import type { ClientRequest, IncomingMessage, RequestOptions } from 'node:http';
 import type { Socket } from 'node:net';
@@ -31,21 +32,30 @@ function noOutputExtensions(value: Record<string, unknown>): boolean {
   return !['images', 'image', 'tools', 'tool_calls', 'remote_host', 'remote_model'].some(key => Object.hasOwn(value, key));
 }
 
-function chatCandidate(value: unknown): unknown {
+function chatCandidate(value: unknown, onRejection?: GenerationRejectionSink): unknown {
   if (!object(value) || !noOutputExtensions(value) || value.model !== 'qwen3.5:4b:local'
     || value.done !== true || value.done_reason !== 'stop' || !object(value.message)
     || !noOutputExtensions(value.message) || value.message.role !== 'assistant'
     || typeof value.message.content !== 'string'
     || (Object.hasOwn(value, 'thinking') && value.thinking !== '')
-    || (Object.hasOwn(value.message, 'thinking') && value.message.thinking !== '')) throw new Error('Invalid output');
-  const candidate: unknown = JSON.parse(value.message.content);
-  if (!object(candidate)) throw new Error('Invalid output');
-  return candidate;
+    || (Object.hasOwn(value.message, 'thinking') && value.message.thinking !== '')) {
+    emitGenerationRejection(onRejection, 'adapter-response/envelope');
+    throw new Error('Invalid output');
+  }
+  try {
+    const candidate: unknown = JSON.parse(value.message.content);
+    if (!object(candidate)) throw new Error('Invalid output');
+    return candidate;
+  } catch (error) {
+    emitGenerationRejection(onRejection, 'adapter-response/content');
+    throw error;
+  }
 }
 
 // The transport owns only its HTTP resources. Disconnect cannot prove runner cancellation.
 function exchange(options: RequestOptions, body: string, signal: AbortSignal, metadata: boolean,
-  start: AttemptTransport, requestImplementation: OllamaNativeRequest): Promise<WireResult> {
+  start: AttemptTransport, requestImplementation: OllamaNativeRequest, onRejection?: GenerationRejectionSink): Promise<WireResult> {
+  const rejectBody = () => { if (!metadata) emitGenerationRejection(onRejection, 'adapter-response/body'); };
   const invalid: WireError = metadata ? 'configuration' : 'incomplete-output';
   const network: WireError = metadata ? 'configuration' : 'network';
   const cancelled: WireError = metadata ? 'configuration' : 'shutdown';
@@ -151,24 +161,27 @@ function exchange(options: RequestOptions, body: string, signal: AbortSignal, me
         if (settled || pending || ended) return;
         try {
           if (typeof chunk !== 'string' && !Buffer.isBuffer(chunk) && !(chunk instanceof Uint8Array)) {
+            if (!statusError) rejectBody();
             failNow(statusError ?? invalid, true); return;
           }
           const length = typeof chunk === 'string' ? Buffer.byteLength(chunk, 'utf8') : chunk.byteLength;
-          if (length > BODY_LIMIT - bytes) { failNow(statusError ?? invalid, true); return; }
+          if (length > BODY_LIMIT - bytes) { if (!statusError) rejectBody(); failNow(statusError ?? invalid, true); return; }
           bytes += length;
           chunks.push(Buffer.from(chunk));
-        } catch { failNow(statusError ?? invalid, true); }
+        } catch { if (!statusError) rejectBody(); failNow(statusError ?? invalid, true); }
       });
       listen(incoming, 'end', () => {
         if (settled || ended) return;
         ended = true;
         if (!pending) {
           if (statusError) pending = { ok: false, error: statusError };
-          else if (!incoming.complete) pending = { ok: false, error: invalid };
+          else if (!incoming.complete) { rejectBody(); pending = { ok: false, error: invalid }; }
           else {
             try {
-              const value: unknown = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(Buffer.concat(chunks, bytes)));
-              pending = { ok: true, value: metadata ? value : chatCandidate(value) };
+              let value: unknown;
+              try { value = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(Buffer.concat(chunks, bytes))); }
+              catch (error) { rejectBody(); throw error; }
+              pending = { ok: true, value: metadata ? value : chatCandidate(value, onRejection) };
             } catch { pending = { ok: false, error: invalid }; }
           }
         }
@@ -215,8 +228,8 @@ export async function requestOllamaGenerationMetadata(kind: 'version' | 'show' |
 }
 
 export async function dispatchOllamaGeneration(body: string, signal: AbortSignal, attemptTransport: AttemptTransport,
-  requestImplementation: OllamaNativeRequest = nativeRequest): Promise<DispatchResult> {
-  const result = await exchange(requestOptions('/api/chat', body), body, signal, false, attemptTransport, requestImplementation);
+  requestImplementation: OllamaNativeRequest = nativeRequest, onRejection?: GenerationRejectionSink): Promise<DispatchResult> {
+  const result = await exchange(requestOptions('/api/chat', body), body, signal, false, attemptTransport, requestImplementation, onRejection);
   if (result.ok) return Object.freeze({ ok: true, candidate: result.value, complete: true, cleanup: 'complete' } as const);
   return Object.freeze({ ok: false,
     error: result.error === 'configuration' || result.error === 'missing-prerequisite' ? 'provider' : result.error,

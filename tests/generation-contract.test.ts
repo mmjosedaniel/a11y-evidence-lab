@@ -10,7 +10,7 @@ import {
   SCHEMA_VERSION,
 } from '../src/server/generation/generation-artifacts.ts';
 import { readProviderInvocation } from '../src/server/generation/generation-contract.ts';
-import { validateProposal } from '../src/server/generation/proposal-contract.ts';
+import { validateProposal, validateProposalCandidate } from '../src/server/generation/proposal-contract.ts';
 import type { Proposal, ProposalValidationResult } from '../src/server/generation/proposal-contract.ts';
 import {
   cloneCandidate,
@@ -130,6 +130,71 @@ test('admits exact proposals for every profile as detached deeply frozen values 
     fixture.proposal.assumptions[0] = 'Changed after validation';
     assert.deepEqual(value, original, profile);
   }
+});
+
+test('validates an authenticated candidate scope without inventing retrieval eligibility', () => {
+  for (const profile of ['image-alt', 'label', 'color-contrast'] as const satisfies readonly GenerationProfile[]) {
+    const fixture = generationFixture(profile);
+    const context = Object.freeze({
+      findingId: fixture.finding.findingId,
+      availableEvidenceReferences: assessFindingEvidence(fixture.finding).availableReferences,
+      passageIds: Object.freeze(fixture.retrieval.passages.map(({ passageId }) => passageId)),
+    });
+    const scoped = validateProposalCandidate(fixture.proposal, context);
+    const eligible = validateProposal(fixture.proposal, fixture);
+    assert.deepEqual(scoped, eligible, profile);
+    assert.equal(scoped.ok, true, profile);
+    if (!scoped.ok) throw new Error('Expected authenticated candidate scope to validate');
+    expectDeepFrozen(scoped);
+    const retained = structuredClone(scoped.value);
+    fixture.proposal.findingSummary.text = 'Changed after candidate validation';
+    assert.deepEqual(scoped.value, retained, profile);
+
+    assert.deepEqual(validateProposalCandidate(fixture.proposal, { ...context, findingId: 'other-finding' }), failure);
+    assert.deepEqual(validateProposalCandidate(fixture.proposal, {
+      ...context, availableEvidenceReferences: Object.freeze([]),
+    }), failure);
+    assert.deepEqual(validateProposalCandidate(fixture.proposal, {
+      ...context, passageIds: Object.freeze([]),
+    }), failure);
+  }
+});
+
+test('reports candidate rejection as one content-free constant while preserving validation', async () => {
+  const fixture = generationFixture();
+  const context = Object.freeze({
+    findingId: fixture.finding.findingId,
+    availableEvidenceReferences: assessFindingEvidence(fixture.finding).availableReferences,
+    passageIds: Object.freeze(fixture.retrieval.passages.map(({ passageId }) => passageId)),
+  });
+  const invalid = cloneCandidate(fixture.proposal);
+  invalid.findingId = 'SECRET-wrong-finding';
+  const events: unknown[] = [];
+  assert.deepEqual(validateProposalCandidate(invalid, context, (event: unknown) => { events.push(event); }), failure);
+  assert.deepEqual(events, [{ code: 'candidate/contract' }]);
+  assert.equal(Object.isFrozen(events[0]), true);
+  assert.deepEqual(Object.keys(events[0] as object), ['code']);
+  assert.equal(JSON.stringify(events).includes('SECRET'), false);
+
+  const successfulEvents: unknown[] = [];
+  assert.equal(validateProposalCandidate(fixture.proposal, context,
+    (event: unknown) => { successfulEvents.push(event); }).ok, true);
+  assert.deepEqual(successfulEvents, []);
+
+  let getterRead = false;
+  const hostile = new Proxy(invalid, {
+    ownKeys() { throw new Error('SECRET proxy failure'); },
+    get() { getterRead = true; throw new Error('SECRET getter failure'); },
+  });
+  for (const sink of [
+    (event: unknown) => { assert.deepEqual(event, { code: 'candidate/contract' }); throw new Error('SECRET sink'); },
+    () => Promise.reject(new Error('SECRET rejection')),
+    () => Object.defineProperty({}, 'then', { get() { throw new Error('SECRET thenable'); } }),
+  ]) {
+    assert.deepEqual(validateProposalCandidate(hostile, context, sink), failure);
+    await Promise.resolve();
+  }
+  assert.equal(getterRead, false);
 });
 
 test('requires the closed eleven-field shape and every closed supported-field shape', () => {

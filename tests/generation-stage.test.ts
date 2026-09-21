@@ -1,10 +1,14 @@
 import { executeGeneration } from '../src/server/generation/generation-stage.ts';
+import { executeGenerationOperation } from '../src/server/generation/generation-execution.ts';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { syncBuiltinESMExports } from 'node:module';
 import test from 'node:test';
 import { CORPUS_IDENTITY } from '../src/server/retrieval/corpus-identity.ts';
 import { SOURCE_NOTICES } from '../src/server/retrieval/source-notices.ts';
+import { validateProposal } from '../src/server/generation/proposal-contract.ts';
+import { createGroqGenerationAdapter } from '../src/server/generation/groq-generation.ts';
+import { groqGenerationRequest, virtualCredentialIO } from './helpers/m304-groq-fixture.ts';
 import {
   cloneCandidate,
   generationConfiguration,
@@ -279,6 +283,196 @@ test('projects only authenticated selected facts and canonical guidance into the
     assert.deepEqual(properties.confidence, { type: 'string', enum: ['high', 'medium', 'low'] });
     assertDeepFrozen(request);
   }
+});
+
+test('executes an admitted request through one marked transport capability and returns only closed observation', async () => {
+  const fixture = generationFixture();
+  const configuration = generationConfiguration() as StageConfiguration;
+  const harness = adapterHarness(configuration, { candidate: fixture.proposal });
+  const validated = validateProposal(fixture.proposal, fixture);
+  assert.equal(validated.ok, true);
+  if (!validated.ok) throw new Error('Expected the existing proposal reader to validate the fixture');
+  const events: string[] = [];
+  const result = await executeGenerationOperation({
+    signal: new AbortController().signal,
+    providerContext: localContext,
+    adapter: harness.adapter,
+    admit: () => Object.freeze({
+      status: 'ready' as const,
+      createRequest: (received: StageConfiguration) => {
+        assert.strictEqual(received, configuration);
+        events.push('request');
+        return Object.freeze({
+          messages: Object.freeze([]), schema: Object.freeze({}),
+          promptVersion: configuration.promptVersion, schemaVersion: configuration.schemaVersion,
+          outputContractVersion: configuration.outputContractVersion, controls: configuration.parameters,
+          deadlineMs: 120000 as const, configuration,
+        });
+      },
+      validateCandidate: (candidate: unknown) => {
+        events.push('validate');
+        return candidate === fixture.proposal ? validateProposal(candidate, fixture)
+          : Object.freeze({ ok: false as const, error: 'response-validation' as const });
+      },
+    }),
+    beforeTransport: () => { events.push('marker'); },
+  } as never);
+  assert.deepEqual(events, ['request', 'marker', 'validate']);
+  assert.equal(harness.calls.transport, 1);
+  assert.deepEqual(result, {
+    status: 'proposal', proposal: validated.value, attempted: true,
+    observation: {
+      adapterConfiguration: {
+        adapterId: configuration.adapterId, adapterVersion: configuration.adapterVersion,
+        endpointIdentity: configuration.endpoint, promptVersion: configuration.promptVersion,
+        schemaVersion: configuration.schemaVersion, outputContractVersion: configuration.outputContractVersion,
+        parameters: configuration.parameters,
+      },
+      outcome: 'response', validation: 'passed',
+    },
+    cleanupFailed: false,
+  });
+  assertDeepFrozen(result);
+});
+
+test('consumes the shared transport capability before rejecting unsafe marker effects', async t => {
+  const fixture = generationFixture();
+  for (const entry of [
+    { name: 'throwing marker', marker: () => { throw new Error('SECRET MARKER'); } },
+    { name: 'asynchronous marker', marker: () => Promise.resolve() },
+    { name: 'non-undefined marker', marker: () => false },
+  ] as const) {
+    await t.test(entry.name, async () => {
+      const configuration = generationConfiguration() as StageConfiguration;
+      const harness = adapterHarness(configuration, { candidate: fixture.proposal });
+      const result = await executeGenerationOperation({
+        signal: new AbortController().signal,
+        providerContext: localContext,
+        adapter: harness.adapter,
+        admit: () => Object.freeze({
+          status: 'ready' as const,
+          createRequest: () => Object.freeze({
+            messages: Object.freeze([]), schema: Object.freeze({}),
+            promptVersion: configuration.promptVersion, schemaVersion: configuration.schemaVersion,
+            outputContractVersion: configuration.outputContractVersion, controls: configuration.parameters,
+            deadlineMs: 120000 as const, configuration,
+          }),
+          validateCandidate: () => Object.freeze({ ok: true as const, value: Object.freeze(structuredClone(fixture.proposal)) }),
+        }),
+        beforeTransport: entry.marker,
+      } as never);
+      assert.deepEqual(result, { status: 'failed', error: 'configuration', attempted: false, cleanupFailed: true });
+      assert.equal(harness.calls.transport, 0);
+      assert.equal(JSON.stringify(result).includes('SECRET'), false);
+    });
+  }
+});
+
+test('keeps pre-transport reentry, configuration mutation and expiry terminal even when collaborators catch them', async t => {
+  const fixture = generationFixture();
+  for (const effect of ['reentry', 'mutation', 'expiry'] as const) {
+    await t.test(effect, async child => {
+      let now = Date.parse('2026-09-20T12:00:00.000Z');
+      if (effect === 'expiry') child.mock.method(Date, 'now', () => now);
+      const configuration = generationConfiguration() as StageConfiguration;
+      let activeAttempt: AttemptTransport | undefined;
+      let transports = 0;
+      const mutableAdapter = {
+        configuration,
+        prepare: (request: unknown) => Object.freeze({
+          ok: true as const, request, configuration, fit: fit(configuration), cleanup: 'complete' as const,
+          dispatch: (_signal: AbortSignal, attempt: AttemptTransport) => {
+            activeAttempt = attempt;
+            return attempt(() => { transports++; return Object.freeze({ ok: true, candidate: fixture.proposal, complete: true, cleanup: 'complete' }); });
+          },
+        }),
+      };
+      const result = await executeGenerationOperation({
+        signal: new AbortController().signal, providerContext: localContext, adapter: mutableAdapter,
+        admit: () => Object.freeze({
+          status: 'ready' as const,
+          createRequest: () => Object.freeze({
+            messages: Object.freeze([]), schema: Object.freeze({}),
+            promptVersion: configuration.promptVersion, schemaVersion: configuration.schemaVersion,
+            outputContractVersion: configuration.outputContractVersion, controls: configuration.parameters,
+            deadlineMs: 120000 as const, configuration,
+          }),
+          validateCandidate: (candidate: unknown) => validateProposal(candidate, fixture),
+        }),
+        beforeTransport: () => {
+          if (effect === 'reentry') {
+            assert.ok(activeAttempt);
+            try { activeAttempt(() => { transports++; return null; }); } catch { /* violation remains core-owned */ }
+          } else if (effect === 'mutation') mutableAdapter.configuration = generationConfiguration() as StageConfiguration;
+          else now += 120001;
+        },
+      } as never);
+      assert.deepEqual(result, {
+        status: 'failed', error: effect === 'expiry' ? 'timeout' : 'configuration', attempted: false, cleanupFailed: true,
+      });
+      assert.equal(transports, 0);
+    });
+  }
+});
+
+test('starts the shared timeout before admission and reports unresolved admission cleanup as uncertain', async t => {
+  t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: Date.parse('2026-09-20T12:00:00.000Z') });
+  try {
+    const gate = deferred<never>();
+    const configuration = generationConfiguration() as StageConfiguration;
+    const harness = adapterHarness(configuration);
+    const pending = executeGenerationOperation({
+      signal: new AbortController().signal, providerContext: localContext, adapter: harness.adapter,
+      admit: () => gate.promise,
+    } as never);
+    t.mock.timers.tick(120000);
+    assert.deepEqual(await pending, { status: 'failed', error: 'timeout', attempted: false, cleanupFailed: true });
+    assert.deepEqual(harness.calls, { prepare: 0, dispatch: 0, transport: 0 });
+  } finally { t.mock.timers.reset(); }
+});
+
+test('aborts prepared-but-undispatched Groq credentials after fit rejection and keeps the cleared dispatch inert', async () => {
+  const fixture = generationFixture();
+  const credential = virtualCredentialIO();
+  let nativeCalls = 0;
+  const base = createGroqGenerationAdapter({
+    credentialIO: credential.io,
+    requestImplementation: (() => { nativeCalls++; throw new Error('native request must not run'); }) as never,
+  });
+  let preparedSignal: AbortSignal | undefined;
+  let preparedDispatch: ((signal: AbortSignal, attempt: AttemptTransport) => unknown) | undefined;
+  const adapter = Object.freeze({
+    configuration: base.configuration,
+    async prepare(request: any, signal: AbortSignal) {
+      preparedSignal = signal;
+      const prepared = await base.prepare(request, signal) as any;
+      assert.equal(prepared.ok, true);
+      preparedDispatch = prepared.dispatch;
+      return Object.freeze({ ...prepared, fit: Object.freeze({
+        ...prepared.fit, serializedRequestBytes: 65537,
+      }) });
+    },
+  });
+  const result = await executeGenerationOperation({
+    signal: new AbortController().signal, providerContext: groqContext, adapter,
+    admit: () => Object.freeze({
+      status: 'ready' as const,
+      createRequest: () => groqGenerationRequest(),
+      validateCandidate: (candidate: unknown) => validateProposal(candidate, fixture),
+    }),
+  } as never);
+  assert.deepEqual(result, { status: 'failed', error: 'input-fit', attempted: false, cleanupFailed: false });
+  assert.equal(preparedSignal?.aborted, true);
+  assert.equal(credential.calls.buffers.length > 0, true);
+  assert.equal(credential.calls.buffers.every(bytes => bytes.every(byte => byte === 0)), true);
+  assert.equal(nativeCalls, 0);
+  const dispatch = preparedDispatch;
+  assert.ok(dispatch);
+  let attemptCalls = 0;
+  const inert = await dispatch(new AbortController().signal, start => { attemptCalls++; return start(); });
+  assert.deepEqual(inert, { ok: false, error: 'configuration', cleanup: 'complete' });
+  assert.equal(attemptCalls, 0);
+  assert.equal(nativeCalls, 0);
 });
 
 test('projects the exact allowlisted fact order for label and contrast without retaining wrappers', async () => {
@@ -617,6 +811,162 @@ test('records exactly one bounded invocation for success, invalid output and eve
     status: 'failed', error: 'shutdown', invocation: invocation(configuration, 'response', 'passed'), cleanupFailed: false,
   });
   assert.equal(stoppedHarness.calls.transport, 1);
+});
+
+test('reports executor rejection stages without changing terminal outcomes or transport accounting', async () => {
+  const fixture = generationFixture();
+  const configuration = generationConfiguration() as StageConfiguration;
+  const validated = validateProposal(fixture.proposal, fixture);
+  assert.equal(validated.ok, true);
+  if (!validated.ok) throw new Error('Expected valid proposal fixture');
+  const run = async (
+    envelope: Readonly<Record<string, unknown>>,
+    validateCandidate: (candidate: unknown, sink?: (event: unknown) => unknown) => unknown,
+    sink: (event: unknown) => unknown,
+  ) => {
+    const harness = adapterHarness(configuration, { transportEnvelope: envelope });
+    const outcome = await executeGenerationOperation({
+      signal: new AbortController().signal,
+      providerContext: localContext,
+      adapter: harness.adapter,
+      onRejection: sink,
+      admit: () => Object.freeze({
+        status: 'ready' as const,
+        createRequest: (received: StageConfiguration) => Object.freeze({
+          messages: Object.freeze([]), schema: Object.freeze({}), promptVersion: received.promptVersion,
+          schemaVersion: received.schemaVersion, outputContractVersion: received.outputContractVersion,
+          controls: received.parameters, deadlineMs: 120000 as const, configuration: received,
+        }),
+        validateCandidate,
+      }),
+    } as never);
+    assert.deepEqual(harness.calls, { prepare: 1, dispatch: 1, transport: 1 });
+    return outcome;
+  };
+
+  const genericEvents: unknown[] = [];
+  const generic = await run(Object.freeze({ ok: false, error: 'incomplete-output', cleanup: 'complete' }),
+    () => validated, event => { genericEvents.push(event); });
+  // Preserve the established closed outcome; diagnostics are additional side-channel evidence only.
+  assert.equal(generic.status, 'failed');
+  if (generic.status === 'failed') {
+    assert.equal(generic.error, 'response-validation');
+    assert.equal(generic.attempted, true);
+    assert.equal(generic.observation?.outcome, 'response');
+    assert.equal(generic.observation?.validation, 'failed');
+    assert.equal(generic.cleanupFailed, false);
+  }
+  assert.deepEqual(genericEvents, [{ code: 'adapter-response/unspecified' }]);
+
+  const envelopeEvents: unknown[] = [];
+  const malformed = await run(Object.freeze({ ok: true, candidate: fixture.proposal, complete: false,
+    cleanup: 'complete', secret: 'SECRET envelope' }), () => validated, event => { envelopeEvents.push(event); });
+  assert.equal(malformed.status, 'failed');
+  if (malformed.status === 'failed') {
+    assert.equal(malformed.error, 'provider');
+    assert.equal(malformed.cleanupFailed, true);
+  }
+  assert.deepEqual(envelopeEvents, [{ code: 'executor/envelope' }]);
+  assert.equal(JSON.stringify(envelopeEvents).includes('SECRET'), false);
+
+  for (const reportInsideValidator of [false, true]) {
+    const candidateEvents: unknown[] = [];
+    const rejected = await run(Object.freeze({ ok: true, candidate: fixture.proposal, complete: true, cleanup: 'complete' }),
+      (_candidate, sink) => {
+        if (reportInsideValidator) sink?.(Object.freeze({ code: 'candidate/contract' }));
+        return Object.freeze({ ok: false, error: 'response-validation' });
+      }, event => { candidateEvents.push(event); });
+    assert.equal(rejected.status, 'failed');
+    if (rejected.status === 'failed') {
+      assert.equal(rejected.error, 'response-validation');
+      assert.equal(rejected.cleanupFailed, false);
+    }
+    assert.deepEqual(candidateEvents, Array.from({ length: reportInsideValidator ? 2 : 1 },
+      () => ({ code: 'candidate/contract' })));
+  }
+
+  const silentEvents: unknown[] = [];
+  const success = await run(Object.freeze({ ok: true, candidate: fixture.proposal, complete: true, cleanup: 'complete' }),
+    () => validated, event => { silentEvents.push(event); });
+  assert.equal(success.status, 'proposal');
+  const provider = await run(Object.freeze({ ok: false, error: 'provider', cleanup: 'complete' }),
+    () => validated, event => { silentEvents.push(event); });
+  assert.equal(provider.status, 'failed');
+  assert.deepEqual(silentEvents, []);
+
+  const contained = await run(Object.freeze({ ok: false, error: 'incomplete-output', cleanup: 'complete' }),
+    () => validated, () => { throw new Error('SECRET rejection sink'); });
+  assert.equal(contained.status, 'failed');
+  if (contained.status === 'failed') assert.equal(contained.error, 'response-validation');
+});
+
+test('keeps executor envelope reporting narrow and emits response diagnostics before cancellation wins', async () => {
+  const fixture = generationFixture();
+  const configuration = generationConfiguration() as StageConfiguration;
+  const validated = validateProposal(fixture.proposal, fixture);
+  assert.equal(validated.ok, true);
+  if (!validated.ok) throw new Error('Expected valid proposal fixture');
+  const admit = () => Object.freeze({
+    status: 'ready' as const,
+    createRequest: (received: StageConfiguration) => Object.freeze({
+      messages: Object.freeze([]), schema: Object.freeze({}), promptVersion: received.promptVersion,
+      schemaVersion: received.schemaVersion, outputContractVersion: received.outputContractVersion,
+      controls: received.parameters, deadlineMs: 120000 as const, configuration: received,
+    }),
+    validateCandidate: () => validated,
+  });
+
+  const noEnvelopeEvents: unknown[] = [];
+  const throwing = adapterHarness(configuration, {
+    dispatch: (_signal, attempt) => attempt(() => { throw new Error('SECRET dispatch failure'); }),
+  });
+  const thrown = await executeGenerationOperation({
+    signal: new AbortController().signal, providerContext: localContext, adapter: throwing.adapter,
+    admit, onRejection: (event: unknown) => { noEnvelopeEvents.push(event); },
+  } as never);
+  assert.equal(thrown.status, 'failed');
+  if (thrown.status === 'failed') assert.equal(thrown.error, 'provider');
+
+  const duplicate = adapterHarness(configuration, {
+    dispatch: (_signal, attempt) => {
+      const envelope = attempt(() => Object.freeze({ ok: true, candidate: fixture.proposal, complete: true, cleanup: 'complete' }));
+      try { attempt(() => envelope); } catch { /* Sticky duplicate remains authoritative. */ }
+      return envelope;
+    },
+  });
+  const duplicated = await executeGenerationOperation({
+    signal: new AbortController().signal, providerContext: localContext, adapter: duplicate.adapter,
+    admit, onRejection: (event: unknown) => { noEnvelopeEvents.push(event); },
+  } as never);
+  assert.equal(duplicated.status, 'failed');
+  if (duplicated.status === 'failed') assert.equal(duplicated.error, 'provider');
+
+  const gated = adapterHarness(configuration, { candidate: fixture.proposal });
+  const gateFailed = await executeGenerationOperation({
+    signal: new AbortController().signal, providerContext: localContext, adapter: gated.adapter,
+    admit, beforeTransport: () => { throw new Error('SECRET gate failure'); },
+    onRejection: (event: unknown) => { noEnvelopeEvents.push(event); },
+  } as never);
+  assert.equal(gateFailed.status, 'failed');
+  if (gateFailed.status === 'failed') assert.equal(gateFailed.error, 'configuration');
+  assert.deepEqual(noEnvelopeEvents, []);
+
+  const controller = new AbortController();
+  const orderedEvents: unknown[] = [];
+  const incomplete = adapterHarness(configuration, {
+    transportEnvelope: Object.freeze({ ok: false, error: 'incomplete-output', cleanup: 'complete' }),
+  });
+  const stopped = await executeGenerationOperation({
+    signal: controller.signal, providerContext: localContext, adapter: incomplete.adapter, admit,
+    onRejection: (event: unknown) => { orderedEvents.push(event); controller.abort(); },
+  } as never);
+  assert.deepEqual(orderedEvents, [{ code: 'adapter-response/unspecified' }]);
+  assert.equal(stopped.status, 'failed');
+  if (stopped.status === 'failed') {
+    assert.equal(stopped.error, 'shutdown');
+    assert.equal(stopped.observation?.outcome, 'response');
+    assert.equal(stopped.observation?.validation, 'failed');
+  }
 });
 
 test('bounds admitted metadata reads and preserves exact controls and invocation serialization', async t => {
