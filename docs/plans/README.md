@@ -4,7 +4,7 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-- [M6-02 — Six fixed generation executions](m6-02-six-fixed-generation-executions.md)
+- [M6-02 — Six fixed generation executions](m6-02-six-fixed-generation-executions.md) — [current state and resumption boundary](m6-02-six-fixed-generation-executions.md#current-state).
 
 ## Completed plans
 
