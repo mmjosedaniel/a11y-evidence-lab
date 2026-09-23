@@ -1,0 +1,91 @@
+{
+  "version": "m602-repaired-v1",
+  "status": "frozen",
+  "frozenAt": "2026-09-22T02:37:31.000Z",
+  "inputDefinition": {
+    "path": "evaluation/m301-generation-v1.json",
+    "sha256": "63770583a97e1d0517337474dadc706c1047d78e026e22c7a745ce7674ed9e6b"
+  },
+  "caseOrder": [
+    "local-image",
+    "local-label",
+    "local-contrast",
+    "groq-image",
+    "groq-label",
+    "groq-contrast"
+  ],
+  "executionPolicy": "m602-successor-execution-v1",
+  "observationPolicy": {
+    "version": "m602-loading-observation-v2",
+    "startDelayMs": 1,
+    "deadlineMs": 5000,
+    "cleanupDeadlineMs": 5000,
+    "qualificationWindowMs": 7000,
+    "runtimeMaximumAttempts": 120,
+    "runtimeIntervalMs": 1000,
+    "runtimeAcquisitionDeadlineMs": 120000
+  },
+  "groqAdmission": {
+    "version": "m304-groq-request-bytes-v1",
+    "maximumBytes": 65536,
+    "exposedDefaults": "groq-gpt-oss-20b-2026-09-11-v1"
+  },
+  "rubric": "inherit-input-definition",
+  "failureInterpretation": "inherit-input-definition",
+  "advancement": "accepted-proposal-and-qualified-observations",
+  "consumption": "exclusive-case-directory",
+  "maximumEntriesPerCase": 1,
+  "maximumDispatchesPerCase": 1,
+  "stopOn": "first-failed-invalid-unknown-or-unqualified-case",
+  "originalEvidence": "preserved-separately",
+  "schemaPolicy": {
+    "version": "m602-case-schema-v2",
+    "serialization": "compact-json-utf8",
+    "schemas": [
+      {
+        "profile": "informative-image-alt",
+        "sha256": "702cb1dc1e96891bc893246f481c5d5a15805d72da079d53b8d9926bd75e075f"
+      },
+      {
+        "profile": "form-input-label",
+        "sha256": "6ead6a4fb2e9f7c2f1ae770926cb16bc74878d4ae0a008e1d1c2927a229a0a06"
+      },
+      {
+        "profile": "text-contrast",
+        "sha256": "de787cfb0f38030867d8d28b87f4acd432f0d27dd3cfab4f9fe70bf372e58572"
+      }
+    ],
+    "wireBindings": [
+      {
+        "caseLabel": "local-image",
+        "bytes": 18171,
+        "sha256": "e827e28b7913a0d10bf56a267910cd8e066bfa05a61f14d334e7bc904b1c70c7"
+      },
+      {
+        "caseLabel": "local-label",
+        "bytes": 20314,
+        "sha256": "289f694525aec4b90ecf7e739946a562a2d396f3478c93ccc1453243897bf896"
+      },
+      {
+        "caseLabel": "local-contrast",
+        "bytes": 20703,
+        "sha256": "c7dced7d15886a91d55d700e3dc78e9155feecc768a66dc5b3b4c3d2fe555933"
+      },
+      {
+        "caseLabel": "groq-image",
+        "bytes": 18246,
+        "sha256": "9f74b175669383c174309c7a14a7de2fd148b4ce3570908bfb878b9a0c6e310c"
+      },
+      {
+        "caseLabel": "groq-label",
+        "bytes": 20389,
+        "sha256": "18aae209f7de61f0c3de4211dadcff9d9d92bc48ccc9ad33af6dfa81ed2f2f8e"
+      },
+      {
+        "caseLabel": "groq-contrast",
+        "bytes": 20778,
+        "sha256": "de7cd909ad3fd9fb0f625be0768efca187763de3cf211400856ba46dddd57df8"
+      }
+    ]
+  }
+}

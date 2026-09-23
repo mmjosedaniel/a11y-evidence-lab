@@ -104,11 +104,19 @@ Feature: Evidence-first accessibility analysis for one trusted public page
     Scenario: Fail before invocation when required Local input does not fit
       Given the run uses Local mode
       And the selected Finding has complete required evidence and "supported" retrieval
-      But its required evidence, guidance, citations, or system constraints cannot fit without truncation
-      When the application checks context fit
+      But its complete required input fails the identified Local profile's admission check without truncation
+      When the application checks initial-prompt fit for the native-schema profile or complete fit for a historical profile
       Then that Finding workflow fails before provider invocation with a content-safe limiting-capability reason
       And the result is not recorded as an evidence-sufficiency abstention
       And the completed scan, minimized evidence, and sibling Finding states remain unchanged
+
+    Scenario: Preserve attempted failure when native Local reasoning exceeds later context
+      Given one eligible Local Finding passes the native-schema profile's initial-prompt check and first-completion reserve
+      When its one complete request is dispatched but the runtime's internally formed second prompt is rejected or exhausts context
+      Then the Finding workflow retains one attempted ProviderInvocation and a bounded failure without a proposal
+      And no required evidence is truncated, no context shifting is enabled and no retry or fallback occurs
+      And both native completions share the original operation deadline and their fixed per-completion limits
+      And the completed scan, minimized evidence and sibling Finding states remain unchanged
 
     Scenario: Reject a Groq body above its fixed byte policy before invocation
       Given the run uses Groq mode and the selected Finding has complete required evidence and "supported" retrieval

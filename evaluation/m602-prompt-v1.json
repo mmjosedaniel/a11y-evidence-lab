@@ -1,0 +1,96 @@
+{
+  "version": "m602-prompt-v1",
+  "status": "frozen",
+  "frozenAt": "2026-09-22T14:56:45.922Z",
+  "inputDefinition": {
+    "path": "evaluation/m301-generation-v1.json",
+    "sha256": "63770583a97e1d0517337474dadc706c1047d78e026e22c7a745ce7674ed9e6b"
+  },
+  "caseOrder": [
+    "local-image",
+    "local-label",
+    "local-contrast",
+    "groq-image",
+    "groq-label",
+    "groq-contrast"
+  ],
+  "executionPolicy": "m602-successor-execution-v1",
+  "observationPolicy": {
+    "version": "m602-loading-observation-v2",
+    "startDelayMs": 1,
+    "deadlineMs": 5000,
+    "cleanupDeadlineMs": 5000,
+    "qualificationWindowMs": 7000,
+    "runtimeMaximumAttempts": 120,
+    "runtimeIntervalMs": 1000,
+    "runtimeAcquisitionDeadlineMs": 120000
+  },
+  "groqAdmission": {
+    "version": "m304-groq-request-bytes-v1",
+    "maximumBytes": 65536,
+    "exposedDefaults": "groq-gpt-oss-20b-2026-09-11-v1"
+  },
+  "rubric": "inherit-input-definition",
+  "failureInterpretation": "inherit-input-definition",
+  "advancement": "accepted-proposal-and-qualified-observations",
+  "consumption": "exclusive-case-directory",
+  "maximumEntriesPerCase": 1,
+  "maximumDispatchesPerCase": 1,
+  "stopOn": "first-failed-invalid-unknown-or-unqualified-case",
+  "originalEvidence": "preserved-separately",
+  "schemaPolicy": {
+    "version": "m602-case-schema-v2",
+    "serialization": "compact-json-utf8",
+    "schemas": [
+      {
+        "profile": "informative-image-alt",
+        "sha256": "702cb1dc1e96891bc893246f481c5d5a15805d72da079d53b8d9926bd75e075f"
+      },
+      {
+        "profile": "form-input-label",
+        "sha256": "6ead6a4fb2e9f7c2f1ae770926cb16bc74878d4ae0a008e1d1c2927a229a0a06"
+      },
+      {
+        "profile": "text-contrast",
+        "sha256": "de787cfb0f38030867d8d28b87f4acd432f0d27dd3cfab4f9fe70bf372e58572"
+      }
+    ],
+    "wireBindings": [
+      {
+        "caseLabel": "local-image",
+        "bytes": 18291,
+        "sha256": "fdcdeafe8c77afb4fd2fa8d0594c9aa4eba4502fdefbc270c52cb64ecf734837"
+      },
+      {
+        "caseLabel": "local-label",
+        "bytes": 20434,
+        "sha256": "6d8dd9dcd8c7aca9340de5a4ce298d8f569c8d32004b6d7a50b8e7fe7aaed470"
+      },
+      {
+        "caseLabel": "local-contrast",
+        "bytes": 20823,
+        "sha256": "94c7f23bf8eab2fdb9a9483a51222c0730f264336a38bd14e32578dd91df289b"
+      },
+      {
+        "caseLabel": "groq-image",
+        "bytes": 18366,
+        "sha256": "a151eff11aada2cc1bb5859da3ccbe7ba2afb7b6ee133430a43ee7bdbbf16f4a"
+      },
+      {
+        "caseLabel": "groq-label",
+        "bytes": 20509,
+        "sha256": "22a6971a0c0e7c7866def6b92ebe2a6311a088f5acb53afc1b2e2066655361a8"
+      },
+      {
+        "caseLabel": "groq-contrast",
+        "bytes": 20898,
+        "sha256": "d941bac111e1fe7ea2967ee7f2db19110a47e860da4cae4288084e731d8f9def"
+      }
+    ]
+  },
+  "promptPolicy": {
+    "version": "m602-grounded-instructions-v1",
+    "path": "evaluation/m602-grounded-instructions-v1.txt",
+    "sha256": "b04d25f49a35a1dea4b12abb30e0cf3b1ee47f48e5208f6efed5fdfe05b36aa6"
+  }
+}

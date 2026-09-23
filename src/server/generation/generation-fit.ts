@@ -1,6 +1,13 @@
+import { NATIVE_SCHEMA_PROMPT_VERSION, NATIVE_SCHEMA_VERSION, NATIVE_SCHEMA_LOCAL_ADAPTER_VERSION } from './generation-artifacts.ts';
+import { NATIVE_SCHEMA_QWEN_CONFIGURATION } from './reasoning-generation-configuration.ts';
+import { UNCERTAINTY_QWEN_CONFIGURATION, UNCERTAINTY_GROQ_CONFIGURATION } from './reasoning-generation-configuration.ts';
+import { UNCERTAINTY_PROMPT_VERSION, UNCERTAINTY_SCHEMA_VERSION, UNCERTAINTY_LOCAL_ADAPTER_VERSION, UNCERTAINTY_GROQ_ADAPTER_VERSION } from './generation-artifacts.ts';
+import { JUDGMENT_PROMPT_VERSION, JUDGMENT_SCHEMA_VERSION, JUDGMENT_LOCAL_ADAPTER_VERSION, JUDGMENT_GROQ_ADAPTER_VERSION } from './generation-artifacts.ts';
+import { JUDGMENT_QWEN_CONFIGURATION, JUDGMENT_GROQ_CONFIGURATION } from './reasoning-generation-configuration.ts';
 import { readChoice, readInteger, readObject, readPattern, requireValid } from '../domain/run-contract/contract-value-reader.ts';
 import type { ProviderContext } from '../domain/run-contract/run-types.ts';
-import { OUTPUT_CONTRACT_VERSION, PROMPT_VERSION, SCHEMA_VERSION } from './generation-artifacts.ts';
+import { REASONING_QWEN_CONFIGURATION, REASONING_GROQ_CONFIGURATION } from './reasoning-generation-configuration.ts';
+import { REASONING_PROMPT_VERSION, REASONING_LOCAL_ADAPTER_VERSION, REASONING_GROQ_ADAPTER_VERSION, CASE_SCHEMA_VERSION, PROMPT_CASE_VERSION, OUTPUT_CONTRACT_VERSION, PROMPT_VERSION, SCHEMA_VERSION } from './generation-artifacts.ts';
 import { readGenerationIdentity, readGenerationParameters } from './generation-contract.ts';
 import type { GenerationConfiguration } from './generation-contract.ts';
 
@@ -29,9 +36,32 @@ export function validateGenerationConfiguration(candidate: unknown, providerCont
     requireValid(root.adapterId === (mode === 'local' ? 'ollama-generation' : 'groq-generation')
       && root.endpoint === (mode === 'local' ? 'ollama-loopback-chat' : 'groq-chat-completions'));
     readGenerationIdentity(root.adapterVersion);
-    requireValid(root.promptVersion === PROMPT_VERSION && root.schemaVersion === SCHEMA_VERSION
+    const native = root.promptVersion === NATIVE_SCHEMA_PROMPT_VERSION;
+    requireValid(native === (root.adapterVersion === NATIVE_SCHEMA_LOCAL_ADAPTER_VERSION));
+    if (native) requireValid(mode === 'local' && candidate === NATIVE_SCHEMA_QWEN_CONFIGURATION);
+    const uncertainty = root.promptVersion === UNCERTAINTY_PROMPT_VERSION;
+    const uncertaintyExpected = mode === 'local' ? UNCERTAINTY_QWEN_CONFIGURATION : UNCERTAINTY_GROQ_CONFIGURATION;
+    requireValid(uncertainty === (root.adapterVersion === UNCERTAINTY_LOCAL_ADAPTER_VERSION || root.adapterVersion === UNCERTAINTY_GROQ_ADAPTER_VERSION));
+    if (uncertainty) requireValid(root.adapterVersion === uncertaintyExpected.adapterVersion
+      && root.binding === uncertaintyExpected.binding && root.accounting === uncertaintyExpected.accounting);
+    const judgment = root.promptVersion === JUDGMENT_PROMPT_VERSION;
+    const judgmentExpected = mode === 'local' ? JUDGMENT_QWEN_CONFIGURATION : JUDGMENT_GROQ_CONFIGURATION;
+    requireValid(judgment === (root.adapterVersion === JUDGMENT_LOCAL_ADAPTER_VERSION || root.adapterVersion === JUDGMENT_GROQ_ADAPTER_VERSION));
+    if (judgment) requireValid(root.adapterVersion === judgmentExpected.adapterVersion
+      && root.binding === judgmentExpected.binding && root.accounting === judgmentExpected.accounting);
+    const reasoning = root.promptVersion === REASONING_PROMPT_VERSION;
+    const expected = mode === 'local' ? REASONING_QWEN_CONFIGURATION : REASONING_GROQ_CONFIGURATION;
+    requireValid(reasoning === (root.adapterVersion === REASONING_LOCAL_ADAPTER_VERSION || root.adapterVersion === REASONING_GROQ_ADAPTER_VERSION));
+    if (reasoning) requireValid(root.adapterVersion === expected.adapterVersion
+      && root.binding === expected.binding && root.accounting === expected.accounting);
+    requireValid(((native && root.schemaVersion === NATIVE_SCHEMA_VERSION)
+      || (uncertainty && root.schemaVersion === UNCERTAINTY_SCHEMA_VERSION)
+      || (judgment && root.schemaVersion === JUDGMENT_SCHEMA_VERSION)
+      || (reasoning && root.schemaVersion === CASE_SCHEMA_VERSION)
+      || (root.promptVersion === PROMPT_VERSION && (root.schemaVersion === SCHEMA_VERSION || root.schemaVersion === CASE_SCHEMA_VERSION))
+      || (root.promptVersion === PROMPT_CASE_VERSION && root.schemaVersion === CASE_SCHEMA_VERSION))
       && root.outputContractVersion === OUTPUT_CONTRACT_VERSION);
-    readGenerationParameters(root.parameters, mode);
+    readGenerationParameters(root.parameters, mode, reasoning || judgment || uncertainty || native);
     requireValid(Object.isFrozen(root.parameters));
     let tokenizer: unknown;
     if (mode === 'local') {
@@ -48,6 +78,10 @@ export function validateGenerationConfiguration(candidate: unknown, providerCont
     }
     error = 'input-fit';
     const method = readObject(root.accounting).method;
+    if (method === 'initial-prompt-upper-bound') {
+      requireValid(native && root.accounting === NATIVE_SCHEMA_QWEN_CONFIGURATION.accounting);
+      return Object.freeze({ ok: true, value: candidate as GenerationConfiguration });
+    }
     if (method === 'serialized-byte-budget') {
       const accounting = frozenRecord(root.accounting, ['method', 'implementationVersion', 'tokenizerIdentity',
         'maxRequestBytes', 'contextTokenLimit', 'outputTokenLimit']);
@@ -70,6 +104,16 @@ export function validateGenerationConfiguration(candidate: unknown, providerCont
 
 export function validatePreparedGenerationFit(fit: unknown, configuration: GenerationConfiguration): boolean {
   try {
+    if (configuration.accounting.method === 'initial-prompt-upper-bound') {
+      requireValid(configuration === NATIVE_SCHEMA_QWEN_CONFIGURATION);
+      const report = frozenRecord(fit, ['accounting', 'initialInputTokens', 'firstCompletionReservedTokens',
+        'contextTokenLimit', 'perCompletionOutputTokenLimit', 'maximumNativeCompletions', 'maximumAggregateGeneratedTokens']);
+      requireValid(report.accounting === configuration.accounting);
+      const input = readInteger(report.initialInputTokens, 0);
+      return report.firstCompletionReservedTokens === 12288 && report.contextTokenLimit === 32768
+        && report.perCompletionOutputTokenLimit === 12288 && report.maximumNativeCompletions === 2
+        && report.maximumAggregateGeneratedTokens === 24576 && input <= 32768 - 12288 - 32;
+    }
     if (configuration.accounting.method === 'serialized-byte-budget') {
       const report = frozenRecord(fit, ['accounting', 'serializedRequestBytes', 'requestedOutputTokens',
         'contextTokenLimit', 'outputTokenLimit']);
@@ -86,7 +130,9 @@ export function validatePreparedGenerationFit(fit: unknown, configuration: Gener
     const input = readInteger(report.inputTokens, 0);
     const context = readInteger(report.contextTokenLimit, 1);
     const output = readInteger(report.outputTokenLimit, 1);
-    return report.reservedOutputTokens === 4096 && context === configuration.accounting.contextTokenLimit
-      && output === configuration.accounting.outputTokenLimit && output >= 4096 && input <= context - 4096;
+    const reserve = (configuration.promptVersion === UNCERTAINTY_PROMPT_VERSION || configuration.promptVersion === REASONING_PROMPT_VERSION || configuration.promptVersion === JUDGMENT_PROMPT_VERSION) ? 12288 : 4096;
+    const guard = reserve === 12288 ? 32 : 0;
+    return report.reservedOutputTokens === reserve && context === configuration.accounting.contextTokenLimit
+      && output === configuration.accounting.outputTokenLimit && output >= reserve && input <= context - reserve - guard;
   } catch { return false; }
 }

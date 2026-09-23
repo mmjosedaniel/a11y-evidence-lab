@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import test from 'node:test';
 import { assessFindingEvidence } from '../src/server/domain/finding-sufficiency.ts';
@@ -195,6 +196,358 @@ test('reports candidate rejection as one content-free constant while preserving 
     await Promise.resolve();
   }
   assert.equal(getterRead, false);
+});
+
+type CandidateDetail = Readonly<{
+  field: string;
+  reason: string;
+}>;
+
+function candidateContext(fixture = generationFixture()) {
+  return Object.freeze({
+    findingId: fixture.finding.findingId,
+    availableEvidenceReferences: assessFindingEvidence(fixture.finding).availableReferences,
+    passageIds: Object.freeze(fixture.retrieval.passages.map(({ passageId }) => passageId)),
+  });
+}
+
+function validateCandidateWithDetail(
+  candidate: unknown,
+  context: ReturnType<typeof candidateContext>,
+  onRejection: ((event: unknown) => unknown) | undefined,
+  onDetail: (detail: CandidateDetail) => unknown,
+): ProposalValidationResult {
+  return validateProposalCandidate(candidate, context, onRejection, onDetail);
+}
+
+test('reports the frozen finite field and reason vocabulary for every candidate rejection position', () => {
+  const fixture = generationFixture();
+  const context = candidateContext(fixture);
+  const evidence = context.availableEvidenceReferences[0]!;
+  const passage = context.passageIds[0]!;
+  const cases: readonly {
+    name: string;
+    candidate: () => unknown;
+    expected: CandidateDetail;
+  }[] = [
+    { name: 'candidate structure', candidate: () => null,
+      expected: { field: 'candidate', reason: 'structure' } },
+    { name: 'type fixed value', candidate: () => ({ ...cloneCandidate(fixture.proposal), type: 'SECRET-abstention' }),
+      expected: { field: 'type', reason: 'fixed-value' } },
+    { name: 'finding mismatch', candidate: () => ({ ...cloneCandidate(fixture.proposal), findingId: 'SECRET-other' }),
+      expected: { field: 'findingId', reason: 'finding-mismatch' } },
+    { name: 'sufficiency structure', candidate: () => ({ ...cloneCandidate(fixture.proposal), evidenceSufficiency: null }),
+      expected: { field: 'evidenceSufficiency', reason: 'structure' } },
+    { name: 'finding evidence fixed value', candidate: () => {
+      const candidate = cloneCandidate(fixture.proposal);
+      candidate.evidenceSufficiency.findingEvidence = 'SECRET-incomplete';
+      return candidate;
+    }, expected: { field: 'evidenceSufficiency.findingEvidence', reason: 'fixed-value' } },
+    { name: 'guidance fixed value', candidate: () => {
+      const candidate = cloneCandidate(fixture.proposal);
+      candidate.evidenceSufficiency.guidance = 'SECRET-missing';
+      return candidate;
+    }, expected: { field: 'evidenceSufficiency.guidance', reason: 'fixed-value' } },
+    { name: 'assumptions structure', candidate: () => ({ ...cloneCandidate(fixture.proposal), assumptions: null }),
+      expected: { field: 'assumptions', reason: 'structure' } },
+    { name: 'assumption prose type', candidate: () => {
+      const candidate = cloneCandidate(fixture.proposal);
+      candidate.assumptions = [42 as never];
+      return candidate;
+    }, expected: { field: 'assumptions[]', reason: 'prose-type' } },
+    { name: 'assumption count', candidate: () => {
+      const candidate = cloneCandidate(fixture.proposal);
+      candidate.assumptions = Array.from({ length: 6 }, () => 'bounded assumption');
+      return candidate;
+    }, expected: { field: 'assumptions', reason: 'assumption-count' } },
+    { name: 'summary structure', candidate: () => ({ ...cloneCandidate(fixture.proposal), findingSummary: null }),
+      expected: { field: 'findingSummary', reason: 'structure' } },
+    { name: 'summary text type', candidate: () => {
+      const candidate = cloneCandidate(fixture.proposal);
+      candidate.findingSummary.text = 42 as never;
+      return candidate;
+    }, expected: { field: 'findingSummary.text', reason: 'prose-type' } },
+    { name: 'summary evidence structure', candidate: () => {
+      const candidate = cloneCandidate(fixture.proposal);
+      candidate.findingSummary.evidenceReferences = null as never;
+      return candidate;
+    }, expected: { field: 'findingSummary.evidenceReferences', reason: 'structure' } },
+    { name: 'summary passage value', candidate: () => {
+      const candidate = cloneCandidate(fixture.proposal);
+      candidate.findingSummary.passageIds = ['SECRET-passage'];
+      return candidate;
+    }, expected: { field: 'findingSummary.passageIds', reason: 'reference-value' } },
+    { name: 'impact structure', candidate: () => ({ ...cloneCandidate(fixture.proposal), userImpact: null }),
+      expected: { field: 'userImpact', reason: 'structure' } },
+    { name: 'impact text length', candidate: () => {
+      const candidate = cloneCandidate(fixture.proposal);
+      candidate.userImpact.text = 'a'.repeat(1001);
+      return candidate;
+    }, expected: { field: 'userImpact.text', reason: 'prose-length' } },
+    { name: 'impact evidence duplicate', candidate: () => {
+      const candidate = cloneCandidate(fixture.proposal);
+      candidate.userImpact.evidenceReferences = [evidence, evidence];
+      return candidate;
+    }, expected: { field: 'userImpact.evidenceReferences', reason: 'reference-duplicate' } },
+    { name: 'impact passage count', candidate: () => {
+      const candidate = cloneCandidate(fixture.proposal);
+      candidate.userImpact.passageIds = [];
+      return candidate;
+    }, expected: { field: 'userImpact.passageIds', reason: 'reference-count' } },
+    { name: 'remediation structure', candidate: () => ({ ...cloneCandidate(fixture.proposal), remediation: null }),
+      expected: { field: 'remediation', reason: 'structure' } },
+    { name: 'remediation text blank', candidate: () => {
+      const candidate = cloneCandidate(fixture.proposal);
+      candidate.remediation.text = ' \t\n ';
+      return candidate;
+    }, expected: { field: 'remediation.text', reason: 'prose-blank' } },
+    { name: 'remediation evidence value', candidate: () => {
+      const candidate = cloneCandidate(fixture.proposal);
+      candidate.remediation.evidenceReferences = ['SECRET-evidence'];
+      return candidate;
+    }, expected: { field: 'remediation.evidenceReferences', reason: 'reference-value' } },
+    { name: 'remediation passage duplicate', candidate: () => {
+      const candidate = cloneCandidate(fixture.proposal);
+      candidate.remediation.passageIds = [passage, passage];
+      return candidate;
+    }, expected: { field: 'remediation.passageIds', reason: 'reference-duplicate' } },
+    { name: 'confidence choice', candidate: () => ({ ...cloneCandidate(fixture.proposal), confidence: 'SECRET-certain' }),
+      expected: { field: 'confidence', reason: 'choice' } },
+    { name: 'uncertainty prohibited claim', candidate: () => ({
+      ...cloneCandidate(fixture.proposal), uncertainty: 'The whole site is accessible. SECRET',
+    }), expected: { field: 'uncertainty', reason: 'prohibited-claim' } },
+    { name: 'blocking judgment blank', candidate: () => ({
+      ...cloneCandidate(fixture.proposal), blockingManualJudgment: '  ',
+    }), expected: { field: 'blockingManualJudgment', reason: 'prose-blank' } },
+    { name: 'verification reminder length', candidate: () => ({
+      ...cloneCandidate(fixture.proposal), postChangeVerificationReminder: 'a'.repeat(1001),
+    }), expected: { field: 'postChangeVerificationReminder', reason: 'prose-length' } },
+    { name: 'first failure wins', candidate: () => ({
+      ...cloneCandidate(fixture.proposal), type: 'SECRET-abstention', findingId: 'SECRET-other',
+    }), expected: { field: 'type', reason: 'fixed-value' } },
+  ];
+
+  const observations = cases.map(({ name, candidate, expected }) => {
+    const coarse: unknown[] = [];
+    const details: CandidateDetail[] = [];
+    const result = validateCandidateWithDetail(candidate(), context,
+      event => { coarse.push(event); }, detail => { details.push(detail); });
+    return {
+      name,
+      result,
+      coarse,
+      details,
+      detailFrozen: details.length === 1 && Object.isFrozen(details[0]),
+      detailKeys: details.length === 1 ? Object.keys(details[0]!) : [],
+      contentSafe: !JSON.stringify(details).includes('SECRET'),
+      expected,
+    };
+  });
+
+  assert.deepEqual(observations, cases.map(({ name, expected }) => ({
+    name,
+    result: failure,
+    coarse: [{ code: 'candidate/contract' }],
+    details: [expected],
+    detailFrozen: true,
+    detailKeys: ['field', 'reason'],
+    contentSafe: true,
+    expected,
+  })));
+});
+
+test('emits no candidate detail for valid proposals in every profile', () => {
+  for (const profile of ['image-alt', 'label', 'color-contrast'] as const satisfies readonly GenerationProfile[]) {
+    const fixture = generationFixture(profile);
+    const coarse: unknown[] = [];
+    const details: CandidateDetail[] = [];
+    const result = validateCandidateWithDetail(fixture.proposal, candidateContext(fixture),
+      event => { coarse.push(event); }, detail => { details.push(detail); });
+    assert.equal(result.ok, true, profile);
+    assert.deepEqual(coarse, [], profile);
+    assert.deepEqual(details, [], profile);
+  }
+});
+
+test('preserves exact deeply frozen valid results when the detail callback is present', () => {
+  for (const profile of ['image-alt', 'label', 'color-contrast'] as const satisfies readonly GenerationProfile[]) {
+    const fixture = generationFixture(profile);
+    const expected = validateProposalCandidate(fixture.proposal, candidateContext(fixture));
+    const details: CandidateDetail[] = [];
+    const actual = validateCandidateWithDetail(fixture.proposal, candidateContext(fixture), undefined,
+      detail => { details.push(detail); });
+    assert.deepEqual(actual, expected, profile);
+    assert.equal(actual.ok, true, profile);
+    expectDeepFrozen(actual);
+    assert.deepEqual(details, [], profile);
+  }
+});
+
+test('attributes malformed and interrupted arrays to the enclosing frozen field', () => {
+  const fixture = generationFixture();
+  const context = candidateContext(fixture);
+  const passage = context.passageIds[0]!;
+  const sparseAssumptions = cloneCandidate(fixture.proposal);
+  sparseAssumptions.assumptions = Array(2);
+  const extraReferenceProperty = cloneCandidate(fixture.proposal);
+  extraReferenceProperty.userImpact.passageIds = Object.assign([passage], { extra: 'SECRET' });
+  const descriptorAssumptions = cloneCandidate(fixture.proposal);
+  descriptorAssumptions.assumptions = new Proxy(['valid first item', 'unreadable second item'], {
+    getOwnPropertyDescriptor(target, key) {
+      if (key === '1') throw new Error('SECRET assumption descriptor');
+      return Reflect.getOwnPropertyDescriptor(target, key);
+    },
+  });
+  const descriptorReferences = cloneCandidate(fixture.proposal);
+  descriptorReferences.userImpact.passageIds = new Proxy([passage, passage], {
+    getOwnPropertyDescriptor(target, key) {
+      if (key === '1') throw new Error('SECRET reference descriptor');
+      return Reflect.getOwnPropertyDescriptor(target, key);
+    },
+  });
+  const invalidBeforeCount = cloneCandidate(fixture.proposal);
+  invalidBeforeCount.assumptions = [42 as never, 'two', 'three', 'four', 'five', 'six'];
+  const revocable = Proxy.revocable(cloneCandidate(fixture.proposal), {});
+  revocable.revoke();
+  const cases = [
+    [sparseAssumptions, { field: 'assumptions', reason: 'structure' }],
+    [extraReferenceProperty, { field: 'userImpact.passageIds', reason: 'structure' }],
+    [descriptorAssumptions, { field: 'assumptions', reason: 'structure' }],
+    [descriptorReferences, { field: 'userImpact.passageIds', reason: 'structure' }],
+    [invalidBeforeCount, { field: 'assumptions[]', reason: 'prose-type' }],
+    [revocable.proxy, { field: 'candidate', reason: 'structure' }],
+  ] as const;
+  const observations = cases.map(([candidate]) => {
+    const details: CandidateDetail[] = [];
+    const result = validateCandidateWithDetail(candidate, context, undefined, detail => { details.push(detail); });
+    return { result, details };
+  });
+  assert.deepEqual(observations, cases.map(([, expected]) => ({ result: failure, details: [expected] })));
+});
+
+test('attributes hostile structures without extra reads and preserves the rejection verdict', () => {
+  const fixture = generationFixture();
+  const context = candidateContext(fixture);
+  let rootGet = 0;
+  const hostileRoot = new Proxy(fixture.proposal, {
+    ownKeys() { throw new Error('SECRET root keys'); },
+    get() { rootGet++; throw new Error('SECRET root get'); },
+  });
+  let nestedGet = 0;
+  const hostileSummary = cloneCandidate(fixture.proposal);
+  hostileSummary.findingSummary = new Proxy(hostileSummary.findingSummary, {
+    ownKeys() { throw new Error('SECRET summary keys'); },
+    get() { nestedGet++; throw new Error('SECRET summary get'); },
+  });
+  const hostileAssumptions = cloneCandidate(fixture.proposal);
+  hostileAssumptions.assumptions = new Proxy(hostileAssumptions.assumptions, {
+    ownKeys() { throw new Error('SECRET assumptions keys'); },
+  });
+  let accessorRead = false;
+  const accessor = cloneCandidate(fixture.proposal) as unknown as Record<string, unknown>;
+  Object.defineProperty(accessor, 'confidence', {
+    enumerable: true,
+    get() { accessorRead = true; throw new Error('SECRET accessor'); },
+  });
+  const cases = [
+    [hostileRoot, { field: 'candidate', reason: 'structure' }],
+    [hostileSummary, { field: 'findingSummary', reason: 'structure' }],
+    [hostileAssumptions, { field: 'assumptions', reason: 'structure' }],
+    [accessor, { field: 'candidate', reason: 'structure' }],
+  ] as const;
+  const observations = cases.map(([candidate]) => {
+    const details: CandidateDetail[] = [];
+    const result = validateCandidateWithDetail(candidate, context, undefined, detail => { details.push(detail); });
+    return { result, details };
+  });
+  assert.deepEqual(observations, cases.map(([, expected]) => ({ result: failure, details: [expected] })));
+  assert.equal(rootGet, 0);
+  assert.equal(nestedGet, 0);
+  assert.equal(accessorRead, false);
+
+  let rootOwnKeys = 0;
+  const counted = new Proxy(cloneCandidate(fixture.proposal), {
+    ownKeys(target) { rootOwnKeys++; return Reflect.ownKeys(target); },
+  });
+  const successDetails: CandidateDetail[] = [];
+  assert.equal(validateCandidateWithDetail(counted, context, undefined,
+    detail => { successDetails.push(detail); }).ok, true);
+  assert.equal(rootOwnKeys, 1);
+  assert.deepEqual(successDetails, []);
+});
+
+test('contains detail callback failures and isolates reentrant validation details', async () => {
+  const fixture = generationFixture();
+  const context = candidateContext(fixture);
+  const invalid = cloneCandidate(fixture.proposal);
+  invalid.findingId = 'SECRET-other';
+  const coarse: unknown[] = [];
+  let callbackCalls = 0;
+  const sinks: readonly ((detail: CandidateDetail) => unknown)[] = [
+    detail => { callbackCalls++; assert.deepEqual(detail, { field: 'findingId', reason: 'finding-mismatch' });
+      throw new Error('SECRET sink'); },
+    detail => { callbackCalls++; assert.deepEqual(detail, { field: 'findingId', reason: 'finding-mismatch' });
+      return Promise.reject(new Error('SECRET rejection')); },
+    detail => { callbackCalls++; assert.deepEqual(detail, { field: 'findingId', reason: 'finding-mismatch' });
+      return Object.defineProperty({}, 'then', { get() { throw new Error('SECRET thenable'); } }); },
+  ];
+  for (const sink of sinks) {
+    assert.deepEqual(validateCandidateWithDetail(invalid, context,
+      event => { coarse.push(event); }, sink), failure);
+    await Promise.resolve();
+  }
+  assert.equal(callbackCalls, 3);
+  assert.deepEqual(coarse, Array.from({ length: 3 }, () => ({ code: 'candidate/contract' })));
+
+  const outerDetails: CandidateDetail[] = [];
+  const innerDetails: CandidateDetail[] = [];
+  const outer = validateCandidateWithDetail(invalid, context, undefined, detail => {
+    outerDetails.push(detail);
+    const nested = cloneCandidate(fixture.proposal);
+    nested.confidence = 'SECRET-certain';
+    assert.deepEqual(validateCandidateWithDetail(nested, context, undefined,
+      inner => { innerDetails.push(inner); }), failure);
+  });
+  assert.deepEqual(outer, failure);
+  assert.deepEqual(outerDetails, [{ field: 'findingId', reason: 'finding-mismatch' }]);
+  assert.deepEqual(innerDetails, [{ field: 'confidence', reason: 'choice' }]);
+});
+
+test('contains native rejected Promises with poisoned own catch or then methods at process level', () => {
+  const moduleUrl = new URL('../src/server/generation/proposal-contract.ts', import.meta.url).href;
+  const script = [
+    `const { validateProposalCandidate } = await import(${JSON.stringify(moduleUrl)});`,
+    "const returned = Promise.reject(new Error('EXPECTED_REJECTION'));",
+    "const variant = process.argv[1];",
+    "Object.defineProperty(returned, variant, { value() { throw new Error('POISON_' + variant.toUpperCase()); } });",
+    "const result = validateProposalCandidate(null, { findingId: 'fixed', availableEvidenceReferences: [], passageIds: [] }, undefined, () => returned);",
+    'console.log(JSON.stringify(result));',
+    "setImmediate(() => console.log('NORMAL_COMPLETION'));",
+  ].join('');
+  const variants = ['catch', 'then'] as const;
+  const observations = variants.map(variant => {
+    const child = spawnSync(process.execPath, ['--input-type=module', '--eval', script, variant], {
+      encoding: 'utf8',
+      maxBuffer: 65536,
+      shell: false,
+      timeout: 5000,
+      windowsHide: true,
+    });
+    return {
+      variant,
+      status: child.status,
+      signal: child.signal,
+      stdout: child.stdout.trim().split(/\r?\n/),
+      stderr: child.stderr,
+    };
+  });
+  assert.deepEqual(observations, variants.map(variant => ({
+    variant,
+    status: 0,
+    signal: null,
+    stdout: [JSON.stringify(failure), 'NORMAL_COMPLETION'],
+    stderr: '',
+  })));
 });
 
 test('requires the closed eleven-field shape and every closed supported-field shape', () => {
@@ -400,4 +753,76 @@ test('applies all frozen lexical patterns to every listed prose leaf after exact
   const normalized = cloneCandidate(fixture.proposal);
   normalized.uncertainty = '  ＴＨＥ\tＦＩＮＤＩＮＧ\nＨＡＳ  ＢＥＥＮ  ＦＩＸＥＤ  ';
   expectInvalid(normalized, fixture);
+});
+
+type OutputValidationDetail = Readonly<
+  | { kind: 'content'; reason: 'json-syntax' | 'non-object' }
+  | { kind: 'prohibited-claim'; field: string; rule:
+      | 'certification-conformance-compliance'
+      | 'whole-page-site-accessible'
+      | 'page-site-accessible'
+      | 'finding-fixed-resolved-remediated'
+      | 'automated-evidence-proves-fix' }
+>;
+
+test('identifies the exact frozen prohibited rule and field through the separate content-free detail sink', () => {
+  const fixture = generationFixture();
+  const context = candidateContext(fixture);
+  const vectors = [
+    ['This certification claims compliance. SECRET', 'certification-conformance-compliance',
+      'findingSummary.text', (candidate: MutableProposalCandidate, value: string) => { candidate.findingSummary.text = value; }],
+    ['The whole page is fully accessible. SECRET', 'whole-page-site-accessible',
+      'userImpact.text', (candidate: MutableProposalCandidate, value: string) => { candidate.userImpact.text = value; }],
+    ['The site is accessible. SECRET', 'page-site-accessible',
+      'remediation.text', (candidate: MutableProposalCandidate, value: string) => { candidate.remediation.text = value; }],
+    ['The finding has been fixed. SECRET', 'finding-fixed-resolved-remediated',
+      'uncertainty', (candidate: MutableProposalCandidate, value: string) => { candidate.uncertainty = value; }],
+    ['Scanner evidence alone confirms the fix. SECRET', 'automated-evidence-proves-fix',
+      'assumptions[]', (candidate: MutableProposalCandidate, value: string) => { candidate.assumptions = [value]; }],
+  ] as const;
+  for (const [phrase, rule, field, assign] of vectors) {
+    const candidate = cloneCandidate(fixture.proposal);
+    assign(candidate, phrase);
+    const coarse: unknown[] = [];
+    const candidateDetails: CandidateDetail[] = [];
+    const outputDetails: OutputValidationDetail[] = [];
+    assert.deepEqual(validateProposalCandidate(candidate, context,
+      event => { coarse.push(event); }, detail => { candidateDetails.push(detail); },
+      detail => { outputDetails.push(detail); }), failure, rule);
+    assert.deepEqual(coarse, [{ code: 'candidate/contract' }], rule);
+    assert.deepEqual(candidateDetails, [{ field, reason: 'prohibited-claim' }], rule);
+    assert.deepEqual(outputDetails, [{ kind: 'prohibited-claim', field, rule }], rule);
+    assert.equal(Object.isFrozen(outputDetails[0]), true, rule);
+    assert.deepEqual(Object.keys(outputDetails[0]!), ['kind', 'field', 'rule'], rule);
+    assert.equal(JSON.stringify(outputDetails).includes('SECRET'), false, rule);
+  }
+
+  const details: OutputValidationDetail[] = [];
+  assert.equal(validateProposalCandidate(fixture.proposal, context, undefined, undefined,
+    detail => { details.push(detail); }).ok, true);
+  assert.deepEqual(details, []);
+});
+
+test('contains output-detail sink failures without changing lexical validation or old events', async () => {
+  const fixture = generationFixture();
+  const candidate = cloneCandidate(fixture.proposal);
+  candidate.uncertainty = 'The whole site is accessible. SECRET';
+  const context = candidateContext(fixture);
+  const candidateDetails: CandidateDetail[] = [];
+  const coarse: unknown[] = [];
+  const sinks: readonly ((detail: OutputValidationDetail) => unknown)[] = [
+    detail => { assert.deepEqual(detail,
+      { kind: 'prohibited-claim', field: 'uncertainty', rule: 'whole-page-site-accessible' });
+      throw new Error('SECRET synchronous detail failure'); },
+    () => Promise.reject(new Error('SECRET rejected detail failure')),
+    () => Object.defineProperty({}, 'then', { get() { throw new Error('SECRET hostile thenable'); } }),
+  ];
+  for (const sink of sinks) {
+    assert.deepEqual(validateProposalCandidate(candidate, context,
+      event => { coarse.push(event); }, detail => { candidateDetails.push(detail); }, sink), failure);
+    await Promise.resolve();
+  }
+  assert.deepEqual(coarse, Array.from({ length: 3 }, () => ({ code: 'candidate/contract' })));
+  assert.deepEqual(candidateDetails, Array.from({ length: 3 }, () =>
+    ({ field: 'uncertainty', reason: 'prohibited-claim' })));
 });

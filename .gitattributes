@@ -7,3 +7,13 @@
 /fixtures/rd003/text-contrast/failing.html text eol=lf
 /fixtures/rd003/text-contrast/corrected.html text eol=lf
 /evaluation/m502-comparison-v1.json text eol=lf
+/evaluation/m602-successor-v1.json text eol=lf
+/evaluation/m602-completion-v1.json text eol=lf
+/evaluation/m602-instrumented-v1.json text eol=lf
+/evaluation/m602-repaired-v1.json text eol=lf
+/evaluation/m602-prompt-v1.json text eol=lf
+/evaluation/m602-reasoning-v1.json text eol=lf
+/evaluation/m602-judgment-v1.json text eol=lf
+/evaluation/m602-grounded-instructions-v1.txt text eol=lf
+/evaluation/m602-uncertainty-v1.json text eol=lf
+/evaluation/m602-native-schema-v1.json text eol=lf

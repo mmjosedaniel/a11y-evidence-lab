@@ -60,7 +60,7 @@ Inspect the actual diff, evidence, and terminal lease result before accepting a 
 
 ## Verification
 
-For implementation, run focused checks at work-slice boundaries and the complete authoritative suite at task closure. Broaden or repeat checks only for changed code, stale or contradictory evidence, failed prerequisites, or unresolved risk. An agent handoff alone does not invalidate evidence; follow the workflow's complete evidence-identity rule. Preserve required independent strict typechecking, risk-critical reproduction, and task-specific checks. Use structural, semantic, manual, or negative evidence where TDD does not apply; never fabricate Red.
+For implementation, add focused tests for changed observable behavior, uncovered contract gaps, and reproduced defects; reuse existing coverage rather than duplicating it. Run focused checks during development and the complete authoritative suite once after integration, reusing that evidence at closure. Later changes require affected checks; repeat the full suite only when a concrete risk or unknown impact makes those checks insufficient. Follow the workflow's [verification cadence](.codex/execplan-implementation-workflow.md#verification-cadence) and [review routing](.codex/execplan-implementation-workflow.md#work-slice-and-final-review): ordinary low-risk work receives primary inspection, and additional independent review needs a named risk or explicit owner requirement. Preserve independent strict typechecking, risk-critical reproduction, and task-specific checks. An agent handoff or documentation-only closure alone does not invalidate evidence. Use structural, semantic, manual, or negative evidence where TDD does not apply; never fabricate Red.
 
 ## Documentation rules
 

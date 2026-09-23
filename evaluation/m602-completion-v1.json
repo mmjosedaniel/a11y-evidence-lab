@@ -1,0 +1,38 @@
+{
+  "version": "m602-completion-v1",
+  "status": "frozen",
+  "frozenAt": "2026-09-21T19:02:40.166Z",
+  "inputDefinition": {
+    "path": "evaluation/m301-generation-v1.json",
+    "sha256": "63770583a97e1d0517337474dadc706c1047d78e026e22c7a745ce7674ed9e6b"
+  },
+  "caseOrder": [
+    "local-image",
+    "local-label",
+    "local-contrast",
+    "groq-image",
+    "groq-label",
+    "groq-contrast"
+  ],
+  "executionPolicy": "m602-successor-execution-v1",
+  "observationPolicy": {
+    "version": "m602-successor-observation-v1",
+    "startDelayMs": 1000,
+    "deadlineMs": 5000,
+    "cleanupDeadlineMs": 5000,
+    "qualificationWindowMs": 7000
+  },
+  "groqAdmission": {
+    "version": "m304-groq-request-bytes-v1",
+    "maximumBytes": 65536,
+    "exposedDefaults": "groq-gpt-oss-20b-2026-09-11-v1"
+  },
+  "rubric": "inherit-input-definition",
+  "failureInterpretation": "inherit-input-definition",
+  "advancement": "accepted-proposal-and-qualified-observations",
+  "consumption": "exclusive-case-directory",
+  "maximumEntriesPerCase": 1,
+  "maximumDispatchesPerCase": 1,
+  "stopOn": "first-failed-invalid-unknown-or-unqualified-case",
+  "originalEvidence": "preserved-separately"
+}

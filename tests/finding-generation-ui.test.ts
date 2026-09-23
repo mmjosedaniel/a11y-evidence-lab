@@ -380,8 +380,8 @@ describe('M3-05 explicit Finding generation UI', { concurrency: false, timeout: 
         persisted: false, cleanupFailed: false, invocationPersisted: false });
       window.m104.rerender(true, {}, true, true, true);
       window.m104.generationAccessor = callback => {
-        Object.defineProperty(performance, 'now', { configurable: true, value: () => originalPerformance() + 120001 });
-        Date.now = () => originalDate() + 120001;
+        Object.defineProperty(performance, 'now', { configurable: true, value: () => originalPerformance() + 300001 });
+        Date.now = () => originalDate() + 300001;
         return callback;
       };
     });
@@ -401,10 +401,37 @@ describe('M3-05 explicit Finding generation UI', { concurrency: false, timeout: 
     }
   });
 
-  it('times out the complete collaborator lifetime and prevents an old settlement from changing a newer owner', async () => {
-    const oldId = 'generation-late-old';
-    await openEligible(oldId);
-    await setGeneration('hold', 'old-generation');
+  it('keeps Local pending beyond the Groq deadline while Groq still expires at 120 seconds', async () => {
+    await openEligible('generation-local-extended-deadline', 'local');
+    await setGeneration('hold', 'local-after-120');
+    await page.evaluate(() => {
+      const ownPerformance = Object.getOwnPropertyDescriptor(performance, 'now');
+      const originalPerformance = performance.now.bind(performance);
+      window.m104.raw = { ownPerformance, originalPerformance };
+    });
+    try {
+      await generationButton().click();
+      await page.evaluate(() => {
+        const saved = window.m104.raw;
+        Object.defineProperty(performance, 'now', {
+          configurable: true,
+          value: () => saved.originalPerformance() + 120001,
+        });
+      });
+      await page.evaluate(outcome => window.m104.resolveKey('local-after-120', outcome),
+        successfulGenerationEnvelope('generation-local-extended-deadline'));
+      await detail().getByText('The scanner recorded a bounded issue for the selected element.', { exact: true }).waitFor();
+    } finally {
+      await page.evaluate(() => {
+        const saved = window.m104.raw;
+        if (saved.ownPerformance) Object.defineProperty(performance, 'now', saved.ownPerformance);
+        else delete (performance as any).now;
+        window.m104.raw = null;
+      });
+    }
+
+    await openEligible('generation-groq-deadline', 'groq');
+    await setGeneration('hold', 'groq-timeout');
     await page.evaluate(() => {
       const nativeTimeout = window.setTimeout.bind(window);
       window.m104.raw = { nativeTimeout };
@@ -420,6 +447,34 @@ describe('M3-05 explicit Finding generation UI', { concurrency: false, timeout: 
       await generationButton().click();
       await page.waitForFunction(() => window.m104.timerDelay !== null);
       assert.equal(await page.evaluate(() => window.m104.timerDelay), 120000);
+      await page.waitForFunction(() => /time|unknown|uncertain/i.test(document.querySelector('[role=status]')?.textContent ?? ''));
+    } finally {
+      await page.evaluate(() => {
+        window.setTimeout = window.m104.raw.nativeTimeout;
+        window.m104.raw = null;
+      });
+    }
+  });
+
+  it('times out the complete collaborator lifetime and prevents an old settlement from changing a newer owner', async () => {
+    const oldId = 'generation-late-old';
+    await openEligible(oldId);
+    await setGeneration('hold', 'old-generation');
+    await page.evaluate(() => {
+      const nativeTimeout = window.setTimeout.bind(window);
+      window.m104.raw = { nativeTimeout };
+      window.setTimeout = ((handler: TimerHandler, delay?: number, ...args: any[]) => {
+        if (delay === 300000 || delay === 120000) {
+          window.m104.timerDelay = delay;
+          return nativeTimeout(handler, 0, ...args);
+        }
+        return nativeTimeout(handler, delay, ...args);
+      }) as typeof window.setTimeout;
+    });
+    try {
+      await generationButton().click();
+      await page.waitForFunction(() => window.m104.timerDelay !== null);
+      assert.equal(await page.evaluate(() => window.m104.timerDelay), 300000);
       await page.waitForFunction(() => /time|unknown|uncertain/i.test(document.querySelector('[role=status]')?.textContent ?? ''));
       const oldSignalAborted = await page.evaluate(() => {
         const call = window.m104.calls.find(item => item.stage === 'generation');
@@ -574,7 +629,7 @@ describe('M3-05 explicit Finding generation UI', { concurrency: false, timeout: 
         const nativeTimeout = window.m104.raw.nativeTimeout;
         window.m104.timerDelay = null;
         window.setTimeout = ((handler: TimerHandler, delay?: number, ...args: any[]) => {
-          if (delay === 120000) {
+          if (delay === 300000 || delay === 120000) {
             window.m104.timerDelay = delay;
             return nativeTimeout(handler, 0, ...args);
           }
@@ -589,7 +644,7 @@ describe('M3-05 explicit Finding generation UI', { concurrency: false, timeout: 
       assert.deepEqual({ method: call.value.method, body: call.value.body, contentType: call.value.contentType }, {
         method: 'POST', body: JSON.stringify({ runId, findingId: 'finding-0' }), contentType: 'application/json',
       });
-      assert.equal(await page.evaluate(() => window.m104.timerDelay), 120000);
+      assert.equal(await page.evaluate(() => window.m104.timerDelay), 300000);
       await page.waitForFunction(() => window.m104.raw?.signal?.aborted === true);
       assert.match(await status().innerText(), /time|unknown|uncertain/i);
       await page.evaluate(outcome => window.m104.resolveKey('main-json', outcome), successfulGenerationEnvelope(runId));

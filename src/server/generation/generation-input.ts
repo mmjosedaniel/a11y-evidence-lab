@@ -1,3 +1,7 @@
+import { NATIVE_SCHEMA_PROMPT_VERSION, NATIVE_SCHEMA_VERSION, NATIVE_SCHEMA_LOCAL_ADAPTER_VERSION } from './generation-artifacts.ts';
+import { UNCERTAINTY_PROMPT_VERSION, JUDGMENT_PROMPT_VERSION, REASONING_PROMPT_VERSION } from './generation-artifacts.ts';
+import { createCaseGenerationRequest } from './generation-case-request.ts';
+import { nativeSchemaGenerationInstructions, uncertaintyGenerationInstructions, judgmentGenerationInstructions, reasoningGenerationInstructions } from './reasoning-generation-instructions.ts';
 import { buildFindingAnalysis } from '../domain/finding-analysis.ts';
 import type { EvidencePath, FindingAnalysisDecision } from '../domain/finding-analysis-types.ts';
 import { assessFindingEvidence } from '../domain/finding-sufficiency.ts';
@@ -81,6 +85,17 @@ export function buildGenerationInput(options: {
 
 export function createGenerationRequest(input: GenerationInput, providerContext: ProviderContext, configuration: GenerationConfiguration): GenerationRequest {
   requireValid(validateGenerationConfiguration(configuration, providerContext).ok);
+  if (configuration.promptVersion === NATIVE_SCHEMA_PROMPT_VERSION || configuration.promptVersion === UNCERTAINTY_PROMPT_VERSION || configuration.promptVersion === REASONING_PROMPT_VERSION || configuration.promptVersion === JUDGMENT_PROMPT_VERSION) {
+    return createCaseGenerationRequest([
+      { role: 'system', content: (configuration.promptVersion === NATIVE_SCHEMA_PROMPT_VERSION ? nativeSchemaGenerationInstructions
+        : configuration.promptVersion === UNCERTAINTY_PROMPT_VERSION ? uncertaintyGenerationInstructions
+        : configuration.promptVersion === JUDGMENT_PROMPT_VERSION
+        ? judgmentGenerationInstructions : reasoningGenerationInstructions)(input.finding.ruleId) },
+      { role: 'user', content: `${JSON.stringify(input, null, 2)}\n` },
+    ], { findingId: input.finding.findingId,
+      availableEvidenceReferences: input.finding.facts.map(fact => fact.reference),
+      passageIds: input.guidance.passages.map(passage => passage.passageId) }, configuration);
+  }
   const admitted = readObject(configuration);
   const context = readObject(admitted.providerContext, ['mode', 'provider', 'model']);
   const controls = readGenerationParameters(admitted.parameters, readChoice(context.mode, ['local', 'groq']));

@@ -43,6 +43,8 @@ The records below preserve confirmed defects and their current disposition.
 | Bug | Summary | Status | Responsible task or policy scope |
 | --- | --- | --- | --- |
 | [BUG-0001](bug-0001-generation-metadata-read-escape.md) | Admitted generation metadata can throw after transport and escape bounded outcomes | Verified | M3-02 |
+| [BUG-0002](bug-0002-successor-manifest-checkout-bytes.md) | Windows checkout changes frozen successor-manifest bytes and blocks admission | Verified | M6-02 |
+| [BUG-0003](bug-0003-metadata-phase-deadline-race.md) | Late metadata can bypass its ten-second phase limit | Verified | M6-02 |
 
 ## Record template
 

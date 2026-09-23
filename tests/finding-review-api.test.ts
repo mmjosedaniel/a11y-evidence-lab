@@ -27,10 +27,20 @@ const clientRoot = path.resolve('dist/client');
 
 // These factories are never part of review transport. Any accidental provider path is a test failure.
 mock.module(new URL('../src/server/generation/ollama-generation.ts', import.meta.url).href, {
-  namedExports: { createOllamaGenerationAdapter: () => { throw new Error('Review invoked Local provider'); } },
+  namedExports: {
+    createOllamaGenerationAdapter: () => { throw new Error('Review invoked Local provider'); },
+    createReasoningOllamaGenerationAdapter: () => { throw new Error('Review invoked Local provider'); },
+    createJudgmentOllamaGenerationAdapter: () => { throw new Error('Review invoked Local provider'); },
+    createUncertaintyOllamaGenerationAdapter: () => { throw new Error('Review invoked Local provider'); },
+    createNativeSchemaOllamaGenerationAdapter: () => { throw new Error('Review invoked Local provider'); },
+  },
 });
 mock.module(new URL('../src/server/generation/groq-generation.ts', import.meta.url).href, {
-  namedExports: { createGroqGenerationAdapter: () => { throw new Error('Review invoked Groq provider'); } },
+  namedExports: {
+    createGroqGenerationAdapter: () => { throw new Error('Review invoked Groq provider'); },
+    createJudgmentGroqGenerationAdapter: () => { throw new Error('Review invoked Groq provider'); },
+    createUncertaintyGroqGenerationAdapter: () => { throw new Error('Review invoked Groq provider'); },
+  },
 });
 
 // The full suite intentionally reaches initial Red at this agreed missing production owner.

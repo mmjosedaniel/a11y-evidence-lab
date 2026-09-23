@@ -19,10 +19,20 @@ import { withReviewSandbox } from './helpers/m401-review-sandbox.ts';
 import { expectedComparison } from './helpers/m503-comparison-fixture.ts';
 
 mock.module(new URL('../src/server/generation/ollama-generation.ts', import.meta.url).href, {
-  namedExports: { createOllamaGenerationAdapter: () => { throw new Error('Rescan invoked Local provider'); } },
+  namedExports: {
+    createOllamaGenerationAdapter: () => { throw new Error('Rescan invoked Local provider'); },
+    createReasoningOllamaGenerationAdapter: () => { throw new Error('Rescan invoked Local provider'); },
+    createJudgmentOllamaGenerationAdapter: () => { throw new Error('Rescan invoked Local provider'); },
+    createUncertaintyOllamaGenerationAdapter: () => { throw new Error('Rescan invoked Local provider'); },
+    createNativeSchemaOllamaGenerationAdapter: () => { throw new Error('Rescan invoked Local provider'); },
+  },
 });
 mock.module(new URL('../src/server/generation/groq-generation.ts', import.meta.url).href, {
-  namedExports: { createGroqGenerationAdapter: () => { throw new Error('Rescan invoked Groq provider'); } },
+  namedExports: {
+    createGroqGenerationAdapter: () => { throw new Error('Rescan invoked Groq provider'); },
+    createJudgmentGroqGenerationAdapter: () => { throw new Error('Rescan invoked Groq provider'); },
+    createUncertaintyGroqGenerationAdapter: () => { throw new Error('Rescan invoked Groq provider'); },
+  },
 });
 
 const { receiveRescan } = await import('../src/server/local-service/rescan-api.ts');

@@ -1,3 +1,27 @@
+import { REASONING_QWEN_CONFIGURATION, REASONING_GROQ_CONFIGURATION } from '../../src/server/generation/reasoning-generation-configuration.ts';
+import { CASE_QWEN_CONFIGURATION, CASE_GROQ_CONFIGURATION, PROMPT_CASE_QWEN_CONFIGURATION, PROMPT_CASE_GROQ_CONFIGURATION } from '../../src/server/generation/generation-case-request.ts';
+import { promptCampaign, promptVersion, loadPromptManifest, promptBuild,
+  validatePromptQualification, validatePromptObservation, validatePromptProjection, promptObservationQualified,
+  type M602PromptResult, type M602PromptAssessment, type M602PromptObservation,
+  type M602PromptQualification } from './m602-successor-evidence.ts';
+import { reasoningCampaign, reasoningVersion, loadReasoningManifest, reasoningBuild,
+  validateReasoningQualification, validateReasoningObservation, validateReasoningProjection, reasoningObservationQualified,
+  type M602ReasoningResult, type M602ReasoningAssessment, type M602ReasoningObservation,
+  type M602ReasoningQualification } from './m602-successor-evidence.ts';
+import { repairedCampaign, repairedVersion, loadRepairedManifest, repairedBuild,
+  validateRepairedQualification, validateRepairedObservation, validateRepairedProjection, repairedObservationQualified,
+  type M602RepairedResult, type M602RepairedAssessment, type M602RepairedObservation,
+  type M602RepairedQualification } from './m602-successor-evidence.ts';
+import { instrumentedCampaign, instrumentedVersion, loadInstrumentedManifest, instrumentedBuild,
+  validateInstrumentedQualification, validateInstrumentedObservation, validateInstrumentedProjection, instrumentedObservationQualified,
+  type ObservedCampaign, type M602InstrumentedResult, type M602InstrumentedAssessment, type M602InstrumentedObservation,
+  type M602InstrumentedQualification } from './m602-successor-evidence.ts';
+import { createM602InstrumentedDiagnosticCollector, reconcileInstrumentedDetails, validateInstrumentedDetails } from './m602-instrumented-diagnostics.ts';
+import type { CandidateDetailSink } from '../../src/server/generation/generation-diagnostics.ts';
+import { completionCampaign, completionVersion, loadCompletionManifest, validateCompletionQualification,
+  validateCompletionObservation, validateCompletionProjection, completionObservationQualified,
+  type M602CompletionResult, type M602CompletionAssessment, type M602CompletionObservation,
+  type M602CompletionQualification } from './m602-successor-evidence.ts';
 import { prepareM602SuccessorObservers, completeSuccessorIO, isolatedSuccessorRoot, type M602SuccessorObserverIO, type M602SuccessorObserverSession } from './m602-successor-observers.ts';
 import { successorCampaign, successorVersion, noSuccessorResources, loadSuccessorManifest, successorBuild,
   validateSuccessorQualification, validateSuccessorObservation, validateSuccessorProjection, successorObservationQualified,
@@ -18,13 +42,13 @@ import type { GenerationObservation } from '../../src/server/generation/generati
 import { readProviderInvocation } from '../../src/server/generation/generation-contract.ts';
 import type { GenerationErrorCode } from '../../src/server/generation/generation-contract.ts';
 import type { Proposal } from '../../src/server/generation/proposal-contract.ts';
-import { createOllamaGenerationAdapter } from '../../src/server/generation/ollama-generation.ts';
-import { createGroqGenerationAdapter } from '../../src/server/generation/groq-generation.ts';
+import { createReasoningOllamaGenerationAdapter, createPromptCaseOllamaGenerationAdapter, createCaseOllamaGenerationAdapter, createOllamaGenerationAdapter } from '../../src/server/generation/ollama-generation.ts';
+import { createReasoningGroqGenerationAdapter, createPromptCaseGroqGenerationAdapter, createCaseGroqGenerationAdapter, createGroqGenerationAdapter } from '../../src/server/generation/groq-generation.ts';
 import type { GroqCredentialIO } from '../../src/server/generation/groq-credential.ts';
 import type { OllamaNativeRequest } from '../../src/server/generation/ollama-generation-http.ts';
 import { QWEN_CONFIGURATION } from '../../src/server/generation/ollama-generation-model.ts';
 import { GROQ_CONFIGURATION } from '../../src/server/generation/groq-generation-configuration.ts';
-import { loadM602Package } from './m602-package.ts';
+import { loadM602Package, loadM602RepairedPackage, loadM602PromptPackage, loadM602ReasoningPackage } from './m602-package.ts';
 import type { M602CaseLabel, M602Package, M602PackageEnvironment } from './m602-package.ts';
 
 export type M602OperationDependencies = {
@@ -33,13 +57,33 @@ export type M602OperationDependencies = {
   readonly signal?: AbortSignal; readonly filesystem?: Partial<EvidenceFilesystem>;
   readonly followup?: { readonly reportRoot: string; readonly observers?: M602Observers };
 };
-type EvidenceVersion = 'm602-evidence-v1' | 'm602-successor-evidence-v1';
+type EvidenceVersion = 'm602-evidence-v1' | 'm602-successor-evidence-v1' | 'm602-completion-evidence-v1' | 'm602-instrumented-evidence-v1' | 'm602-repaired-evidence-v1' | 'm602-prompt-evidence-v1' | 'm602-reasoning-evidence-v1';
 type CommonResult = Omit<M602Result, 'version'> & { readonly version: EvidenceVersion };
 type CommonEntered = Omit<Entered, 'version'> & { readonly version: EvidenceVersion };
 type CommonDispatch = Omit<Dispatch, 'version'> & { readonly version: EvidenceVersion };
 export type M602SuccessorDependencies = Omit<M602OperationDependencies, 'followup'> & {
   readonly successorManifestEnvironment?: M602PackageEnvironment; readonly observerIO?: M602SuccessorObserverIO;
 };
+export type M602CompletionDependencies = Omit<M602SuccessorDependencies, 'successorManifestEnvironment'> & {
+  readonly completionManifestEnvironment?: M602PackageEnvironment;
+};
+export type M602InstrumentedDependencies = Omit<M602SuccessorDependencies, 'successorManifestEnvironment'> & {
+  readonly instrumentedManifestEnvironment?: M602PackageEnvironment;
+};
+export type M602RepairedDependencies = Omit<M602SuccessorDependencies, 'successorManifestEnvironment'> & {
+  readonly repairedManifestEnvironment?: M602PackageEnvironment;
+};
+export type M602PromptDependencies = Omit<M602SuccessorDependencies, 'successorManifestEnvironment'> & {
+  readonly promptManifestEnvironment?: M602PackageEnvironment;
+};
+export type M602ReasoningDependencies = Omit<M602SuccessorDependencies, 'successorManifestEnvironment'> & {
+  readonly reasoningManifestEnvironment?: M602PackageEnvironment;
+};
+type ObservedDependencies = M602SuccessorDependencies & M602CompletionDependencies & M602InstrumentedDependencies & M602RepairedDependencies & M602PromptDependencies & M602ReasoningDependencies;
+type ObservedResult = M602SuccessorResult | M602CompletionResult | M602InstrumentedResult | M602RepairedResult | M602PromptResult | M602ReasoningResult;
+type ObservedAssessment = M602SuccessorAssessment | M602CompletionAssessment | M602InstrumentedAssessment | M602RepairedAssessment | M602PromptAssessment | M602ReasoningAssessment;
+type ObservedObservation = M602SuccessorObservation | M602CompletionObservation | M602InstrumentedObservation | M602RepairedObservation | M602PromptObservation | M602ReasoningObservation;
+type ObservedQualification = M602SuccessorQualification | M602CompletionQualification | M602InstrumentedQualification | M602RepairedQualification | M602PromptQualification | M602ReasoningQualification;
 type RecordIdentity = { readonly version: 'm602-evidence-v1'; readonly caseLabel: M602CaseLabel };
 type Wire = { readonly sha256: string; readonly bytes: number };
 type ChatWindow = { readonly startedAt: string; readonly finishedAt: string };
@@ -128,7 +172,7 @@ function context(label: M602CaseLabel, dependencies: M602OperationDependencies |
   if (dependencies?.followup) assert.equal(reportRoot, path.join(root, 'followup-evidence'));
   return { root, filesystem, reportRoot, configuration: label.startsWith('local-') ? QWEN_CONFIGURATION : GROQ_CONFIGURATION };
 }
-function codeHash(successor = false, filesystem: EvidenceFilesystem = fs): string {
+function codeHash(version: EvidenceVersion = 'm602-evidence-v1', filesystem: EvidenceFilesystem = fs): string {
   const paths: string[] = [];
   const visit = (relative: string) => {
     const absolute = path.join(repository, relative);
@@ -144,16 +188,19 @@ function codeHash(successor = false, filesystem: EvidenceFilesystem = fs): strin
   paths.push('tests/helpers/m602-package.ts', 'tests/helpers/m602-operation.ts', 'tests/helpers/m602-run-case.ts',
     'tests/helpers/m602-observation.ts', 'tests/helpers/m602-historical-evidence.ts', 'tests/helpers/m602-evidence-files.ts',
     'package.json', 'package-lock.json', 'tsconfig.json');
-  if (successor) paths.push('tests/helpers/m602-successor-observers.ts', 'tests/helpers/m602-successor-evidence.ts', 'evaluation/m602-successor-v1.json');
+  if (version !== 'm602-evidence-v1') paths.push('tests/helpers/m602-successor-observers.ts', 'tests/helpers/m602-successor-evidence.ts',
+    version === reasoningVersion ? 'evaluation/m602-reasoning-v1.json' : version === promptVersion ? 'evaluation/m602-prompt-v1.json' : version === repairedVersion ? 'evaluation/m602-repaired-v1.json' : version === instrumentedVersion ? 'evaluation/m602-instrumented-v1.json' : version === completionVersion ? 'evaluation/m602-completion-v1.json' : 'evaluation/m602-successor-v1.json');
+  if (version === instrumentedVersion || version === repairedVersion || version === promptVersion || version === reasoningVersion) paths.push('tests/helpers/m602-instrumented-diagnostics.ts');
+  if (version === promptVersion) paths.push('evaluation/m602-grounded-instructions-v1.txt');
   return hash(JSON.stringify(paths.sort().map(relative => {
     ordinary(path.join(repository, relative), fs, true);
     return { path: relative, sha256: hash(filesystem.readFileSync(path.join(repository, relative))) };
   })));
 }
-function validateAssessment(value: unknown, label: M602CaseLabel, result: CommonResult, resultSha256: string, entered: CommonEntered, version: EvidenceVersion = 'm602-evidence-v1'): M602Assessment | M602SuccessorAssessment {
-  closed(value, ['version', 'caseLabel', 'resultSha256', 'evaluator', 'assessedAt', 'dimensions', 'uncertainty', 'localObservation', 'accepted', ...(version === successorVersion ? ['observationSha256'] : [])]);
+function validateAssessment(value: unknown, label: M602CaseLabel, result: CommonResult, resultSha256: string, entered: CommonEntered, version: EvidenceVersion = 'm602-evidence-v1'): M602Assessment | ObservedAssessment {
+  closed(value, ['version', 'caseLabel', 'resultSha256', 'evaluator', 'assessedAt', 'dimensions', 'uncertainty', 'localObservation', 'accepted', ...(version !== 'm602-evidence-v1' ? ['observationSha256'] : [])]);
   identity(value, label, version);
-  if (version === successorVersion) digest(value.observationSha256);
+  if (version !== 'm602-evidence-v1') digest(value.observationSha256);
   assert.equal(value.resultSha256, resultSha256);
   assert.equal(value.evaluator, 'primary');
   assert.ok(instant(value.assessedAt) >= instant(result.finishedAt));
@@ -234,7 +281,13 @@ function validateResult(value: unknown, label: M602CaseLabel, pkg: M602Package, 
     closed(value.observation, ['adapterConfiguration', 'outcome', 'validation']);
     const observation = value.observation;
     const invocation = readProviderInvocation({ ...observation.adapterConfiguration, outcome: observation.outcome, validation: observation.validation });
-    const configuration = label.startsWith('local-') ? QWEN_CONFIGURATION : GROQ_CONFIGURATION;
+    const configuration = version === reasoningVersion
+      ? (label.startsWith('local-') ? REASONING_QWEN_CONFIGURATION : REASONING_GROQ_CONFIGURATION)
+      : version === promptVersion
+      ? (label.startsWith('local-') ? PROMPT_CASE_QWEN_CONFIGURATION : PROMPT_CASE_GROQ_CONFIGURATION)
+      : version === repairedVersion
+      ? (label.startsWith('local-') ? CASE_QWEN_CONFIGURATION : CASE_GROQ_CONFIGURATION)
+      : (label.startsWith('local-') ? QWEN_CONFIGURATION : GROQ_CONFIGURATION);
     const { outcome: _outcome, validation: _validation, ...metadata } = invocation;
     assert.deepEqual(observation.adapterConfiguration, metadata);
     assert.deepEqual(metadata, { adapterId: configuration.adapterId, adapterVersion: configuration.adapterVersion,
@@ -405,7 +458,7 @@ export async function executeM602Case(caseLabel: M602CaseLabel, dependencies?: M
 
 async function executeSource(caseLabel: M602CaseLabel, dependencies: M602OperationDependencies | undefined,
   execution: Pick<ReturnType<typeof context>, 'root' | 'filesystem' | 'configuration'>, version: EvidenceVersion,
-  observers?: M602Observers, extension: Record<string, string> = {}) {
+  observers?: M602Observers, extension: Record<string, string> = {}, onDetail?: CandidateDetailSink) {
   const { root, filesystem, configuration } = execution;
   filesystem.mkdirSync(path.join(root, caseLabel));
   const directory = path.join(root, caseLabel);
@@ -415,23 +468,23 @@ async function executeSource(caseLabel: M602CaseLabel, dependencies: M602Operati
   try {
     const entered = { version, caseLabel, enteredAt: timestamp(),
       manifestSha256: dependencies?.packageEnvironment?.manifestSha256 ?? manifestDigest,
-      mode: configuration.providerContext.mode, configurationSha256: hash(JSON.stringify(configuration)), codeSha256: codeHash(version === successorVersion, filesystem), ...extension };
+      mode: configuration.providerContext.mode, configurationSha256: hash(JSON.stringify(configuration)), codeSha256: codeHash(version, filesystem), ...extension };
     const enteredSha256 = publish(directory, 'entered.json', entered, filesystem);
     const local = configuration.providerContext.mode === 'local';
     const native = dependencies === undefined ? (local ? httpRequest : httpsRequest) : dependencies.requestImplementation!;
     const accounting = accountNative(native, local, observation);
-    const adapter = local ? createOllamaGenerationAdapter(accounting.request, diagnostic.onRejection)
-      : createGroqGenerationAdapter({ requestImplementation: accounting.request, credentialIO: dependencies?.credentialIO });
+    const adapter = local ? (version === reasoningVersion ? createReasoningOllamaGenerationAdapter : version === promptVersion ? createPromptCaseOllamaGenerationAdapter : version === repairedVersion ? createCaseOllamaGenerationAdapter : createOllamaGenerationAdapter)(accounting.request, diagnostic.onRejection)
+      : (version === reasoningVersion ? createReasoningGroqGenerationAdapter : version === promptVersion ? createPromptCaseGroqGenerationAdapter : version === repairedVersion ? createCaseGroqGenerationAdapter : createGroqGenerationAdapter)({ requestImplementation: accounting.request, credentialIO: dependencies?.credentialIO });
     let pkg: M602Package | undefined;
     let dispatchSha256: string | null = null;
     let publicationFailed = false;
     const outcome = await executeGenerationOperation({ signal, onRejection: diagnostic.onRejection,
       providerContext: configuration.providerContext, adapter,
       admit() {
-        const loaded = loadM602Package(caseLabel, dependencies?.packageEnvironment);
+        const loaded = (version === reasoningVersion ? loadM602ReasoningPackage : version === promptVersion ? loadM602PromptPackage : version === repairedVersion ? loadM602RepairedPackage : loadM602Package)(caseLabel, dependencies?.packageEnvironment);
         if (loaded.status !== 'ready') return loaded;
         pkg = loaded.value;
-        return { status: 'ready', createRequest: pkg.createRequest, validateCandidate: pkg.validateCandidate };
+        return { status: 'ready', createRequest: pkg.createRequest, validateCandidate: (candidate, onRejection) => pkg!.validateCandidate(candidate, onRejection, onDetail) };
       },
       beforeTransport() {
         try {
@@ -578,14 +631,15 @@ export async function readM602Followup(caseLabel: M602CaseLabel, dependencies?: 
   } catch { return Object.freeze({ ok: false, error: 'evidence-blocked' }); }
 }
 
-function successorContext(caseLabel: M602CaseLabel, dependencies: M602SuccessorDependencies | undefined,
+function observedContext(caseLabel: M602CaseLabel, campaign: ObservedCampaign, dependencies: ObservedDependencies | undefined,
   mode: 'read' | 'execute' | 'qualify') {
   assert.ok(labels.includes(caseLabel));
+  const manifestEnvironment = campaign === 'reasoning' ? dependencies?.reasoningManifestEnvironment : campaign === 'prompt' ? dependencies?.promptManifestEnvironment : campaign === 'repaired' ? dependencies?.repairedManifestEnvironment : campaign === 'instrumented' ? dependencies?.instrumentedManifestEnvironment : campaign === 'completion' ? dependencies?.completionManifestEnvironment : dependencies?.successorManifestEnvironment;
   if (dependencies !== undefined) {
-    assert.ok(dependencies.root && dependencies.packageEnvironment && dependencies.successorManifestEnvironment);
+    assert.ok(dependencies.root && dependencies.packageEnvironment && manifestEnvironment);
     isolatedSuccessorRoot(dependencies.root);
     assert.equal(typeof dependencies.packageEnvironment.readBytes, 'function');
-    assert.equal(typeof dependencies.successorManifestEnvironment.readBytes, 'function');
+    assert.equal(typeof manifestEnvironment.readBytes, 'function');
     if (mode === 'execute') {
       assert.equal(typeof dependencies.requestImplementation, 'function');
       if (caseLabel.startsWith('groq-')) assert.ok(dependencies.credentialIO);
@@ -593,45 +647,55 @@ function successorContext(caseLabel: M602CaseLabel, dependencies: M602SuccessorD
     if (mode === 'qualify' || (mode === 'execute' && caseLabel.startsWith('local-'))) completeSuccessorIO(dependencies.observerIO);
   }
   if (mode !== 'read') assert.ok(!dependencies?.signal?.aborted);
-  const root = dependencies === undefined ? path.join(repository, 'temp/m602-successor-v1') : path.resolve(dependencies.root!);
+  const root = dependencies === undefined ? path.join(repository, `temp/m602-${campaign}-v1`) : path.resolve(dependencies.root!);
   const filesystem: EvidenceFilesystem = { mkdirSync: fs.mkdirSync, openSync: fs.openSync, writeSync: fs.writeSync,
     fsyncSync: fs.fsyncSync, closeSync: fs.closeSync, lstatSync: fs.lstatSync, realpathSync: fs.realpathSync,
     readFileSync: fs.readFileSync, readdirSync: fs.readdirSync, ...dependencies?.filesystem };
   ordinary(root, filesystem, false);
   const allowed = ['qualification.json', ...labels, ...(dependencies === undefined ? [] : ['runs', 'client', 'observer-scratch'])];
   assert.ok(filesystem.readdirSync(root).every(name => allowed.includes(name)));
-  const loaded = loadM602Package(caseLabel, dependencies?.packageEnvironment);
+  const loaded = (campaign === 'reasoning' ? loadM602ReasoningPackage : campaign === 'prompt' ? loadM602PromptPackage : campaign === 'repaired' ? loadM602RepairedPackage : loadM602Package)(caseLabel, dependencies?.packageEnvironment);
   assert.equal(loaded.status, 'ready'); if (loaded.status !== 'ready') throw new Error('Package rejected');
-  const campaignManifestSha256 = loadSuccessorManifest(loaded.value.identities.manifestSha256, dependencies?.successorManifestEnvironment);
+  const campaignManifestSha256 = campaign === 'reasoning' || campaign === 'prompt' || campaign === 'repaired'
+    ? (campaign === 'reasoning' ? loadReasoningManifest : campaign === 'prompt' ? loadPromptManifest : loadRepairedManifest)(loaded.value.identities.manifestSha256, manifestEnvironment, dependencies?.packageEnvironment)
+    : (campaign === 'instrumented' ? loadInstrumentedManifest : campaign === 'completion' ? loadCompletionManifest : loadSuccessorManifest)(loaded.value.identities.manifestSha256, manifestEnvironment);
   const applicationRevision = process.env.A11Y_APPLICATION_REVISION;
   if (mode !== 'read' || dependencies === undefined) assert.ok(applicationRevision && /^[0-9a-f]{40}$/u.test(applicationRevision));
-  return { root, filesystem, configuration: caseLabel.startsWith('local-') ? QWEN_CONFIGURATION : GROQ_CONFIGURATION,
+  return { kind: campaign, version: campaign === 'reasoning' ? reasoningVersion : campaign === 'prompt' ? promptVersion : campaign === 'repaired' ? repairedVersion : campaign === 'instrumented' ? instrumentedVersion : campaign === 'completion' ? completionVersion : successorVersion,
+    campaign: campaign === 'reasoning' ? reasoningCampaign : campaign === 'prompt' ? promptCampaign : campaign === 'repaired' ? repairedCampaign : campaign === 'instrumented' ? instrumentedCampaign : campaign === 'completion' ? completionCampaign : successorCampaign,
+    root, filesystem, configuration: campaign === 'reasoning'
+      ? (caseLabel.startsWith('local-') ? REASONING_QWEN_CONFIGURATION : REASONING_GROQ_CONFIGURATION)
+      : campaign === 'prompt'
+      ? (caseLabel.startsWith('local-') ? PROMPT_CASE_QWEN_CONFIGURATION : PROMPT_CASE_GROQ_CONFIGURATION)
+      : campaign === 'repaired'
+      ? (caseLabel.startsWith('local-') ? CASE_QWEN_CONFIGURATION : CASE_GROQ_CONFIGURATION)
+      : (caseLabel.startsWith('local-') ? QWEN_CONFIGURATION : GROQ_CONFIGURATION),
     pkg: loaded.value, campaignManifestSha256, manifestSha256: loaded.value.identities.manifestSha256,
-    producerCodeSha256: codeHash(true, filesystem), build: successorBuild(dependencies?.root, filesystem),
+    producerCodeSha256: codeHash(campaign === 'reasoning' ? reasoningVersion : campaign === 'prompt' ? promptVersion : campaign === 'repaired' ? repairedVersion : campaign === 'instrumented' ? instrumentedVersion : campaign === 'completion' ? completionVersion : successorVersion, filesystem), build: (campaign === 'reasoning' ? reasoningBuild : campaign === 'prompt' ? promptBuild : campaign === 'repaired' ? repairedBuild : campaign === 'instrumented' ? instrumentedBuild : successorBuild)(dependencies?.root, filesystem),
     applicationRevision: mode === 'read' && dependencies !== undefined ? undefined : applicationRevision };
 }
-type SuccessorContext = ReturnType<typeof successorContext>;
-function successorQualification(execution: SuccessorContext) {
+type ObservedContext = ReturnType<typeof observedContext>;
+function observedQualification(execution: ObservedContext) {
   const stored = record(execution.root, 'qualification.json', execution.filesystem);
-  return { qualification: validateSuccessorQualification(stored.value, execution), sha256: stored.sha256 };
+  return { qualification: (execution.kind === 'reasoning' ? validateReasoningQualification : execution.kind === 'prompt' ? validatePromptQualification : execution.kind === 'repaired' ? validateRepairedQualification : execution.kind === 'instrumented' ? validateInstrumentedQualification : execution.kind === 'completion' ? validateCompletionQualification : validateSuccessorQualification)(stored.value, execution), sha256: stored.sha256 };
 }
 function successorFailure(error: M602SuccessorFailure['error'], cleanup = noSuccessorResources): M602SuccessorFailure {
   return freeze({ ok: false, error, cleanup });
 }
-function observerEnvironment(dependencies: M602SuccessorDependencies | undefined, revision: string) {
+function observerEnvironment(dependencies: ObservedDependencies | undefined, revision: string) {
   return dependencies === undefined ? undefined : { root: dependencies.root!, applicationRevision: revision, io: dependencies.observerIO! };
 }
-export async function qualifyM602SuccessorObservers(dependencies?: M602SuccessorDependencies):
-  Promise<{ readonly ok: true; readonly qualification: M602SuccessorQualification; readonly sha256: string } | M602SuccessorFailure> {
-  let execution: SuccessorContext;
+async function qualifyObserved(campaign: ObservedCampaign, dependencies?: ObservedDependencies):
+  Promise<{ readonly ok: true; readonly qualification: ObservedQualification; readonly sha256: string } | M602SuccessorFailure> {
+  let execution: ObservedContext;
   try {
-    execution = successorContext('local-image', dependencies, 'qualify');
+    execution = observedContext('local-image', campaign, dependencies, 'qualify');
     if (execution.filesystem.readdirSync(execution.root).includes('qualification.json')) {
-      return freeze({ ok: true, ...successorQualification(execution) });
+      return freeze({ ok: true, ...observedQualification(execution) });
     }
     assert.ok(!execution.filesystem.readdirSync(execution.root).some(name => labels.includes(name as M602CaseLabel)));
   } catch { return successorFailure('evidence-blocked'); }
-  const prepared = await prepareM602SuccessorObservers(observerEnvironment(dependencies, execution.applicationRevision!), dependencies?.signal);
+  const prepared = await prepareM602SuccessorObservers(observerEnvironment(dependencies, execution.applicationRevision!), dependencies?.signal, undefined, (campaign === 'repaired' || campaign === 'prompt' || campaign === 'reasoning') ? 'm602-loading-observation-v2' : undefined);
   if (!prepared.ok) return prepared;
   const session = prepared.session;
   const signal = dependencies?.signal ?? new AbortController().signal;
@@ -653,19 +717,19 @@ export async function qualifyM602SuccessorObservers(dependencies?: M602Successor
     const timing = coordinator.report({ startedAt, finishedAt });
     assert.ok(['ui', 'runtime', 'gpu'].every(kind => timing[kind as 'ui'].status === 'completed'));
     cleanup = await session.close();
-    const qualification = validateSuccessorQualification({ version: 'm602-successor-qualification-v1', campaign: successorCampaign,
+    const qualification = (campaign === 'reasoning' ? validateReasoningQualification : campaign === 'prompt' ? validatePromptQualification : campaign === 'repaired' ? validateRepairedQualification : campaign === 'instrumented' ? validateInstrumentedQualification : campaign === 'completion' ? validateCompletionQualification : validateSuccessorQualification)({ version: `m602-${campaign}-qualification-v1`, campaign: execution.campaign,
       qualifiedAt: timestamp(), campaignManifestSha256: execution.campaignManifestSha256, manifestSha256: execution.manifestSha256,
       producerCodeSha256: execution.producerCodeSha256, applicationRevision: execution.applicationRevision,
-      nodeVersion: process.version, browserVersion: '151.0.7922.34', build: execution.build, ui: true, gpu: true, cleanup }, execution);
+      nodeVersion: process.version, browserVersion: '151.0.7922.34', build: execution.build, ui: true, gpu: true, cleanup, ...((campaign === 'repaired' || campaign === 'prompt' || campaign === 'reasoning') ? { runtime: 'not-exercised' } : {}) }, execution);
     try { return freeze({ ok: true, qualification, sha256: publish(execution.root, 'qualification.json', qualification, execution.filesystem) }); }
     catch { return successorFailure('evidence-publication', cleanup); }
   } catch { return successorFailure('observer-readiness', await session.close()); }
   finally { coordinator.close(); await session.close(); }
 }
 
-function successorSnapshot(caseLabel: M602CaseLabel, dependencies?: M602SuccessorDependencies) {
-  const execution = successorContext(caseLabel, dependencies, 'read');
-  const qualified = successorQualification(execution);
+function observedSnapshot(caseLabel: M602CaseLabel, campaign: ObservedCampaign, dependencies?: ObservedDependencies) {
+  const execution = observedContext(caseLabel, campaign, dependencies, 'read');
+  const qualified = observedQualification(execution);
   const { root, filesystem, configuration } = execution;
   const directory = path.join(root, caseLabel); ordinary(directory, filesystem, false);
   const names = filesystem.readdirSync(directory);
@@ -674,8 +738,8 @@ function successorSnapshot(caseLabel: M602CaseLabel, dependencies?: M602Successo
   const enteredRecord = record(directory, 'entered.json', filesystem), entered = enteredRecord.value;
   closed(entered, ['version', 'caseLabel', 'enteredAt', 'manifestSha256', 'mode', 'configurationSha256', 'codeSha256',
     'campaign', 'campaignManifestSha256', 'qualificationSha256']);
-  identity(entered, caseLabel, successorVersion); instant(entered.enteredAt);
-  assert.equal(entered.campaign, successorCampaign); assert.equal(entered.campaignManifestSha256, execution.campaignManifestSha256);
+  identity(entered, caseLabel, execution.version); instant(entered.enteredAt);
+  assert.equal(entered.campaign, execution.campaign); assert.equal(entered.campaignManifestSha256, execution.campaignManifestSha256);
   assert.equal(entered.qualificationSha256, qualified.sha256); assert.equal(entered.manifestSha256, execution.manifestSha256);
   assert.equal(entered.codeSha256, execution.producerCodeSha256); assert.equal(entered.mode, configuration.providerContext.mode);
   assert.equal(entered.configurationSha256, hash(JSON.stringify(configuration)));
@@ -683,48 +747,77 @@ function successorSnapshot(caseLabel: M602CaseLabel, dependencies?: M602Successo
   let dispatch: CommonDispatch | null = null, dispatchSha256: string | null = null;
   if (names.includes('dispatch.json')) {
     const stored = record(directory, 'dispatch.json', filesystem), value = stored.value;
-    closed(value, ['version', 'caseLabel', 'enteredSha256', 'markedAt', 'meaning']); identity(value, caseLabel, successorVersion);
+    closed(value, ['version', 'caseLabel', 'enteredSha256', 'markedAt', 'meaning']); identity(value, caseLabel, execution.version);
     assert.equal(value.enteredSha256, enteredRecord.sha256); assert.equal(value.meaning, 'dispatch-may-have-started');
     assert.ok(instant(value.markedAt) >= instant(entered.enteredAt)); dispatch = value as CommonDispatch; dispatchSha256 = stored.sha256;
   }
   const resultRecord = record(directory, 'result.json', filesystem);
   const result = validateResult(resultRecord.value, caseLabel, execution.pkg, entered as CommonEntered, enteredRecord.sha256,
-    dispatch, dispatchSha256, successorVersion) as M602SuccessorResult;
+    dispatch, dispatchSha256, execution.version) as ObservedResult;
   const stored = record(directory, 'observation.json', filesystem);
-  const observation = validateSuccessorObservation(stored.value, { caseLabel, campaignManifestSha256: execution.campaignManifestSha256,
+  const observation = (campaign === 'reasoning' ? validateReasoningObservation : campaign === 'prompt' ? validatePromptObservation : campaign === 'repaired' ? validateRepairedObservation : campaign === 'instrumented' ? validateInstrumentedObservation : campaign === 'completion' ? validateCompletionObservation : validateSuccessorObservation)(stored.value, { caseLabel, campaignManifestSha256: execution.campaignManifestSha256,
     qualificationSha256: qualified.sha256, producerCodeSha256: entered.codeSha256, enteredSha256: enteredRecord.sha256,
     dispatchSha256, resultSha256: resultRecord.sha256 }, entered.enteredAt);
   validateFollowup({ version: 'm602-followup-v1', caseLabel, producerCodeSha256: entered.codeSha256, manifestSha256: entered.manifestSha256,
     enteredSha256: enteredRecord.sha256, dispatchSha256, resultSha256: resultRecord.sha256,
     diagnostic: observation.diagnostic, observation: observation.timing }, result, execution.pkg.wire);
-  let assessment: M602SuccessorAssessment | null = null;
+  if ('details' in observation) validateInstrumentedDetails(observation.details, observation, result);
+  let assessment: ObservedAssessment | null = null;
   if (names.includes('assessment.json')) {
     assessment = validateAssessment(record(directory, 'assessment.json', filesystem).value, caseLabel, result, resultRecord.sha256,
-      entered as CommonEntered, successorVersion) as M602SuccessorAssessment;
-    validateSuccessorProjection(assessment, observation, stored.sha256);
+      entered as CommonEntered, execution.version) as ObservedAssessment;
+    if (campaign === 'reasoning') validateReasoningProjection(assessment as M602ReasoningAssessment, observation as M602ReasoningObservation, stored.sha256);
+    else if (campaign === 'prompt') validatePromptProjection(assessment as M602PromptAssessment, observation as M602PromptObservation, stored.sha256);
+    else if (campaign === 'repaired') validateRepairedProjection(assessment as M602RepairedAssessment, observation as M602RepairedObservation, stored.sha256);
+    else if (campaign === 'instrumented') validateInstrumentedProjection(assessment as M602InstrumentedAssessment, observation as M602InstrumentedObservation, stored.sha256);
+    else if (campaign === 'completion') validateCompletionProjection(assessment as M602CompletionAssessment, observation as M602CompletionObservation, stored.sha256);
+    else validateSuccessorProjection(assessment as M602SuccessorAssessment, observation as M602SuccessorObservation, stored.sha256);
   }
-  return freeze({ ok: true as const, result, observation, observationSha256: stored.sha256, assessment });
+  return freeze({ ok: true as const, result, observation, observationSha256: stored.sha256, assessment,
+    ...(campaign === 'reasoning' ? { eligibleForContinuation: reasoningContinuation(result, observation, assessment, execution.pkg.wire) } : {}) });
 }
-export async function readM602SuccessorCase(caseLabel: M602CaseLabel, dependencies?: M602SuccessorDependencies):
-  Promise<ReturnType<typeof successorSnapshot> | { readonly ok: false; readonly error: 'evidence-blocked' }> {
-  try { return successorSnapshot(caseLabel, dependencies); }
+function reasoningContinuation(result: ObservedResult, observation: ObservedObservation,
+  assessment: ObservedAssessment | null, expectedWire: Wire): boolean {
+  if (!assessment || !result.attempted || result.cleanupFailed || result.requests.chat !== 1
+    || result.dispatchSha256 === null || result.chatWindow === null
+    || result.wire?.sha256 !== expectedWire.sha256 || result.wire.bytes !== expectedWire.bytes
+    || !reasoningObservationQualified(observation as M602ReasoningObservation)) return false;
+  const dimension = (name: string) => assessment.dimensions.find(item => item.observation === name)?.value;
+  if (dimension('evidence completeness') !== 'pass') return false;
+  if (result.caseLabel.startsWith('local-')) {
+    if (!observation.samples || !observation.samples.ui || !observation.samples.runtime || !observation.samples.gpuDuring
+      || !assessment.localObservation?.ui.responsive || assessment.localObservation.oomObserved) return false;
+  } else if (observation.samples !== null || assessment.localObservation !== null) return false;
+  if (result.status === 'proposal' && assessment.accepted) return true;
+  if (assessment.accepted) return false;
+  if (result.status === 'failed') return result.error === 'response-validation' && dimension('structural validity') === 'fail';
+  if (result.status !== 'proposal' || dimension('structural validity') !== 'pass' || dimension('provider completion') !== 'pass') return false;
+  const semantics = ['controlled support and citations', 'semantic groundedness', 'remediation usefulness',
+    'human judgment and reminder', 'prohibited claims'].map(dimension).concat(assessment.uncertainty);
+  return semantics.every(value => value === 'pass' || value === 'fail') && semantics.includes('fail');
+}
+
+async function readObserved(caseLabel: M602CaseLabel, campaign: ObservedCampaign, dependencies?: ObservedDependencies):
+  Promise<ReturnType<typeof observedSnapshot> | { readonly ok: false; readonly error: 'evidence-blocked' }> {
+  try { return observedSnapshot(caseLabel, campaign, dependencies); }
   catch { return freeze({ ok: false, error: 'evidence-blocked' }); }
 }
-export async function executeM602SuccessorCase(caseLabel: M602CaseLabel, dependencies?: M602SuccessorDependencies):
-  Promise<{ readonly ok: true; readonly result: M602SuccessorResult; readonly observation: M602SuccessorObservation;
+async function executeObserved(caseLabel: M602CaseLabel, campaign: ObservedCampaign, dependencies?: ObservedDependencies):
+  Promise<{ readonly ok: true; readonly result: ObservedResult; readonly observation: ObservedObservation;
     readonly observationSha256: string } | M602SuccessorFailure> {
-  let execution: SuccessorContext, qualified: ReturnType<typeof successorQualification>;
+  let execution: ObservedContext, qualified: ReturnType<typeof observedQualification>;
   try {
-    execution = successorContext(caseLabel, dependencies, 'execute'); qualified = successorQualification(execution);
+    execution = observedContext(caseLabel, campaign, dependencies, 'execute'); qualified = observedQualification(execution);
     assert.ok(!execution.filesystem.readdirSync(execution.root).includes(caseLabel));
     for (const previous of labels.slice(0, labels.indexOf(caseLabel))) {
-      const prior = successorSnapshot(previous, dependencies);
-      assert.ok(prior.result.status === 'proposal' && prior.assessment?.accepted && successorObservationQualified(prior.observation));
+      const prior = observedSnapshot(previous, campaign, dependencies);
+      assert.ok(campaign === 'reasoning' ? prior.eligibleForContinuation : prior.result.status === 'proposal' && prior.assessment?.accepted && (campaign === 'prompt' ? promptObservationQualified(prior.observation as M602PromptObservation) : campaign === 'repaired' ? repairedObservationQualified(prior.observation as M602RepairedObservation) : campaign === 'instrumented' ? instrumentedObservationQualified(prior.observation as M602InstrumentedObservation) : campaign === 'completion' ? completionObservationQualified(prior.observation as M602CompletionObservation) : successorObservationQualified(prior.observation as M602SuccessorObservation)));
     }
   } catch { return successorFailure('evidence-blocked'); }
+  const details = (campaign === 'instrumented' || campaign === 'repaired' || campaign === 'prompt' || campaign === 'reasoning') ? createM602InstrumentedDiagnosticCollector() : undefined;
   let session: M602SuccessorObserverSession | undefined;
   if (caseLabel.startsWith('local-')) {
-    const prepared = await prepareM602SuccessorObservers(observerEnvironment(dependencies, execution.applicationRevision!), dependencies?.signal);
+    const prepared = await prepareM602SuccessorObservers(observerEnvironment(dependencies, execution.applicationRevision!), dependencies?.signal, details?.onRuntime, (campaign === 'repaired' || campaign === 'prompt' || campaign === 'reasoning') ? 'm602-loading-observation-v2' : undefined);
     if (!prepared.ok) return prepared; session = prepared.session;
   }
   let cleanup = noSuccessorResources;
@@ -732,23 +825,108 @@ export async function executeM602SuccessorCase(caseLabel: M602CaseLabel, depende
     // Baseline must precede exclusive entry even when both occur in the same clock millisecond.
     if (session && Date.now() <= Date.parse(session.gpuBefore.observedAt)) await new Promise<void>(resolve => setTimeout(resolve, 1));
     assert.ok(!dependencies?.signal?.aborted);
-    const source = await executeSource(caseLabel, dependencies, execution, successorVersion, session?.observers,
-      { campaign: successorCampaign, campaignManifestSha256: execution.campaignManifestSha256, qualificationSha256: qualified.sha256 });
+    // Awaited observer preparation must not carry stale qualification into case consumption.
+    const current = observedContext(caseLabel, campaign, dependencies, 'execute');
+    assert.equal(observedQualification(current).sha256, qualified.sha256);
+    const source = await executeSource(caseLabel, dependencies, execution, execution.version, session?.observers,
+      { campaign: execution.campaign, campaignManifestSha256: execution.campaignManifestSha256, qualificationSha256: qualified.sha256 }, details?.onCandidate);
     cleanup = session ? await session.close() : noSuccessorResources;
-    const result = source.result as M602SuccessorResult;
-    const observation = validateSuccessorObservation({ version: 'm602-successor-observation-v1', campaign: successorCampaign,
+    const result = source.result as ObservedResult;
+    const observation = (campaign === 'reasoning' ? validateReasoningObservation : campaign === 'prompt' ? validatePromptObservation : campaign === 'repaired' ? validateRepairedObservation : campaign === 'instrumented' ? validateInstrumentedObservation : campaign === 'completion' ? validateCompletionObservation : validateSuccessorObservation)({ version: `m602-${campaign}-observation-v1`, campaign: execution.campaign,
       caseLabel, campaignManifestSha256: execution.campaignManifestSha256, qualificationSha256: qualified.sha256,
       producerCodeSha256: source.entered.codeSha256, enteredSha256: source.enteredSha256, dispatchSha256: source.dispatchSha256,
       resultSha256: source.resultSha256, diagnostic: source.diagnostic, timing: source.timing,
-      samples: session ? session.samples(source.timing) : null, cleanup }, {
+      samples: session ? session.samples(source.timing) : null, cleanup,
+      ...(details ? { details: reconcileInstrumentedDetails(details.close(), source.timing) } : {}) }, {
       caseLabel, campaignManifestSha256: execution.campaignManifestSha256, qualificationSha256: qualified.sha256,
       producerCodeSha256: source.entered.codeSha256, enteredSha256: source.enteredSha256,
       dispatchSha256: source.dispatchSha256, resultSha256: source.resultSha256 }, source.entered.enteredAt);
     validateFollowup({ version: 'm602-followup-v1', caseLabel, producerCodeSha256: source.entered.codeSha256,
       manifestSha256: source.entered.manifestSha256, enteredSha256: source.enteredSha256, dispatchSha256: source.dispatchSha256,
       resultSha256: source.resultSha256, diagnostic: source.diagnostic, observation: source.timing }, result, source.expectedWire);
+    if ('details' in observation) validateInstrumentedDetails(observation.details, observation, result);
     const observationSha256 = publish(path.join(execution.root, caseLabel), 'observation.json', observation, execution.filesystem);
     return freeze({ ok: true, result, observation, observationSha256 });
   } catch { return successorFailure('evidence-publication', session ? await session.close() : cleanup); }
   finally { if (session) await session.close(); }
+}
+
+type ObservedSuccess<R, O> = { readonly ok: true; readonly result: R; readonly observation: O; readonly observationSha256: string };
+type ObservedRead<R, O, A> = (ObservedSuccess<R, O> & { readonly assessment: A | null }) | { readonly ok: false; readonly error: 'evidence-blocked' };
+
+export async function qualifyM602SuccessorObservers(dependencies?: M602SuccessorDependencies):
+  Promise<{ readonly ok: true; readonly qualification: M602SuccessorQualification; readonly sha256: string } | M602SuccessorFailure> {
+  return qualifyObserved('successor', dependencies) as ReturnType<typeof qualifyM602SuccessorObservers>;
+}
+export async function qualifyM602CompletionObservers(dependencies?: M602CompletionDependencies):
+  Promise<{ readonly ok: true; readonly qualification: M602CompletionQualification; readonly sha256: string } | M602SuccessorFailure> {
+  return qualifyObserved('completion', dependencies) as ReturnType<typeof qualifyM602CompletionObservers>;
+}
+export async function readM602SuccessorCase(caseLabel: M602CaseLabel, dependencies?: M602SuccessorDependencies):
+  Promise<ObservedRead<M602SuccessorResult, M602SuccessorObservation, M602SuccessorAssessment>> {
+  return readObserved(caseLabel, 'successor', dependencies) as ReturnType<typeof readM602SuccessorCase>;
+}
+export async function readM602CompletionCase(caseLabel: M602CaseLabel, dependencies?: M602CompletionDependencies):
+  Promise<ObservedRead<M602CompletionResult, M602CompletionObservation, M602CompletionAssessment>> {
+  return readObserved(caseLabel, 'completion', dependencies) as ReturnType<typeof readM602CompletionCase>;
+}
+export async function executeM602SuccessorCase(caseLabel: M602CaseLabel, dependencies?: M602SuccessorDependencies):
+  Promise<ObservedSuccess<M602SuccessorResult, M602SuccessorObservation> | M602SuccessorFailure> {
+  return executeObserved(caseLabel, 'successor', dependencies) as ReturnType<typeof executeM602SuccessorCase>;
+}
+export async function executeM602CompletionCase(caseLabel: M602CaseLabel, dependencies?: M602CompletionDependencies):
+  Promise<ObservedSuccess<M602CompletionResult, M602CompletionObservation> | M602SuccessorFailure> {
+  return executeObserved(caseLabel, 'completion', dependencies) as ReturnType<typeof executeM602CompletionCase>;
+}
+
+export async function qualifyM602InstrumentedObservers(dependencies?: M602InstrumentedDependencies):
+  Promise<{ readonly ok: true; readonly qualification: M602InstrumentedQualification; readonly sha256: string } | M602SuccessorFailure> {
+  return qualifyObserved('instrumented', dependencies) as ReturnType<typeof qualifyM602InstrumentedObservers>;
+}
+export async function readM602InstrumentedCase(caseLabel: M602CaseLabel, dependencies?: M602InstrumentedDependencies):
+  Promise<ObservedRead<M602InstrumentedResult, M602InstrumentedObservation, M602InstrumentedAssessment>> {
+  return readObserved(caseLabel, 'instrumented', dependencies) as ReturnType<typeof readM602InstrumentedCase>;
+}
+export async function executeM602InstrumentedCase(caseLabel: M602CaseLabel, dependencies?: M602InstrumentedDependencies):
+  Promise<ObservedSuccess<M602InstrumentedResult, M602InstrumentedObservation> | M602SuccessorFailure> {
+  return executeObserved(caseLabel, 'instrumented', dependencies) as ReturnType<typeof executeM602InstrumentedCase>;
+}
+
+export async function qualifyM602RepairedObservers(dependencies?: M602RepairedDependencies):
+  Promise<{ readonly ok: true; readonly qualification: M602RepairedQualification; readonly sha256: string } | M602SuccessorFailure> {
+  return qualifyObserved('repaired', dependencies) as ReturnType<typeof qualifyM602RepairedObservers>;
+}
+export async function readM602RepairedCase(caseLabel: M602CaseLabel, dependencies?: M602RepairedDependencies):
+  Promise<ObservedRead<M602RepairedResult, M602RepairedObservation, M602RepairedAssessment>> {
+  return readObserved(caseLabel, 'repaired', dependencies) as ReturnType<typeof readM602RepairedCase>;
+}
+export async function executeM602RepairedCase(caseLabel: M602CaseLabel, dependencies?: M602RepairedDependencies):
+  Promise<ObservedSuccess<M602RepairedResult, M602RepairedObservation> | M602SuccessorFailure> {
+  return executeObserved(caseLabel, 'repaired', dependencies) as ReturnType<typeof executeM602RepairedCase>;
+}
+
+export async function qualifyM602PromptObservers(dependencies?: M602PromptDependencies):
+  Promise<{ readonly ok: true; readonly qualification: M602PromptQualification; readonly sha256: string } | M602SuccessorFailure> {
+  return qualifyObserved('prompt', dependencies) as ReturnType<typeof qualifyM602PromptObservers>;
+}
+export async function readM602PromptCase(caseLabel: M602CaseLabel, dependencies?: M602PromptDependencies):
+  Promise<ObservedRead<M602PromptResult, M602PromptObservation, M602PromptAssessment>> {
+  return readObserved(caseLabel, 'prompt', dependencies) as ReturnType<typeof readM602PromptCase>;
+}
+export async function executeM602PromptCase(caseLabel: M602CaseLabel, dependencies?: M602PromptDependencies):
+  Promise<ObservedSuccess<M602PromptResult, M602PromptObservation> | M602SuccessorFailure> {
+  return executeObserved(caseLabel, 'prompt', dependencies) as ReturnType<typeof executeM602PromptCase>;
+}
+
+export async function qualifyM602ReasoningObservers(dependencies?: M602ReasoningDependencies):
+  Promise<{ readonly ok: true; readonly qualification: M602ReasoningQualification; readonly sha256: string } | M602SuccessorFailure> {
+  return qualifyObserved('reasoning', dependencies) as ReturnType<typeof qualifyM602ReasoningObservers>;
+}
+export async function readM602ReasoningCase(caseLabel: M602CaseLabel, dependencies?: M602ReasoningDependencies):
+  Promise<(ObservedSuccess<M602ReasoningResult, M602ReasoningObservation> & { readonly assessment: M602ReasoningAssessment | null; readonly eligibleForContinuation: boolean }) | { readonly ok: false; readonly error: 'evidence-blocked' }> {
+  return readObserved(caseLabel, 'reasoning', dependencies) as ReturnType<typeof readM602ReasoningCase>;
+}
+export async function executeM602ReasoningCase(caseLabel: M602CaseLabel, dependencies?: M602ReasoningDependencies):
+  Promise<ObservedSuccess<M602ReasoningResult, M602ReasoningObservation> | M602SuccessorFailure> {
+  return executeObserved(caseLabel, 'reasoning', dependencies) as ReturnType<typeof executeM602ReasoningCase>;
 }

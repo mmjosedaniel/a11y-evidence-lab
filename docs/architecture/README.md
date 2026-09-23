@@ -12,7 +12,11 @@ This directory is the entry point for the architecture documentation of A11y Evi
 - The [workflow-step technical assessments](#workflow-step-technical-assessments) record the smallest viable Proposed technical approach for each of the six planned workflow elements.
 - [Voxleaf implementation-pattern assessment](candidates/VOXLEAF_IMPLEMENTATION_PATTERN_ASSESSMENT.md) records proposed research inputs, limitations, and provenance from the reference review. Its status is **Proposed**; it does not select a dependency, technology, threshold, provider, model, or release design.
 
+The [2026-09-23 Local admission amendment](decisions/ADR-0020-manual-developer-managed-local-model-setup.md#native-schema-local-admission-amendment--2026-09-23) accepts native schema enforcement with reasoning and initial-prompt fit only for the new identified Local profile. Internal second-prompt context failure remains bounded and attempted; earlier profiles and evidence retain their original meaning. Acceptance does not establish implementation or capacity.
+
 ## Workflow-step technical assessments
+
+The repository development method follows [ADR-0024's proportional verification and review amendment](decisions/ADR-0024-milestone-slice-tdd-with-independent-ownership.md#proportional-verification-and-review): focused development checks, one full suite after integration and independent review for concrete risks. This changes development procedure only; application acceptance and evaluation limits remain unchanged.
 
 Current retrieval selection follows [ADR-0019's 2026-09-12 amendment](decisions/ADR-0019-in-process-exact-vector-search.md#selection-amendment--2026-09-12): select the highest-ranked passage per required role after exact filtered ranking, with at most three results and explicit selection provenance. Earlier global-three observations retain their original interpretation.
 

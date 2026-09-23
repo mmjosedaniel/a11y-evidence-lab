@@ -1,0 +1,205 @@
+{
+  "version": "m602-reasoning-v1",
+  "status": "frozen",
+  "frozenAt": "2026-09-22T21:36:39.405Z",
+  "inputDefinition": {
+    "path": "evaluation/m301-generation-v1.json",
+    "sha256": "63770583a97e1d0517337474dadc706c1047d78e026e22c7a745ce7674ed9e6b"
+  },
+  "caseOrder": [
+    "local-image",
+    "local-label",
+    "local-contrast",
+    "groq-image",
+    "groq-label",
+    "groq-contrast"
+  ],
+  "executionPolicy": "m602-reasoning-execution-v1",
+  "observationPolicy": {
+    "version": "m602-loading-observation-v2",
+    "startDelayMs": 1,
+    "deadlineMs": 5000,
+    "cleanupDeadlineMs": 5000,
+    "qualificationWindowMs": 7000,
+    "runtimeMaximumAttempts": 120,
+    "runtimeIntervalMs": 1000,
+    "runtimeAcquisitionDeadlineMs": 120000
+  },
+  "groqAdmission": {
+    "version": "m304-groq-request-bytes-v1",
+    "maximumBytes": 65536,
+    "exposedDefaults": "groq-gpt-oss-20b-2026-09-11-v1"
+  },
+  "rubric": "inherit-input-definition",
+  "failureInterpretation": "inherit-input-definition",
+  "advancement": "authenticated-safe-distinct-case",
+  "consumption": "exclusive-case-directory",
+  "maximumEntriesPerCase": 1,
+  "maximumDispatchesPerCase": 1,
+  "stopOn": "prerequisite-identity-fit-runtime-cleanup-or-unrecorded-outcome",
+  "originalEvidence": "preserved-separately",
+  "schemaPolicy": {
+    "version": "m602-case-schema-v2",
+    "serialization": "compact-json-utf8",
+    "schemas": [
+      {
+        "profile": "informative-image-alt",
+        "sha256": "702cb1dc1e96891bc893246f481c5d5a15805d72da079d53b8d9926bd75e075f"
+      },
+      {
+        "profile": "form-input-label",
+        "sha256": "6ead6a4fb2e9f7c2f1ae770926cb16bc74878d4ae0a008e1d1c2927a229a0a06"
+      },
+      {
+        "profile": "text-contrast",
+        "sha256": "de787cfb0f38030867d8d28b87f4acd432f0d27dd3cfab4f9fe70bf372e58572"
+      }
+    ],
+    "wireBindings": [
+      {
+        "caseLabel": "local-image",
+        "bytes": 17096,
+        "sha256": "57f5cdb64e7eb9cf0800b269e0a1a19c8c47aa4c410ee811e302238f0a8ee2a4"
+      },
+      {
+        "caseLabel": "local-label",
+        "bytes": 19301,
+        "sha256": "2507d5e36375b4e80be482bbdf6c7af2d3006dd963e40581df0bbbaecfea43ac"
+      },
+      {
+        "caseLabel": "local-contrast",
+        "bytes": 19652,
+        "sha256": "bbd346331ea5018db9d5782bb51b98825559926a407b05769de1d2ff904de08d"
+      },
+      {
+        "caseLabel": "groq-image",
+        "bytes": 16811,
+        "sha256": "8d64b12cb2db6058181de76a842a47c7eddfc7dcc6d703739085a3a4bcd611de"
+      },
+      {
+        "caseLabel": "groq-label",
+        "bytes": 18974,
+        "sha256": "86f0e2235871041d5ce7170deaa97c49fe871e074c438a16aaba04311392b661"
+      },
+      {
+        "caseLabel": "groq-contrast",
+        "bytes": 19337,
+        "sha256": "c24372120f4ba3aad4d1885edc8bd101f47624a6989c9a26c018c87807d95927"
+      }
+    ]
+  },
+  "promptPolicy": {
+    "version": "m602-reasoning-instructions-v1",
+    "source": "src/server/generation/reasoning-generation-instructions.ts",
+    "rules": [
+      {
+        "ruleId": "image-alt",
+        "sha256": "80d668334280885df31d071e967fa46ae2e1a2882493bccabe699af06ac1d04b"
+      },
+      {
+        "ruleId": "label",
+        "sha256": "862c817a271590c37cadc83cdbbc64cfbca18950f3ff288f4a94719899c456cd"
+      },
+      {
+        "ruleId": "color-contrast",
+        "sha256": "efd8c8cf86c9e1ad801e4805567e7a07211e3d8e2eec78bff0244d9acfbee5ba"
+      }
+    ]
+  },
+  "capacityPrerequisite": "separate-full-stack-smoke-accepted-in-owning-execplan",
+  "generationPolicy": {
+    "version": "m602-reasoning-generation-v1",
+    "local": {
+      "providerContext": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "qwen3.5:4b"
+      },
+      "adapterId": "ollama-generation",
+      "adapterVersion": "m602-ollama-reasoning-v1",
+      "endpoint": "ollama-loopback-chat",
+      "promptVersion": "m602-reasoning-instructions-v1",
+      "schemaVersion": "m602-case-schema-v2",
+      "outputContractVersion": "m301-proposal-v1",
+      "parameters": {
+        "temperature": 1,
+        "top_p": 0.95,
+        "num_predict": 12288,
+        "think": true,
+        "stream": false,
+        "responses": 1
+      },
+      "binding": {
+        "kind": "local",
+        "runtimeVersion": "0.33.3",
+        "modelDigest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+        "tokenizerIdentity": "sha256:bc26cd0f6499d5bd69f5f7d1baab46718c56a8d443328edf1de7e58710a8b2f6",
+        "templateIdentity": "ollama-qwen35-renderer-v0.33.3",
+        "parserIdentity": "ollama-qwen35-parser-v0.33.3",
+        "effectiveConfigurationIdentity": "m602-qwen35-reasoning-32768-v1"
+      },
+      "accounting": {
+        "method": "verified-upper-bound",
+        "implementationVersion": "m602-qwen35-reasoning-utf8-bound-v1",
+        "tokenizerIdentity": "sha256:bc26cd0f6499d5bd69f5f7d1baab46718c56a8d443328edf1de7e58710a8b2f6",
+        "contextTokenLimit": 32768,
+        "outputTokenLimit": 12288
+      }
+    },
+    "groq": {
+      "providerContext": {
+        "mode": "groq",
+        "provider": "groq",
+        "model": "openai/gpt-oss-20b"
+      },
+      "adapterId": "groq-generation",
+      "adapterVersion": "m602-groq-reasoning-v1",
+      "endpoint": "groq-chat-completions",
+      "promptVersion": "m602-reasoning-instructions-v1",
+      "schemaVersion": "m602-case-schema-v2",
+      "outputContractVersion": "m301-proposal-v1",
+      "parameters": {
+        "temperature": 0,
+        "top_p": 1,
+        "max_completion_tokens": 4096,
+        "reasoning_effort": "low",
+        "include_reasoning": false,
+        "stream": false,
+        "n": 1
+      },
+      "binding": {
+        "kind": "groq",
+        "exposedDefaultsIdentity": "groq-gpt-oss-20b-2026-09-11-v1",
+        "serverRevision": null
+      },
+      "accounting": {
+        "method": "serialized-byte-budget",
+        "implementationVersion": "m304-groq-request-bytes-v1",
+        "tokenizerIdentity": null,
+        "maxRequestBytes": 65536,
+        "contextTokenLimit": 131072,
+        "outputTokenLimit": 65536
+      }
+    },
+    "localDeadlineMs": 300000,
+    "groqDeadlineMs": 120000,
+    "localFramingBytes": 88,
+    "localGuardPositions": 32,
+    "localSchemaPlacement": "complete-system-message",
+    "localNativeFormat": "absent"
+  },
+  "clientBuild": [
+    {
+      "path": "index.html",
+      "sha256": "bedf97b3deb9a5578038f22738e71153d42241e4765738527155e19b1236ff73"
+    },
+    {
+      "path": "assets/index-C6L8S9Ht.css",
+      "sha256": "4962722f0d6585b7c3e2c0b232e6617161829991988b859d12f8f8c10c48cbfa"
+    },
+    {
+      "path": "assets/index-HAXqw7F5.js",
+      "sha256": "49f6a89f21d02a570be784c383e18f8caf436c2e124789ef7c2a2dc8920df134"
+    }
+  ]
+}
