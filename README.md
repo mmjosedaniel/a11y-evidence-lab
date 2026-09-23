@@ -74,7 +74,9 @@ M5-02 implements conservative comparison at the [internal rescan boundary](#inte
 
 M5-04 comparison verification exercises controlled native transitions, conservative uncertainty, preserved baseline/downstream state and exact synthetic deletion. Its [actual public observation](docs/plans/completed/m5-04-comparison-checkpoint.md#m504-public-02--actual-selected-finding-comparison-accepted) saved a persistent contrast comparison from a selected W3C demo Finding, with no retrieval or generation request. Its recorded 45-file regression passed 881 tests, followed by final independent critical review and documentation closure. M5-04 is Complete.
 
-[M6-01](docs/plans/completed/m6-01-shared-deterministic-evaluation.md#m601-final-01--integrated-review-and-documentation-closure) is Complete. Its [shared result matrix](docs/plans/completed/m6-01-shared-deterministic-evaluation.md#m601-b-matrix-01--separate-shared-observations) separates controlled native, synthetic, policy-only and historical public evidence. The [three actual retrieval observations](docs/plans/completed/m6-01-shared-deterministic-evaluation.md#m601-b-retrieval-02--three-current-actual-observations) retain G1's unsuitable decorative-image guidance despite complete roles; G2/G3 return their frozen gold passages. [M6-02](docs/plans/completed/m6-02-six-fixed-generation-executions.md#m602-native-final--six-case-verification-and-task-closure) is Complete. Current native-schema capacity and all three affected Local cases pass; the three unchanged Groq results are inherited after exact compatibility verification. All six proposals pass runtime validation, with source-support and contextual wording limitations recorded separately. Earlier failures remain preserved. M6-03/M6-04 remain Not started; M6-03 is dependency-ready. These observations establish neither whole-page accessibility nor release qualification.
+[M6-01](docs/plans/completed/m6-01-shared-deterministic-evaluation.md#m601-final-01--integrated-review-and-documentation-closure) is Complete. Its [shared result matrix](docs/plans/completed/m6-01-shared-deterministic-evaluation.md#m601-b-matrix-01--separate-shared-observations) separates controlled native, synthetic, policy-only and historical public evidence. The [three actual retrieval observations](docs/plans/completed/m6-01-shared-deterministic-evaluation.md#m601-b-retrieval-02--three-current-actual-observations) retain G1's unsuitable decorative-image guidance despite complete roles; G2/G3 return their frozen gold passages. [M6-02](docs/plans/completed/m6-02-six-fixed-generation-executions.md#m602-native-final--six-case-verification-and-task-closure) is Complete. Current native-schema capacity and all three affected Local cases pass; the three unchanged Groq results are inherited after exact compatibility verification. All six proposals pass runtime validation, with source-support and contextual wording limitations recorded separately. Earlier failures remain preserved. M6-04 remains Not started. These observations establish neither whole-page accessibility nor release qualification.
+
+[M6-03](docs/plans/completed/m6-03-application-accessibility-verification.md#m603-final-01--independent-review-and-task-closure) is Complete: all 1061 tests across 54 files, independent strict TypeScript, the current build and the bounded desktop/narrow visual path pass. One new continuous-keyboard characterization reuses the existing App harness; production code is unchanged. Outcomes are controlled, and 200% zoom testing and manual screen-reader speech remain outside this proof. Final independent review and documentation closure pass.
 
 ## Development toolchain
 
@@ -230,7 +232,7 @@ Invoke-M105Command {
 }
 ```
 
-Run the complete fifty-three-file suite sequentially, with no running application service or concurrent browser test. Production-entry, review and rescan integration tests also require the built client. Scanner, walking-skeleton and rescan integration suites use scanner scratch; the eight UI/checkpoint suites use separate UI scratch:
+Run the complete fifty-four-file suite sequentially, with no running application service or concurrent browser test. Production-entry, review and rescan integration tests also require the built client. Scanner, walking-skeleton and rescan integration suites use scanner scratch; the nine UI/checkpoint suites use separate UI scratch:
 
 ```powershell
 if ($null -ne [Environment]::GetEnvironmentVariable('A11Y_M305_CAPTURE_PROOF','Process') -or
@@ -238,6 +240,7 @@ if ($null -ne [Environment]::GetEnvironmentVariable('A11Y_M305_CAPTURE_PROOF','P
     $null -ne [Environment]::GetEnvironmentVariable('A11Y_M501_CAPTURE_PROOF','Process') -or
     $null -ne [Environment]::GetEnvironmentVariable('A11Y_M503_CAPTURE_PROOF','Process') -or
     $null -ne [Environment]::GetEnvironmentVariable('A11Y_M504_CAPTURE_PROOF','Process') -or
+    $null -ne [Environment]::GetEnvironmentVariable('A11Y_M603_CAPTURE_PROOF','Process') -or
     $null -ne [Environment]::GetEnvironmentVariable('A11Y_M601_FROZEN_NO_CALL','Process')) {
   throw 'Ordinary regression requires capture and frozen-case flags absent.'
 }
@@ -269,7 +272,7 @@ foreach ($m105Test in @('tests/scan-page.test.ts','tests/walking-skeleton.test.t
     if ($LASTEXITCODE -ne 0) { throw 'Scanner or integration suite failed.' }
   } $m105ScanTemp
 }
-foreach ($m105Test in @('tests/target-results-ui.test.ts','tests/finding-guidance-ui.test.ts','tests/finding-generation-ui.test.ts','tests/finding-review-ui.test.ts','tests/review-checkpoint.test.ts','tests/intentional-rescan-ui.test.ts','tests/comparison-ui.test.ts','tests/m601-frozen-abstention.test.ts')) {
+foreach ($m105Test in @('tests/target-results-ui.test.ts','tests/finding-guidance-ui.test.ts','tests/finding-generation-ui.test.ts','tests/finding-review-ui.test.ts','tests/review-checkpoint.test.ts','tests/intentional-rescan-ui.test.ts','tests/comparison-ui.test.ts','tests/m601-frozen-abstention.test.ts','tests/application-accessibility-ui.test.ts')) {
   Assert-M105EmptyDirectory $m105UiTemp
   Invoke-M105Command {
     & $m105Node --test --test-timeout=120000 $m105Test

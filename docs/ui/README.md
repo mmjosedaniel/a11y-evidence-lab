@@ -1,12 +1,13 @@
 # UI design documentation
 
 - **Status:** M1-04 Analyze/Results and M2-03 guidance retain their recorded verification limits. M3-05 adds generation and original proposal presentation. M4-02 implements individual review; M4-03 verifies human decisions on isolated authentic-source copies. M5-01 adds intentional rescan and read-only immediate baseline navigation. M5-03 is Complete with saved comparison, accepted UI verification, native deletion/readback proof and final critical review in its owning plan.
-- **Last reviewed:** 2026-09-20
+- **Last reviewed:** 2026-09-23
 - **Analyze and Results contract:** [Analyze and results presentation](ANALYZE_AND_RESULTS_PRESENTATION.md)
 - **Implemented guidance evidence and limits:** [M2-03 renewed closure](../plans/completed/m2-03-sufficiency-abstention-and-detail-ui.md#m203-c-post01-closure--renewed-task-closure)
 - **Implemented review evidence and limits:** [M4-02 closure](../plans/completed/m4-02-accessible-review-ui.md#m402-final-01--integrated-review-and-task-closure) and [M4-03 authentic-proposal checkpoint](../plans/completed/m4-03-review-checkpoint.md#m403-final-01--integrated-review-and-task-closure)
 - **Intentional rescan evidence:** [M5-01 task plan](../plans/completed/m5-01-intentional-rescan.md)
 - **Implemented comparison evidence and limits:** [Saved comparison presentation](ANALYZE_AND_RESULTS_PRESENTATION.md#m5-03-saved-comparison) and [M5-03 UI acceptance](../plans/completed/m5-03-comparison-persistence-and-ui.md#m503-c-review-02--presentation-slice-accepted)
+- **Application accessibility evidence:** [M6-03 integrated and rendered verification](../plans/completed/m6-03-application-accessibility-verification.md#m603-b-c-verify-01--integrated-and-rendered-evidence) passes the controlled core path at desktop/narrow 100%, automated accessibility, keyboard/focus and announcement checks. M6-03 is Complete after final independent review and documentation closure; zoom/speech and broader support claims remain excluded.
 - **Zoom verification timing:** [All 200% zoom tests are Deferred until after MVP](../requirements/quality-security-and-operations/APPLICATION_ACCESSIBILITY.md#200-zoom-verification-deferral--2026-09-15-utc); accessible zoom/reflow behavior remains required, and historical results and omissions remain in their evidence records.
 - **Visual direction:** [Visual foundations](VISUAL_FOUNDATIONS.md)
 
