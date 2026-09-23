@@ -1,3 +1,4 @@
+import { generationTimeoutMs } from '../shared/generation-timeout.ts';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import type { PageAnalysisRun } from '../server/domain/run-contract.ts';
@@ -329,7 +330,8 @@ export function App(props: AppProps): ReactElement {
         || continuation.current?.run !== run || continuation.current.findingId !== findingId) return;
     const token = {};
     const controller = new AbortController();
-    const expires = performance.now() + 120000;
+    const duration = generationTimeoutMs(run.providerContext.mode);
+    const expires = performance.now() + duration;
     reservation.current = token;
     continuation.current = null;
     const update = (state: GenerationPresentation): void => {
@@ -349,7 +351,7 @@ export function App(props: AppProps): ReactElement {
       setAnnouncement(`${label}. ${generationAnnouncement(run.providerContext, findingId, { status: 'unknown', error })}`);
       controller.abort();
     };
-    const timer = window.setTimeout(() => unknown('timeout'), 120000);
+    const timer = window.setTimeout(() => unknown('timeout'), duration);
     const stop = (): void => { window.clearTimeout(timer); controller.abort(); };
     stopGeneration.current = stop;
     const timely = (): boolean => {

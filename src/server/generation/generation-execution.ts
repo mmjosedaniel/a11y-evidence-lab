@@ -1,3 +1,9 @@
+import { NATIVE_SCHEMA_PROMPT_VERSION } from './generation-artifacts.ts';
+import { validateNativeSchemaPostChangeVerificationReminder } from './proposal-contract.ts';
+import { UNCERTAINTY_PROMPT_VERSION, JUDGMENT_PROMPT_VERSION } from './generation-artifacts.ts';
+import { readCaseGenerationRule } from './generation-case-request.ts';
+import { validateBlockingManualJudgment } from './profile-judgment.ts';
+import { configurationDeadlineMs } from './reasoning-generation-configuration.ts';
 import { emitGenerationRejection, type GenerationRejectionSink } from './generation-diagnostics.ts';
 import type { Proposal, ProposalValidationResult } from './proposal-contract.ts';
 import { types } from 'node:util';
@@ -25,13 +31,25 @@ export type GenerationOperationOutcome =
   | { readonly status: 'failed'; readonly error: GenerationErrorCode; readonly attempted: boolean;
       readonly observation?: GenerationObservation; readonly cleanupFailed: boolean };
 
+export function adapterDeadlineMs(candidate: unknown, context: ProviderContext): 120000 | 300000 {
+  try {
+    requireValid(!types.isProxy(candidate));
+    const adapter = readObject(candidate, ['configuration', 'prepare']);
+    const admitted = validateGenerationConfiguration(adapter.configuration, context);
+    return admitted.ok ? configurationDeadlineMs(admitted.value) : GENERATION_DEADLINE_MS;
+  } catch { return GENERATION_DEADLINE_MS; }
+}
+
 export async function executeGenerationOperation(options: {
   readonly signal: AbortSignal; readonly providerContext: ProviderContext; readonly adapter?: unknown;
   readonly admit: (signal: AbortSignal) => GenerationAdmission | PromiseLike<GenerationAdmission>;
+  readonly expiresAt?: number;
   readonly beforeTransport?: () => void;
   readonly onRejection?: GenerationRejectionSink;
 }): Promise<GenerationOperationOutcome> {
-  const expiresAt = Date.now() + GENERATION_DEADLINE_MS;
+  const enteredAt = Date.now();
+  const ownExpiry = enteredAt + adapterDeadlineMs(options.adapter, options.providerContext);
+  const expiresAt = options.expiresAt === undefined ? ownExpiry : Math.min(ownExpiry, options.expiresAt);
   const controller = new AbortController();
   const interrupted = Symbol('generation-interrupted');
   let stop: 'shutdown' | 'timeout' | undefined;
@@ -56,7 +74,7 @@ export async function executeGenerationOperation(options: {
   }
   const onAbort = () => interrupt('shutdown');
   options.signal.addEventListener('abort', onAbort, { once: true });
-  const timer = setTimeout(() => interrupt('timeout'), GENERATION_DEADLINE_MS);
+  const timer = setTimeout(() => interrupt('timeout'), Math.max(0, expiresAt - Date.now()));
 
   function checkStop(): void {
     if (options.signal.aborted) interrupt('shutdown');
@@ -81,6 +99,7 @@ export async function executeGenerationOperation(options: {
   }
 
   try {
+    requireValid(Number.isFinite(expiresAt));
     checkStop();
     let built: GenerationAdmission;
     try {
@@ -118,12 +137,15 @@ export async function executeGenerationOperation(options: {
     });
     invocationMetadata = Object.freeze(safeMetadata);
     const request = built.createRequest(configuration);
+    const native = configuration.promptVersion === NATIVE_SCHEMA_PROMPT_VERSION;
+    const judgmentRule = readCaseGenerationRule(request, configuration);
+    if ((native || configuration.promptVersion === UNCERTAINTY_PROMPT_VERSION || configuration.promptVersion === JUDGMENT_PROMPT_VERSION) && judgmentRule === null) return failed('configuration');
     checkStop();
     let prepared: Record<string, unknown>;
     // Until an explicit, valid cleanup declaration arrives, collaborator resources are uncertain.
     cleanupFailed = true;
     try {
-      const raw = await bounded((adapter.prepare as (request: unknown, signal: AbortSignal) => unknown)(request, controller.signal));
+      const raw = await bounded((adapter.prepare as (request: unknown, signal: AbortSignal, expiresAt: number) => unknown)(request, controller.signal, expiresAt));
       prepared = readObject(raw);
       if (prepared.ok === false) {
         prepared = readObject(raw, ['ok', 'error', 'cleanup']);
@@ -248,7 +270,21 @@ export async function executeGenerationOperation(options: {
       checkStop();
       return failed(error === 'incomplete-output' ? 'response-validation' : error);
     }
+    if ((judgmentRule !== null && !validateBlockingManualJudgment(envelope.candidate, judgmentRule))
+      || (native && !validateNativeSchemaPostChangeVerificationReminder(envelope.candidate))) {
+      observe('response', 'failed');
+      emitGenerationRejection(options.onRejection, 'candidate/contract');
+      checkStop();
+      return failed('response-validation');
+    }
     const result = built.validateCandidate(envelope.candidate, options.onRejection);
+    if (result.ok && ((judgmentRule !== null && !validateBlockingManualJudgment(result.value, judgmentRule))
+      || (native && !validateNativeSchemaPostChangeVerificationReminder(result.value)))) {
+      observe('response', 'failed');
+      emitGenerationRejection(options.onRejection, 'candidate/contract');
+      checkStop();
+      return failed('response-validation');
+    }
     observe('response', result.ok ? 'passed' : 'failed');
     if (!result.ok) emitGenerationRejection(options.onRejection, 'candidate/contract');
     checkStop();

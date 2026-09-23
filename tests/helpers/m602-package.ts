@@ -1,4 +1,8 @@
-import type { GenerationRejectionSink } from '../../src/server/generation/generation-diagnostics.ts';
+import { REASONING_QWEN_CONFIGURATION, REASONING_GROQ_CONFIGURATION } from '../../src/server/generation/reasoning-generation-configuration.ts';
+import { reasoningGenerationInstructions } from '../../src/server/generation/reasoning-generation-instructions.ts';
+import { prepareReasoningOllamaGenerationWire } from '../../src/server/generation/ollama-generation-fit.ts';
+import { prepareReasoningGroqGenerationWire } from '../../src/server/generation/groq-generation-fit.ts';
+import type { GenerationRejectionSink, CandidateDetailSink } from '../../src/server/generation/generation-diagnostics.ts';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import fs from 'node:fs';
@@ -19,6 +23,9 @@ import { QWEN_CONFIGURATION } from '../../src/server/generation/ollama-generatio
 import { GROQ_CONFIGURATION } from '../../src/server/generation/groq-generation-configuration.ts';
 import { prepareOllamaGenerationWire } from '../../src/server/generation/ollama-generation-fit.ts';
 import { prepareGroqGenerationWire } from '../../src/server/generation/groq-generation-fit.ts';
+import { CASE_QWEN_CONFIGURATION, CASE_GROQ_CONFIGURATION, PROMPT_CASE_QWEN_CONFIGURATION, PROMPT_CASE_GROQ_CONFIGURATION, createCaseGenerationRequest } from '../../src/server/generation/generation-case-request.ts';
+import { prepareCaseOllamaGenerationWire, preparePromptCaseOllamaGenerationWire } from '../../src/server/generation/ollama-generation-fit.ts';
+import { prepareCaseGroqGenerationWire, preparePromptCaseGroqGenerationWire } from '../../src/server/generation/groq-generation-fit.ts';
 
 export type M602CaseLabel = 'local-image' | 'local-label' | 'local-contrast' | 'groq-image' | 'groq-label' | 'groq-contrast';
 export type M602PackageEnvironment = {
@@ -28,10 +35,10 @@ export type M602Package = {
   readonly caseLabel: M602CaseLabel; readonly providerContext: ProviderContext; readonly findingId: string;
   readonly availableEvidenceReferences: readonly EvidencePath[]; readonly passageIds: readonly string[];
   readonly identities: { readonly manifestSha256: string; readonly inputSha256: string;
-    readonly instructionsSha256: string; readonly schemaSha256: string; readonly provenanceSha256: string };
+    readonly instructionsSha256: string; readonly promptInstructionsSha256?: string; readonly reasoningInstructionsSha256?: string; readonly schemaSha256: string; readonly provenanceSha256: string };
   readonly wire: { readonly sha256: string; readonly bytes: number };
   readonly createRequest: (configuration: GenerationConfiguration) => GenerationRequest;
-  readonly validateCandidate: (candidate: unknown, onRejection?: GenerationRejectionSink) => ProposalValidationResult;
+  readonly validateCandidate: (candidate: unknown, onRejection?: GenerationRejectionSink, onDetail?: CandidateDetailSink) => ProposalValidationResult;
 };
 
 const repository = path.resolve(import.meta.dirname, '../..');
@@ -55,6 +62,124 @@ const bodyIdentities = [
   [19878, '0b0eda9dfc67cda043f284023fba13e370efa02c410dd8e6848a7c7c52e69c7a'],
 ] as const;
 const hash = (bytes: Uint8Array | string) => createHash('sha256').update(bytes).digest('hex');
+const caseSchemaHashes = [
+  '702cb1dc1e96891bc893246f481c5d5a15805d72da079d53b8d9926bd75e075f',
+  '6ead6a4fb2e9f7c2f1ae770926cb16bc74878d4ae0a008e1d1c2927a229a0a06',
+  'de787cfb0f38030867d8d28b87f4acd432f0d27dd3cfab4f9fe70bf372e58572',
+];
+const caseBodyIdentities = [
+  [18171, 'e827e28b7913a0d10bf56a267910cd8e066bfa05a61f14d334e7bc904b1c70c7'],
+  [20314, '289f694525aec4b90ecf7e739946a562a2d396f3478c93ccc1453243897bf896'],
+  [20703, 'c7dced7d15886a91d55d700e3dc78e9155feecc768a66dc5b3b4c3d2fe555933'],
+  [18246, '9f74b175669383c174309c7a14a7de2fd148b4ce3570908bfb878b9a0c6e310c'],
+  [20389, '18aae209f7de61f0c3de4211dadcff9d9d92bc48ccc9ad33af6dfa81ed2f2f8e'],
+  [20778, 'de7cd909ad3fd9fb0f625be0768efca187763de3cf211400856ba46dddd57df8'],
+] as const;
+
+const promptBodyIdentities = [
+  [18291, 'fdcdeafe8c77afb4fd2fa8d0594c9aa4eba4502fdefbc270c52cb64ecf734837'],
+  [20434, '6d8dd9dcd8c7aca9340de5a4ce298d8f569c8d32004b6d7a50b8e7fe7aaed470'],
+  [20823, '94c7f23bf8eab2fdb9a9483a51222c0730f264336a38bd14e32578dd91df289b'],
+  [18366, 'a151eff11aada2cc1bb5859da3ccbe7ba2afb7b6ee133430a43ee7bdbbf16f4a'],
+  [20509, '22a6971a0c0e7c7866def6b92ebe2a6311a088f5acb53afc1b2e2066655361a8'],
+  [20898, 'd941bac111e1fe7ea2967ee7f2db19110a47e860da4cae4288084e731d8f9def'],
+] as const;
+
+export function loadM602RepairedPackage(caseLabel: M602CaseLabel, environment?: M602PackageEnvironment):
+  { readonly status: 'ready'; readonly value: M602Package & { readonly caseSchemaSha256: string } }
+  | { readonly status: 'failed'; readonly error: 'input-integrity' } {
+  try {
+    const original = loadM602Package(caseLabel, environment);
+    if (original.status !== 'ready') return original;
+    const pkg = original.value, local = caseLabel.startsWith('local-');
+    const configuration = local ? CASE_QWEN_CONFIGURATION : CASE_GROQ_CONFIGURATION;
+    const messages = pkg.createRequest(local ? QWEN_CONFIGURATION : GROQ_CONFIGURATION).messages;
+    const request = createCaseGenerationRequest(messages, { findingId: pkg.findingId,
+      availableEvidenceReferences: pkg.availableEvidenceReferences, passageIds: pkg.passageIds }, configuration);
+    const prepared = (local ? prepareCaseOllamaGenerationWire : prepareCaseGroqGenerationWire)(request);
+    assert.ok(prepared.ok);
+    const caseSchemaSha256 = hash(JSON.stringify(request.schema));
+    const wire = Object.freeze({ sha256: hash(prepared.body), bytes: Buffer.byteLength(prepared.body) });
+    if (environment === undefined) {
+      const index = suffixes.findIndex(suffix => caseLabel === `local-${suffix}` || caseLabel === `groq-${suffix}`);
+      assert.equal(caseSchemaSha256, caseSchemaHashes[index]);
+      const expected = caseBodyIdentities[index + (local ? 0 : 3)];
+      assert.deepEqual(wire, { bytes: expected[0], sha256: expected[1] });
+    }
+    return Object.freeze({ status: 'ready', value: Object.freeze({ ...pkg, caseSchemaSha256, wire,
+      createRequest(supplied: GenerationConfiguration) { assert.equal(supplied, configuration); return request; },
+    }) });
+  } catch { return Object.freeze({ status: 'failed', error: 'input-integrity' }); }
+}
+export function loadM602PromptPackage(caseLabel: M602CaseLabel, environment?: M602PackageEnvironment):
+  { readonly status: 'ready'; readonly value: M602Package & { readonly caseSchemaSha256: string; readonly identities: M602Package['identities'] & { readonly promptInstructionsSha256: string } } }
+  | { readonly status: 'failed'; readonly error: 'input-integrity' } {
+  try {
+    const original = loadM602Package(caseLabel, environment);
+    if (original.status !== 'ready') return original;
+    const pkg = original.value, local = caseLabel.startsWith('local-');
+    const configuration = local ? PROMPT_CASE_QWEN_CONFIGURATION : PROMPT_CASE_GROQ_CONFIGURATION;
+    const originalMessages = pkg.createRequest(local ? QWEN_CONFIGURATION : GROQ_CONFIGURATION).messages;
+    const instructionPath = 'evaluation/m602-grounded-instructions-v1.txt';
+    const instructionBytes = (environment === undefined ? ordinaryRead : environment.readBytes)(instructionPath);
+    const instructions = textBytes(instructionBytes, instructionPath);
+    const promptInstructionsSha256 = hash(instructionBytes);
+    assert.equal(promptInstructionsSha256, 'b04d25f49a35a1dea4b12abb30e0cf3b1ee47f48e5208f6efed5fdfe05b36aa6');
+    const messages = [Object.freeze({ role: 'system' as const, content: instructions }), originalMessages[1]];
+    const request = createCaseGenerationRequest(messages, { findingId: pkg.findingId,
+      availableEvidenceReferences: pkg.availableEvidenceReferences, passageIds: pkg.passageIds }, configuration);
+    const prepared = (local ? preparePromptCaseOllamaGenerationWire : preparePromptCaseGroqGenerationWire)(request);
+    assert.ok(prepared.ok);
+    const caseSchemaSha256 = hash(JSON.stringify(request.schema));
+    const wire = Object.freeze({ sha256: hash(prepared.body), bytes: Buffer.byteLength(prepared.body) });
+    if (environment === undefined) {
+      const index = suffixes.findIndex(suffix => caseLabel === `local-${suffix}` || caseLabel === `groq-${suffix}`);
+      assert.equal(caseSchemaSha256, caseSchemaHashes[index]);
+      const expected = promptBodyIdentities[index + (local ? 0 : 3)];
+      assert.deepEqual(wire, { bytes: expected[0], sha256: expected[1] });
+    }
+    return Object.freeze({ status: 'ready', value: Object.freeze({ ...pkg, caseSchemaSha256, wire,
+      identities: Object.freeze({ ...pkg.identities, promptInstructionsSha256 }),
+      createRequest(supplied: GenerationConfiguration) { assert.equal(supplied, configuration); return request; },
+    }) });
+  } catch { return Object.freeze({ status: 'failed', error: 'input-integrity' }); }
+}
+export function loadM602ReasoningPackage(caseLabel: M602CaseLabel, environment?: M602PackageEnvironment):
+  { readonly status: 'ready'; readonly value: M602Package & { readonly caseSchemaSha256: string; readonly identities: M602Package['identities'] & { readonly reasoningInstructionsSha256: string } } }
+  | { readonly status: 'failed'; readonly error: 'input-integrity' } {
+  try {
+    const original = loadM602Package(caseLabel, environment);
+    if (original.status !== 'ready') return original;
+    const pkg = original.value, local = caseLabel.startsWith('local-');
+    const configuration = local ? REASONING_QWEN_CONFIGURATION : REASONING_GROQ_CONFIGURATION;
+    const originalMessages = pkg.createRequest(local ? QWEN_CONFIGURATION : GROQ_CONFIGURATION).messages;
+    const frozenBytes = ordinaryRead('evaluation/m602-reasoning-v1.json');
+    assert.equal(hash(frozenBytes), 'da8aa75e9f59818fb1edcf11e939032070a44b3e5ae4d716a709cc8b3462b388');
+    const frozen = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(frozenBytes));
+    assert.deepEqual(configuration, local ? frozen.generationPolicy.local : frozen.generationPolicy.groq);
+    const ruleId = JSON.parse(originalMessages[1].content).finding.ruleId;
+    const instructions = reasoningGenerationInstructions(ruleId);
+    const reasoningInstructionsSha256 = hash(instructions);
+    assert.equal(reasoningInstructionsSha256, frozen.promptPolicy.rules.find((rule: RecordValue) => rule.ruleId === ruleId)?.sha256);
+    const messages = [Object.freeze({ role: 'system' as const, content: instructions }), originalMessages[1]];
+    const request = createCaseGenerationRequest(messages, { findingId: pkg.findingId,
+      availableEvidenceReferences: pkg.availableEvidenceReferences, passageIds: pkg.passageIds }, configuration);
+    const prepared = (local ? prepareReasoningOllamaGenerationWire : prepareReasoningGroqGenerationWire)(request);
+    assert.ok(prepared.ok);
+    const caseSchemaSha256 = hash(JSON.stringify(request.schema));
+    const wire = Object.freeze({ sha256: hash(prepared.body), bytes: Buffer.byteLength(prepared.body) });
+    if (environment === undefined) {
+      const index = suffixes.findIndex(suffix => caseLabel === `local-${suffix}` || caseLabel === `groq-${suffix}`);
+      assert.equal(caseSchemaSha256, caseSchemaHashes[index]);
+      const expected = frozen.schemaPolicy.wireBindings[index + (local ? 0 : 3)];
+      assert.deepEqual(wire, { bytes: expected.bytes, sha256: expected.sha256 });
+    }
+    return Object.freeze({ status: 'ready', value: Object.freeze({ ...pkg, caseSchemaSha256, wire,
+      identities: Object.freeze({ ...pkg.identities, reasoningInstructionsSha256 }),
+      createRequest(supplied: GenerationConfiguration) { assert.equal(supplied, configuration); return request; },
+    }) });
+  } catch { return Object.freeze({ status: 'failed', error: 'input-integrity' }); }
+}
 // JSON is authenticated and bounded before these task-local structural projections.
 type RecordValue = Record<string, any>;
 
@@ -243,7 +368,7 @@ export function loadM602Package(caseLabel: M602CaseLabel, environment?: M602Pack
       identities: Object.freeze({ manifestSha256: trust, inputSha256: selected.input.sha256.toLowerCase(),
         instructionsSha256: manifest.shared.instructions.sha256.toLowerCase(), schemaSha256: manifest.shared.outputSchema.sha256.toLowerCase(),
         provenanceSha256: selected.provenance.sha256.toLowerCase() }),
-      validateCandidate: (candidate: unknown, onRejection?: GenerationRejectionSink) => validateProposalCandidate(candidate, { findingId, availableEvidenceReferences, passageIds }, onRejection),
+      validateCandidate: (candidate: unknown, onRejection?: GenerationRejectionSink, onDetail?: CandidateDetailSink) => validateProposalCandidate(candidate, { findingId, availableEvidenceReferences, passageIds }, onRejection, onDetail),
     }) });
   } catch { return Object.freeze({ status: 'failed', error: 'input-integrity' }); }
 }

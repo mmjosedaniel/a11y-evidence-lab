@@ -62,7 +62,9 @@ function discardLate(resource: IncomingMessage | Socket): void {
 }
 
 export async function dispatchGroqGeneration(body: string, credential: string, signal: AbortSignal,
-  attemptTransport: AttemptTransport, requestImplementation: GroqNativeRequest = nativeRequest): Promise<DispatchResult> {
+  attemptTransport: AttemptTransport, requestImplementation: GroqNativeRequest = nativeRequest, expiresAt?: number): Promise<DispatchResult> {
+  const deadline = expiresAt ?? Date.now() + 120000;
+  if (Date.now() >= deadline) return { ok: false, error: 'timeout', cleanup: 'complete' };
   if (signal.aborted) return { ok: false, error: 'shutdown', cleanup: 'complete' };
   try {
     if (!credential || debuglog('http').enabled || debuglog('https').enabled
@@ -103,6 +105,7 @@ export async function dispatchGroqGeneration(body: string, credential: string, s
     };
     const publish = () => {
       if (!settled && !failing && pending && closed()) {
+        if (pending.ok && Date.now() >= deadline) pending = { ok: false, error: 'timeout' };
         finish(pending.ok ? { ok: true, candidate: pending.candidate, complete: true, cleanup: 'complete' }
           : { ok: false, error: pending.error, cleanup: 'complete' });
       }
@@ -186,11 +189,14 @@ export async function dispatchGroqGeneration(body: string, credential: string, s
         else fail(pending.error);
       });
     };
-    timer = setTimeout(onTimeout, 120000);
+    const remaining = expiresAt === undefined ? 120000 : Math.min(120000, deadline - Date.now());
+    if (remaining <= 0) { finish({ ok: false, error: 'timeout', cleanup: 'complete' }); return; }
+    timer = setTimeout(onTimeout, remaining);
     signal.addEventListener('abort', onAbort, { once: true });
     if (signal.aborted) { finish({ ok: false, error: 'shutdown', cleanup: 'complete' }); return; }
     try {
       attemptTransport(() => {
+        if (Date.now() >= deadline) { onTimeout(); return; }
         handle = requestImplementation({ hostname: 'api.groq.com', port: 443, path: '/openai/v1/chat/completions',
           method: 'POST', agent: false, maxHeaderSize: 16384, rejectUnauthorized: true,
           headers: { authorization: `Bearer ${credential}`, 'content-type': 'application/json',
@@ -204,7 +210,7 @@ export async function dispatchGroqGeneration(body: string, credential: string, s
           else publish();
         });
         handle.on('timeout', onTimeout);
-        handle.setTimeout(120000);
+        handle.setTimeout(expiresAt === undefined ? 120000 : Math.max(1, Math.min(remaining, deadline - Date.now())));
         if (signal.aborted || failing || settled) { destroy(handle); onAbort(); return; }
         handle.end(body);
         body = '';

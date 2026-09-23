@@ -4,11 +4,17 @@ This directory indexes living, roadmap-task-scoped execution plans governed by [
 
 ## Active plans
 
-- [M6-02 — Six fixed generation executions](m6-02-six-fixed-generation-executions.md) — [current state and resumption boundary](m6-02-six-fixed-generation-executions.md#current-state).
+None.
+
+## Prepared plans awaiting activation
+
+- [M6-03 — Application-accessibility verification](m6-03-application-accessibility-verification.md) — dependency-ready after M6-02 closure; roadmap status remains Not started pending its own G readiness procedure. Existing conditional execution authorization is preserved. This entry does not activate execution.
 
 ## Completed plans
 
 These archives preserve each task's execution, review, failures, and closure evidence. The roadmap remains the status authority.
+
+- [M6-02 — Six fixed generation executions](completed/m6-02-six-fixed-generation-executions.md)
 
 - [M6-01 — Shared deterministic evaluation](completed/m6-01-shared-deterministic-evaluation.md)
 

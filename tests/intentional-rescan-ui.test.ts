@@ -476,7 +476,7 @@ describe('M5-01 intentional rescan UI', { concurrency: false, timeout: 120000 },
       const nativeTimeout = window.setTimeout;
       window.m104.raw = { nativeTimeout };
       window.setTimeout = ((handler: TimerHandler, delay?: number, ...args: any[]) =>
-        delay === 120000 ? nativeTimeout(handler, 0, ...args) : nativeTimeout(handler, delay, ...args)) as typeof window.setTimeout;
+        delay === 300000 ? nativeTimeout(handler, 0, ...args) : nativeTimeout(handler, delay, ...args)) as typeof window.setTimeout;
       window.m104.generation = () => window.m104.hold('generation-unknown');
       window.m104.rerender(true, { localModelInstalled: true }, true, true, false, true, false, true, false);
     });

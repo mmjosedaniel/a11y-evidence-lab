@@ -378,6 +378,62 @@ test('reports only frozen content-free Local rejection codes without changing di
   assert.deepEqual(forwarded, [{ code: 'adapter-response/envelope' }]);
 });
 
+type OutputValidationDetail = Readonly<
+  | { kind: 'content'; reason: 'json-syntax' | 'non-object' }
+  | { kind: 'prohibited-claim'; field: string; rule: string }
+>;
+
+test('distinguishes Local JSON syntax from parsed non-object content without changing coarse results', async () => {
+  const vectors = [
+    [{ role: 'assistant', content: 'SECRET {', thinking: 'SECRET hidden reasoning' }, 'json-syntax'],
+    [{ role: 'assistant', content: 'null', thinking: 'SECRET hidden reasoning' }, 'non-object'],
+    [{ role: 'assistant', content: '["SECRET array"]', thinking: 'SECRET hidden reasoning' }, 'non-object'],
+  ] as const;
+  for (const [message, reason] of vectors) {
+    const coarse: unknown[] = [];
+    const details: OutputValidationDetail[] = [];
+    const harness = nativeHarness([{ body: ollamaChatBody({}, { message }) }]);
+    const result = await dispatchOllamaGeneration('{}', new AbortController().signal, start => start(),
+      harness.request, event => { coarse.push(event); }, undefined, true,
+      detail => { details.push(detail); });
+    assert.deepEqual(result, { ok: false, error: 'incomplete-output', cleanup: 'complete' }, reason);
+    assert.deepEqual(coarse, [{ code: 'adapter-response/content' }], reason);
+    assert.deepEqual(details, [{ kind: 'content', reason }], reason);
+    assert.equal(Object.isFrozen(details[0]), true, reason);
+    assert.deepEqual(Object.keys(details[0]!), ['kind', 'reason'], reason);
+    assert.equal(JSON.stringify({ result, coarse, details }).includes('SECRET'), false, reason);
+  }
+
+  const successfulDetails: OutputValidationDetail[] = [];
+  const successful = nativeHarness([{ body: ollamaChatBody({ accepted: true }, {
+    message: { role: 'assistant', content: '{"accepted":true}', thinking: 'SECRET hidden reasoning' },
+  }) }]);
+  assert.deepEqual(await dispatchOllamaGeneration('{}', new AbortController().signal, start => start(),
+    successful.request, undefined, undefined, true, detail => { successfulDetails.push(detail); }),
+  { ok: true, candidate: { accepted: true }, complete: true, cleanup: 'complete' });
+  assert.deepEqual(successfulDetails, []);
+});
+
+test('contains Local output-detail sink failures without changing errors, cleanup or old rejection events', async () => {
+  const sinks: readonly ((detail: OutputValidationDetail) => unknown)[] = [
+    detail => { assert.deepEqual(detail, { kind: 'content', reason: 'json-syntax' });
+      throw new Error('SECRET synchronous detail failure'); },
+    () => Promise.reject(new Error('SECRET rejected detail failure')),
+    () => Object.defineProperty({}, 'then', { get() { throw new Error('SECRET hostile thenable'); } }),
+  ];
+  for (const sink of sinks) {
+    const coarse: unknown[] = [];
+    const harness = nativeHarness([{ body: ollamaChatBody({}, {
+      message: { role: 'assistant', content: 'SECRET {', thinking: 'SECRET hidden reasoning' },
+    }) }]);
+    assert.deepEqual(await dispatchOllamaGeneration('{}', new AbortController().signal, start => start(),
+      harness.request, event => { coarse.push(event); }, undefined, true, sink),
+    { ok: false, error: 'incomplete-output', cleanup: 'complete' });
+    assert.deepEqual(coarse, [{ code: 'adapter-response/content' }]);
+    await Promise.resolve();
+  }
+});
+
 test('retains a detailed envelope event when a later response error wins terminal precedence', async () => {
   const secret = 'SECRET invalid envelope';
   const base = nativeHarness([{ body: ollamaChatBody({}, { model: secret }) }]);

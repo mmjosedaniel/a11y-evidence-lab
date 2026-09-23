@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { executeGeneration } from '../src/server/generation/generation-stage.ts';
 import { createOllamaGenerationAdapter } from '../src/server/generation/ollama-generation.ts';
+import { requestOllamaGenerationMetadata } from '../src/server/generation/ollama-generation-http.ts';
 import { QWEN_CONFIGURATION } from '../src/server/generation/ollama-generation-model.ts';
 import { generationFixture } from './helpers/m302-generation-fixture.ts';
 import {
@@ -236,6 +237,81 @@ test('shared stage deadline includes unresolved metadata and starts no chat', se
     if (watchdog !== undefined) nativeClearTimeout(watchdog);
     t.mock.timers.reset();
   }
+});
+
+test('metadata terminal admission enforces the earlier phase or operation deadline', serial, async t => {
+  const base = Date.parse('2026-09-23T12:00:00.000Z');
+  const version = JSON.stringify(validMetadata().version);
+  const settle = (control: ReturnType<typeof manuallySettledNativeHarness>['control']) => {
+    control.respond();
+    control.data(version);
+    control.end();
+    control.closeResponse();
+    control.closeRequest();
+    control.closeSocket();
+  };
+
+  await t.test('accepts metadata completed within ten seconds of exchange entry', async st => {
+    st.mock.timers.enable({ apis: ['Date'], now: base });
+    try {
+      const native = manuallySettledNativeHarness();
+      const pending = requestOllamaGenerationMetadata('version', new AbortController().signal,
+        native.request, base + 300000);
+      assert.equal(native.calls.length, 1);
+      assert.equal(native.calls[0]!.timeout, 10000);
+      st.mock.timers.tick(9999);
+      settle(native.control);
+      assert.deepEqual(await pending, { ok: true, value: validMetadata().version, cleanup: 'complete' });
+      assert.equal(native.control.responseDestroyed, false);
+    } finally { st.mock.timers.reset(); }
+  });
+
+  await t.test('rejects metadata completed after its ten-second phase before timer delivery', async st => {
+    st.mock.timers.enable({ apis: ['Date'], now: base });
+    try {
+      const native = manuallySettledNativeHarness();
+      const pending = requestOllamaGenerationMetadata('version', new AbortController().signal,
+        native.request, base + 300000);
+      assert.equal(native.calls[0]!.timeout, 10000);
+      st.mock.timers.tick(10001);
+      settle(native.control);
+      assert.deepEqual(await pending, { ok: false, error: 'configuration', cleanup: 'complete' });
+    } finally { st.mock.timers.reset(); }
+  });
+
+  await t.test('keeps an earlier overall operation expiry controlling', async st => {
+    st.mock.timers.enable({ apis: ['Date'], now: base });
+    try {
+      const native = manuallySettledNativeHarness();
+      const pending = requestOllamaGenerationMetadata('version', new AbortController().signal,
+        native.request, base + 4000);
+      assert.equal(native.calls[0]!.timeout, 4000);
+      st.mock.timers.tick(4001);
+      settle(native.control);
+      assert.deepEqual(await pending, { ok: false, error: 'configuration', cleanup: 'complete' });
+    } finally { st.mock.timers.reset(); }
+  });
+
+  await t.test('late first metadata failure prevents later metadata and chat dispatch', async st => {
+    st.mock.timers.enable({ apis: ['Date'], now: base });
+    try {
+      const native = manuallySettledNativeHarness();
+      const paths: string[] = [];
+      const request: typeof native.request = (options, callback) => {
+        paths.push(String(options.path));
+        if (paths.length > 1) throw new Error('late metadata must stop adapter preparation');
+        return native.request(options, callback);
+      };
+      const pending = createOllamaGenerationAdapter(request).prepare(generationRequest(),
+        new AbortController().signal, base + 300000);
+      assert.deepEqual(paths, ['/api/version']);
+      st.mock.timers.tick(10001);
+      settle(native.control);
+      assert.deepEqual(await pending, { ok: false, error: 'configuration', cleanup: 'complete' });
+      assert.deepEqual(paths, ['/api/version']);
+      assert.equal(paths.includes('/api/chat'), false);
+    } finally { st.mock.timers.reset(); }
+  });
 });
 
 test('prepared dispatch is inert until called and cannot bypass a one-use stage capability', serial, async () => {

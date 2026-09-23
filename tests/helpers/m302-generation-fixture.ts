@@ -261,6 +261,10 @@ export function generationAdapterHarness(options: {
 } = {}): { readonly adapter: GenerationAdapter; readonly calls: { prepare: number; dispatch: number; transport: number } } {
   const mode = options.mode ?? 'local';
   const configuration = generationConfiguration(mode) as GenerationConfiguration;
+  const accounting = configuration.accounting;
+  if (!('outputTokenLimit' in accounting)) {
+    throw new Error('Historical generation fixture requires completion-token accounting');
+  }
   const calls = { prepare: 0, dispatch: 0, transport: 0 };
   const envelope = options.envelope ?? Object.freeze({
     ok: true,
@@ -277,11 +281,11 @@ export function generationAdapterHarness(options: {
         request,
         configuration,
         fit: Object.freeze({
-          accounting: configuration.accounting,
+          accounting,
           inputTokens: options.inputTokens ?? 4096,
           reservedOutputTokens: 4096 as const,
-          contextTokenLimit: configuration.accounting.contextTokenLimit,
-          outputTokenLimit: configuration.accounting.outputTokenLimit,
+          contextTokenLimit: accounting.contextTokenLimit,
+          outputTokenLimit: accounting.outputTokenLimit,
         }),
         dispatch: (signal: AbortSignal, attempt: AttemptTransport) => {
           calls.dispatch++;

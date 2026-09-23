@@ -20,7 +20,7 @@ The flow supports:
 - `setup` by `code_worker` through a separately justified non-TDD route for declarative or infrastructure work;
 - `red` by `test_worker` for one coherent observable work-slice contract;
 - `green` plus optional behavior-preserving Refactor by `code_worker` for the standard profile or `frontend_code_worker` for the frontend-visual profile in one implementation turn; and
-- proportional work-slice review followed by risk-routed integrated review.
+- primary work-slice inspection and risk-triggered independent review, normally consolidated at integration.
 
 Only one write-capable worker lease may be active in one worktree. Test and implementation workers remain separate and their write phases are always sequential when TDD applies. Before assigning roles, the coordinator records whether the slice has meaningful executable production behavior. A non-behavioral setup records `TDD: Not applicable` and uses only `code_worker`; a behavior-bearing slice uses this repository's accepted milestone-slice preflight and TDD route. The unchanged standard profile is implicit. Before behavior preflight, the coordinator determines whether the work slice triggers the conditional frontend-visual overlay and keeps one test-worker instance plus only the applicable implementation-worker instance alive for the current slice so bounded follow-ups retain role-local context. Persistence never carries a lease across turns: every write follow-up receives a fresh packet, baseline, digest, and terminally closed lease. Retire selected workers at the work-slice barrier; if the runtime cannot preserve an instance, respawn from the capsule.
 
@@ -143,6 +143,18 @@ Stop the worker if new information changes a binding field: roadmap-task or work
 
 Accepted command evidence may be reused only when all of these still match: exact command, working directory, relevant-tree fingerprint, environment fingerprint, and guard-backed no-drift state. Evidence against a mutable browser, filesystem, model runtime, provider, network, clock, or other external boundary is `Non-reusable` unless the packet pins an isolated run identity and state. Reuse avoids duplicate execution; it never converts a worker report into proof. Any mismatch invalidates the evidence and requires the proportional command to run again.
 
+Scope a fingerprint to the inputs relevant to its check. A documentation edit, agent handoff or new review does not by itself invalidate executable evidence. When an integrated tree changes, retain the earlier full-suite result as baseline evidence, identify the affected checks and record their new results; do not label the old full run as execution against the new tree. If unaffected coverage cannot be justified, broaden verification under the cadence below.
+
+### Verification cadence
+
+During development, use the smallest focused checks that cover the changed contract and its relevant failure paths. Add tests only for changed observable behavior, an uncovered contract gap or a reproduced defect; reuse existing coverage and avoid tests that merely mirror private implementation. Preserve existing tests unless inspection establishes specific redundancy or invalidity. Test counts are not acceptance targets.
+
+After integration, run the complete authoritative suite once and obtain independent strict typechecking plus the applicable build and task-specific proof. The primary accepts actual logs and identities; a worker summary alone is insufficient. Independent strict checking means a separate compiler check accepted independently of the implementation worker's claim, not a compiler run by every participant. Build before checks that consume generated assets where their commands permit it; a changed build requires affected consumer checks, not a second full suite by default.
+
+Reuse accepted evidence for review, phase handoff and task closure. After later executable changes, run affected tests and any invalidated strict/build checks. Before broadening or repeating the full suite, record the concrete changed input, failure or unresolved risk and why narrower checks cannot resolve it. A shared dependency change with unknown impact can justify a full rerun; a new agent, documentation-only edit or another closure checkpoint cannot. Failed checks require triage, preserved failure evidence and a justified bounded follow-up, not retries until green.
+
+Documentation-only policy maintenance uses link, consistency, syntax where applicable and diff checks; it does not trigger the application suite. None of these defaults replaces task-specific acceptance evidence, live prerequisites or operation limits. Record validation and review decisions concisely in the existing packet/plan, without a new ledger or planning phase.
+
 ### Guard projection
 
 Apply the command preparation below before opening a write lease. Its checks are part of packet preparation, not another worker phase or permission to run commands with unapproved effects.
@@ -208,16 +220,16 @@ flowchart TD
     H --> K{"Proportional work-slice validation passes?"}
     K -- "No" --> X
     K -- "Yes" --> L{"Risk route"}
-    L -- "S0 or S1" --> M["Fresh milestone_reviewer"]
-    L -- "S2" --> O["Fresh independent_reviewer"]
-    L -- "S3 or critical trigger" --> P["Fresh critical_reviewer"]
-    M --> Q{"Accepted verdict?"}
+    L -- "S0 or S1" --> M["Primary inspection; extra reviewer only for a named risk"]
+    L -- "S2" --> O["Independent review at integration, or earlier when reliance requires it"]
+    L -- "S3 or critical trigger" --> P["Critical review at integration, or before consequential reliance"]
+    M --> Q{"Required evidence accepted and any pending review safely deferred?"}
     O --> Q
     P --> Q
     Q -- "No" --> X
     Q -- "Yes" --> R{"More work slices?"}
     R -- "Yes" --> A
-    R -- "No" --> S["Complete closure validation and risk-routed integrated review"]
+    R -- "No" --> S["Complete closure validation and uncovered review obligations; reuse accepted coverage"]
     S --> T["Primary coordinator reconciles authorities and closes"]
 ```
 
@@ -244,7 +256,7 @@ Search absence alone never proves `MISSING`. The preflight handoff must cite exa
 For each work slice whose preflight result is `MISSING` or `REGRESSION`:
 
 1. The coordinator uses the work-slice ID and assigns `red` to the persistent `test_worker` under a fresh lease.
-2. The test worker adds the smallest coherent test-side change sufficient to prove one indivisible work-slice outcome. Related assertions may travel together when splitting them would create artificial handoffs; future work-slice behavior may not.
+2. The test worker adds the smallest coherent test-side change sufficient to prove one indivisible work-slice outcome, reusing existing coverage and covering changed behavior or the reproduced defect. Related assertions may travel together when splitting them would create artificial handoffs; future work-slice behavior and tests mirroring private implementation may not.
 3. The coordinator closes the lease, inspects the actual test diff and focused result, and either accepts the Red or stops for triage. The accepted test boundary and its test-owned files must remain unchanged during the implementation worker's Green assignment.
 4. The coordinator assigns `green` under a new packet and lease to the persistent `code_worker` for `standard` or `frontend_code_worker` for `frontend-visual`. The worker may reuse the accepted Red without rerunning it only when its full evidence identity remains fresh. Otherwise it reproduces Red before editing.
 5. The selected implementation worker writes only the production behavior required by the accepted work-slice contract, using the declared focused modules and components from the first production change, and reaches behavioral Green with the focused passing command. Minimum Green means minimum required behavior, not minimum file count or a monolithic first draft. Passing tests never waive the accepted responsibility-and-cohesion contract. After Green, the worker performs a separate structural-fit checkpoint against the actual changed surface and records exactly one cohesion disposition: `RETAINED` with a path-and-symbol rationale when no material Refactor is needed; `REFACTORED` after a small behavior-preserving Refactor and a fresh focused check; or `RECONCILE` when the accepted production placement, path, dependency edge, or reuse disposition is incorrect. `RECONCILE` stops writes and returns control to the coordinator; it is not a new worker phase or permission to widen scope. The frontend worker additionally follows the accepted reuse dispositions and visual capsule; it receives no design or scope authority from the stronger model route.
@@ -304,18 +316,22 @@ Apply the [small, cohesive modules rule](../AGENTS.md#small-cohesive-modules-fro
 
 File length, function count, branch count, or superficial textual similarity is an inspection signal only and never a standalone finding. A large schema validator or state machine may remain cohesive, while a shorter component or handler may mix unrelated reasons to change. Tests must protect observable behavior without freezing private file layout. Report only material, actionable violations with exact paths or symbols and the smallest current-scope remediation; do not require a generic layer, component library, broad refactor, or future-facing abstraction.
 
-After each work slice's worker handoffs are accepted, the coordinator runs its proportional affected checks and routes review:
+After each work slice's worker handoffs are accepted, the coordinator inspects the actual diff, accepts proportional affected checks and records the review route in the existing packet or plan:
 
-- `S0`: inside an implementation ExecPlan, a fresh `milestone_reviewer` performs the smallest semantic review and reuses deterministic evidence. S0 work outside an implementation ExecPlan needs no LLM reviewer unless another trigger applies.
-- `S1`: a fresh `milestone_reviewer` reviews the scoped work slice.
-- `S2`: a fresh `independent_reviewer` reviews the work slice.
-- `S3`: a fresh `critical_reviewer` reviews the work slice.
+- `S0`: documentation-only or deterministic mechanical work receives primary inspection and deterministic checks; no additional reviewer by default, including inside an implementation ExecPlan.
+- `S1`: ordinary bounded behavior receives primary inspection and focused evidence; no additional reviewer by default. Use a fresh `milestone_reviewer` only for a named unresolved correctness or coverage risk, or explicit owner direction.
+- `S2`: a consequential cross-boundary change requires a fresh `independent_reviewer`. Name the changed interface, state transition or integration failure that warrants it; a service, browser, provider or UI filename alone is insufficient.
+- `S3`: a changed critical boundary requires a fresh `critical_reviewer` and the concrete failure-path reproduction it warrants.
 
-For a `frontend-visual` work slice, the same risk route also reviews the accepted reuse dispositions, the actual presentation and state ownership, and the assigned real-browser evidence. If execution shows that a disposition grouped unrelated current responsibilities, the reviewer reports that concrete mismatch without promoting the risk tier, adding a second reviewer, making a component sandbox an acceptance boundary, or claiming responsive behavior owned by a later task.
+Normally consolidate required S2/S3 coverage into one review of the integrated change at the highest triggered tier. Review earlier when dependent work would build on an unreviewed consequential contract, or before a live, irreversible or externally mutating operation relies on that boundary. Record the pending coverage and point before which it must pass; deferral never admits that operation or task closure. An independently reviewable slice does not automatically need a separate reviewer.
 
-Critical triggers override the nominal tier: security; irreversible migration or data-loss risk; concurrency, locking, or recovery; custom serialization, integrity, or identity contracts; cross-platform byte equivalence; an unresolved Blocker or Major from an ordinary reviewer; or explicit project-owner direction. Reviewers reuse fresh evidence under the identity rule and rerun only missing, stale, contradictory, externally mutable, or risk-critical checks.
+For a `frontend-visual` work slice, the primary and any triggered reviewer also inspect the accepted reuse dispositions, actual presentation and state ownership, and assigned real-browser evidence. If execution shows that a disposition grouped unrelated current responsibilities, report that concrete mismatch without automatically promoting the risk tier, adding a second reviewer, making a component sandbox an acceptance boundary, or claiming responsive behavior owned by a later task.
 
-After all work slices are integrated, the coordinator runs the ExecPlan's closure checks, test-relevance audit, documentation validation, and authoritative status checks. A fresh `independent_reviewer` performs ordinary integrated review; use `critical_reviewer` only when an integrated critical trigger remains. The final reviewer concentrates on cross-slice interaction, unresolved findings, changed evidence, and closure rather than replaying every already accepted slice.
+Critical triggers override the nominal tier when the change affects security, irreversible migration or data-loss risk, concurrency/locking/recovery, custom serialization/integrity/identity contracts, or cross-platform byte equivalence. Identify the changed boundary and plausible failure, not merely the use of an existing validated mechanism or a risk-related word. An unresolved Blocker or Major after ordinary review, or explicit project-owner direction, also triggers critical review. Reviewers inspect the actual diff and reuse fresh evidence under the identity rule; independently reproduce missing, stale, contradictory, externally mutable or risk-critical checks, not every passing suite.
+
+After integration, the coordinator completes the verification cadence, test-relevance audit, documentation validation and authoritative status checks. Existing independent coverage can satisfy closure when the reviewed code/contracts, relevant evidence and integration assumptions remain valid. Use a separate fresh final reviewer only for a named unreviewed integration risk, materially invalidated review coverage, or an explicit owner requirement; select `independent_reviewer` for S2 or `critical_reviewer` for S3. The mere continued presence of an already reviewed critical boundary does not require another review. Every pending S2/S3 obligation must pass before closure. A single-slice task can use one independent review for both slice and integration coverage; an S0/S1-only task can close after primary inspection when no additional trigger exists.
+
+Apply these defaults prospectively under [ADR-0024's amendment](../docs/architecture/decisions/ADR-0024-milestone-slice-tdd-with-independent-ownership.md#proportional-verification-and-review). Reconcile active packets before changing their review plan, preserve explicit task-specific gates until amended by their owner, and never reset a correction, review or live-operation allowance. The changed-surface quality baseline applies equally to primary inspection and triggered reviewers.
 
 - `PASS` permits coordinator reconciliation and closure when every task gate also passes.
 - `PASS WITH FOLLOW-UPS` permits closure only when the coordinator dispositions every item and none conflicts with a definition of done, validation result, or documentation gate.
@@ -388,18 +404,23 @@ correction is necessary, close every worker lease first, record its reason, path
 validation, invalidate the prior test evidence, and accept the revised boundary before
 Green resumes. Never let the implementation worker change the accepted test contract.
 
-Run proportional affected validation at the work-slice barrier and route review by risk:
-S0 or S1 milestone_reviewer, S2 independent_reviewer, and S3 or a critical trigger
-critical_reviewer. Every route applies the common changed-surface quality baseline to the
+Run focused validation at the work-slice barrier and route review by concrete risk:
+S0/S1 primary inspection; optional milestone_reviewer only for a named risk or owner request.
+S2 independent_reviewer; S3 critical_reviewer. Consolidate required coverage at integration
+unless dependent work or a consequential operation requires an earlier review.
+Every route applies the common changed-surface quality baseline to the
 actual responsibility placement and dependency direction. Reuse fresh evidence; rerun only missing, stale,
 contradictory, externally mutable, or risk-critical checks. Retire the work-slice workers
-after acceptance. For frontend-visual, have that same reviewer also inspect the accepted reuse
+after acceptance. For frontend-visual, have the primary and any triggered reviewer inspect the accepted reuse
 dispositions, actual presentation and state placement, and assigned real-browser evidence without changing the risk tier or adding
 a second reviewer.
 
-At task closure, run the ExecPlan's complete validation, relevance, documentation, and
-authority checks. Use a fresh independent_reviewer for ordinary integrated review or a
-critical_reviewer when a critical trigger remains. PASS may proceed to coordinator-owned
+Run the complete suite once after integration, plus independent strict checking and applicable
+build/task-specific proof. Reuse fresh results at closure; later changes need affected checks,
+and another full run needs a recorded reason why narrower checks are insufficient.
+Complete relevance, documentation and authority checks. Reuse accepted independent coverage;
+a separate final reviewer needs an unreviewed integration risk, materially invalidated coverage
+or explicit owner requirement. All pending S2/S3 coverage must pass. PASS may proceed to coordinator-owned
 closure; PASS WITH FOLLOW-UPS requires explicit disposition; REVISE, BLOCKED, or
 escalation stops advancement and returns control to coordinator triage.
 

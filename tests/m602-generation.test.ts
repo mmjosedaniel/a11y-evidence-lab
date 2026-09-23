@@ -1739,3 +1739,1671 @@ test('pre-entry, partial source, observation, and qualification publication fail
     } finally { removeRoot(root); }
   }
 });
+
+// M6-02 completion integration. The named import is the contracted first-module Red: every
+// behavioral assertion below remains blocked until the separately owned Green adds the callable.
+import { qualifyM602CompletionObservers } from './helpers/m602-operation.ts';
+
+void qualifyM602CompletionObservers;
+
+const completionManifestPath = 'evaluation/m602-completion-v1.json';
+type CompletionDependenciesFixture = Omit<SuccessorDependenciesFixture, 'successorManifestEnvironment'> & {
+  completionManifestEnvironment: SuccessorPackageEnvironment;
+};
+type CompletionOperationApi = {
+  qualifyM602CompletionObservers(dependencies?: Partial<CompletionDependenciesFixture>): Promise<JsonRecord>;
+  executeM602CompletionCase(caseLabel: typeof caseLabels[number], dependencies?: Partial<CompletionDependenciesFixture>): Promise<JsonRecord>;
+  readM602CompletionCase(caseLabel: typeof caseLabels[number], dependencies?: Partial<CompletionDependenciesFixture>): Promise<JsonRecord>;
+};
+
+function completionManifest(bundle: SyntheticBundle) {
+  const value = {
+    version: 'm602-completion-v1', status: 'frozen', frozenAt: '2026-09-21T19:02:40.166Z',
+    inputDefinition: { path: 'evaluation/m301-generation-v1.json', sha256: bundle.environment.manifestSha256 },
+    caseOrder: caseLabels,
+    executionPolicy: 'm602-successor-execution-v1',
+    observationPolicy: { version: 'm602-successor-observation-v1', startDelayMs: 1000, deadlineMs: 5000,
+      cleanupDeadlineMs: 5000, qualificationWindowMs: 7000 },
+    groqAdmission: { version: 'm304-groq-request-bytes-v1', maximumBytes: 65536,
+      exposedDefaults: 'groq-gpt-oss-20b-2026-09-11-v1' },
+    rubric: 'inherit-input-definition', failureInterpretation: 'inherit-input-definition',
+    advancement: 'accepted-proposal-and-qualified-observations', consumption: 'exclusive-case-directory',
+    maximumEntriesPerCase: 1, maximumDispatchesPerCase: 1,
+    stopOn: 'first-failed-invalid-unknown-or-unqualified-case', originalEvidence: 'preserved-separately',
+  };
+  const bytes = jsonBytes(value);
+  return Object.freeze({ value: Object.freeze(value), bytes, environment: Object.freeze({
+    manifestSha256: sha256(bytes),
+    readBytes(relativePath: string) {
+      if (relativePath === completionManifestPath) return bytes;
+      return bundle.environment.readBytes(relativePath);
+    },
+  }) });
+}
+
+function completionDependencies(root: string, bundle: SyntheticBundle, observer = successorObserverHarness(), entryTick?: () => void) {
+  const manifest = completionManifest(bundle);
+  const dependencies: CompletionDependenciesFixture = {
+    root, packageEnvironment: bundle.environment, completionManifestEnvironment: manifest.environment,
+    requestImplementation: localNative(generationFixture().proposal).request,
+    observerIO: observer.io as unknown as SuccessorObserverIO,
+    filesystem: successorEntryClock(root, entryTick),
+  };
+  return { manifest, observer, dependencies };
+}
+
+function completionProposal(label: typeof caseLabels[number]) {
+  return generationFixture(label.endsWith('-image') ? 'image-alt'
+    : label.endsWith('-label') ? 'label' : 'color-contrast').proposal;
+}
+
+function writeCompletionAssessment(root: string, bundle: SyntheticBundle, result: JsonRecord, observation: JsonRecord,
+  accepted = true, mutate?: (assessment: JsonRecord) => void): void {
+  const resultBytes = fs.readFileSync(path.join(root, result.caseLabel, 'result.json'));
+  const observationBytes = fs.readFileSync(path.join(root, result.caseLabel, 'observation.json'));
+  const finished = Date.parse(result.finishedAt);
+  const localObservation = observation.samples === null ? null : {
+    ui: { startedAt: observation.timing.ui.startedAt, finishedAt: observation.timing.ui.finishedAt, responsive: true },
+    runtime: { observedAt: observation.timing.runtime.finishedAt, ...observation.samples.runtime },
+    gpuBefore: observation.samples.gpuBefore,
+    gpuDuring: { observedAt: observation.timing.gpu.finishedAt, ...observation.samples.gpuDuring },
+    oomObserved: false,
+  };
+  const assessment: JsonRecord = {
+    version: 'm602-completion-evidence-v1', caseLabel: result.caseLabel,
+    resultSha256: sha256(resultBytes), observationSha256: sha256(observationBytes), evaluator: 'primary',
+    assessedAt: new Date(finished + 60_000).toISOString(),
+    dimensions: bundle.manifest.rubric.map(({ observation: observationName }: JsonRecord, index: number) => ({
+      observation: observationName,
+      value: index === 2 ? (result.caseLabel.endsWith('-image') ? 'fail' : 'not-run') : 'pass',
+    })),
+    uncertainty: 'pass', localObservation, accepted,
+  };
+  mutate?.(assessment);
+  fs.writeFileSync(path.join(root, result.caseLabel, 'assessment.json'), jsonBytes(assessment), { flag: 'wx' });
+}
+
+async function qualifyCompletion(root: string, bundle: SyntheticBundle,
+  clock: { mock: { timers: { tick(milliseconds: number): void } } }, tick?: () => void) {
+  const operation = m602Operation as unknown as CompletionOperationApi;
+  const fixture = completionDependencies(root, bundle, successorObserverHarness(), tick);
+  const dependencies: Partial<CompletionDependenciesFixture> = { ...fixture.dependencies };
+  delete dependencies.requestImplementation;
+  const outcome = await driveSuccessor(withSuccessorRevision(() =>
+    operation.qualifyM602CompletionObservers(dependencies)), clock);
+  assert.equal(outcome.ok, true);
+  return { outcome, fixture };
+}
+
+test('completion qualification and execution reject every incomplete injected dependency before effects or fallback', async t => {
+  t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: Date.parse('2026-09-21T20:00:00.000Z') });
+  const operation = m602Operation as unknown as CompletionOperationApi;
+  const bundle = canonicalSyntheticBundle();
+  for (const missing of ['root', 'packageEnvironment', 'completionManifestEnvironment',
+    'observerIO'] as (keyof CompletionDependenciesFixture)[]) {
+    const root = makeRoot();
+    try {
+      prepareSuccessorRoot(root);
+      const fixture = completionDependencies(root, bundle);
+      const incomplete: Partial<CompletionDependenciesFixture> = { ...fixture.dependencies };
+      delete incomplete.requestImplementation;
+      delete incomplete[missing];
+      const outcome = await withSuccessorRevision(() => operation.qualifyM602CompletionObservers(incomplete));
+      assert.equal(outcome.ok, false, `qualification:${missing}`);
+      assert.deepEqual(outcome.cleanup, { ui: 'not-created', runtime: 'not-created', gpu: 'not-created',
+        application: 'not-created', browser: 'not-created', scratch: 'not-created' });
+      assert.deepEqual(fixture.observer.calls, []);
+      assert.equal(fs.existsSync(path.join(root, 'qualification.json')), false);
+    } finally { removeRoot(root); }
+  }
+  for (const missing of ['root', 'packageEnvironment', 'completionManifestEnvironment', 'requestImplementation',
+    'observerIO'] as (keyof CompletionDependenciesFixture)[]) {
+    const root = makeRoot();
+    try {
+      prepareSuccessorRoot(root);
+      await qualifyCompletion(root, bundle, t, () => t.mock.timers.tick(1));
+      const fixture = completionDependencies(root, bundle, successorObserverHarness(), () => t.mock.timers.tick(1));
+      const native = controlledSuccessorNative(completionProposal('local-image'));
+      fixture.dependencies.requestImplementation = native.request;
+      const incomplete: Partial<CompletionDependenciesFixture> = { ...fixture.dependencies };
+      delete incomplete[missing];
+      const outcome = await withSuccessorRevision(() => operation.executeM602CompletionCase('local-image', incomplete));
+      assert.equal(outcome.ok, false, `execution:${missing}`);
+      assert.equal(native.calls.length, 0, `execution:${missing}`);
+      assert.deepEqual(fixture.observer.calls, [], `execution:${missing}`);
+      assert.equal(fs.existsSync(path.join(root, 'local-image')), false, `execution:${missing}`);
+    } finally { removeRoot(root); }
+  }
+});
+
+test('completion qualification binds only its manifest, current code, build, and application revision', async t => {
+  t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: Date.parse('2026-09-21T20:30:00.000Z') });
+  const operation = m602Operation as unknown as CompletionOperationApi;
+  const bundle = canonicalSyntheticBundle();
+  const previousRevision = process.env.A11Y_APPLICATION_REVISION;
+  for (const fault of ['manifest', 'code', 'build', 'revision'] as const) {
+    const root = makeRoot();
+    try {
+      prepareSuccessorRoot(root);
+      const qualified = await qualifyCompletion(root, bundle, t, () => t.mock.timers.tick(1));
+      assert.equal(qualified.outcome.qualification.version, 'm602-completion-qualification-v1');
+      assert.equal(qualified.outcome.qualification.campaign, 'm602-completion-v1');
+      assert.equal(qualified.outcome.qualification.applicationRevision, successorRevision);
+      assert.equal(sha256(fs.readFileSync(path.join(root, 'qualification.json'))), qualified.outcome.sha256);
+      const fixture = completionDependencies(root, bundle, successorObserverHarness(), () => t.mock.timers.tick(1));
+      const native = controlledSuccessorNative(completionProposal('local-image'));
+      fixture.dependencies.requestImplementation = native.request;
+      if (fault === 'manifest') fixture.dependencies.completionManifestEnvironment = {
+        ...fixture.manifest.environment, manifestSha256: '0'.repeat(64),
+      };
+      if (fault === 'build') fs.writeFileSync(path.join(root, 'client', 'index.html'), '<!doctype html><title>drift</title>\n');
+      if (fault === 'revision') process.env.A11Y_APPLICATION_REVISION = 'b'.repeat(40);
+      if (fault === 'code') {
+        const readFileSync = ((target: fs.PathOrFileDescriptor,
+          options?: BufferEncoding | { encoding?: BufferEncoding | null; flag?: string } | null) => {
+          const bytes = fs.readFileSync(target, options as never);
+          if (!String(target).endsWith('m602-operation.ts')) return bytes;
+          return Buffer.isBuffer(bytes) ? Buffer.from(`${bytes.toString()}\n`) : `${bytes}\n`;
+        }) as typeof fs.readFileSync;
+        fixture.dependencies.filesystem = { ...fixture.dependencies.filesystem, readFileSync };
+      }
+      const outcome = fault === 'revision'
+        ? await operation.executeM602CompletionCase('local-image', fixture.dependencies)
+        : await withSuccessorRevision(() => operation.executeM602CompletionCase('local-image', fixture.dependencies));
+      assert.equal(outcome.ok, false, fault);
+      assert.equal(native.calls.length, 0, fault);
+      assert.deepEqual(fixture.observer.calls, [], fault);
+    } finally {
+      if (previousRevision === undefined) delete process.env.A11Y_APPLICATION_REVISION;
+      else process.env.A11Y_APPLICATION_REVISION = previousRevision;
+      removeRoot(root);
+    }
+  }
+});
+
+test('completion executes and reads back exactly six ordered cases with fresh Local observers and no Groq observers', async t => {
+  t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: Date.parse('2026-09-21T21:00:00.000Z') });
+  const operation = m602Operation as unknown as CompletionOperationApi;
+  const root = makeRoot();
+  try {
+    prepareSuccessorRoot(root);
+    const bundle = canonicalSyntheticBundle();
+    const qualified = await qualifyCompletion(root, bundle, t, () => t.mock.timers.tick(1));
+    const manifest = completionManifest(bundle);
+    const observedOrder: string[] = [];
+    for (const label of caseLabels) {
+      const isLocal = label.startsWith('local-');
+      const observer = successorObserverHarness();
+      const fixture = completionDependencies(root, bundle, observer, () => t.mock.timers.tick(1));
+      const credential = virtualCredentialIO();
+      const local = controlledSuccessorNative(completionProposal(label));
+      const groq = groqNativeHarness([{ body: groqChatBody(completionProposal(label)) }]);
+      if (isLocal) fixture.dependencies.requestImplementation = local.request;
+      else {
+        fixture.dependencies.requestImplementation = groq.request;
+        fixture.dependencies.credentialIO = credential.io;
+        delete fixture.dependencies.observerIO;
+      }
+      if (label === 'groq-image') {
+        const missingCredential = { ...fixture.dependencies };
+        delete missingCredential.credentialIO;
+        const blocked = await withSuccessorRevision(() => operation.executeM602CompletionCase(label, missingCredential));
+        assert.equal(blocked.ok, false);
+        assert.equal(groq.calls.length, 0);
+        assert.equal(credential.calls.open.length, 0);
+        assert.equal(fs.existsSync(path.join(root, label)), false);
+      }
+      const executed = await driveSuccessor(withSuccessorRevision(() =>
+        operation.executeM602CompletionCase(label, fixture.dependencies)), t);
+      assert.equal(executed.ok, true, label);
+      assert.equal(executed.result.status, 'proposal', label);
+      assert.equal(executed.result.version, 'm602-completion-evidence-v1', label);
+      assert.equal(executed.observation.version, 'm602-completion-observation-v1', label);
+      assert.equal(executed.observation.campaign, 'm602-completion-v1', label);
+      assert.equal(executed.observation.qualificationSha256, qualified.outcome.sha256, label);
+      assert.equal(executed.observationSha256,
+        sha256(fs.readFileSync(path.join(root, label, 'observation.json'))), label);
+      if (isLocal) {
+        assert.equal(local.calls.length, 4, label);
+        assert.equal(observer.calls.includes('application.start'), true, label);
+        assert.deepEqual(executed.observation.cleanup, { ui: 'complete', runtime: 'complete', gpu: 'complete',
+          application: 'complete', browser: 'complete', scratch: 'complete' });
+      } else {
+        assert.equal(observer.calls.length, 0, label);
+        assert.equal(groq.calls.length, 1, label);
+        assert.equal(credential.calls.open.length, 1, label);
+        assert.equal(credential.calls.buffers.every(bytes => bytes.every(byte => byte === 0)), true, label);
+        assert.equal(executed.observation.samples, null, label);
+      }
+      observedOrder.push(label);
+      writeCompletionAssessment(root, bundle, executed.result, executed.observation);
+      const read = await operation.readM602CompletionCase(label, {
+        root, packageEnvironment: bundle.environment, completionManifestEnvironment: manifest.environment,
+        filesystem: { mkdirSync() { throw new Error('completion readback must not write'); } },
+      });
+      assert.equal(read.ok, true, label);
+      assert.deepEqual(read.result, executed.result, label);
+      assert.deepEqual(read.observation, executed.observation, label);
+      assert.equal(read.assessment.accepted, true, label);
+    }
+    assert.deepEqual(observedOrder, caseLabels);
+    assert.deepEqual(fs.readdirSync(root).filter(name => caseLabels.includes(name as typeof caseLabels[number])).sort(),
+      [...caseLabels].sort());
+    const duplicate = completionDependencies(root, bundle, successorObserverHarness(), () => t.mock.timers.tick(1));
+    const duplicateNative = controlledSuccessorNative(completionProposal('local-image'));
+    duplicate.dependencies.requestImplementation = duplicateNative.request;
+    assert.equal((await withSuccessorRevision(() =>
+      operation.executeM602CompletionCase('local-image', duplicate.dependencies))).ok, false);
+    assert.equal(duplicateNative.calls.length, 0);
+    assert.deepEqual(duplicate.observer.calls, []);
+    for (const missing of ['root', 'packageEnvironment', 'completionManifestEnvironment'] as const) {
+      const dependencies: JsonRecord = { root, packageEnvironment: bundle.environment,
+        completionManifestEnvironment: manifest.environment };
+      delete dependencies[missing];
+      assert.deepEqual(await operation.readM602CompletionCase('local-image', dependencies),
+        { ok: false, error: 'evidence-blocked' }, `readback:${missing}`);
+    }
+  } finally { removeRoot(root); }
+});
+
+test('completion rejects valid original and successor evidence and preserves occupied, partial, and concurrent one-use records', async t => {
+  t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: Date.parse('2026-09-21T22:00:00.000Z') });
+  const operation = m602Operation as unknown as CompletionOperationApi;
+  const successorOperation = m602Operation as unknown as SuccessorOperationApi;
+  const bundle = canonicalSyntheticBundle();
+  for (const campaign of ['original', 'successor'] as const) {
+    const completionRoot = makeRoot();
+    const witnessRoot = makeRoot();
+    try {
+      prepareSuccessorRoot(completionRoot);
+      await qualifyCompletion(completionRoot, bundle, t, () => t.mock.timers.tick(1));
+      if (campaign === 'original') {
+        const native = advancingLocalNative(completionProposal('local-image'), () => t.mock.timers.tick(20));
+        const witness = await executeM602Case('local-image', {
+          root: witnessRoot, packageEnvironment: bundle.environment, requestImplementation: native.request,
+        });
+        assert.equal(witness.ok, true);
+        writeAssessment(witnessRoot, witness.result, bundle.manifest);
+        const read = await readM602Case('local-image', { root: witnessRoot, packageEnvironment: bundle.environment });
+        assert.ok(read.ok && read.assessment?.accepted);
+      } else {
+        prepareSuccessorRoot(witnessRoot);
+        const qualificationFixture = successorDependencies(witnessRoot, bundle, successorObserverHarness(), () => t.mock.timers.tick(1));
+        assert.equal((await driveSuccessor(withSuccessorRevision(() =>
+          successorOperation.qualifyM602SuccessorObservers(qualificationFixture.dependencies)), t)).ok, true);
+        const fixture = successorDependencies(witnessRoot, bundle, successorObserverHarness(), () => t.mock.timers.tick(1));
+        fixture.dependencies.requestImplementation = controlledSuccessorNative(completionProposal('local-image')).request;
+        const witness = await driveSuccessor(withSuccessorRevision(() =>
+          successorOperation.executeM602SuccessorCase('local-image', fixture.dependencies)), t);
+        assert.equal(witness.ok, true);
+        writeSuccessorAssessment(witnessRoot, bundle, witness.result, witness.observation);
+        const read = await successorOperation.readM602SuccessorCase('local-image', {
+          root: witnessRoot, packageEnvironment: bundle.environment,
+          successorManifestEnvironment: fixture.manifest.environment,
+        });
+        assert.ok(read.ok && read.assessment?.accepted);
+      }
+      fs.cpSync(path.join(witnessRoot, 'local-image'), path.join(completionRoot, 'local-image'), { recursive: true });
+      const next = completionDependencies(completionRoot, bundle, successorObserverHarness(), () => t.mock.timers.tick(1));
+      const native = controlledSuccessorNative(completionProposal('local-label'));
+      next.dependencies.requestImplementation = native.request;
+      assert.equal((await withSuccessorRevision(() =>
+        operation.executeM602CompletionCase('local-label', next.dependencies))).ok, false, campaign);
+      assert.equal(native.calls.length, 0, campaign);
+      assert.deepEqual(next.observer.calls, [], campaign);
+    } finally { removeRoot(witnessRoot); removeRoot(completionRoot); }
+  }
+  for (const occupied of ['empty', 'partial'] as const) {
+    const root = makeRoot();
+    try {
+      prepareSuccessorRoot(root);
+      await qualifyCompletion(root, bundle, t, () => t.mock.timers.tick(1));
+      const directory = path.join(root, 'local-image');
+      fs.mkdirSync(directory);
+      if (occupied === 'partial') fs.writeFileSync(path.join(directory, 'entered.json'), '{"partial":true}\n', { flag: 'wx' });
+      const before = fs.readdirSync(directory).map(name => [name, fs.readFileSync(path.join(directory, name))] as const);
+      const fixture = completionDependencies(root, bundle, successorObserverHarness(), () => t.mock.timers.tick(1));
+      const native = controlledSuccessorNative(completionProposal('local-image'));
+      fixture.dependencies.requestImplementation = native.request;
+      assert.equal((await withSuccessorRevision(() =>
+        operation.executeM602CompletionCase('local-image', fixture.dependencies))).ok, false, occupied);
+      assert.equal(native.calls.length, 0, occupied);
+      assert.deepEqual(fixture.observer.calls, [], occupied);
+      assert.deepEqual(fs.readdirSync(directory), before.map(([name]) => name));
+      for (const [name, bytes] of before) assert.deepEqual(fs.readFileSync(path.join(directory, name)), bytes);
+    } finally { removeRoot(root); }
+  }
+  const concurrentRoot = makeRoot();
+  try {
+    prepareSuccessorRoot(concurrentRoot);
+    await qualifyCompletion(concurrentRoot, bundle, t, () => t.mock.timers.tick(1));
+    const left = completionDependencies(concurrentRoot, bundle, successorObserverHarness(), () => t.mock.timers.tick(1));
+    const right = completionDependencies(concurrentRoot, bundle, successorObserverHarness(), () => t.mock.timers.tick(1));
+    const leftNative = controlledSuccessorNative(completionProposal('local-image'));
+    const rightNative = controlledSuccessorNative(completionProposal('local-image'));
+    left.dependencies.requestImplementation = leftNative.request;
+    right.dependencies.requestImplementation = rightNative.request;
+    const outcomes = await driveSuccessor(withSuccessorRevision(() => Promise.all([
+      operation.executeM602CompletionCase('local-image', left.dependencies),
+      operation.executeM602CompletionCase('local-image', right.dependencies),
+    ])), t);
+    assert.equal(outcomes.filter(outcome => outcome.ok).length, 1);
+    assert.equal(outcomes.filter(outcome => !outcome.ok).length, 1);
+    assert.equal(leftNative.calls.length + rightNative.calls.length, 4);
+    assert.deepEqual(fs.readdirSync(path.join(concurrentRoot, 'local-image')).sort(),
+      ['dispatch.json', 'entered.json', 'observation.json', 'result.json']);
+  } finally { removeRoot(concurrentRoot); }
+});
+
+test('completion stops before the next case for failed, unknown, unqualified, or invalid predecessor evidence', async t => {
+  t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: Date.parse('2026-09-21T23:00:00.000Z') });
+  const operation = m602Operation as unknown as CompletionOperationApi;
+  const bundle = canonicalSyntheticBundle();
+  for (const fault of ['missing-assessment', 'malformed-assessment', 'rejected', 'projection', 'oom',
+    'assessment-observation-link', 'observation-result-link', 'uncertain-cleanup', 'failed', 'unknown'] as const) {
+    const root = makeRoot();
+    try {
+      prepareSuccessorRoot(root);
+      await qualifyCompletion(root, bundle, t, () => t.mock.timers.tick(1));
+      const firstFixture = completionDependencies(root, bundle, successorObserverHarness(), () => t.mock.timers.tick(1));
+      const firstNative = controlledSuccessorNative(fault === 'failed' ? { invalid: true } : completionProposal('local-image'));
+      firstFixture.dependencies.requestImplementation = firstNative.request;
+      const first = await driveSuccessor(withSuccessorRevision(() =>
+        operation.executeM602CompletionCase('local-image', firstFixture.dependencies)), t);
+      assert.equal(first.ok, true, fault);
+      if (!first.ok) continue;
+      let assessmentObservation = first.observation;
+      if (fault === 'malformed-assessment') {
+        fs.writeFileSync(path.join(root, 'local-image', 'assessment.json'), '{}\n', { flag: 'wx' });
+      } else if (!['missing-assessment', 'failed', 'unknown'].includes(fault)) {
+        if (fault === 'observation-result-link' || fault === 'uncertain-cleanup') {
+          const observationPath = path.join(root, 'local-image', 'observation.json');
+          const observation = JSON.parse(fs.readFileSync(observationPath, 'utf8')) as JsonRecord;
+          if (fault === 'observation-result-link') observation.resultSha256 = '0'.repeat(64);
+          else observation.cleanup.application = 'uncertain';
+          fs.writeFileSync(observationPath, jsonBytes(observation));
+          assessmentObservation = observation;
+        }
+        writeCompletionAssessment(root, bundle, first.result, assessmentObservation, fault !== 'rejected', assessment => {
+          if (fault === 'projection') assessment.localObservation.runtime.contextLength++;
+          if (fault === 'oom') assessment.localObservation.oomObserved = true;
+          if (fault === 'assessment-observation-link') assessment.observationSha256 = '0'.repeat(64);
+        });
+      }
+      if (fault === 'unknown') {
+        const resultPath = path.join(root, 'local-image', 'result.json');
+        const result = JSON.parse(fs.readFileSync(resultPath, 'utf8')) as JsonRecord;
+        result.status = 'unknown';
+        fs.writeFileSync(resultPath, jsonBytes(result));
+      }
+      const nextFixture = completionDependencies(root, bundle, successorObserverHarness(), () => t.mock.timers.tick(1));
+      const nextNative = controlledSuccessorNative(completionProposal('local-label'));
+      nextFixture.dependencies.requestImplementation = nextNative.request;
+      const next = await withSuccessorRevision(() =>
+        operation.executeM602CompletionCase('local-label', nextFixture.dependencies));
+      assert.equal(next.ok, false, fault);
+      assert.equal(nextNative.calls.length, 0, fault);
+      assert.deepEqual(nextFixture.observer.calls, [], fault);
+      assert.equal(fs.existsSync(path.join(root, 'local-label')), false, fault);
+    } finally { removeRoot(root); }
+  }
+});
+
+test('completion blocks producer-code drift introduced during awaited observer preparation before entry', async t => {
+  t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: Date.parse('2026-09-21T23:30:00.000Z') });
+  const operation = m602Operation as unknown as CompletionOperationApi;
+  const root = makeRoot();
+  try {
+    prepareSuccessorRoot(root);
+    const bundle = canonicalSyntheticBundle();
+    await qualifyCompletion(root, bundle, t, () => t.mock.timers.tick(1));
+    const qualificationBytes = fs.readFileSync(path.join(root, 'qualification.json'));
+    const observer = successorObserverHarness();
+    const fixture = completionDependencies(root, bundle, observer, () => t.mock.timers.tick(1));
+    const native = controlledSuccessorNative(completionProposal('local-image'));
+    fixture.dependencies.requestImplementation = native.request;
+    let drifted = false;
+    const startApplication = observer.io.startApplication;
+    fixture.dependencies.observerIO = { ...observer.io, async startApplication() {
+      const service = await startApplication();
+      drifted = true;
+      return service;
+    } } as unknown as SuccessorObserverIO;
+    const readFileSync = ((target: fs.PathOrFileDescriptor,
+      options?: BufferEncoding | { encoding?: BufferEncoding | null; flag?: string } | null) => {
+      const bytes = fs.readFileSync(target, options as never);
+      if (!drifted || !String(target).endsWith('m602-operation.ts')) return bytes;
+      return Buffer.isBuffer(bytes) ? Buffer.concat([bytes, Buffer.from('\n')]) : `${bytes}\n`;
+    }) as typeof fs.readFileSync;
+    fixture.dependencies.filesystem = { ...fixture.dependencies.filesystem, readFileSync };
+    const outcome = await driveSuccessor(withSuccessorRevision(() =>
+      operation.executeM602CompletionCase('local-image', fixture.dependencies)), t);
+    assert.equal(outcome.ok, false, 'producer drift after preparation must invalidate admission');
+    if (outcome.ok) return;
+    assert.equal(outcome.error, 'evidence-publication');
+    assert.equal(native.calls.length, 0);
+    assert.equal(fs.existsSync(path.join(root, 'local-image')), false);
+    assert.deepEqual(fs.readFileSync(path.join(root, 'qualification.json')), qualificationBytes);
+    assert.equal(Object.isFrozen(outcome.cleanup), true);
+    assert.equal(Object.values(outcome.cleanup).every(value => value === 'complete' || value === 'not-created'), true);
+  } finally { removeRoot(root); t.mock.timers.reset(); }
+});
+
+test('completion blocks client-build drift introduced during awaited observer preparation before entry', async t => {
+  t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: Date.parse('2026-09-21T23:45:00.000Z') });
+  const operation = m602Operation as unknown as CompletionOperationApi;
+  const root = makeRoot();
+  try {
+    prepareSuccessorRoot(root);
+    const bundle = canonicalSyntheticBundle();
+    await qualifyCompletion(root, bundle, t, () => t.mock.timers.tick(1));
+    const qualificationBytes = fs.readFileSync(path.join(root, 'qualification.json'));
+    const observer = successorObserverHarness();
+    const fixture = completionDependencies(root, bundle, observer, () => t.mock.timers.tick(1));
+    const native = controlledSuccessorNative(completionProposal('local-image'));
+    fixture.dependencies.requestImplementation = native.request;
+    const startApplication = observer.io.startApplication;
+    fixture.dependencies.observerIO = { ...observer.io, async startApplication() {
+      const service = await startApplication();
+      fs.appendFileSync(path.join(root, 'client', 'index.html'), '<!-- synthetic post-admission drift -->');
+      return service;
+    } } as unknown as SuccessorObserverIO;
+    const outcome = await driveSuccessor(withSuccessorRevision(() =>
+      operation.executeM602CompletionCase('local-image', fixture.dependencies)), t);
+    assert.equal(outcome.ok, false, 'build drift after preparation must invalidate admission');
+    if (outcome.ok) return;
+    assert.equal(outcome.error, 'evidence-publication');
+    assert.equal(native.calls.length, 0);
+    assert.equal(fs.existsSync(path.join(root, 'local-image')), false);
+    assert.deepEqual(fs.readFileSync(path.join(root, 'qualification.json')), qualificationBytes);
+    assert.equal(Object.isFrozen(outcome.cleanup), true);
+    assert.equal(Object.values(outcome.cleanup).every(value => value === 'complete' || value === 'not-created'), true);
+  } finally { removeRoot(root); t.mock.timers.reset(); }
+});
+
+// M6-02 instrumented continuation. This named import is the contracted first-module Red:
+// the behavioral assertions below remain blocked until Green adds the public callable.
+import { qualifyM602InstrumentedObservers } from './helpers/m602-operation.ts';
+
+void qualifyM602InstrumentedObservers;
+
+const instrumentedManifestPath = 'evaluation/m602-instrumented-v1.json';
+type InstrumentedDependenciesFixture = Omit<CompletionDependenciesFixture, 'completionManifestEnvironment'> & {
+  instrumentedManifestEnvironment: SuccessorPackageEnvironment;
+};
+type InstrumentedOperationApi = {
+  qualifyM602InstrumentedObservers(dependencies?: Partial<InstrumentedDependenciesFixture>): Promise<JsonRecord>;
+  executeM602InstrumentedCase(caseLabel: typeof caseLabels[number], dependencies?: Partial<InstrumentedDependenciesFixture>): Promise<JsonRecord>;
+  readM602InstrumentedCase(caseLabel: typeof caseLabels[number], dependencies?: Partial<InstrumentedDependenciesFixture>): Promise<JsonRecord>;
+};
+
+function instrumentedManifest(bundle: SyntheticBundle) {
+  const value = {
+    ...completionManifest(bundle).value,
+    version: 'm602-instrumented-v1',
+    frozenAt: '2026-09-22T01:14:13.000Z',
+  };
+  const bytes = jsonBytes(value);
+  return Object.freeze({ value: Object.freeze(value), bytes, environment: Object.freeze({
+    manifestSha256: sha256(bytes),
+    readBytes(relativePath: string) {
+      if (relativePath === instrumentedManifestPath) return bytes;
+      return bundle.environment.readBytes(relativePath);
+    },
+  }) });
+}
+
+function prepareInstrumentedRoot(root: string): void {
+  prepareSuccessorRoot(root);
+  fs.renameSync(path.join(root, 'client', 'assets', 'index-C7OtU_Ke.js'),
+    path.join(root, 'client', 'assets', 'index-BRf9Pkds.js'));
+}
+
+function instrumentedDependencies(root: string, bundle: SyntheticBundle,
+  observer = successorObserverHarness(), entryTick?: () => void) {
+  const manifest = instrumentedManifest(bundle);
+  const dependencies: InstrumentedDependenciesFixture = {
+    root, packageEnvironment: bundle.environment, instrumentedManifestEnvironment: manifest.environment,
+    requestImplementation: localNative(generationFixture().proposal).request,
+    observerIO: observer.io as unknown as SuccessorObserverIO,
+    filesystem: successorEntryClock(root, entryTick),
+  };
+  return { manifest, observer, dependencies };
+}
+
+async function qualifyInstrumented(root: string, bundle: SyntheticBundle,
+  clock: { mock: { timers: { tick(milliseconds: number): void } } }, tick?: () => void) {
+  const operation = m602Operation as unknown as InstrumentedOperationApi;
+  const fixture = instrumentedDependencies(root, bundle, successorObserverHarness(), tick);
+  const dependencies: Partial<InstrumentedDependenciesFixture> = { ...fixture.dependencies };
+  delete dependencies.requestImplementation;
+  const outcome = await driveSuccessor(withSuccessorRevision(() =>
+    operation.qualifyM602InstrumentedObservers(dependencies)), clock);
+  assert.equal(outcome.ok, true);
+  return { outcome, fixture };
+}
+
+function writeInstrumentedAssessment(root: string, bundle: SyntheticBundle, result: JsonRecord,
+  observation: JsonRecord): void {
+  const resultBytes = fs.readFileSync(path.join(root, result.caseLabel, 'result.json'));
+  const observationBytes = fs.readFileSync(path.join(root, result.caseLabel, 'observation.json'));
+  const finished = Date.parse(result.finishedAt);
+  const localObservation = observation.samples === null ? null : {
+    ui: { startedAt: observation.timing.ui.startedAt, finishedAt: observation.timing.ui.finishedAt, responsive: true },
+    runtime: { observedAt: observation.timing.runtime.finishedAt, ...observation.samples.runtime },
+    gpuBefore: observation.samples.gpuBefore,
+    gpuDuring: { observedAt: observation.timing.gpu.finishedAt, ...observation.samples.gpuDuring },
+    oomObserved: false,
+  };
+  const assessment = {
+    version: 'm602-instrumented-evidence-v1', caseLabel: result.caseLabel,
+    resultSha256: sha256(resultBytes), observationSha256: sha256(observationBytes), evaluator: 'primary',
+    assessedAt: new Date(finished + 60_000).toISOString(),
+    dimensions: bundle.manifest.rubric.map(({ observation: observationName }: JsonRecord, index: number) => ({
+      observation: observationName,
+      value: index === 2 ? (result.caseLabel.endsWith('-image') ? 'fail' : 'not-run') : 'pass',
+    })),
+    uncertainty: 'pass', localObservation, accepted: true,
+  };
+  fs.writeFileSync(path.join(root, result.caseLabel, 'assessment.json'), jsonBytes(assessment), { flag: 'wx' });
+}
+
+test('instrumented CLI and qualification bind the finite campaign without fallback', async t => {
+  t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: Date.parse('2026-09-22T02:00:00.000Z') });
+  assert.deepEqual(parseM602Arguments(['--qualify-instrumented-observers']),
+    { ok: true, mode: 'qualify-instrumented-observers' });
+  for (const label of caseLabels) {
+    assert.deepEqual(parseM602Arguments(['--execute-instrumented', '--case', label]),
+      { ok: true, mode: 'execute-instrumented', caseLabel: label });
+    assert.deepEqual(parseM602Arguments(['--readback-instrumented', '--case', label]),
+      { ok: true, mode: 'readback-instrumented', caseLabel: label });
+  }
+  for (const args of [
+    ['--execute-instrumented'],
+    ['--execute-instrumented', '--case', 'local-image', '--readback-instrumented'],
+    ['--qualify-instrumented-observers', '--case', 'local-image'],
+  ]) assert.deepEqual(parseM602Arguments(args), { ok: false, error: 'arguments' });
+
+  const operation = m602Operation as unknown as InstrumentedOperationApi;
+  const bundle = canonicalSyntheticBundle();
+  const missingRoot = makeRoot();
+  try {
+    prepareInstrumentedRoot(missingRoot);
+    const fixture = instrumentedDependencies(missingRoot, bundle);
+    const incomplete: Partial<InstrumentedDependenciesFixture> = { ...fixture.dependencies };
+    delete incomplete.requestImplementation;
+    delete incomplete.instrumentedManifestEnvironment;
+    const blocked = await withSuccessorRevision(() => operation.qualifyM602InstrumentedObservers(incomplete));
+    assert.equal(blocked.ok, false);
+    assert.deepEqual(fixture.observer.calls, []);
+    assert.equal(fs.existsSync(path.join(missingRoot, 'qualification.json')), false);
+  } finally { removeRoot(missingRoot); }
+
+  for (const fault of ['manifest', 'build'] as const) {
+    const root = makeRoot();
+    try {
+      prepareInstrumentedRoot(root);
+      const qualified = await qualifyInstrumented(root, bundle, t, () => t.mock.timers.tick(1));
+      assert.equal(qualified.outcome.qualification.version, 'm602-instrumented-qualification-v1');
+      assert.equal(qualified.outcome.qualification.campaign, 'm602-instrumented-v1');
+      assert.deepEqual(qualified.outcome.qualification.build.map(({ path: buildPath }: JsonRecord) => buildPath),
+        ['index.html', 'assets/index-C6L8S9Ht.css', 'assets/index-BRf9Pkds.js']);
+      const fixture = instrumentedDependencies(root, bundle, successorObserverHarness(), () => t.mock.timers.tick(1));
+      const native = controlledSuccessorNative(completionProposal('local-image'));
+      fixture.dependencies.requestImplementation = native.request;
+      if (fault === 'manifest') fixture.dependencies.instrumentedManifestEnvironment = {
+        ...fixture.manifest.environment, manifestSha256: '0'.repeat(64),
+      };
+      else fs.appendFileSync(path.join(root, 'client', 'assets', 'index-BRf9Pkds.js'), '// drift\n');
+      const outcome = await withSuccessorRevision(() =>
+        operation.executeM602InstrumentedCase('local-image', fixture.dependencies));
+      assert.equal(outcome.ok, false, fault);
+      assert.equal(native.calls.length, 0, fault);
+      assert.deepEqual(fixture.observer.calls, [], fault);
+      assert.equal(fs.existsSync(path.join(root, 'local-image')), false, fault);
+    } finally { removeRoot(root); }
+  }
+});
+
+test('instrumented campaign executes six ordered cases with null details and rejects replay', async t => {
+  t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: Date.parse('2026-09-22T03:00:00.000Z') });
+  const operation = m602Operation as unknown as InstrumentedOperationApi;
+  const root = makeRoot();
+  try {
+    prepareInstrumentedRoot(root);
+    const bundle = canonicalSyntheticBundle();
+    const qualified = await qualifyInstrumented(root, bundle, t, () => t.mock.timers.tick(1));
+    const manifest = instrumentedManifest(bundle);
+    const order: string[] = [];
+    for (const label of caseLabels) {
+      const localCase = label.startsWith('local-');
+      const fixture = instrumentedDependencies(root, bundle, successorObserverHarness(), () => t.mock.timers.tick(1));
+      const local = controlledSuccessorNative(completionProposal(label));
+      const hosted = groqNativeHarness([{ body: groqChatBody(completionProposal(label)) }]);
+      if (localCase) fixture.dependencies.requestImplementation = local.request;
+      else {
+        fixture.dependencies.requestImplementation = hosted.request;
+        fixture.dependencies.credentialIO = virtualCredentialIO().io;
+        delete fixture.dependencies.observerIO;
+      }
+      const executed = await driveSuccessor(withSuccessorRevision(() =>
+        operation.executeM602InstrumentedCase(label, fixture.dependencies)), t);
+      assert.equal(executed.ok, true, label);
+      assert.equal(executed.result.status, 'proposal', label);
+      assert.equal(executed.result.version, 'm602-instrumented-evidence-v1', label);
+      assert.equal(executed.observation.version, 'm602-instrumented-observation-v1', label);
+      assert.equal(executed.observation.campaign, 'm602-instrumented-v1', label);
+      assert.equal(executed.observation.qualificationSha256, qualified.outcome.sha256, label);
+      assert.deepEqual(executed.observation.details,
+        { integrity: 'complete', candidate: null, runtime: null }, label);
+      order.push(label);
+      writeInstrumentedAssessment(root, bundle, executed.result, executed.observation);
+      const read = await operation.readM602InstrumentedCase(label, {
+        root, packageEnvironment: bundle.environment, instrumentedManifestEnvironment: manifest.environment,
+        filesystem: { mkdirSync() { throw new Error('instrumented readback must not write'); } },
+      });
+      assert.equal(read.ok, true, label);
+      assert.deepEqual(read.observation, executed.observation, label);
+      assert.equal(read.assessment.accepted, true, label);
+    }
+    assert.deepEqual(order, caseLabels);
+    const replay = instrumentedDependencies(root, bundle, successorObserverHarness(), () => t.mock.timers.tick(1));
+    const native = controlledSuccessorNative(completionProposal('local-image'));
+    replay.dependencies.requestImplementation = native.request;
+    assert.equal((await withSuccessorRevision(() =>
+      operation.executeM602InstrumentedCase('local-image', replay.dependencies))).ok, false);
+    assert.equal(native.calls.length, 0);
+    assert.deepEqual(replay.observer.calls, []);
+  } finally { removeRoot(root); }
+});
+
+test('instrumented execution captures candidate and runtime failures without retaining supplied content', async t => {
+  t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: Date.parse('2026-09-22T04:00:00.000Z') });
+  const operation = m602Operation as unknown as InstrumentedOperationApi;
+  const bundle = canonicalSyntheticBundle();
+  for (const mode of ['local-candidate', 'local-runtime'] as const) {
+    const root = makeRoot();
+    try {
+      prepareInstrumentedRoot(root);
+      await qualifyInstrumented(root, bundle, t, () => t.mock.timers.tick(1));
+      const observer = successorObserverHarness();
+      if (mode === 'local-runtime') {
+        const runtimeRequest = observer.io.runtimeRequest;
+        observer.io.runtimeRequest = ((options: JsonRecord, callback: (response: JsonRecord) => void) =>
+          runtimeRequest(options, response => { response.statusCode = 503; callback(response); })) as typeof observer.io.runtimeRequest;
+      }
+      const fixture = instrumentedDependencies(root, bundle, observer, () => t.mock.timers.tick(1));
+      const label = 'local-image';
+      fixture.dependencies.requestImplementation = controlledSuccessorNative(
+        mode === 'local-candidate' ? { private: 'must-not-survive' } : completionProposal(label)).request;
+      const executed = await driveSuccessor(withSuccessorRevision(() =>
+        operation.executeM602InstrumentedCase(label, fixture.dependencies)), t);
+      assert.equal(executed.ok, true, mode);
+      if (mode.endsWith('candidate')) {
+        assert.equal(executed.result.status, 'failed', mode);
+        assert.equal(executed.result.error, 'response-validation', mode);
+        assert.deepEqual(executed.observation.details,
+          { integrity: 'complete', candidate: { field: 'candidate', reason: 'structure' }, runtime: null }, mode);
+      } else {
+        assert.equal(executed.result.status, 'proposal', mode);
+        assert.equal(executed.observation.timing.runtime.status, 'failed', mode);
+        assert.deepEqual(executed.observation.details,
+          { integrity: 'complete', candidate: null, runtime: 'http-metadata' }, mode);
+      }
+      assert.equal(JSON.stringify(executed.observation).includes('must-not-survive'), false, mode);
+      const next = instrumentedDependencies(root, bundle, successorObserverHarness(), () => t.mock.timers.tick(1));
+      const nextNative = controlledSuccessorNative(completionProposal('local-label'));
+      next.dependencies.requestImplementation = nextNative.request;
+      const blocked = await withSuccessorRevision(() =>
+        operation.executeM602InstrumentedCase('local-label', next.dependencies));
+      assert.equal(blocked.ok, false, `${mode}:first-failure-stop`);
+      assert.equal(nextNative.calls.length, 0, `${mode}:first-failure-stop`);
+      assert.deepEqual(next.observer.calls, [], `${mode}:first-failure-stop`);
+      assert.equal(fs.existsSync(path.join(root, 'local-label')), false, `${mode}:first-failure-stop`);
+    } finally { removeRoot(root); }
+  }
+});
+
+test('instrumented detail collector closes duplicates and readback rejects detail tampering', async t => {
+  const diagnosticModulePath: string = './helpers/m602-instrumented-diagnostics.ts';
+  const diagnostics = await import(diagnosticModulePath) as JsonRecord;
+  const accepted = diagnostics.createM602InstrumentedDiagnosticCollector();
+  accepted.onCandidate({ field: 'candidate', reason: 'structure' });
+  accepted.onCandidate({ field: 'candidate', reason: 'structure' });
+  accepted.onRuntime('http-metadata');
+  accepted.onRuntime('http-metadata');
+  const acceptedDetails = accepted.close();
+  assert.deepEqual(acceptedDetails, { integrity: 'complete', candidate: { field: 'candidate', reason: 'structure' },
+    runtime: 'http-metadata' });
+  assert.equal(Object.isFrozen(acceptedDetails), true);
+  assert.equal(Object.isFrozen(acceptedDetails.candidate), true);
+
+  for (const apply of [
+    (collector: JsonRecord) => { collector.onCandidate({ field: 'candidate', reason: 'structure' }); collector.onCandidate({ field: 'type', reason: 'fixed-value' }); },
+    (collector: JsonRecord) => { collector.onRuntime('http-metadata'); collector.onRuntime('body-limit'); },
+    (collector: JsonRecord) => collector.onCandidate({ field: 'private-field', reason: 'private-reason' }),
+    (collector: JsonRecord) => collector.onRuntime('private-runtime-code'),
+  ]) {
+    const collector = diagnostics.createM602InstrumentedDiagnosticCollector();
+    apply(collector);
+    assert.deepEqual(collector.close(), { integrity: 'failed', candidate: null, runtime: null });
+  }
+
+  t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: Date.parse('2026-09-22T05:00:00.000Z') });
+  const operation = m602Operation as unknown as InstrumentedOperationApi;
+  const bundle = canonicalSyntheticBundle();
+  const root = makeRoot();
+  try {
+    prepareInstrumentedRoot(root);
+    await qualifyInstrumented(root, bundle, t, () => t.mock.timers.tick(1));
+    const fixture = instrumentedDependencies(root, bundle, successorObserverHarness(), () => t.mock.timers.tick(1));
+    fixture.dependencies.requestImplementation = controlledSuccessorNative(completionProposal('local-image')).request;
+    const executed = await driveSuccessor(withSuccessorRevision(() =>
+      operation.executeM602InstrumentedCase('local-image', fixture.dependencies)), t);
+    assert.equal(executed.ok, true);
+    const observationPath = path.join(root, 'local-image', 'observation.json');
+    const tampered = JSON.parse(fs.readFileSync(observationPath, 'utf8')) as JsonRecord;
+    tampered.details.candidate = { field: 'private-field', reason: 'private-reason' };
+    fs.writeFileSync(observationPath, jsonBytes(tampered));
+    assert.deepEqual(await operation.readM602InstrumentedCase('local-image', {
+      root, packageEnvironment: bundle.environment,
+      instrumentedManifestEnvironment: instrumentedManifest(bundle).environment,
+    }), { ok: false, error: 'evidence-blocked' });
+  } finally { removeRoot(root); }
+});
+
+test('instrumented aborted runtime sample preserves its durable observation and stop', async t => {
+  t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: Date.parse('2026-09-22T06:00:00.000Z') });
+  const operation = m602Operation as unknown as InstrumentedOperationApi;
+  const bundle = canonicalSyntheticBundle();
+  const root = makeRoot();
+  try {
+    prepareInstrumentedRoot(root);
+    await qualifyInstrumented(root, bundle, t, () => t.mock.timers.tick(1));
+    const observer = successorObserverHarness();
+    let runtimeRequests = 0;
+    let runtimeDestroys = 0;
+    observer.io.runtimeRequest = ((_options: JsonRecord, _callback: (response: JsonRecord) => void) => {
+      runtimeRequests++;
+      const handle = new SuccessorEventEmitter() as JsonRecord;
+      const socket = new SuccessorEventEmitter() as JsonRecord;
+      socket.destroyed = false;
+      socket.destroy = () => { if (!socket.destroyed) { socket.destroyed = true; socket.emit('close'); } return socket; };
+      Object.defineProperty(handle, 'socket', { value: socket });
+      handle.setTimeout = () => handle;
+      handle.end = () => handle;
+      handle.destroy = () => {
+        runtimeDestroys++;
+        handle.emit('close');
+        socket.destroy();
+        return handle;
+      };
+      return handle;
+    }) as typeof observer.io.runtimeRequest;
+    const fixture = instrumentedDependencies(root, bundle, observer, () => t.mock.timers.tick(1));
+    const native = controlledSuccessorNative(completionProposal('local-image'));
+    fixture.dependencies.requestImplementation = native.request;
+    const executed = await driveSuccessor(withSuccessorRevision(() =>
+      operation.executeM602InstrumentedCase('local-image', fixture.dependencies)), t);
+
+    assert.equal(runtimeRequests, 1, 'runtime sample must start before generation settles');
+    assert.equal(runtimeDestroys, 1, 'pending runtime request must be owned and destroyed once');
+    const storedResult = JSON.parse(fs.readFileSync(path.join(root, 'local-image', 'result.json'), 'utf8')) as JsonRecord;
+    assert.equal(storedResult.status, 'proposal', 'fixture must complete valid generation before observation publication');
+    assert.equal(executed.ok, true, 'aborted runtime timing must still publish a durable observation');
+    assert.equal(executed.result.status, 'proposal');
+    assert.equal(executed.observation.timing.runtime.status, 'aborted');
+    assert.equal(executed.observation.samples.runtime, null);
+    assert.deepEqual(executed.observation.details,
+      { integrity: 'complete', candidate: null, runtime: null });
+    assert.deepEqual(executed.observation.cleanup, {
+      ui: 'complete', runtime: 'complete', gpu: 'complete', application: 'complete', browser: 'complete', scratch: 'complete',
+    });
+    const evidence = await import('./helpers/m602-successor-evidence.ts');
+    assert.equal(evidence.instrumentedObservationQualified(executed.observation), false);
+    const read = await operation.readM602InstrumentedCase('local-image', {
+      root, packageEnvironment: bundle.environment,
+      instrumentedManifestEnvironment: instrumentedManifest(bundle).environment,
+    });
+    assert.equal(read.ok, true);
+    assert.deepEqual(read.observation, executed.observation);
+    assert.equal(read.assessment, null);
+
+    const next = instrumentedDependencies(root, bundle, successorObserverHarness(), () => t.mock.timers.tick(1));
+    const nextNative = controlledSuccessorNative(completionProposal('local-label'));
+    next.dependencies.requestImplementation = nextNative.request;
+    const blocked = await withSuccessorRevision(() =>
+      operation.executeM602InstrumentedCase('local-label', next.dependencies));
+    assert.equal(blocked.ok, false);
+    assert.equal(nextNative.calls.length, 0);
+    assert.deepEqual(next.observer.calls, []);
+    assert.equal(fs.existsSync(path.join(root, 'local-label')), false);
+  } finally { removeRoot(root); }
+});
+
+// M6-02 repaired campaign. These named exports are the accepted S2 public boundary;
+// the complete assertions remain blocked until Green adds them to the existing finite owners.
+import { loadM602RepairedPackage } from './helpers/m602-package.ts';
+import { qualifyM602RepairedObservers } from './helpers/m602-operation.ts';
+import { repairedObservationQualified } from './helpers/m602-successor-evidence.ts';
+import { loadM602PromptPackage } from './helpers/m602-package.ts';
+import { qualifyM602PromptObservers } from './helpers/m602-operation.ts';
+import { promptObservationQualified } from './helpers/m602-successor-evidence.ts';
+import { PROMPT_CASE_GROQ_CONFIGURATION, PROMPT_CASE_QWEN_CONFIGURATION } from '../src/server/generation/generation-case-request.ts';
+
+void qualifyM602RepairedObservers;
+void qualifyM602PromptObservers;
+
+const repairedManifestPath = 'evaluation/m602-repaired-v1.json';
+type RepairedDependenciesFixture = Omit<InstrumentedDependenciesFixture, 'instrumentedManifestEnvironment'> & {
+  repairedManifestEnvironment: SuccessorPackageEnvironment;
+};
+type RepairedOperationApi = {
+  qualifyM602RepairedObservers(dependencies?: Partial<RepairedDependenciesFixture>): Promise<JsonRecord>;
+  executeM602RepairedCase(caseLabel: typeof caseLabels[number], dependencies?: Partial<RepairedDependenciesFixture>): Promise<JsonRecord>;
+  readM602RepairedCase(caseLabel: typeof caseLabels[number], dependencies?: Partial<RepairedDependenciesFixture>): Promise<JsonRecord>;
+};
+
+function repairedManifest(bundle: SyntheticBundle) {
+  const packages = caseLabels.map(caseLabel => {
+    const loaded = loadM602RepairedPackage(caseLabel, bundle.environment);
+    assert.equal(loaded.status, 'ready', caseLabel);
+    if (loaded.status !== 'ready') throw new Error(`Synthetic repaired package rejected: ${caseLabel}`);
+    return loaded.value;
+  });
+  const profiles = ['informative-image-alt', 'form-input-label', 'text-contrast'] as const;
+  const value = {
+    ...instrumentedManifest(bundle).value,
+    version: 'm602-repaired-v1',
+    frozenAt: '2026-09-22T02:37:31.000Z',
+    observationPolicy: {
+      version: 'm602-loading-observation-v2', startDelayMs: 1, deadlineMs: 5000,
+      cleanupDeadlineMs: 5000, qualificationWindowMs: 7000,
+      runtimeMaximumAttempts: 120, runtimeIntervalMs: 1000, runtimeAcquisitionDeadlineMs: 120000,
+    },
+    schemaPolicy: {
+      version: 'm602-case-schema-v2', serialization: 'compact-json-utf8',
+      schemas: profiles.map((profile, index) => ({ profile, sha256: packages[index]!.caseSchemaSha256 })),
+      wireBindings: packages.map((packageValue, index) => ({
+        caseLabel: caseLabels[index], bytes: packageValue.wire.bytes, sha256: packageValue.wire.sha256,
+      })),
+    },
+  };
+  const bytes = jsonBytes(value);
+  return Object.freeze({ value: Object.freeze(value), bytes, packages: Object.freeze(packages), environment: Object.freeze({
+    manifestSha256: sha256(bytes),
+    readBytes(relativePath: string) {
+      if (relativePath === repairedManifestPath) return bytes;
+      return bundle.environment.readBytes(relativePath);
+    },
+  }) });
+}
+
+function prepareRepairedRoot(root: string): void {
+  prepareSuccessorRoot(root);
+  fs.renameSync(path.join(root, 'client', 'assets', 'index-C7OtU_Ke.js'),
+    path.join(root, 'client', 'assets', 'index-Bdo3BCH2.js'));
+}
+
+function preparePromptRoot(root: string): void {
+  prepareRepairedRoot(root);
+  fs.renameSync(path.join(root, 'client', 'assets', 'index-Bdo3BCH2.js'),
+    path.join(root, 'client', 'assets', 'index-BT7UcryN.js'));
+}
+
+function repairedDependencies(root: string, bundle: SyntheticBundle,
+  observer = successorObserverHarness(), entryTick?: () => void) {
+  const manifest = repairedManifest(bundle);
+  const dependencies: RepairedDependenciesFixture = {
+    root, packageEnvironment: bundle.environment, repairedManifestEnvironment: manifest.environment,
+    requestImplementation: localNative(generationFixture().proposal).request,
+    observerIO: observer.io as unknown as SuccessorObserverIO,
+    filesystem: successorEntryClock(root, entryTick),
+  };
+  return { manifest, observer, dependencies };
+}
+
+async function qualifyRepaired(root: string, bundle: SyntheticBundle,
+  clock: { mock: { timers: { tick(milliseconds: number): void } }, }, tick?: () => void) {
+  const operation = m602Operation as unknown as RepairedOperationApi;
+  const fixture = repairedDependencies(root, bundle, successorObserverHarness(), tick);
+  const dependencies: Partial<RepairedDependenciesFixture> = { ...fixture.dependencies };
+  delete dependencies.requestImplementation;
+  const outcome = await driveSuccessor(withSuccessorRevision(() =>
+    operation.qualifyM602RepairedObservers(dependencies)), clock);
+  assert.equal(outcome.ok, true);
+  return { outcome, fixture };
+}
+
+function writeRepairedAssessment(root: string, bundle: SyntheticBundle, result: JsonRecord,
+  observation: JsonRecord): void {
+  const resultBytes = fs.readFileSync(path.join(root, result.caseLabel, 'result.json'));
+  const observationBytes = fs.readFileSync(path.join(root, result.caseLabel, 'observation.json'));
+  const finished = Date.parse(result.finishedAt);
+  const localObservation = observation.samples === null ? null : {
+    ui: { startedAt: observation.timing.ui.startedAt, finishedAt: observation.timing.ui.finishedAt, responsive: true },
+    runtime: { observedAt: observation.timing.runtime.finishedAt, ...observation.samples.runtime },
+    gpuBefore: observation.samples.gpuBefore,
+    gpuDuring: { observedAt: observation.timing.gpu.finishedAt, ...observation.samples.gpuDuring },
+    oomObserved: false,
+  };
+  const assessment = {
+    version: 'm602-repaired-evidence-v1', caseLabel: result.caseLabel,
+    resultSha256: sha256(resultBytes), observationSha256: sha256(observationBytes), evaluator: 'primary',
+    assessedAt: new Date(finished + 60_000).toISOString(),
+    dimensions: bundle.manifest.rubric.map(({ observation: observationName }: JsonRecord, index: number) => ({
+      observation: observationName,
+      value: index === 2 ? (result.caseLabel.endsWith('-image') ? 'fail' : 'not-run') : 'pass',
+    })),
+    uncertainty: 'pass', localObservation, accepted: true,
+  };
+  fs.writeFileSync(path.join(root, result.caseLabel, 'assessment.json'), jsonBytes(assessment), { flag: 'wx' });
+}
+
+test('repaired package tables, CLI and qualification bind derived identities without fallback', async t => {
+  t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: Date.parse('2026-09-22T07:00:00.000Z') });
+  assert.deepEqual(parseM602Arguments(['--qualify-repaired-observers']),
+    { ok: true, mode: 'qualify-repaired-observers' });
+  for (const label of caseLabels) {
+    assert.deepEqual(parseM602Arguments(['--execute-repaired', '--case', label]),
+      { ok: true, mode: 'execute-repaired', caseLabel: label });
+    assert.deepEqual(parseM602Arguments(['--readback-repaired', '--case', label]),
+      { ok: true, mode: 'readback-repaired', caseLabel: label });
+  }
+  for (const args of [
+    ['--execute-repaired'],
+    ['--execute-repaired', '--case', 'local-image', '--readback-repaired'],
+    ['--qualify-repaired-observers', '--case', 'local-image'],
+  ]) assert.deepEqual(parseM602Arguments(args), { ok: false, error: 'arguments' });
+
+  const operation = m602Operation as unknown as RepairedOperationApi;
+  const bundle = canonicalSyntheticBundle();
+  const root = makeRoot();
+  try {
+    prepareRepairedRoot(root);
+    const qualified = await qualifyRepaired(root, bundle, t, () => t.mock.timers.tick(1));
+    assert.equal(qualified.outcome.qualification.version, 'm602-repaired-qualification-v1');
+    assert.equal(qualified.outcome.qualification.campaign, 'm602-repaired-v1');
+    assert.equal(qualified.outcome.qualification.runtime, 'not-exercised');
+    assert.deepEqual(qualified.outcome.qualification.build.map(({ path: buildPath }: JsonRecord) => buildPath),
+      ['index.html', 'assets/index-C6L8S9Ht.css', 'assets/index-Bdo3BCH2.js']);
+    assert.deepEqual(qualified.fixture.manifest.value.schemaPolicy.schemas,
+      qualified.fixture.manifest.packages.slice(0, 3).map((packageValue, index) => ({
+        profile: ['informative-image-alt', 'form-input-label', 'text-contrast'][index],
+        sha256: packageValue.caseSchemaSha256,
+      })));
+    assert.deepEqual(qualified.fixture.manifest.value.schemaPolicy.wireBindings,
+      qualified.fixture.manifest.packages.map((packageValue, index) => ({
+        caseLabel: caseLabels[index], bytes: packageValue.wire.bytes, sha256: packageValue.wire.sha256,
+      })));
+  } finally { removeRoot(root); }
+
+  const rejectedRoot = makeRoot();
+  try {
+    prepareRepairedRoot(rejectedRoot);
+    const fixture = repairedDependencies(rejectedRoot, bundle);
+    const tampered = structuredClone(fixture.manifest.value) as JsonRecord;
+    tampered.schemaPolicy.wireBindings[0].sha256 = '0'.repeat(64);
+    const bytes = jsonBytes(tampered);
+    const environment = { manifestSha256: sha256(bytes), readBytes(relativePath: string) {
+      if (relativePath === repairedManifestPath) return bytes;
+      return bundle.environment.readBytes(relativePath);
+    } };
+    const dependencies: Partial<RepairedDependenciesFixture> = {
+      ...fixture.dependencies, repairedManifestEnvironment: environment,
+    };
+    delete dependencies.requestImplementation;
+    const blocked = await withSuccessorRevision(() => operation.qualifyM602RepairedObservers(dependencies));
+    assert.equal(blocked.ok, false);
+    assert.deepEqual(fixture.observer.calls, []);
+    assert.equal(fs.existsSync(path.join(rejectedRoot, 'qualification.json')), false);
+  } finally { removeRoot(rejectedRoot); }
+});
+
+test('repaired campaign executes and reads six ordered cases with the same authenticated package and wire', async t => {
+  t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: Date.parse('2026-09-22T08:00:00.000Z') });
+  const operation = m602Operation as unknown as RepairedOperationApi;
+  const bundle = canonicalSyntheticBundle();
+  const root = makeRoot();
+  try {
+    prepareRepairedRoot(root);
+    const qualified = await qualifyRepaired(root, bundle, t, () => t.mock.timers.tick(1));
+    const manifest = repairedManifest(bundle);
+    const order: string[] = [];
+    for (const label of caseLabels) {
+      const fixture = repairedDependencies(root, bundle, successorObserverHarness(), () => t.mock.timers.tick(1));
+      const local = controlledSuccessorNative(completionProposal(label));
+      const hosted = groqNativeHarness([{ body: groqChatBody(completionProposal(label)) }]);
+      if (label.startsWith('local-')) fixture.dependencies.requestImplementation = local.request;
+      else {
+        fixture.dependencies.requestImplementation = hosted.request;
+        fixture.dependencies.credentialIO = virtualCredentialIO().io;
+        delete fixture.dependencies.observerIO;
+      }
+      const executed = await driveSuccessor(withSuccessorRevision(() =>
+        operation.executeM602RepairedCase(label, fixture.dependencies)), t);
+      assert.equal(executed.ok, true, label);
+      assert.equal(executed.result.status, 'proposal', label);
+      assert.equal(executed.result.version, 'm602-repaired-evidence-v1', label);
+      assert.equal(executed.observation.version, 'm602-repaired-observation-v1', label);
+      assert.equal(executed.observation.campaign, 'm602-repaired-v1', label);
+      assert.equal(executed.observation.qualificationSha256, qualified.outcome.sha256, label);
+      assert.deepEqual(executed.observation.details,
+        { integrity: 'complete', candidate: null, runtime: null }, label);
+      assert.equal(repairedObservationQualified(executed.observation), true, label);
+      order.push(label);
+      writeRepairedAssessment(root, bundle, executed.result, executed.observation);
+      const read = await operation.readM602RepairedCase(label, {
+        root, packageEnvironment: bundle.environment, repairedManifestEnvironment: manifest.environment,
+        filesystem: { mkdirSync() { throw new Error('repaired readback must not write'); } },
+      });
+      assert.equal(read.ok, true, label);
+      assert.deepEqual(read.observation, executed.observation, label);
+      assert.equal(read.assessment.accepted, true, label);
+    }
+    assert.deepEqual(order, caseLabels);
+  } finally { removeRoot(root); }
+});
+
+test('repaired campaign stops before the second case after the first invalid generation', async t => {
+  t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: Date.parse('2026-09-22T09:00:00.000Z') });
+  const operation = m602Operation as unknown as RepairedOperationApi;
+  const bundle = canonicalSyntheticBundle();
+  const root = makeRoot();
+  try {
+    prepareRepairedRoot(root);
+    await qualifyRepaired(root, bundle, t, () => t.mock.timers.tick(1));
+    const first = repairedDependencies(root, bundle, successorObserverHarness(), () => t.mock.timers.tick(1));
+    first.dependencies.requestImplementation = controlledSuccessorNative({ private: 'invalid candidate' }).request;
+    const failed = await driveSuccessor(withSuccessorRevision(() =>
+      operation.executeM602RepairedCase('local-image', first.dependencies)), t);
+    assert.equal(failed.ok, true);
+    assert.equal(failed.result.status, 'failed');
+    assert.equal(failed.result.error, 'response-validation');
+
+    const next = repairedDependencies(root, bundle, successorObserverHarness(), () => t.mock.timers.tick(1));
+    const nextNative = controlledSuccessorNative(completionProposal('local-label'));
+    next.dependencies.requestImplementation = nextNative.request;
+    const blocked = await withSuccessorRevision(() =>
+      operation.executeM602RepairedCase('local-label', next.dependencies));
+    assert.equal(blocked.ok, false);
+    assert.equal(nextNative.calls.length, 0);
+    assert.deepEqual(next.observer.calls, []);
+    assert.equal(fs.existsSync(path.join(root, 'local-label')), false);
+  } finally { removeRoot(root); }
+});
+
+// M6-02 prompt campaign. These imports intentionally establish the first-module Red boundary;
+// the assertions below remain blocked until Green adds the exact finite prompt owners.
+const promptManifestPath = 'evaluation/m602-prompt-v1.json';
+const promptInstructionsPath = 'evaluation/m602-grounded-instructions-v1.txt';
+const promptInstructionsBytes = fs.readFileSync(path.join(repo, promptInstructionsPath));
+const promptInstructionsText = promptInstructionsBytes.toString('utf8');
+const promptInstructionsSha256 = 'b04d25f49a35a1dea4b12abb30e0cf3b1ee47f48e5208f6efed5fdfe05b36aa6';
+const promptManifestSha256 = 'd6e5767e82b51531b9fb1a823d38ac0fa1684c21764cef2eb7cf162e53afa15d';
+type PromptDependenciesFixture = Omit<InstrumentedDependenciesFixture, 'instrumentedManifestEnvironment'> & {
+  promptManifestEnvironment: SuccessorPackageEnvironment;
+};
+type PromptOperationApi = {
+  qualifyM602PromptObservers(dependencies?: Partial<PromptDependenciesFixture>): Promise<JsonRecord>;
+  executeM602PromptCase(caseLabel: typeof caseLabels[number], dependencies?: Partial<PromptDependenciesFixture>): Promise<JsonRecord>;
+  readM602PromptCase(caseLabel: typeof caseLabels[number], dependencies?: Partial<PromptDependenciesFixture>): Promise<JsonRecord>;
+};
+
+function promptPackageEnvironment(bundle: SyntheticBundle): SuccessorPackageEnvironment {
+  return Object.freeze({
+    manifestSha256: bundle.environment.manifestSha256,
+    readBytes(relativePath: string) {
+      if (relativePath === promptInstructionsPath) return promptInstructionsBytes;
+      return bundle.environment.readBytes(relativePath);
+    },
+  });
+}
+
+function promptManifest(bundle: SyntheticBundle) {
+  const packageEnvironment = promptPackageEnvironment(bundle);
+  const packages = caseLabels.map(caseLabel => {
+    const loaded = loadM602PromptPackage(caseLabel, packageEnvironment);
+    assert.equal(loaded.status, 'ready', caseLabel);
+    if (loaded.status !== 'ready') throw new Error(`Synthetic prompt package rejected: ${caseLabel}`);
+    return loaded.value;
+  });
+  const repaired = repairedManifest(bundle).value;
+  const profiles = ['informative-image-alt', 'form-input-label', 'text-contrast'] as const;
+  const value = {
+    ...repaired,
+    version: 'm602-prompt-v1',
+    frozenAt: '2026-09-22T14:56:45.922Z',
+    schemaPolicy: {
+      version: 'm602-case-schema-v2', serialization: 'compact-json-utf8',
+      schemas: profiles.map((profile, index) => ({ profile, sha256: packages[index]!.caseSchemaSha256 })),
+      wireBindings: packages.map((packageValue, index) => ({
+        caseLabel: caseLabels[index], bytes: packageValue.wire.bytes, sha256: packageValue.wire.sha256,
+      })),
+    },
+    promptPolicy: {
+      version: 'm602-grounded-instructions-v1', path: promptInstructionsPath,
+      sha256: promptInstructionsSha256,
+    },
+  };
+  const bytes = jsonBytes(value);
+  return Object.freeze({ value: Object.freeze(value), bytes, packages: Object.freeze(packages), packageEnvironment,
+    environment: Object.freeze({
+      manifestSha256: sha256(bytes),
+      readBytes(relativePath: string) {
+        if (relativePath === promptManifestPath) return bytes;
+        return packageEnvironment.readBytes(relativePath);
+      },
+    }) });
+}
+
+function promptDependencies(root: string, bundle: SyntheticBundle,
+  observer = successorObserverHarness(), entryTick?: () => void) {
+  const manifest = promptManifest(bundle);
+  const dependencies: PromptDependenciesFixture = {
+    root, packageEnvironment: manifest.packageEnvironment, promptManifestEnvironment: manifest.environment,
+    requestImplementation: localNative(generationFixture().proposal).request,
+    observerIO: observer.io as unknown as SuccessorObserverIO,
+    filesystem: successorEntryClock(root, entryTick),
+  };
+  return { manifest, observer, dependencies };
+}
+
+async function qualifyPrompt(root: string, bundle: SyntheticBundle,
+  clock: { mock: { timers: { tick(milliseconds: number): void } }, }, tick?: () => void) {
+  const operation = m602Operation as unknown as PromptOperationApi;
+  const fixture = promptDependencies(root, bundle, successorObserverHarness(), tick);
+  const dependencies: Partial<PromptDependenciesFixture> = { ...fixture.dependencies };
+  delete dependencies.requestImplementation;
+  const outcome = await driveSuccessor(withSuccessorRevision(() =>
+    operation.qualifyM602PromptObservers(dependencies)), clock);
+  assert.equal(outcome.ok, true);
+  return { outcome, fixture };
+}
+
+function writePromptAssessment(root: string, bundle: SyntheticBundle, result: JsonRecord,
+  observation: JsonRecord): void {
+  const resultBytes = fs.readFileSync(path.join(root, result.caseLabel, 'result.json'));
+  const observationBytes = fs.readFileSync(path.join(root, result.caseLabel, 'observation.json'));
+  const finished = Date.parse(result.finishedAt);
+  const localObservation = observation.samples === null ? null : {
+    ui: { startedAt: observation.timing.ui.startedAt, finishedAt: observation.timing.ui.finishedAt, responsive: true },
+    runtime: { observedAt: observation.timing.runtime.finishedAt, ...observation.samples.runtime },
+    gpuBefore: observation.samples.gpuBefore,
+    gpuDuring: { observedAt: observation.timing.gpu.finishedAt, ...observation.samples.gpuDuring },
+    oomObserved: false,
+  };
+  const assessment = {
+    version: 'm602-prompt-evidence-v1', caseLabel: result.caseLabel,
+    resultSha256: sha256(resultBytes), observationSha256: sha256(observationBytes), evaluator: 'primary',
+    assessedAt: new Date(finished + 60_000).toISOString(),
+    dimensions: bundle.manifest.rubric.map(({ observation: observationName }: JsonRecord, index: number) => ({
+      observation: observationName,
+      value: index === 2 ? (result.caseLabel.endsWith('-image') ? 'fail' : 'not-run') : 'pass',
+    })),
+    uncertainty: 'pass', localObservation, accepted: true,
+  };
+  fs.writeFileSync(path.join(root, result.caseLabel, 'assessment.json'), jsonBytes(assessment), { flag: 'wx' });
+}
+
+test('prompt package, manifest, CLI and qualification authenticate exact frozen identities', async t => {
+  t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: Date.parse('2026-09-22T15:00:00.000Z') });
+  assert.equal(sha256(promptInstructionsBytes), promptInstructionsSha256);
+  const frozenManifestBytes = fs.readFileSync(path.join(repo, promptManifestPath));
+  const frozenManifest = JSON.parse(frozenManifestBytes.toString('utf8')) as JsonRecord;
+  assert.equal(sha256(frozenManifestBytes), promptManifestSha256);
+  assert.deepEqual(frozenManifest.promptPolicy, {
+    version: 'm602-grounded-instructions-v1', path: promptInstructionsPath, sha256: promptInstructionsSha256,
+  });
+  assert.deepEqual(parseM602Arguments(['--qualify-prompt-observers']),
+    { ok: true, mode: 'qualify-prompt-observers' });
+  for (const label of caseLabels) {
+    assert.deepEqual(parseM602Arguments(['--execute-prompt', '--case', label]),
+      { ok: true, mode: 'execute-prompt', caseLabel: label });
+    assert.deepEqual(parseM602Arguments(['--readback-prompt', '--case', label]),
+      { ok: true, mode: 'readback-prompt', caseLabel: label });
+    const defaultPackage = loadM602PromptPackage(label);
+    assert.equal(defaultPackage.status, 'ready', label);
+    if (defaultPackage.status === 'ready') {
+      assert.equal(defaultPackage.value.identities.promptInstructionsSha256, promptInstructionsSha256, label);
+      assert.notEqual(defaultPackage.value.identities.instructionsSha256,
+        defaultPackage.value.identities.promptInstructionsSha256, label);
+      const configuration = label.startsWith('local-')
+        ? PROMPT_CASE_QWEN_CONFIGURATION : PROMPT_CASE_GROQ_CONFIGURATION;
+      assert.equal(defaultPackage.value.createRequest(configuration).messages[0]!.content,
+        promptInstructionsText, label);
+      const binding = frozenManifest.schemaPolicy.wireBindings.find((entry: JsonRecord) => entry.caseLabel === label);
+      assert.deepEqual(defaultPackage.value.wire, { bytes: binding.bytes, sha256: binding.sha256 }, label);
+    }
+  }
+  for (const args of [
+    ['--execute-prompt'],
+    ['--execute-prompt', '--case', 'local-image', '--readback-prompt'],
+    ['--qualify-prompt-observers', '--case', 'local-image'],
+  ]) assert.deepEqual(parseM602Arguments(args), { ok: false, error: 'arguments' });
+
+  const operation = m602Operation as unknown as PromptOperationApi;
+  const bundle = canonicalSyntheticBundle();
+  const root = makeRoot();
+  try {
+    preparePromptRoot(root);
+    const qualified = await qualifyPrompt(root, bundle, t, () => t.mock.timers.tick(1));
+    assert.equal(qualified.outcome.qualification.version, 'm602-prompt-qualification-v1');
+    assert.equal(qualified.outcome.qualification.campaign, 'm602-prompt-v1');
+    assert.equal(qualified.outcome.qualification.runtime, 'not-exercised');
+    assert.deepEqual(qualified.fixture.manifest.value.schemaPolicy.wireBindings,
+      qualified.fixture.manifest.packages.map((packageValue, index) => ({
+        caseLabel: caseLabels[index], bytes: packageValue.wire.bytes, sha256: packageValue.wire.sha256,
+      })));
+  } finally { removeRoot(root); }
+
+  const packageEnvironment = promptPackageEnvironment(bundle);
+  const changedInstructions = Uint8Array.from(promptInstructionsBytes);
+  changedInstructions[0] = changedInstructions[0]! ^ 1;
+  const tamperedPackage = loadM602PromptPackage('local-image', {
+    ...packageEnvironment,
+    readBytes(relativePath: string) {
+      if (relativePath === promptInstructionsPath) return changedInstructions;
+      return bundle.environment.readBytes(relativePath);
+    },
+  });
+  assert.notEqual(tamperedPackage.status, 'ready');
+
+  const rejectedRoot = makeRoot();
+  try {
+    preparePromptRoot(rejectedRoot);
+    const fixture = promptDependencies(rejectedRoot, bundle);
+    const tampered = structuredClone(fixture.manifest.value) as JsonRecord;
+    tampered.promptPolicy.sha256 = '0'.repeat(64);
+    const bytes = jsonBytes(tampered);
+    const environment = { manifestSha256: sha256(bytes), readBytes(relativePath: string) {
+      if (relativePath === promptManifestPath) return bytes;
+      return fixture.manifest.packageEnvironment.readBytes(relativePath);
+    } };
+    const dependencies: Partial<PromptDependenciesFixture> = {
+      ...fixture.dependencies, promptManifestEnvironment: environment,
+    };
+    delete dependencies.requestImplementation;
+    const blocked = await withSuccessorRevision(() => operation.qualifyM602PromptObservers(dependencies));
+    assert.equal(blocked.ok, false);
+    assert.deepEqual(fixture.observer.calls, []);
+    assert.equal(fs.existsSync(path.join(rejectedRoot, 'qualification.json')), false);
+  } finally { removeRoot(rejectedRoot); }
+});
+
+test('prompt campaign executes and reads six ordered cases with exact authenticated system bytes', async t => {
+  t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: Date.parse('2026-09-22T16:00:00.000Z') });
+  const operation = m602Operation as unknown as PromptOperationApi;
+  const bundle = canonicalSyntheticBundle();
+  const root = makeRoot();
+  try {
+    preparePromptRoot(root);
+    const qualified = await qualifyPrompt(root, bundle, t, () => t.mock.timers.tick(1));
+    const manifest = promptManifest(bundle);
+    const order: string[] = [];
+    for (const label of caseLabels) {
+      const fixture = promptDependencies(root, bundle, successorObserverHarness(), () => t.mock.timers.tick(1));
+      const local = controlledSuccessorNative(completionProposal(label));
+      const hosted = groqNativeHarness([{ body: groqChatBody(completionProposal(label)) }]);
+      if (label.startsWith('local-')) fixture.dependencies.requestImplementation = local.request;
+      else {
+        fixture.dependencies.requestImplementation = hosted.request;
+        fixture.dependencies.credentialIO = virtualCredentialIO().io;
+        delete fixture.dependencies.observerIO;
+      }
+      const executed = await driveSuccessor(withSuccessorRevision(() =>
+        operation.executeM602PromptCase(label, fixture.dependencies)), t);
+      assert.equal(executed.ok, true, label);
+      assert.equal(executed.result.status, 'proposal', label);
+      assert.equal(executed.result.version, 'm602-prompt-evidence-v1', label);
+      assert.equal(executed.observation.version, 'm602-prompt-observation-v1', label);
+      assert.equal(executed.observation.campaign, 'm602-prompt-v1', label);
+      assert.equal(executed.observation.qualificationSha256, qualified.outcome.sha256, label);
+      assert.deepEqual(executed.observation.details,
+        { integrity: 'complete', candidate: null, runtime: null }, label);
+      assert.equal(promptObservationQualified(executed.observation), true, label);
+      const nativeBody = label.startsWith('local-')
+        ? local.calls[3]!.body
+        : hosted.calls[0]!.body.toString('utf8');
+      assert.equal(JSON.parse(nativeBody).messages[0].content, promptInstructionsText, label);
+      const packageValue = manifest.packages[caseLabels.indexOf(label)]!;
+      assert.deepEqual(executed.result.wire, packageValue.wire, label);
+      order.push(label);
+      writePromptAssessment(root, bundle, executed.result, executed.observation);
+      const read = await operation.readM602PromptCase(label, {
+        root, packageEnvironment: manifest.packageEnvironment, promptManifestEnvironment: manifest.environment,
+        filesystem: { mkdirSync() { throw new Error('prompt readback must not write'); } },
+      });
+      assert.equal(read.ok, true, label);
+      assert.deepEqual(read.observation, executed.observation, label);
+      assert.equal(read.assessment.accepted, true, label);
+    }
+    assert.deepEqual(order, caseLabels);
+  } finally { removeRoot(root); }
+});
+
+test('prompt campaign stops before the second case after the first invalid generation', async t => {
+  t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: Date.parse('2026-09-22T17:00:00.000Z') });
+  const operation = m602Operation as unknown as PromptOperationApi;
+  const bundle = canonicalSyntheticBundle();
+  const root = makeRoot();
+  try {
+    preparePromptRoot(root);
+    await qualifyPrompt(root, bundle, t, () => t.mock.timers.tick(1));
+    const first = promptDependencies(root, bundle, successorObserverHarness(), () => t.mock.timers.tick(1));
+    first.dependencies.requestImplementation = controlledSuccessorNative({ private: 'invalid candidate' }).request;
+    const failed = await driveSuccessor(withSuccessorRevision(() =>
+      operation.executeM602PromptCase('local-image', first.dependencies)), t);
+    assert.equal(failed.ok, true);
+    assert.equal(failed.result.status, 'failed');
+    assert.equal(failed.result.error, 'response-validation');
+
+    const next = promptDependencies(root, bundle, successorObserverHarness(), () => t.mock.timers.tick(1));
+    const nextNative = controlledSuccessorNative(completionProposal('local-label'));
+    next.dependencies.requestImplementation = nextNative.request;
+    const blocked = await withSuccessorRevision(() =>
+      operation.executeM602PromptCase('local-label', next.dependencies));
+    assert.equal(blocked.ok, false);
+    assert.equal(nextNative.calls.length, 0);
+    assert.deepEqual(next.observer.calls, []);
+    assert.equal(fs.existsSync(path.join(root, 'local-label')), false);
+  } finally { removeRoot(root); }
+});
+
+// M6-02 reasoning campaign. These named imports establish the accepted first-module Red;
+// Green must execute every behavioral assertion below unchanged through the finite public seams.
+import { loadM602ReasoningPackage } from './helpers/m602-package.ts';
+import { qualifyM602ReasoningObservers } from './helpers/m602-operation.ts';
+import { reasoningObservationQualified } from './helpers/m602-successor-evidence.ts';
+import { REASONING_GROQ_CONFIGURATION, REASONING_QWEN_CONFIGURATION } from '../src/server/generation/reasoning-generation-configuration.ts';
+
+void qualifyM602ReasoningObservers;
+
+const reasoningManifestPath = 'evaluation/m602-reasoning-v1.json';
+const reasoningManifestSha256 = 'da8aa75e9f59818fb1edcf11e939032070a44b3e5ae4d716a709cc8b3462b388';
+type ReasoningDependenciesFixture = Omit<PromptDependenciesFixture, 'promptManifestEnvironment'> & {
+  reasoningManifestEnvironment: SuccessorPackageEnvironment;
+};
+type ReasoningOperationApi = {
+  qualifyM602ReasoningObservers(dependencies?: Partial<ReasoningDependenciesFixture>): Promise<JsonRecord>;
+  executeM602ReasoningCase(caseLabel: typeof caseLabels[number], dependencies?: Partial<ReasoningDependenciesFixture>): Promise<JsonRecord>;
+  readM602ReasoningCase(caseLabel: typeof caseLabels[number], dependencies?: Partial<ReasoningDependenciesFixture>): Promise<JsonRecord>;
+};
+
+function reasoningManifest(bundle: SyntheticBundle) {
+  const packages = caseLabels.map(caseLabel => {
+    const loaded = loadM602ReasoningPackage(caseLabel, bundle.environment);
+    assert.equal(loaded.status, 'ready', caseLabel);
+    if (loaded.status !== 'ready') throw new Error(`Synthetic reasoning package rejected: ${caseLabel}`);
+    return loaded.value;
+  });
+  const value = JSON.parse(fs.readFileSync(path.join(repo, reasoningManifestPath), 'utf8')) as JsonRecord;
+  value.inputDefinition.sha256 = bundle.environment.manifestSha256;
+  value.schemaPolicy.schemas = ['informative-image-alt', 'form-input-label', 'text-contrast'].map((profile, index) =>
+    ({ profile, sha256: packages[index]!.caseSchemaSha256 }));
+  value.schemaPolicy.wireBindings = packages.map(packageValue => ({
+    caseLabel: packageValue.caseLabel, bytes: packageValue.wire.bytes, sha256: packageValue.wire.sha256,
+  }));
+  const bytes = jsonBytes(value);
+  return Object.freeze({ value: Object.freeze(value), bytes, packages: Object.freeze(packages), environment: Object.freeze({
+    manifestSha256: sha256(bytes),
+    readBytes(relativePath: string) {
+      if (relativePath === reasoningManifestPath) return bytes;
+      return bundle.environment.readBytes(relativePath);
+    },
+  }) });
+}
+
+function prepareReasoningRoot(root: string): void {
+  prepareSuccessorRoot(root);
+  fs.renameSync(path.join(root, 'client', 'assets', 'index-C7OtU_Ke.js'),
+    path.join(root, 'client', 'assets', 'index-HAXqw7F5.js'));
+}
+
+function reasoningDependencies(root: string, bundle: SyntheticBundle,
+  observer = successorObserverHarness(), entryTick?: () => void) {
+  const manifest = reasoningManifest(bundle);
+  const dependencies: ReasoningDependenciesFixture = {
+    root, packageEnvironment: bundle.environment, reasoningManifestEnvironment: manifest.environment,
+    requestImplementation: localNative(generationFixture().proposal).request,
+    observerIO: observer.io as unknown as SuccessorObserverIO,
+    filesystem: successorEntryClock(root, entryTick),
+  };
+  return { manifest, observer, dependencies };
+}
+
+async function qualifyReasoning(root: string, bundle: SyntheticBundle,
+  clock: { mock: { timers: { tick(milliseconds: number): void } } }, tick?: () => void) {
+  const operation = m602Operation as unknown as ReasoningOperationApi;
+  const fixture = reasoningDependencies(root, bundle, successorObserverHarness(), tick);
+  const dependencies: Partial<ReasoningDependenciesFixture> = { ...fixture.dependencies };
+  delete dependencies.requestImplementation;
+  const outcome = await driveSuccessor(withSuccessorRevision(() =>
+    operation.qualifyM602ReasoningObservers(dependencies)), clock);
+  assert.equal(outcome.ok, true);
+  return { outcome, fixture };
+}
+
+const semanticDimensions = new Set([
+  'controlled support and citations', 'semantic groundedness', 'remediation usefulness',
+  'human judgment and reminder', 'prohibited claims',
+]);
+
+function writeReasoningAssessment(root: string, bundle: SyntheticBundle, result: JsonRecord,
+  observation: JsonRecord, options: { accepted: boolean; structural?: 'pass' | 'fail' | 'not-run';
+    provider?: 'pass' | 'fail' | 'not-run'; semantic?: 'pass' | 'fail' | 'not-run';
+    uncertainty?: 'pass' | 'fail' | 'not-run'; localSafety?: 'missing' | 'oom' }): void {
+  const resultBytes = fs.readFileSync(path.join(root, result.caseLabel, 'result.json'));
+  const observationBytes = fs.readFileSync(path.join(root, result.caseLabel, 'observation.json'));
+  let localObservation: JsonRecord | null = observation.samples === null ? null : {
+    ui: { startedAt: observation.timing.ui.startedAt, finishedAt: observation.timing.ui.finishedAt, responsive: true },
+    runtime: { observedAt: observation.timing.runtime.finishedAt, ...observation.samples.runtime },
+    gpuBefore: observation.samples.gpuBefore,
+    gpuDuring: { observedAt: observation.timing.gpu.finishedAt, ...observation.samples.gpuDuring },
+    oomObserved: false,
+  };
+  if (options.localSafety === 'missing') localObservation = null;
+  else if (options.localSafety === 'oom' && localObservation !== null) localObservation.oomObserved = true;
+  const assessment = {
+    version: 'm602-reasoning-evidence-v1', caseLabel: result.caseLabel,
+    resultSha256: sha256(resultBytes), observationSha256: sha256(observationBytes), evaluator: 'primary',
+    assessedAt: new Date(Date.parse(result.finishedAt) + 60_000).toISOString(),
+    dimensions: bundle.manifest.rubric.map(({ observation: name }: JsonRecord, index: number) => ({
+      observation: name,
+      value: name === 'structural validity' ? (options.structural ?? 'pass')
+        : name === 'provider completion' ? (options.provider ?? 'pass')
+        : semanticDimensions.has(name) ? (options.semantic ?? 'pass')
+        : index === 2 ? (result.caseLabel.endsWith('-image') ? 'fail' : 'not-run') : 'pass',
+    })),
+    uncertainty: options.uncertainty ?? 'pass', localObservation, accepted: options.accepted,
+  };
+  fs.writeFileSync(path.join(root, result.caseLabel, 'assessment.json'), jsonBytes(assessment), { flag: 'wx' });
+}
+
+test('reasoning package, CLI and qualification authenticate the frozen manifest, instructions, wires and build', async t => {
+  t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: Date.parse('2026-09-22T22:00:00.000Z') });
+  const frozenBytes = fs.readFileSync(path.join(repo, reasoningManifestPath));
+  const frozen = JSON.parse(frozenBytes.toString('utf8')) as JsonRecord;
+  assert.equal(sha256(frozenBytes), reasoningManifestSha256);
+  assert.equal(frozen.version, 'm602-reasoning-v1');
+  assert.equal(frozen.executionPolicy, 'm602-reasoning-execution-v1');
+  assert.deepEqual(parseM602Arguments(['--qualify-reasoning-observers']),
+    { ok: true, mode: 'qualify-reasoning-observers' });
+  for (const label of caseLabels) {
+    assert.deepEqual(parseM602Arguments(['--execute-reasoning', '--case', label]),
+      { ok: true, mode: 'execute-reasoning', caseLabel: label });
+    assert.deepEqual(parseM602Arguments(['--readback-reasoning', '--case', label]),
+      { ok: true, mode: 'readback-reasoning', caseLabel: label });
+    const loaded = loadM602ReasoningPackage(label);
+    assert.equal(loaded.status, 'ready', label);
+    if (loaded.status !== 'ready') continue;
+    const binding = frozen.schemaPolicy.wireBindings.find((entry: JsonRecord) => entry.caseLabel === label);
+    assert.deepEqual(loaded.value.wire, { bytes: binding.bytes, sha256: binding.sha256 }, label);
+    const rule = frozen.promptPolicy.rules[caseLabels.indexOf(label) % 3];
+    assert.equal(loaded.value.identities.reasoningInstructionsSha256, rule.sha256, label);
+    const configuration = label.startsWith('local-') ? REASONING_QWEN_CONFIGURATION : REASONING_GROQ_CONFIGURATION;
+    const request = loaded.value.createRequest(configuration);
+    assert.equal(request.messages.length, 2, label);
+    assert.equal(typeof request.messages[0]!.content, 'string', label);
+  }
+  for (const args of [
+    ['--execute-reasoning'], ['--execute-reasoning', '--case', 'local-image', '--readback-reasoning'],
+    ['--qualify-reasoning-observers', '--case', 'local-image'],
+  ]) assert.deepEqual(parseM602Arguments(args), { ok: false, error: 'arguments' });
+
+  const root = makeRoot();
+  try {
+    prepareReasoningRoot(root);
+    const bundle = canonicalSyntheticBundle();
+    const qualified = await qualifyReasoning(root, bundle, t, () => t.mock.timers.tick(1));
+    assert.equal(qualified.outcome.qualification.version, 'm602-reasoning-qualification-v1');
+    assert.equal(qualified.outcome.qualification.campaign, 'm602-reasoning-v1');
+    assert.equal(qualified.outcome.qualification.runtime, 'not-exercised');
+    assert.deepEqual(qualified.outcome.qualification.build, frozen.clientBuild.map((file: JsonRecord) => ({
+      path: file.path, sha256: sha256(fs.readFileSync(path.join(root, 'client', file.path))),
+    })));
+  } finally { removeRoot(root); }
+
+  const rejectedRoot = makeRoot();
+  try {
+    prepareReasoningRoot(rejectedRoot);
+    const bundle = canonicalSyntheticBundle();
+    const fixture = reasoningDependencies(rejectedRoot, bundle);
+    const tampered = structuredClone(fixture.manifest.value) as JsonRecord;
+    tampered.schemaPolicy.wireBindings[0].sha256 = '0'.repeat(64);
+    const bytes = jsonBytes(tampered);
+    const dependencies: Partial<ReasoningDependenciesFixture> = { ...fixture.dependencies,
+      reasoningManifestEnvironment: { manifestSha256: sha256(bytes), readBytes(relativePath: string) {
+        return relativePath === reasoningManifestPath ? bytes : bundle.environment.readBytes(relativePath);
+      } } };
+    delete dependencies.requestImplementation;
+    const blocked = await withSuccessorRevision(() =>
+      (m602Operation as unknown as ReasoningOperationApi).qualifyM602ReasoningObservers(dependencies));
+    assert.equal(blocked.ok, false);
+    assert.deepEqual(fixture.observer.calls, []);
+    assert.equal(fs.existsSync(path.join(rejectedRoot, 'qualification.json')), false);
+  } finally { removeRoot(rejectedRoot); }
+});
+
+test('reasoning executes and reads six ordered one-use cases with authenticated wire and explicit eligibility', async t => {
+  t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: Date.parse('2026-09-22T23:00:00.000Z') });
+  const operation = m602Operation as unknown as ReasoningOperationApi;
+  const bundle = canonicalSyntheticBundle();
+  const root = makeRoot();
+  try {
+    prepareReasoningRoot(root);
+    await qualifyReasoning(root, bundle, t, () => t.mock.timers.tick(1));
+    const manifest = reasoningManifest(bundle);
+    const order: string[] = [];
+    for (const label of caseLabels) {
+      const fixture = reasoningDependencies(root, bundle, successorObserverHarness(), () => t.mock.timers.tick(1));
+      const local = controlledSuccessorNative(completionProposal(label));
+      const hosted = groqNativeHarness([{ body: groqChatBody(completionProposal(label)) }]);
+      if (label.startsWith('local-')) fixture.dependencies.requestImplementation = local.request;
+      else {
+        fixture.dependencies.requestImplementation = hosted.request;
+        fixture.dependencies.credentialIO = virtualCredentialIO().io;
+        delete fixture.dependencies.observerIO;
+      }
+      const executed = await driveSuccessor(withSuccessorRevision(() =>
+        operation.executeM602ReasoningCase(label, fixture.dependencies)), t);
+      assert.equal(executed.ok, true, label);
+      assert.equal(executed.result.version, 'm602-reasoning-evidence-v1', label);
+      assert.equal(executed.result.status, 'proposal', label);
+      assert.deepEqual(executed.result.wire, manifest.packages[caseLabels.indexOf(label)]!.wire, label);
+      assert.equal(executed.observation.version, 'm602-reasoning-observation-v1', label);
+      assert.equal(executed.observation.campaign, 'm602-reasoning-v1', label);
+      assert.equal(reasoningObservationQualified(executed.observation), true, label);
+      writeReasoningAssessment(root, bundle, executed.result, executed.observation, { accepted: true });
+      const read = await operation.readM602ReasoningCase(label, {
+        root, packageEnvironment: bundle.environment, reasoningManifestEnvironment: manifest.environment,
+        filesystem: { mkdirSync() { throw new Error('reasoning readback must not write'); } },
+      });
+      assert.equal(read.ok, true, label);
+      assert.equal(read.assessment.accepted, true, label);
+      assert.equal(read.eligibleForContinuation, true, label);
+      order.push(label);
+    }
+    assert.deepEqual(order, caseLabels);
+    const duplicate = reasoningDependencies(root, bundle, successorObserverHarness(), () => t.mock.timers.tick(1));
+    const native = controlledSuccessorNative(completionProposal('local-image'));
+    duplicate.dependencies.requestImplementation = native.request;
+    assert.equal((await withSuccessorRevision(() =>
+      operation.executeM602ReasoningCase('local-image', duplicate.dependencies))).ok, false);
+    assert.equal(native.calls.length, 0);
+    assert.deepEqual(duplicate.observer.calls, []);
+  } finally { removeRoot(root); }
+});
+
+test('reasoning continuation preserves negative outcomes and requires complete safe authenticated evidence', async t => {
+  t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: Date.parse('2026-09-23T00:00:00.000Z') });
+  const operation = m602Operation as unknown as ReasoningOperationApi;
+  const bundle = canonicalSyntheticBundle();
+  const scenarios = [
+    { name: 'semantic rejection', candidate: completionProposal('local-image'), assessment: { accepted: false, semantic: 'fail' }, eligible: true },
+    { name: 'invalid response', candidate: { private: 'invalid candidate' }, assessment: { accepted: false, structural: 'fail', semantic: 'not-run', uncertainty: 'not-run' }, eligible: true },
+    { name: 'mere rejection', candidate: completionProposal('local-image'), assessment: { accepted: false }, eligible: false },
+    { name: 'unevaluated semantics', candidate: completionProposal('local-image'), assessment: { accepted: false, semantic: 'not-run' }, eligible: false },
+    { name: 'provider failure', candidate: completionProposal('local-image'), assessment: { accepted: false, semantic: 'fail', provider: 'fail' }, eligible: false },
+    { name: 'missing local projection', candidate: completionProposal('local-image'), assessment: { accepted: false, semantic: 'fail', localSafety: 'missing' }, eligible: false },
+    { name: 'local oom observed', candidate: completionProposal('local-image'), assessment: { accepted: false, semantic: 'fail', localSafety: 'oom' }, eligible: false },
+  ] as const;
+  for (const scenario of scenarios) {
+    const root = makeRoot();
+    try {
+      prepareReasoningRoot(root);
+      await qualifyReasoning(root, bundle, t, () => t.mock.timers.tick(1));
+      const first = reasoningDependencies(root, bundle, successorObserverHarness(), () => t.mock.timers.tick(1));
+      first.dependencies.requestImplementation = controlledSuccessorNative(scenario.candidate).request;
+      const executed = await driveSuccessor(withSuccessorRevision(() =>
+        operation.executeM602ReasoningCase('local-image', first.dependencies)), t);
+      assert.equal(executed.ok, true, scenario.name);
+      assert.equal(executed.result.status, scenario.name === 'invalid response' ? 'failed' : 'proposal', scenario.name);
+      if (scenario.name === 'invalid response') assert.equal(executed.result.error, 'response-validation');
+      writeReasoningAssessment(root, bundle, executed.result, executed.observation, scenario.assessment);
+      const manifest = reasoningManifest(bundle);
+      const read = await operation.readM602ReasoningCase('local-image', {
+        root, packageEnvironment: bundle.environment, reasoningManifestEnvironment: manifest.environment,
+      });
+      assert.equal(read.ok, true, scenario.name);
+      assert.equal(read.assessment.accepted, false, scenario.name);
+      assert.equal(read.eligibleForContinuation, scenario.eligible, scenario.name);
+      const next = reasoningDependencies(root, bundle, successorObserverHarness(), () => t.mock.timers.tick(1));
+      const nextNative = controlledSuccessorNative(completionProposal('local-label'));
+      next.dependencies.requestImplementation = nextNative.request;
+      const continuation = scenario.eligible
+        ? await driveSuccessor(withSuccessorRevision(() =>
+          operation.executeM602ReasoningCase('local-label', next.dependencies)), t)
+        : await withSuccessorRevision(() => operation.executeM602ReasoningCase('local-label', next.dependencies));
+      assert.equal(continuation.ok, scenario.eligible, scenario.name);
+      assert.equal(nextNative.calls.length, scenario.eligible ? 4 : 0, scenario.name);
+    } finally { removeRoot(root); }
+  }
+
+  for (const fault of ['missing-assessment', 'wire-drift'] as const) {
+    const root = makeRoot();
+    try {
+      prepareReasoningRoot(root);
+      await qualifyReasoning(root, bundle, t, () => t.mock.timers.tick(1));
+      const first = reasoningDependencies(root, bundle, successorObserverHarness(), () => t.mock.timers.tick(1));
+      first.dependencies.requestImplementation = controlledSuccessorNative(completionProposal('local-image')).request;
+      const executed = await driveSuccessor(withSuccessorRevision(() =>
+        operation.executeM602ReasoningCase('local-image', first.dependencies)), t);
+      assert.equal(executed.ok, true, fault);
+      if (fault !== 'missing-assessment') writeReasoningAssessment(root, bundle, executed.result, executed.observation, { accepted: true });
+      if (fault === 'wire-drift') {
+        const resultPath = path.join(root, 'local-image', 'result.json');
+        const result = JSON.parse(fs.readFileSync(resultPath, 'utf8')) as JsonRecord;
+        result.wire.sha256 = '0'.repeat(64);
+        fs.writeFileSync(resultPath, jsonBytes(result));
+      }
+      const next = reasoningDependencies(root, bundle, successorObserverHarness(), () => t.mock.timers.tick(1));
+      const native = controlledSuccessorNative(completionProposal('local-label'));
+      next.dependencies.requestImplementation = native.request;
+      assert.equal((await withSuccessorRevision(() =>
+        operation.executeM602ReasoningCase('local-label', next.dependencies))).ok, false, fault);
+      assert.equal(native.calls.length, 0, fault);
+      assert.equal(fs.existsSync(path.join(root, 'local-label')), false, fault);
+    } finally { removeRoot(root); }
+  }
+});

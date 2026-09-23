@@ -33,6 +33,10 @@ Candidate technologies and architecture options not covered by these records rem
 
 ## Partial amendments to current decisions
 
+ADR-0020's [2026-09-23 native-schema Local amendment](ADR-0020-manual-developer-managed-local-model-setup.md#native-schema-local-admission-amendment--2026-09-23) accepts initial-prompt admission and bounded internal second-prompt failure for the new native reasoning profile. It preserves full input, strict application validation, one application request and the shared deadline; historical Local profiles, Groq and previous evidence retain their meanings.
+
+ADR-0024's [2026-09-21 proportional verification and review amendment](ADR-0024-milestone-slice-tdd-with-independent-ownership.md#proportional-verification-and-review) requires focused development checks and one full suite after integration, reuses fresh evidence at closure, and replaces automatic duplicate reviews with risk-triggered coverage. Test/code ownership, live-operation limits and task acceptance remain unchanged.
+
 ADR-0019's [2026-09-12 selection amendment](ADR-0019-in-process-exact-vector-search.md#selection-amendment--2026-09-12) retains exact cosine ranking and three outputs, selecting the highest-ranked passage per required guidance role after complete filtered ranking. Earlier global-three observations remain historical evidence; role coverage is distinct from relevance.
 
 ADR-0024's [2026-09-08 conditional third-attempt amendment](ADR-0024-milestone-slice-tdd-with-independent-ownership.md#conditional-third-implementation-attempt) permits one evidence-justified final implementation correction while preserving early stops, stricter existing grants, and research/review budgets.

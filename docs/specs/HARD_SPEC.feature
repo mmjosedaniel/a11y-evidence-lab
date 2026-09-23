@@ -72,7 +72,9 @@ Feature: Non-negotiable boundaries for the portfolio MVP
       And incomplete evidence or incomplete, missing, or conflicting guidance visibly renders a terminal application-authored abstention that references rather than duplicates available evidence and any retrieval result, records the applicable sufficiency state, reason, missing or conflicting information, confirmation that no provider was called, and manual-investigation guidance, and contains no remediation conclusion
       And an abstention creates no ProviderInvocation or approve/edit-and-accept/reject review decision
       And retrieval execution or passage-integrity failure fails the Finding workflow with no support state and is not recorded as abstention
-      And required Local input that fails complete context fit or Groq input that fails its fixed serialized-request byte policy fails before invocation with a content-safe reason and is not recorded as abstention
+      And required Local input that fails its identified profile's admission or Groq input that fails its fixed serialized-request byte policy fails before invocation with a content-safe reason and is not recorded as abstention
+      And native-schema Local admission establishes initial-prompt fit and first-completion reserve only, while historical Local complete-fit profiles retain their original guarantee
+      And native Local internal second-prompt rejection or context exhaustion retains attempted failure without truncation, shifting, retry or partial proposal publication
       And admitted Groq input has no guaranteed hosted token fit or verified complete consumption, and an actual provider rejection remains an attempted bounded failure
       And no sibling Finding is included or changed
 

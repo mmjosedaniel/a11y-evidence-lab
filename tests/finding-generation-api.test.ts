@@ -20,12 +20,18 @@ const clientRoot = path.join(repo, 'dist', 'client');
 const serial = { concurrency: false };
 const localFactory = controlledGenerationFactory('local');
 const groqFactory = controlledGenerationFactory('groq');
-const factoryArguments: Record<'local' | 'groq', unknown[][]> = { local: [], groq: [] };
+type FactoryKind = 'legacy-local' | 'reasoning-local' | 'judgment-local' | 'uncertainty-local' | 'native-local'
+  | 'groq' | 'judgment-groq' | 'uncertainty-groq';
+const factoryArguments: Record<FactoryKind, unknown[][]> = {
+  'legacy-local': [], 'reasoning-local': [], 'judgment-local': [], 'uncertainty-local': [], 'native-local': [],
+  groq: [], 'judgment-groq': [], 'uncertainty-groq': [],
+};
 let expectedFactory: { mode: 'local' | 'groq'; runs: string } | undefined;
 
-function createControlledAdapter(mode: 'local' | 'groq', args: unknown[]) {
-  factoryArguments[mode].push(args);
+function createControlledAdapter(kind: FactoryKind, args: unknown[]) {
+  factoryArguments[kind].push(args);
   assert.deepEqual(args, [], 'Default factories receive no browser-owned options');
+  const mode = kind === 'groq' || kind === 'judgment-groq' || kind === 'uncertainty-groq' ? 'groq' : 'local';
   assert.deepEqual(expectedFactory?.mode, mode);
   const durable = JSON.parse(fs.readFileSync(path.join(expectedFactory!.runs, 'run-01', 'run.json'), 'utf8')) as
     Record<string | number, unknown>;
@@ -37,12 +43,18 @@ function createControlledAdapter(mode: 'local' | 'groq', args: unknown[]) {
 
 mock.module(new URL('../src/server/generation/ollama-generation.ts', import.meta.url).href, {
   namedExports: {
-    createOllamaGenerationAdapter: (...args: unknown[]) => createControlledAdapter('local', args),
+    createOllamaGenerationAdapter: (...args: unknown[]) => createControlledAdapter('legacy-local', args),
+    createReasoningOllamaGenerationAdapter: (...args: unknown[]) => createControlledAdapter('reasoning-local', args),
+    createJudgmentOllamaGenerationAdapter: (...args: unknown[]) => createControlledAdapter('judgment-local', args),
+    createUncertaintyOllamaGenerationAdapter: (...args: unknown[]) => createControlledAdapter('uncertainty-local', args),
+    createNativeSchemaOllamaGenerationAdapter: (...args: unknown[]) => createControlledAdapter('native-local', args),
   },
 });
 mock.module(new URL('../src/server/generation/groq-generation.ts', import.meta.url).href, {
   namedExports: {
     createGroqGenerationAdapter: (...args: unknown[]) => createControlledAdapter('groq', args),
+    createJudgmentGroqGenerationAdapter: (...args: unknown[]) => createControlledAdapter('judgment-groq', args),
+    createUncertaintyGroqGenerationAdapter: (...args: unknown[]) => createControlledAdapter('uncertainty-groq', args),
   },
 });
 
@@ -359,7 +371,13 @@ test('built-client HTTP selects one fixed factory only after eligibility and run
       assert.deepEqual(JSON.parse(fs.readFileSync(path.join(runs, 'run-01', 'run.json'), 'utf8')), body.run);
       assert.equal(localFactory.calls.factory + groqFactory.calls.factory, beforeCalls + 1);
       assert.equal(mode === 'local' ? localFactory.calls.factory : groqFactory.calls.factory,
-        factoryArguments[mode].length);
+        factoryArguments[mode === 'local' ? 'native-local' : 'uncertainty-groq'].length);
+      assert.equal(factoryArguments['legacy-local'].length, 0,
+        'The ordinary Local service must not fall back to the preserved legacy factory');
+      assert.equal(factoryArguments[mode === 'local' ? 'judgment-local' : 'judgment-groq'].length, 0,
+        'The ordinary service must not fall back to the preserved judgment factory');
+      assert.equal(factoryArguments['uncertainty-local'].length, 0,
+        'The ordinary Local service must preserve the historical uncertainty factory without selecting it');
     } finally {
       expectedFactory = undefined;
       if (service) {

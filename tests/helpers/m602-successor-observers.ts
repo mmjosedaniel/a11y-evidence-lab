@@ -11,9 +11,9 @@ import { startLocalService, type LocalService } from '../../src/server/service.t
 import type { OllamaNativeRequest } from '../../src/server/generation/ollama-generation-http.ts';
 import { hash, ordinary } from './m602-evidence-files.ts';
 import type { M602Observers } from './m602-observation.ts';
-import { noSuccessorResources, successorFreeze, validateGpuSample, validateRuntimeSample,
+import { noSuccessorResources, successorFreeze, validateGpuSample, validateRuntimeSample, RuntimeSampleFailure,
   type M602SuccessorCleanup, type M602SuccessorFailure, type M602SuccessorObservation, type M602SuccessorSamples,
-  type GpuSample, type RuntimeSample, type UiSample } from './m602-successor-evidence.ts';
+  type GpuSample, type RuntimeSample, type RuntimeFailureCode, type UiSample } from './m602-successor-evidence.ts';
 
 export type M602SuccessorObserverIO = Readonly<{ startApplication: typeof startLocalService;
   launchBrowser: typeof chromium.launch; runtimeRequest: OllamaNativeRequest; spawnGpu: typeof spawn; connect: typeof connect }>;
@@ -70,13 +70,15 @@ export type M602SuccessorObserverSession = Readonly<{
   samples(timing: M602SuccessorObservation['timing']): M602SuccessorSamples;
   close(): Promise<M602SuccessorCleanup>;
 }>;
-export async function prepareM602SuccessorObservers(environment?: Environment, callerSignal?: AbortSignal):
+export async function prepareM602SuccessorObservers(environment?: Environment, callerSignal?: AbortSignal,
+  onRuntimeFailure?: (code: RuntimeFailureCode) => unknown, policy?: 'm602-loading-observation-v2'):
   Promise<{ readonly ok: true; readonly session: M602SuccessorObserverSession } | M602SuccessorFailure> {
   const caller = callerSignal ?? new AbortController().signal;
   let io: M602SuccessorObserverIO, runRoot: string, clientRoot: string, scratch: string, revision: string;
   let runInventory: string;
   try {
     check(caller);
+    assert.ok(policy === undefined || policy === 'm602-loading-observation-v2');
     if (environment !== undefined) {
       completeSuccessorIO(environment.io); const root = isolatedSuccessorRoot(environment.root);
       io = environment.io; runRoot = path.join(root, 'runs'); clientRoot = path.join(root, 'client');
@@ -104,6 +106,14 @@ export async function prepareM602SuccessorObservers(environment?: Environment, c
   let browserAcquisitions = 0, serviceAcquisitions = 0;
   let browserClosed = false, contextClosed = false, serviceClosed = false;
   let ui: UiSample | null = null, runtime: RuntimeSample | null = null, gpuDuring: GpuSample | null = null;
+  let runtimeFailureReported = false;
+  const runtimeReady = Promise.withResolvers<boolean>();
+  async function reportRuntimeFailure(code: RuntimeFailureCode): Promise<void> {
+    if (runtimeFailureReported) return;
+    runtimeFailureReported = true;
+    // Await inside this detached notification contains rejection without calling replaceable Promise methods.
+    try { await onRuntimeFailure?.(code); } catch { /* Diagnostics cannot change observation or cleanup. */ }
+  }
   const tracked = <T>(promise: Promise<T>): Promise<T> => {
     jobs.add(promise); void promise.then(() => jobs.delete(promise), () => jobs.delete(promise)); return promise;
   };
@@ -151,7 +161,7 @@ export async function prepareM602SuccessorObservers(environment?: Environment, c
   }
   async function close(): Promise<M602SuccessorCleanup> {
     if (closePromise) return closePromise;
-    closing = true; controller.abort();
+    closing = true; runtimeReady.resolve(false); controller.abort();
     closePromise = (async () => {
       let timer: ReturnType<typeof setTimeout>;
       const deadline = new Promise<void>(resolve => { timer = setTimeout(() => {
@@ -222,19 +232,19 @@ export async function prepareM602SuccessorObservers(environment?: Environment, c
       if (collectorSignal.aborted) abort();
     }));
   }
-  function runtimeSample(active: AbortSignal): Promise<RuntimeSample> {
-    return bounded(active, 5000, collectorSignal => new Promise<RuntimeSample>((resolve, reject) => {
+  function runtimeSample(active: AbortSignal, allowAbsent = false): Promise<RuntimeSample | null> {
+    return bounded(active, 5000, collectorSignal => new Promise<RuntimeSample | null>((resolve, reject) => {
       check(collectorSignal); states.runtime = 'uncertain';
       let incoming: IncomingMessage | undefined, handle: ClientRequest | undefined;
       let requestReturned = false, failed = false, destroying = false;
-      let parsed: RuntimeSample | undefined;
+      let parsed: RuntimeSample | null | undefined;
       const resources = new Map<ClientRequest | IncomingMessage | Socket, boolean>();
       const closed = Promise.withResolvers<void>(); tracked(closed.promise);
       const terminal = () => {
         if (!requestReturned || ![...resources.values()].every(value => value)) return;
         states.runtime = 'complete'; closed.resolve();
         collectorSignal.removeEventListener('abort', abort);
-        if (!failed && parsed && !collectorSignal.aborted) resolve(parsed);
+        if (!failed && parsed !== undefined && !collectorSignal.aborted) resolve(parsed);
       };
       const destroyOwned = () => {
         if (destroying) return;
@@ -245,7 +255,11 @@ export async function prepareM602SuccessorObservers(environment?: Environment, c
         }
         destroying = false;
       };
-      const abort = () => { failed = true; destroyOwned(); reject(failure()); terminal(); };
+      const fail = (code: RuntimeFailureCode) => {
+        if (!failed) { failed = true; void reportRuntimeFailure(code); }
+        destroyOwned(); reject(failure()); terminal();
+      };
+      const abort = () => fail('transport-lifecycle');
       const own = (resource: ClientRequest | IncomingMessage | Socket | null | undefined, premature: () => boolean) => {
         if (!resource || resources.has(resource)) return;
         resources.set(resource, false); states.runtime = 'uncertain';
@@ -271,17 +285,32 @@ export async function prepareM602SuccessorObservers(environment?: Environment, c
           response.on('data', (chunk: Buffer | string) => {
             if (failed || collectorSignal.aborted) return;
             const value = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
-            if (bytes.length + value.length > 65536) abort(); else bytes = Buffer.concat([bytes, value]);
+            if (bytes.length + value.length > 65536) fail('body-limit'); else bytes = Buffer.concat([bytes, value]);
           });
           response.once('end', () => {
+            let code: RuntimeFailureCode = 'transport-lifecycle';
             try {
               check(collectorSignal); assert.ok(!failed);
-              assert.equal(response.statusCode, 200); assert.equal(response.complete, true);
+              code = 'http-metadata'; assert.equal(response.statusCode, 200);
+              code = 'transport-lifecycle'; assert.equal(response.complete, true);
+              code = 'http-metadata';
               assert.match(String(response.headers['content-type']), /^application\/json(?:\s*;|$)/iu);
+              code = 'encoding-json';
               const body = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes)); assert.ok(Array.isArray(body.models));
-              const matches = body.models.filter((model: { name?: unknown }) => model && model.name === 'qwen3.5:4b'); assert.equal(matches.length, 1);
-              const model = matches[0]; const value = { digest: model.digest, contextLength: model.context_length, sizeBytes: model.size, sizeVramBytes: model.size_vram };
-              validateRuntimeSample(value); check(collectorSignal); parsed = successorFreeze(value);
+              if (allowAbsent) {
+                assert.ok(body && typeof body === 'object' && !Array.isArray(body));
+                for (const model of body.models) assert.ok(model && typeof model === 'object' && !Array.isArray(model)
+                  && typeof model.name === 'string' && model.name.length > 0);
+              }
+              code = 'target-cardinality';
+              const matches = body.models.filter((model: { name?: unknown }) => model && model.name === 'qwen3.5:4b');
+              if (allowAbsent && matches.length === 0) parsed = null;
+              else {
+                assert.equal(matches.length, 1);
+                const model = matches[0]; const value = { digest: model.digest, contextLength: model.context_length, sizeBytes: model.size, sizeVramBytes: model.size_vram };
+                validateRuntimeSample(value); parsed = successorFreeze(value);
+              }
+              code = 'transport-lifecycle'; check(collectorSignal);
               // Parsed data remains provisional until every observed native resource closes.
               for (const resource of resources.keys()) {
                 if (resource !== handle && resource !== incoming) {
@@ -289,7 +318,7 @@ export async function prepareM602SuccessorObservers(environment?: Environment, c
                 }
               }
               terminal();
-            } catch { abort(); }
+            } catch (error) { fail(error instanceof RuntimeSampleFailure ? error.code : code); }
           });
         });
         own(handle, () => parsed === undefined); ownSocket(handle.socket);
@@ -298,6 +327,33 @@ export async function prepareM602SuccessorObservers(environment?: Environment, c
         terminal();
       } catch { requestReturned = true; abort(); }
     }));
+  }
+
+  async function acquireRuntime(active: AbortSignal): Promise<RuntimeSample> {
+    const acquisition = new AbortController();
+    const linked = AbortSignal.any([active, acquisition.signal]);
+    const exhausted = () => {
+      if (!active.aborted) void reportRuntimeFailure('target-cardinality');
+      acquisition.abort();
+    };
+    const timer = setTimeout(exhausted, 120000);
+    try {
+      for (let attempt = 0; attempt < 120; attempt++) {
+        check(linked);
+        const value = await runtimeSample(linked, true);
+        check(linked);
+        if (value !== null) return value;
+        if (attempt === 119) { exhausted(); throw failure(); }
+        // A null value is released only after complete native closure; no overlap is possible.
+        await new Promise<void>((resolve, reject) => {
+          const abort = () => { clearTimeout(interval); linked.removeEventListener('abort', abort); reject(failure()); };
+          const interval = setTimeout(() => { linked.removeEventListener('abort', abort); resolve(); }, 1000);
+          linked.addEventListener('abort', abort, { once: true });
+          if (linked.aborted) abort();
+        });
+      }
+      throw failure();
+    } finally { clearTimeout(timer); }
   }
 
   try {
@@ -342,20 +398,36 @@ export async function prepareM602SuccessorObservers(environment?: Environment, c
       if (signal.aborted || gate.signal.aborted || closing) return;
       const cancel = () => { clearTimeout(timer); gate.signal.removeEventListener('abort', cancel); signal.removeEventListener('abort', cancel); };
       const timer = setTimeout(() => {
-        cancel(); if (signal.aborted || closing) return;
+        cancel(); if (signal.aborted || gate.signal.aborted || closing) return;
         gate.start(active => {
           const linked = AbortSignal.any([active, signal]);
-          return effect(linked);
+          const pending = effect(linked);
+          // Keep the rejected result for the gate while owning errors before a delayed consumer attaches.
+          if (policy === 'm602-loading-observation-v2') void pending.catch(() => {});
+          return pending;
         });
-      }, 1000);
+      }, policy === 'm602-loading-observation-v2' ? 1 : 1000);
       gate.signal.addEventListener('abort', cancel, { once: true }); signal.addEventListener('abort', cancel, { once: true });
     };
     return successorFreeze({ ok: true, session: {
       gpuBefore,
       observers: {
         ui: scheduled(async active => { const value = await uiEffect(active); check(active); ui = value; }),
-        runtime: scheduled(async active => { const value = await runtimeSample(active); check(active); runtime = value; }),
-        gpu: scheduled(async active => { const value = await gpuSample(active); check(active); gpuDuring = value; }),
+        runtime: scheduled(async active => {
+          try {
+            const value = policy === 'm602-loading-observation-v2' ? await acquireRuntime(active) : await runtimeSample(active);
+            check(active); runtime = value; runtimeReady.resolve(true);
+          } catch (error) { runtimeReady.resolve(false); throw error; }
+        }),
+        gpu: policy === 'm602-loading-observation-v2' ? gate => {
+          void runtimeReady.promise.then(ready => {
+            if (!ready || signal.aborted || gate.signal.aborted || closing) return;
+            gate.start(async active => {
+              const linked = AbortSignal.any([active, signal]);
+              check(linked); const value = await gpuSample(linked); check(linked); gpuDuring = value;
+            });
+          }).catch(() => { /* Gate failure cannot admit another sample. */ });
+        } : scheduled(async active => { const value = await gpuSample(active); check(active); gpuDuring = value; }),
       },
       samples(timing) { return successorFreeze({ gpuBefore, ui: timing.ui.status === 'completed' ? ui : null,
         runtime: timing.runtime.status === 'completed' ? runtime : null, gpuDuring: timing.gpu.status === 'completed' ? gpuDuring : null }); },

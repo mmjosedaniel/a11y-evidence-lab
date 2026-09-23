@@ -1,3 +1,4 @@
+import { adapterDeadlineMs } from '../generation/generation-execution.ts';
 import { readId, readObject } from '../domain/run-contract/contract-value-reader.ts';
 import type { NativeFinding } from '../domain/run-contract.ts';
 import type { CompletedRun, RunRepository } from '../persistence/run-repository.ts';
@@ -22,6 +23,7 @@ export function createGenerationOperation(dependencies: Dependencies) {
   const owns = (runId: string, findingId: string) => owner?.runId === runId && owner.findingId === findingId;
 
   function start(input: unknown, adapter: GenerationAdapter | undefined, reservation: Reservation): Promise<GenerationServiceOutcome> {
+    const enteredAt = Date.now();
     let durable: CompletedRun | null = null;
     let settled = false;
     const settle = (outcome: GenerationServiceOutcome) => {
@@ -77,14 +79,15 @@ export function createGenerationOperation(dependencies: Dependencies) {
     const native: NativeFinding = { findingId: selected.findingId, ruleId: selected.ruleId,
       nativeResult: selected.nativeResult, checks: selected.checks, locator: selected.locator,
       evidence: selected.evidence, state: 'unprocessed' } as NativeFinding;
-    const expires = Date.now() + 120000;
+    const selectedAdapter = adapter ?? resolveGenerationAdapter(durable.providerContext);
+    const expires = enteredAt + adapterDeadlineMs(selectedAdapter, durable.providerContext);
     void (async () => {
       const outcome: GenerationOutcome = dependencies.isStopping()
         ? { status: 'failed', error: 'shutdown', cleanupFailed: false }
         : await executeGeneration({ finding: Object.freeze(native), retrieval: selected.retrieval.result,
           analysisStartedAt: selected.analysis.startedAt, analysisFinishedAt: selected.analysis.finishedAt,
           providerContext: durable!.providerContext,
-          adapter: adapter ?? resolveGenerationAdapter(durable!.providerContext), signal: reservation.controller.signal });
+          expiresAt: expires, adapter: selectedAdapter, signal: reservation.controller.signal });
       if (settled || dependencies.deadlineExpired()) return;
       const invocation = 'invocation' in outcome ? outcome.invocation : undefined;
       let error: GenerationErrorCode | undefined = outcome.status === 'failed' ? outcome.error
