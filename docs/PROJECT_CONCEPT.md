@@ -6,9 +6,9 @@ A11y Evidence Lab.
 
 ## Status
 
-**Document status:** Product-intent and planning-context summary, reviewed on 2026-09-14 (UTC). This document is not acceptance authority; individual directions are Accepted, Proposed, Deferred, or Superseded only where the canonical requirements baseline or an ADR records that status.
+**Document status:** Product-intent and planning-context summary, reviewed on 2026-09-24 (UTC). This document is not acceptance authority; individual directions are Accepted, Proposed, Deferred, or Superseded only where the canonical requirements baseline or an ADR records that status.
 
-**Repository stage:** Development ready through OD-025, with the scope recorded by OD-026 and OD-027. The [development roadmap](DEVELOPMENT_ROADMAP.md) owns task status and selection. Consult the [current capability summary](../README.md#project-status) and [retrieval evidence guide](../README.md#inspecting-m2-02-retrieval-evidence) for implemented behavior and its verification limits. The [task plans](plans/README.md) preserve execution and review history.
+**Repository stage:** Development ready through OD-025, with the scope recorded by OD-026 and OD-027. The [development roadmap](DEVELOPMENT_ROADMAP.md) owns task status and selection. Consult the [current capability summary](../README.md#project-status) and [retrieval evidence guide](../README.md#inspecting-m2-02-retrieval-evidence) for implemented behavior and its verification limits. The [bounded MVP evidence report](BOUNDED_MVP_EVIDENCE.md) joins the completed portfolio evidence, including semantic failures and verification limits. The [task plans](plans/README.md) preserve execution and review history.
 
 ## Concept
 
@@ -62,7 +62,7 @@ The project objective is to demonstrate the practical use of RAG and LangChain a
 - LangChain for bounded in-process exact-vector retrieval and the retrieve-then-generate-or-abstain integration; the fixed corpus does not justify a Chroma service.
 - Plain TypeScript state for the first linear workflow and one selected proposal's review decision at a time.
 - LangGraph only if a later demonstrated recovery or resume requirement needs it.
-- One content-safe versioned `run.json` aggregate per analysis plus local diagnostics and a compact fixed evaluation manifest; there is no Markdown report, and LangSmith is deferred outside the MVP.
+- One content-safe versioned `run.json` aggregate per analysis plus local diagnostics and a compact fixed evaluation manifest; the application generates no Markdown report, and LangSmith is deferred outside the MVP. The separately authored [bounded MVP evidence report](BOUNDED_MVP_EVIDENCE.md) is repository documentation.
 - Measurable retrieval and answer quality instead of relying only on a polished demo.
 - Human-in-the-loop decisions and explicit abstention when the evidence is insufficient.
 - Conventional engineering quality around the AI workflow.
@@ -91,7 +91,7 @@ The provider boundary, global immutable Local/Groq analysis choice, no-fallback 
 
 ## Deferred implementation and distribution questions
 
-- The Local adapter has recorded model configuration and actual generation observations, while its complete-workflow capacity gate remains unfulfilled; the [current capability summary](../README.md#project-status) links their evidence and limits. M2-02 records the [embedding-only configuration and bounded retrieval observation](plans/completed/m2-02-embedding-retrieval-capacity-gate.md#capacity-screen-and-integration-closure); that evidence does not pass the generation gate.
+- The Local capacity gate has accepted evidence for the [M3-03 full-stack configuration](plans/completed/m3-03-qwen-adapter-and-capacity-screen.md#m303-c-observation-01--successful-full-local-stack-capacity-screen) and the later [M6-02 native-schema profile](plans/completed/m6-02-six-fixed-generation-executions.md#m602-native-capacity--genuine-current-profile-screen-accepted). Each observation applies only to its recorded configuration and reference PC; it does not establish generalized hardware support or semantic generation quality. The [bounded report](BOUNDED_MVP_EVIDENCE.md#local-results) retains those limits. M2-02's [embedding-only observation](plans/completed/m2-02-embedding-retrieval-capacity-gate.md#capacity-screen-and-integration-closure) remains separate evidence.
 - [RD-002](plans/completed/rd-002-minimum-development-toolchain-literals.md#accepted-synthesis-and-ordinary-literal-freeze) selects the minimum M1 package versions and local-service host. [RD-003](plans/completed/rd-003-scan-evaluation-boundary.md#accepted-setup-and-native-observations--rd003-observations-001) supplies the frozen scan-only profile and six native fixture observations; those scan-only observations alone do not qualify application/public-page behavior or release support. The [current capability summary](../README.md#project-status) points to later implementation evidence.
 - Whether production use ever justifies hostile-target isolation, connection-level destination controls, exhaustive resource ceilings, and below/exact/over-limit qualification remains deferred until a demonstrated product need.
 - Whether a desktop container, installer, formal support matrix, hosted tracing, or release-qualification process is ever needed remains deferred until demonstrated product or distribution need.
