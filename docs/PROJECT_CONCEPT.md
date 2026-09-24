@@ -18,25 +18,30 @@ The interface should be an evidence-oriented application rather than a generic c
 
 ## Basic implementation flow
 
+This diagram summarizes the implemented MVP workflow; the [bounded evidence report](BOUNDED_MVP_EVIDENCE.md) records what was verified and its limitations. Passing runtime validation does not establish source support or remediation quality. Rescan/comparison is independent of retrieval, generation and human review.
+
 ```mermaid
 flowchart LR
-    A[Trusted developer-supplied public HTTPS URL plus global Local or Groq mode] --> B[Atomic scan of exactly three rules]
-    B --> C[All returned violations plus distinct incomplete observations]
-    C --> O[User selects one finding]
-    D[Curated guidance corpus plus local EmbeddingGemma vectors] --> E[In-process exact LangChain retrieval, at most one passage per required role]
+    A[Trusted public HTTPS URL and explicit Local or Groq mode] --> B[Atomic scan of exactly three rules]
+    B -->|Complete and durably saved| C[All Findings and separate incomplete observations]
+    B -->|Scan or persistence failure| Z[Visible failed analysis]
+    C --> O[User selects one Finding]
+    D[Closed corpus and local EmbeddingGemma vectors] --> E[Explicit exact retrieval by guidance role]
     O --> E
-    E --> Q{Retrieval completed without execution or integrity failure?}
-    Q -->|No| X[Visible FindingWorkflow failure with no support state]
-    Q -->|Yes| M{Required evidence complete and completed guidance supported?}
-    M -->|Yes| F[Provider-neutral AI generation]
-    M -->|No| N[Terminal application-authored abstention with explanation and manual-investigation guidance]
-    A --> P[Immutable selected provider mode]
-    P --> F
-    F --> G{User review}
-    G -->|Approve or edit| H[Accepted remediation plan]
+    E --> Q{Retrieval completed with valid passages?}
+    Q -->|No| X[Finding failure with no support state or model call]
+    Q -->|Yes| M{Required evidence complete and guidance supported?}
+    M -->|No| N[Terminal abstention and manual guidance; no model call or review]
+    M -->|Yes| F[User explicitly requests generation in the selected mode]
+    A --> P[Immutable provider context; selection makes no call]
+    P -.-> F
+    F --> V{Input admitted, prerequisites present and response valid?}
+    V -->|No| Y[Bounded failure; no proposal or fallback]
+    V -->|Yes| G{Human proposal review}
+    G -->|Approve or edit and accept| H[Accept only after support confirmation and blocking judgment]
     G -->|Reject| I[Recorded rejection]
-    C --> R[Intentional later rescan of the same trusted page]
-    R --> J[New independent run with a baseline reference and conservative comparison]
+    O --> R[Intentional later scan of the same trusted page]
+    R --> J[Independent run and conservative comparison with baseline evidence]
 ```
 
 ## Possible user flow
