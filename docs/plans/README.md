@@ -8,7 +8,7 @@ None.
 
 ## Prepared plans awaiting activation
 
-None.
+- [M6-04 — Bounded evidence report](m6-04-bounded-evidence-report.md) — prerequisites complete; planning only, awaiting execution authorization. Roadmap status remains Not started.
 
 ## Completed plans
 
