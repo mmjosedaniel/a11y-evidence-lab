@@ -14,6 +14,8 @@ None.
 
 These archives preserve each task's execution, review, failures, and closure evidence. The roadmap remains the status authority.
 
+- [M6-04 — Bounded evidence report](completed/m6-04-bounded-evidence-report.md)
+
 - [M6-03 — Application-accessibility verification](completed/m6-03-application-accessibility-verification.md)
 
 - [M6-02 — Six fixed generation executions](completed/m6-02-six-fixed-generation-executions.md)

@@ -60,7 +60,7 @@ The MVP has no Windows installer, Start menu shortcut, desktop wrapper, embedded
 
 Development is authorized through [OD-025](requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-025--development-authorization-and-roadmap-governance); [OD-026](requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-026--defer-user-facing-retained-run-reopening) and [OD-027](requirements/DELIVERY_READINESS_AND_OPEN_DECISIONS.md#od-027--simplify-analysis-and-results-presentation) retain their recorded scope. The [development roadmap](DEVELOPMENT_ROADMAP.md) owns task status and selection.
 
-See the [current capability summary](../README.md#project-status) for implemented behavior and the [retrieval evidence guide](../README.md#inspecting-m2-02-retrieval-evidence) for M2-02's internal retrieval and its user-interface boundary. Execution and review history remain in the [task plans](plans/README.md), rather than being duplicated here.
+See the [current capability summary](../README.md#project-status) for implemented behavior and the [retrieval evidence guide](../README.md#inspecting-m2-02-retrieval-evidence) for M2-02's internal retrieval and its user-interface boundary. The [bounded MVP evidence report](BOUNDED_MVP_EVIDENCE.md) joins the completed portfolio observations, semantic failures and verification limits. Execution and review history remain in the [task plans](plans/README.md), rather than being duplicated here.
 
 ## Documentation navigation
 
