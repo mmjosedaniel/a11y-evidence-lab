@@ -26,11 +26,13 @@ The fixed generation evaluation has six runtime-valid proposals, but semantic su
 
 ## Getting started
 
-This is a developer-run local application with a browser interface. Follow the [development guide](docs/DEVELOPMENT.md) in order:
+This is a developer-run local application with a browser interface. Follow the [local startup guide](docs/DEVELOPMENT.md) in order:
 
-1. Prepare the pinned Node.js/npm toolchain, PowerShell session, and managed Chromium prerequisite.
-2. Restore dependencies, build the client, and run the documented verification commands.
-3. Start the local service and open its reported loopback URL in Chrome or Edge.
+1. Complete the first-time dependency and browser setup, then build the client.
+2. Run the startup block in PowerShell.
+3. Open the URL printed by the server in Chrome or Edge.
+
+An already prepared checkout can go straight to [Start the application](docs/DEVELOPMENT.md#start-the-application).
 
 Scanning needs no model. Retrieval in either mode requires developer-managed Ollama and `embeddinggemma`; Local generation additionally needs `qwen3.5:4b`, while Groq needs the documented local credential setup. See [provider setup and application use](docs/APPLICATION_GUIDE.md).
 
@@ -40,7 +42,8 @@ Start with the [documentation index](docs/README.md) for the complete catalog an
 
 | Guide | Contents |
 | --- | --- |
-| [Development and local operation](docs/DEVELOPMENT.md) | Prerequisites, shell preparation, build, tests, startup, and retained-run cleanup |
+| [Run the project locally](docs/DEVELOPMENT.md) | First-time setup, everyday startup, stopping, and troubleshooting |
+| [Maintainer verification reference](docs/DEVELOPMENT_REFERENCE.md) | Complete tests, recorded command wrappers, and retained-run cleanup |
 | [Application workflow and API reference](docs/APPLICATION_GUIDE.md) | Guidance, generation, review, rescans, service contracts, and provider setup |
 | [Evaluation and evidence inspection](docs/EVALUATION_GUIDE.md) | Frozen packages, retained observations, and read-only inspection instructions |
 | [Closed corpus and source notices](docs/CORPUS.md) | Corpus structure, static verification, attribution, and full W3C notices |
@@ -57,13 +60,13 @@ Project-authored code and documentation use the [MIT License](LICENSE). W3C corp
 These anchors preserve links from frozen corpus metadata, existing documentation, and bookmarks. Follow the linked guide for the maintained content.
 
 - <a id="engineering-objective"></a>[Engineering objective](docs/PROJECT_CONCEPT.md#engineering-objective)
-- <a id="planned-mvp-startup-and-generation-setup"></a>[Planned MVP startup and generation setup](docs/DEVELOPMENT.md#planned-mvp-startup-and-generation-setup)
+- <a id="planned-mvp-startup-and-generation-setup"></a>[Planned MVP startup and generation setup](docs/DEVELOPMENT_REFERENCE.md#planned-mvp-startup-and-generation-setup)
 - <a id="planned-workflow"></a>[Planned workflow](docs/PROJECT_CONCEPT.md#possible-user-flow)
-- <a id="development-toolchain"></a>[Development toolchain](docs/DEVELOPMENT.md#development-toolchain)
-- <a id="development-command-preparation"></a>[Development command preparation](docs/DEVELOPMENT.md#development-command-preparation)
-- <a id="build-and-verify-the-walking-skeleton"></a>[Build and verify the walking skeleton](docs/DEVELOPMENT.md#build-and-verify-the-walking-skeleton)
-- <a id="run-the-local-service"></a>[Run the local service](docs/DEVELOPMENT.md#run-the-local-service)
-- <a id="retained-runs-and-deletion"></a>[Retained runs and deletion](docs/DEVELOPMENT.md#retained-runs-and-deletion)
+- <a id="development-toolchain"></a>[Development toolchain](docs/DEVELOPMENT_REFERENCE.md#development-toolchain)
+- <a id="development-command-preparation"></a>[Development command preparation](docs/DEVELOPMENT_REFERENCE.md#development-command-preparation)
+- <a id="build-and-verify-the-walking-skeleton"></a>[Build and verify the walking skeleton](docs/DEVELOPMENT_REFERENCE.md#build-and-verify-the-walking-skeleton)
+- <a id="run-the-local-service"></a>[Run the local service](docs/DEVELOPMENT.md#start-the-application)
+- <a id="retained-runs-and-deletion"></a>[Retained runs and deletion](docs/DEVELOPMENT_REFERENCE.md#retained-runs-and-deletion)
 - <a id="current-scope"></a>[Current scope](docs/APPLICATION_GUIDE.md#current-scope)
 - <a id="intentional-rescans"></a>[Intentional rescans](docs/APPLICATION_GUIDE.md#intentional-rescans)
 - <a id="internal-comparison"></a>[Internal comparison](docs/APPLICATION_GUIDE.md#internal-comparison)
