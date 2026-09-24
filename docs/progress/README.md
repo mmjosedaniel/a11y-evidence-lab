@@ -54,6 +54,7 @@ Add each new task record to this table in the same change that creates the file:
 | [M6-01](../DEVELOPMENT_ROADMAP.md#m6-01--run-shared-deterministic-and-workflow-checks) | [Shared deterministic evaluation](m6-01-shared-deterministic-evaluation.md) | [Task plan](../plans/completed/m6-01-shared-deterministic-evaluation.md) | Complete | 2026-09-20 |
 | [M6-02](../DEVELOPMENT_ROADMAP.md#m6-02--execute-exactly-six-fixed-generation-cases) | [Six fixed generation executions](m6-02-six-fixed-generation-executions.md) | [Task plan](../plans/completed/m6-02-six-fixed-generation-executions.md) | Complete | 2026-09-23 |
 | [M6-03](../DEVELOPMENT_ROADMAP.md#m6-03--verify-the-applications-accessible-core-path) | [Application accessibility verification](m6-03-application-accessibility-verification.md) | [Task plan](../plans/completed/m6-03-application-accessibility-verification.md) | Complete | 2026-09-23 |
+| [M6-04](../DEVELOPMENT_ROADMAP.md#m6-04--record-and-review-the-bounded-portfolio-evidence) | [Bounded evidence report](m6-04-bounded-evidence-report.md) | [Task plan](../plans/completed/m6-04-bounded-evidence-report.md) | Complete | 2026-09-24 |
 
 The mirrored status is a convenience snapshot only. The roadmap controls when a task is `Not started`, `In progress`, `Blocked`, or `Complete`.
 

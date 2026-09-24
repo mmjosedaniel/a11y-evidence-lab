@@ -107,6 +107,8 @@ Do not load every requirements module automatically. For requirements work, read
 
 ### Development planning
 
+- [Bounded MVP evidence](BOUNDED_MVP_EVIDENCE.md) — manual cross-task report with separate Local/Groq outcomes, capability provenance, verification identity, historical failures and limitations; the roadmap retains task-status authority.
+
 - [Development roadmap](DEVELOPMENT_ROADMAP.md) — task order, status, dependencies, verification, and integration checkpoints.
 - [Execution-plan index](plans/README.md) — current task coordination and preserved completed plans, including their exact commands, decisions, failures, and closure evidence.
 - [Project and agent-workflow progress](progress/README.md) — concise accepted outcomes and coordination lessons, indexed by task.

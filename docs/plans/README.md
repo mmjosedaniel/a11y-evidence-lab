@@ -8,11 +8,13 @@ None.
 
 ## Prepared plans awaiting activation
 
-- [M6-04 — Bounded evidence report](m6-04-bounded-evidence-report.md) — prerequisites complete; planning only, awaiting execution authorization. Roadmap status remains Not started.
+None.
 
 ## Completed plans
 
 These archives preserve each task's execution, review, failures, and closure evidence. The roadmap remains the status authority.
+
+- [M6-04 — Bounded evidence report](completed/m6-04-bounded-evidence-report.md)
 
 - [M6-03 — Application-accessibility verification](completed/m6-03-application-accessibility-verification.md)
 
