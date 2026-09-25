@@ -5,7 +5,7 @@
 - **Roadmap task:** [M6-02](../DEVELOPMENT_ROADMAP.md#m6-02--execute-exactly-six-fixed-generation-cases)
 - **Mirrored roadmap status:** Complete
 - **ExecPlan:** [Six fixed generation executions](../plans/completed/m6-02-six-fixed-generation-executions.md)
-- **Last updated:** 2026-09-23 UTC
+- **Last updated:** 2026-09-24 UTC
 
 ## 2026-09-20 — Planning activation
 
@@ -203,3 +203,9 @@
 - **Project outcome:** Current native-profile capacity and all three affected Local cases pass runtime validation. Three exactly compatible Groq observations are inherited unchanged, completing the six logical cases without new hosted calls. Label/contrast and inherited Groq semantic limitations remain explicit for human review; earlier failed campaigns are preserved.
 - **Agent-workflow outcome:** Reused accepted implementation/regression evidence, corrected and independently reviewed the bounded caller, then inspected each original result and assessment. Final authentication verifies all six requests and records, historical preservation and complete owned cleanup. Schema enforcement resolved structural blockers without establishing semantic correctness.
 - **Evidence and next boundary:** The [final verification and documentation closure](../plans/completed/m6-02-six-fixed-generation-executions.md#m602-native-final--six-case-verification-and-task-closure) completes M6-02. M6-03 is dependency-ready for its prepared readiness procedure; M6-03/M6-04 remain Not started. No new generation, billing change or publication is selected.
+
+## 2026-09-24 UTC — Regression independence from retained inputs verified
+
+- **Project outcome:** The four affected ordinary suites now use the existing synthetic fixture builder and pass all 98 checks without ignored evaluation inputs. Exact original package and wire identities remain covered by the separately invoked `npm.cmd run test:evidence:m602` command, which fails clearly when the originals are absent. Complete ordinary regression passes 1061 tests in 54 files; strict TypeScript and preservation checks pass.
+- **Agent-workflow outcome:** Owner-requested test-workflow maintenance used separate guarded test and npm-registration owners, followed by primary diff, assertion-mapping and integration review. A bounded correction removed self-derived expected wire values. Source, default integrity loaders, frozen manifests and retained originals remain unchanged; no live evaluation allowance was reopened.
+- **Evidence and next boundary:** [BUG-0004 verification](../bugs/bug-0004-regression-private-input-dependency.md#verification-and-disposition) owns the correction evidence and limits. The [maintainer reference](../DEVELOPMENT_REFERENCE.md#optional-m6-02-retained-input-checks) and [evaluation guide](../EVALUATION_GUIDE.md#optional-retained-input-authentication) explain the two verification paths. M6-02 remains Complete; no application task or new campaign is selected.

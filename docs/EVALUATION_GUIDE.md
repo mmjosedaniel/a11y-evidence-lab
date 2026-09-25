@@ -4,7 +4,7 @@
 
 Use the [bounded MVP evidence report](BOUNDED_MVP_EVIDENCE.md) for the cross-task outcomes and limitations. This guide locates the frozen inputs and retained observations and preserves their read-only inspection instructions. Ignored evidence is absent from a fresh checkout; archived execution allowances do not authorize replay.
 
-In this guide: [Frozen generation inputs](#frozen-generation-evaluation-package) · [Generation observations](#inspecting-m6-02-generation-evidence) · [Retrieval capacity evidence](#inspecting-m2-02-retrieval-evidence) · [Retrieval checkpoint evidence](#inspecting-m2-04-checkpoint-evidence).
+In this guide: [Frozen generation inputs](#frozen-generation-evaluation-package) · [Optional input authentication](#optional-retained-input-authentication) · [Generation observations](#inspecting-m6-02-generation-evidence) · [Retrieval capacity evidence](#inspecting-m2-02-retrieval-evidence) · [Retrieval checkpoint evidence](#inspecting-m2-04-checkpoint-evidence).
 
 ## Frozen generation evaluation package
 
@@ -15,6 +15,12 @@ In the original development checkout, the nine exact files under `temp/m301-gene
 For read-only verification, load only the [development command definitions](DEVELOPMENT_REFERENCE.md#development-command-preparation), then run the preserved verification block in [M301-COMMAND-02](plans/completed/m3-01-generation-evaluation-package.md#m301-command-02--resolved-preparation-validation-and-closure-callers) from the repository root. It also requires the retained M2-04 run/seed files named there and makes no model request. Historical creation and task-closure instructions are not steps to replay. Missing or mismatched exact files block downstream use until the existing [recovery conditions](plans/completed/m3-01-generation-evaluation-package.md#idempotence-and-recovery) are satisfied; do not regenerate or overwrite the frozen package merely to make a check pass.
 
 M6-01 executed the [exact frozen no-call case](plans/completed/m6-01-shared-deterministic-evaluation.md#m601-b-no-call-01--exact-frozen-abstention-accepted), verifying application-authored abstention, durable aggregate preservation, rendered manual guidance and zero generation effects. That proof uses the frozen controlled retrieval result and does not establish actual embedding behavior; the [actual retrieval observations](plans/completed/m6-01-shared-deterministic-evaluation.md#m601-b-retrieval-02--three-current-actual-observations) are separate. These records identify retained local artifacts for inspection without inference. Their bounded execution allowances are consumed, and archived commands are not replay instructions. The [ordinary regression command](DEVELOPMENT_REFERENCE.md#build-and-verify-the-walking-skeleton) requires the frozen-case flag to remain absent. For the completed six-case evaluation, see the [M6-02 evidence below](#inspecting-m6-02-generation-evidence); the [roadmap](DEVELOPMENT_ROADMAP.md#m6-02--execute-exactly-six-fixed-generation-cases) owns task status.
+
+### Optional retained-input authentication
+
+The ordinary regression suite uses synthetic inputs and does not require the retained private files. Maintainers who have those originals can run `npm.cmd run test:evidence:m602` using the [prepared command and prerequisites](DEVELOPMENT_REFERENCE.md#optional-m6-02-retained-input-checks).
+
+This separate check verifies the original package and exact historical schema/request identities. It reads the nine frozen generation files and the six M2-04 seed/run files, constructs request bodies locally and makes no provider call. Missing files fail with a prerequisite message; altered files fail authentication. It does not create inputs, renew evaluation allowances, assess model output quality or replace the historical result records below. Synthetic regression results are not evidence that the original evaluation inputs are available.
 
 ### Inspecting M6-02 generation evidence
 
