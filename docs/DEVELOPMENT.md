@@ -2,41 +2,70 @@
 
 [Project overview](../README.md) · [Documentation index](README.md)
 
-This guide takes you from a local checkout to the application open in your browser on Windows. **If this checkout is already set up and built, go straight to [Start the application](#start-the-application).**
+Follow this guide to run the project on Windows. The project folder must already be on your computer.
 
-You run one local server, then open the address it prints in Chrome or Edge. Keep the terminal open while using the application. Scanning works without Ollama or a Groq account; those are needed only for the [optional guidance and generation steps](#enable-guidance-and-generation).
+| What you want to do | Where to start |
+| --- | --- |
+| Run the project for the first time | Follow [First-time setup](#first-time-setup), then [Start the application](#start-the-application). |
+| Open the app again | Go directly to [Start the application](#start-the-application). |
+| Use the app after changing its code | Stop the app. Repeat setup step 1 and [Build the application](#4-build-the-application), then start it. |
+| Use the app after `package-lock.json` changes | Stop the app. Repeat setup steps 1–4, then start it. |
+
+The app runs on your computer. You start it in PowerShell, then open it in Chrome or Edge. Keep PowerShell open while using it. You can scan a page without setting up AI. [Guidance and AI proposals](#enable-guidance-and-generation) need extra setup.
 
 ## First-time setup
 
+Follow steps 1–4 in the **same PowerShell tab**. For each step:
+
+1. Copy all the commands in the box and paste them into PowerShell.
+2. Press Enter and wait until you can type again.
+3. Check the result before moving on.
+
+Copy only the commands, not the example results. **If you see an error, stop and fix it before continuing.**
+
+Steps 2 and 3 need an internet connection to download files.
+
 ### 1. Open the project in PowerShell
 
-Use a new **PowerShell 7** terminal tab dedicated to this project. The environment settings below last only in that terminal and its child processes; close the tab after stopping the application.
+Open **PowerShell 7** from the Windows Start menu or Windows Terminal. Use a new tab for this project. Paste these commands there:
 
 ```powershell
 Set-Location -LiteralPath 'C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab'
 $ErrorActionPreference = 'Stop'
+$PSVersionTable.PSVersion
 node --version
 npm.cmd --version
+git --version
 ```
 
-The required versions are **Node.js 24.20.0** and **npm 11.19.0**, as recorded in [package.json](../package.json). If either command is missing or reports another version, install or select the [pinned Node.js distribution](https://nodejs.org/en/download/archive/v24.20.0), then open a new terminal. Git must also be available in that terminal.
+**Check the result:** PowerShell should show version `7.x`, Node `v24.20.0`, npm `11.19.0`, and Git its version number. The project requires these Node/npm versions, listed in [package.json](../package.json).
 
-The path above is your current checkout. If you move or clone the project elsewhere, change that path; the remaining startup paths are calculated from it.
+`npm.cmd` is the Windows command for npm. It installs the packages the project needs and runs tasks such as building the app.
+
+If PowerShell shows version `5`, open PowerShell 7 instead. If Node/npm is missing or has a different version, install or switch to [Node.js 24.20.0](https://nodejs.org/en/download/archive/v24.20.0). If Git is missing, install Git. After changing any of these tools, open a new PowerShell tab and repeat this step.
+
+The first command opens your project folder. If your folder is somewhere else, change the path in this step and in the startup commands.
 
 ### 2. Install the project dependencies
 
-Run this once after cloning, and again when the dependency lockfile changes:
+This downloads the packages the project needs. Run it the first time and whenever `package-lock.json` changes:
 
 ```powershell
 npm.cmd ci --ignore-scripts --no-audit --no-fund --include=dev --include=optional
 if ($LASTEXITCODE -ne 0) { throw 'Dependency installation failed.' }
 ```
 
-This installs the versions in `package-lock.json`. Keep lifecycle scripts disabled and retain optional dependencies, which include the Windows compiler and build binaries.
+**Expected result:** the command finishes without an error, and you can type again. The packages are now in `node_modules`. Keep the command options as written: they include the Windows build tools and prevent packages from running install scripts.
 
 ### 3. Install the scanner browser
 
-The scanner uses its own Chromium installation, separate from the browser you use to view the app. If `m104-browser-runtime/browsers/chromium-1234/chrome-win64/chrome.exe` already exists in this checkout, skip this download.
+The app uses a browser called Chromium to scan pages. Check whether it is already installed for this project:
+
+```powershell
+Test-Path -LiteralPath 'm104-browser-runtime/browsers/chromium-1234/chrome-win64/chrome.exe'
+```
+
+**`True` means it is installed:** go to step 4. **`False` means it is missing:** run these commands:
 
 ```powershell
 $env:PLAYWRIGHT_BROWSERS_PATH = Join-Path (Get-Location).Path 'm104-browser-runtime/browsers'
@@ -46,11 +75,11 @@ node node_modules/playwright/cli.js install chromium --no-shell
 if ($LASTEXITCODE -ne 0) { throw 'Chromium installation failed.' }
 ```
 
-The installed Playwright package selects Chromium revision 1234. The application itself does not download browsers.
+**Expected result:** the download finishes without an error. Repeat the `Test-Path` command; it should now show `True`. The download command selects the Chromium version this project needs. It does not replace your regular Chrome or Edge browser.
 
 ### 4. Build the application
 
-Run this after dependency setup and whenever you change application code. Stop a running application before rebuilding. The build replaces generated files under `dist/client`; saved analysis runs are stored separately.
+Building prepares the files you will see in the browser. Stop the app if it is running, then paste this whole block into the same PowerShell tab. It checks the code and builds the app. Your saved results are kept.
 
 ```powershell
 npm.cmd run typecheck
@@ -59,11 +88,31 @@ npm.cmd run build -- --configLoader native
 if ($LASTEXITCODE -ne 0) { throw 'Client build failed.' }
 ```
 
-When both commands succeed, continue below. The complete regression suite is documented separately in the [maintainer reference](DEVELOPMENT_REFERENCE.md#build-and-verify-the-walking-skeleton); it is not a daily startup step.
+What the commands mean:
+
+| Command | Purpose |
+| --- | --- |
+| `npm.cmd run typecheck` | Check the code for TypeScript errors. No error message means the check passed. |
+| Each `if ($LASTEXITCODE -ne 0) { throw ... }` line | Show an error if the command just above it failed. `0` means success; any other exit code means failure. |
+| `npm.cmd run build -- --configLoader native` | Create the browser files in `dist/client`. Keep the extra options: they tell the build tool how to read its settings. |
+
+**Expected result:** both commands finish without errors, the build lists the files it created, and you can type again. Check that the main browser file exists:
+
+```powershell
+Test-Path -LiteralPath 'dist/client/index.html'
+```
+
+It should show `True`. Only continue if the build also finished without errors. **The app is built but is not running yet.** Next, [start the application](#start-the-application).
+
+The [maintainer reference](DEVELOPMENT_REFERENCE.md#build-and-verify-the-walking-skeleton) explains how to run all project tests. You do not need to run them each time you open the app.
 
 ## Start the application
 
-Use a new PowerShell 7 terminal tab, or continue in the one used for setup. Run this entire block from the project checkout. Start only one server for this checkout.
+### 1. Run the startup block
+
+Use the same PowerShell tab as before, or open a new **PowerShell 7** tab. Paste and run all the commands below. They open the project folder, set up the scanner, and start the app. **Do not start a second copy while this one is running.**
+
+If you have already set up and built the app, and nothing has changed, these are the only commands you need to run.
 
 ```powershell
 Set-Location -LiteralPath 'C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab'
@@ -87,54 +136,64 @@ node src/server/main.ts
 if ($LASTEXITCODE -ne 0) { throw 'The local service exited with an error.' }
 ```
 
-The temporary-directory settings are required by the current scanner. The Git revision identifies the application in saved records. Port `0` asks Windows to choose an available port.
+The scanner needs the temporary folder set above. The commands also record the code version and let Windows choose a free port for the app's address. Keep these settings as written.
 
-A successful start prints a message like this; your port may differ:
+### 2. Wait for the ready message
+
+When the app is ready, PowerShell shows a message like this. Do not paste this example into PowerShell:
 
 ```json
 {"event":"service-ready","url":"http://127.0.0.1:54321"}
 ```
 
-**Open the exact URL printed in your terminal** in Chrome or Edge. The terminal stays busy because it is running the server; that is expected.
+PowerShell stays busy while the app runs. **You do not need to wait until you can type again.** If you see `service-startup-failed`, check [Troubleshooting](#troubleshooting).
 
-Enter one public HTTPS page you are authorized to analyze, choose Local or Groq, and click **Analyze**. Choosing a mode does not call a model. The scanner opens its own browser context and returns the findings to this interface.
+### 3. Open the application in your browser
+
+Copy the address after `"url":`, without the quotes, and open it in Chrome or Edge. Use the address shown in your PowerShell tab; its number may differ from the example. Keep that tab open.
+
+**Expected result:** you see the app's Analyze form. The address may change each time you start the app, so always use the new address from PowerShell.
+
+### 4. Run a scan
+
+Enter the address of a public HTTPS page you have permission to scan. Choose Local or Groq, then click **Analyze**. Either choice lets you scan without setting up AI or an API key. Selecting a mode does not contact an AI provider. Results appear in the app. To get guidance or AI proposals, complete the [extra setup below](#enable-guidance-and-generation).
 
 ## Stop the application
 
-Return to the server terminal, type `stop`, and press Enter. Wait for:
+Go back to the PowerShell tab where the app is running. Type **`stop`** without quotes and press Enter. Wait for this message:
 
 ```json
 {"event":"service-stopped"}
 ```
 
-Then close the terminal tab. To use the app again, repeat [Start the application](#start-the-application); reinstalling dependencies and rebuilding are unnecessary unless they changed.
+You should now be able to type PowerShell commands again. Close the tab to clear its temporary settings. Next time, follow [Start the application](#start-the-application).
 
 ## Enable guidance and generation
 
-These are additional prerequisites for actions you take after a scan:
+Scanning needs no AI setup. These later actions need extra tools:
 
 | Action | What you need |
 | --- | --- |
 | Scan a page | The setup above; no model or API key |
-| Get guidance in either mode | A running local Ollama installation with `embeddinggemma` |
-| Generate in Local mode | The admitted Ollama runtime and `qwen3.5:4b` model |
-| Generate in Groq mode | Your Groq key in the repository-root `.env`, plus local Ollama/`embeddinggemma` for guidance |
+| Get guidance in either mode | Ollama running on your computer with the `embeddinggemma` model installed |
+| Generate in Local mode | The required Ollama version and `qwen3.5:4b` model, described in the Local setup link below |
+| Generate in Groq mode | Your Groq API key in `.env` in the project folder, plus Ollama and `embeddinggemma` for guidance |
 
-Ollama and its models are installed manually outside the application. Follow the [exact Local prerequisites](APPLICATION_GUIDE.md#fixed-local-qwen-adapter) or [Groq credential setup](APPLICATION_GUIDE.md#fixed-groq-adapter). For the interface steps, continue with [getting guidance](APPLICATION_GUIDE.md#getting-guidance-for-one-finding), [generating a proposal](APPLICATION_GUIDE.md#inspecting-generation-for-one-finding), and [reviewing it](APPLICATION_GUIDE.md#reviewing-one-proposal).
+The app does not install Ollama or its models for you. Follow [Local setup](APPLICATION_GUIDE.md#fixed-local-qwen-adapter) or [Groq API key setup](APPLICATION_GUIDE.md#fixed-groq-adapter). Then follow the steps to [get guidance](APPLICATION_GUIDE.md#getting-guidance-for-one-finding), [generate a proposal](APPLICATION_GUIDE.md#inspecting-generation-for-one-finding), and [review it](APPLICATION_GUIDE.md#reviewing-one-proposal).
 
 ## Troubleshooting
 
 | What you see | What to check |
 | --- | --- |
-| `node`, `npm.cmd`, or `git` is not recognized | Install/select the prerequisite and open a new PowerShell terminal. |
-| `client-unavailable` at startup | Complete the build step and confirm `dist/client/index.html` exists. |
-| `invalid-configuration` at startup | Run the whole startup block; `A11Y_APPLICATION_REVISION` must come from this checkout's `git rev-parse HEAD`. |
-| A scan fails with a browser error | Check that Chromium is installed and that you used the whole startup block, including `TEMP`, `TMP`, and `PLAYWRIGHT_BROWSERS_PATH`. |
-| The scan temporary directory is not empty | Stop any running server. Inspect `temp/m103-scan` for leftovers from an interrupted operation; do not delete unfamiliar files or clear the directory while a process may own it. |
-| The page cannot be reached from a restricted execution environment | Run the app from your normal local terminal with access to the authorized target. A failed navigation is not a zero-finding scan. |
-| Get guidance or Generate fails | Check the prerequisites for that action above. Successful startup or scanning does not prove model readiness. |
+| `node`, `npm.cmd`, or `git` is not recognized | Install the missing tool, then open a new PowerShell tab. |
+| `client-unavailable` at startup | Repeat setup step 4. The build must finish without errors. |
+| `invalid-configuration` at startup | Run the complete startup block. It reads the code version from Git and sets the values the app needs. |
+| A scan fails with a browser error | Check Chromium as shown in setup step 3. Restart using the complete startup block so the scanner has the correct settings. |
+| The scan temporary directory is not empty | Stop the app. Check `temp/m103-scan` for files left by an interrupted scan. Do not delete files you do not recognize or files another program may still be using. |
+| A restricted environment blocks access to the page | Run the app from PowerShell on your computer, where the page is reachable. A page that failed to load has not been successfully scanned. |
+| Get guidance or Generate fails | Check the extra tools listed above. A working scan does not mean the AI tools are ready. |
 
-Analysis records are saved under `data/runs/<run-id>/run.json`. Restarting the app does not reopen previous results in the UI. See [retention and deliberate deletion](DEVELOPMENT_REFERENCE.md#retained-runs-and-deletion) when managing saved files.
+Results are saved in `data/runs/<run-id>/run.json`. The app cannot reopen previous results on screen after a restart. See [how to keep or delete saved results](DEVELOPMENT_REFERENCE.md#retained-runs-and-deletion) before removing any files.
 
 <details>
 <summary>Maintainer references and older section links</summary>
