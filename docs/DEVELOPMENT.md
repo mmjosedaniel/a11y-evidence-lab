@@ -238,13 +238,15 @@ The root of `src/client` contains [main.tsx](../src/client/main.tsx) for startup
 
 | Folder | Responsibility |
 | --- | --- |
-| [components](../src/client/components) | React forms and views, grouped into analysis and results. |
+| [components](../src/client/components) | React forms and views, grouped into analysis and results, plus results focus management. |
 | [analysis](../src/client/analysis) | Validate the response to an initial page analysis. |
-| [findings](../src/client/findings) | Validate guidance and generation responses for a selected Finding. |
+| [findings](../src/client/findings) | Execute guidance and generation requests and validate their responses for a selected Finding. |
 | [review](../src/client/review) | Validate review forms and responses, and manage review requests. |
 | [rescan](../src/client/rescan) | Send, manage and validate intentional rescan requests. |
 | [comparison](../src/client/comparison) | Read and validate the availability of saved comparison evidence. |
 | [responses](../src/client/responses) | Shared detached response snapshots and equality checks. |
+
+`App.tsx` keeps the shared run state, operation reservations, result publication, and comparison/preview coordination. It delegates generation deadlines and cancellation to [generation-request.ts](../src/client/findings/generation-request.ts), guidance callback execution to [guidance-request.ts](../src/client/findings/guidance-request.ts), and DOM focus capture and restoration to [useResultsFocus.ts](../src/client/components/results/useResultsFocus.ts). The request modules return control to `App` to publish results; they do not own shared application state. Guidance does not gain a browser-side timeout or cancellation policy from this separation.
 
 These folders organize existing client behavior; the service continues to own scanning, model calls and persistence. Archived plans and frozen evaluation manifests retain their original source paths and identities. Use this map for current code locations; moving a file does not renew historical evaluation evidence.
 

@@ -1,16 +1,16 @@
-import { generationTimeoutMs } from '../shared/generation-timeout.ts';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import type { PageAnalysisRun } from '../server/domain/run-contract.ts';
 import { AnalyzeSection } from './components/analysis/AnalyzeSection.tsx';
 import type { AnalysisConfiguration, AnalysisError, AnalyzeIntent } from './components/analysis/analysisTypes.ts';
 import { ResultsSection } from './components/results/ResultsSection.tsx';
+import { useResultsFocus } from './components/results/useResultsFocus.ts';
 import type { ResultSelection } from './components/results/resultPresentation.ts';
 import { admit, sameProvider } from './analysis/run-admission.ts';
-import { admitGuidance } from './findings/finding-guidance-admission.ts';
+import { executeGuidanceRequest } from './findings/guidance-request.ts';
 import type { GuidanceIntent } from './findings/finding-guidance-admission.ts';
 import type { GuidancePresentation } from './components/results/FindingGuidance.tsx';
-import { admitGeneration } from './findings/finding-generation-admission.ts';
+import { createGenerationRequest } from './findings/generation-request.ts';
 import type { GenerationIntent } from './findings/finding-generation-admission.ts';
 import { finalReviewStatus, generationAnnouncement, reviewedAnnouncement } from './components/results/FindingGeneration.tsx';
 import type { GenerationPresentation } from './components/results/FindingGeneration.tsx';
@@ -72,8 +72,6 @@ export function App(props: AppProps): ReactElement {
   const reviewOwner = useRef(false);
   const [reviewLocked, setReviewLocked] = useState(false);
   const [reviews, setReviews] = useState<Readonly<Record<string, ReviewPresentation>>>({});
-  const savedFocus = useRef<string | null>(null);
-  const currentReviewForm = useRef<{ findingId: string; element: HTMLFormElement } | null>(null);
   const [rescan, setRescan] = useState<RescanPresentation | null>(null);
   const [submittedRescan, setSubmittedRescan] = useState<{
     baselineRunId: string; findingId: string; mode: 'local' | 'groq';
@@ -91,10 +89,6 @@ export function App(props: AppProps): ReactElement {
   const previewing = useRef(false);
   const [previewSelection, setPreviewSelection] = useState<ResultSelection | null>(null);
   const mounted = useRef(true);
-  const resultsContent = useRef<HTMLDivElement>(null);
-  const resultsHeading = useRef<HTMLHeadingElement>(null);
-  const moveResultsFocus = useRef(false);
-  const comparisonFocus = useRef<Element | null>(null);
 
   useEffect(() => {
     mounted.current = true;
@@ -114,14 +108,9 @@ export function App(props: AppProps): ReactElement {
     };
   }, []);
 
-  useLayoutEffect(() => {
-    const removedFocus = comparisonFocus.current;
-    comparisonFocus.current = null;
-    if (moveResultsFocus.current || (removedFocus && !removedFocus.isConnected)) {
-      resultsHeading.current?.focus();
-    }
-    moveResultsFocus.current = false;
-  }, [complete, preview, comparisonAvailability]);
+  const { resultsContent, resultsHeading, captureComparisonRemovalFocus, captureReplacementFocus,
+    requestResultsFocus, attachReviewForm, captureSavedReviewFocus, clearSavedFocus, resetReviewFocus, takeSavedFocus
+  } = useResultsFocus(complete, preview, comparisonAvailability, () => previewing.current);
 
   function showError(code: string, unsaved = false, cleanup = false): void {
     const text = `Analyze failed: ${code}.`;
@@ -166,9 +155,7 @@ export function App(props: AppProps): ReactElement {
         availability.current = result;
         setComparisonAvailability(result);
         if (result.status !== 'available') {
-          // Restore only focus whose actual DOM owner disappears in this update.
-          const focused = document.activeElement;
-          comparisonFocus.current = resultsContent.current?.contains(focused) ? focused : null;
+          captureComparisonRemovalFocus();
           previewing.current = false;
           setPreview(false);
           if (result.status === 'unavailable') setBaselinePreview(null);
@@ -187,10 +174,10 @@ export function App(props: AppProps): ReactElement {
         stopComparisonRead();
         availability.current = { status: 'unverified' };
         setComparisonAvailability(availability.current);
-        moveResultsFocus.current = !!resultsContent.current?.contains(document.activeElement);
+        captureReplacementFocus();
         setSelectedResult(null);
         setReviews({});
-        savedFocus.current = null;
+        clearSavedFocus();
         guidanceRef.current = {};
         setGuidance(guidanceRef.current);
         continuation.current = null;
@@ -291,37 +278,32 @@ export function App(props: AppProps): ReactElement {
       if (cleanup) retainOwner();
       setAnnouncement(`Guidance failed for ${label}: ${error}.${unsaved ? ' This guidance attempt was not saved.' : ''}${cleanup ? ' Resource cleanup is uncertain.' : ''}`);
     };
-    try {
-      const raw = await callback({ runId: run.runId, findingId });
-      if (!current()) return;
-      const outcome = admitGuidance(raw, run, findingId);
-      // Descriptor reflection may reenter or unmount App; ownership must still be ours.
-      if (!current()) return;
-      if (!outcome) { fail('invalid-result'); return; }
-      if (outcome.run) {
-        held.current = { ...held.current, complete: outcome.run };
-        setComplete(outcome.run);
-        if (outcome.run.scan.findings.some(item => item.state === 'active')) retainOwner();
-      }
-      if (!outcome.ok) { fail(outcome.error, !outcome.persisted, outcome.cleanupFailed); return; }
-      updateGuidance(findingId, { attempted: true, view: outcome.view });
-      const selected = outcome.run.scan.findings.find(item => item.findingId === findingId);
-      if (selected?.state === 'active' && 'retrieval' in selected && selected.retrieval.status === 'completed'
-          && 'support' in selected.retrieval && selected.retrieval.support.state === 'supported'
-          && !('generation' in selected) && !('result' in selected)) {
-        continuation.current = { run: outcome.run, findingId };
-      }
-      setAnnouncement(selected?.state === 'abstained'
-        ? `No proposal generated for ${label}. No generation provider was called.`
-        : `Guidance ready for ${label}.`);
-    } catch {
-      if (current()) fail('request-failed');
-    } finally {
-      if (mounted.current && reservation.current === token) {
-        reservation.current = null;
-        setBusy(false);
-      }
-    }
+    await executeGuidanceRequest({ run, findingId, callback, current, fail,
+      settle: outcome => {
+        if (outcome.run) {
+          held.current = { ...held.current, complete: outcome.run };
+          setComplete(outcome.run);
+          if (outcome.run.scan.findings.some(item => item.state === 'active')) retainOwner();
+        }
+        if (!outcome.ok) { fail(outcome.error, !outcome.persisted, outcome.cleanupFailed); return; }
+        updateGuidance(findingId, { attempted: true, view: outcome.view });
+        const selected = outcome.run.scan.findings.find(item => item.findingId === findingId);
+        if (selected?.state === 'active' && 'retrieval' in selected && selected.retrieval.status === 'completed'
+            && 'support' in selected.retrieval && selected.retrieval.support.state === 'supported'
+            && !('generation' in selected) && !('result' in selected)) {
+          continuation.current = { run: outcome.run, findingId };
+        }
+        setAnnouncement(selected?.state === 'abstained'
+          ? `No proposal generated for ${label}. No generation provider was called.`
+          : `Guidance ready for ${label}.`);
+      },
+      cleanup: () => {
+        if (mounted.current && reservation.current === token) {
+          reservation.current = null;
+          setBusy(false);
+        }
+      },
+    });
   }
 
   async function generateFinding(findingId: string, label: string): Promise<void> {
@@ -329,9 +311,39 @@ export function App(props: AppProps): ReactElement {
     if (!mounted.current || previewing.current || rescanOwner.current || reservation.current || reviewOwner.current || !run || generationRef.current[findingId]
         || continuation.current?.run !== run || continuation.current.findingId !== findingId) return;
     const token = {};
-    const controller = new AbortController();
-    const duration = generationTimeoutMs(run.providerContext.mode);
-    const expires = performance.now() + duration;
+    const request = createGenerationRequest({ run, findingId,
+      current: () => mounted.current && reservation.current === token && held.current.complete === run,
+      readCallback: () => props.generateFinding,
+      unknown: error => {
+        update({ status: 'unknown', error });
+        retainOwner();
+        reservation.current = null;
+        setBusy(false);
+        setAnnouncement(`${label}. ${generationAnnouncement(run.providerContext, findingId, { status: 'unknown', error })}`);
+      },
+      settle: outcome => {
+        update({ status: 'settled', outcome });
+        if (outcome.run) {
+          held.current = { ...held.current, complete: outcome.run };
+          setComplete(outcome.run);
+        }
+        if (outcome.ok || (outcome.persisted && !outcome.cleanupFailed)) {
+          retainedOwner.current = false;
+          setOwnerKnown(false);
+        } else {
+          retainOwner();
+        }
+        setAnnouncement(`${label}. ${generationAnnouncement(run.providerContext, findingId, { status: 'settled', outcome })}`);
+      },
+      cleanup: stop => {
+        if (stopGeneration.current === stop) stopGeneration.current = null;
+        // Successful settlement replaces the run object but still owns this token.
+        if (mounted.current && reservation.current === token) {
+          reservation.current = null;
+          setBusy(false);
+        }
+      },
+    });
     reservation.current = token;
     continuation.current = null;
     const update = (state: GenerationPresentation): void => {
@@ -341,67 +353,12 @@ export function App(props: AppProps): ReactElement {
     update({ status: 'pending' });
     setBusy(true);
     setAnnouncement(`${label}. ${generationAnnouncement(run.providerContext, findingId, { status: 'pending' })}`);
-    const current = (): boolean => mounted.current && reservation.current === token && held.current.complete === run;
-    const unknown = (error: Extract<GenerationPresentation, { status: 'unknown' }>['error']): void => {
-      if (!current()) return;
-      update({ status: 'unknown', error });
-      retainOwner();
-      reservation.current = null;
-      setBusy(false);
-      setAnnouncement(`${label}. ${generationAnnouncement(run.providerContext, findingId, { status: 'unknown', error })}`);
-      controller.abort();
-    };
-    const timer = window.setTimeout(() => unknown('timeout'), duration);
-    const stop = (): void => { window.clearTimeout(timer); controller.abort(); };
-    stopGeneration.current = stop;
-    const timely = (): boolean => {
-      if (!current()) return false;
-      if (performance.now() >= expires) { unknown('timeout'); return false; }
-      return true;
-    };
-    try {
-      // The continuation and action are consumed before callback property reflection.
-      const callback = props.generateFinding;
-      if (!timely()) return;
-      if (typeof callback !== 'function') { unknown('unavailable'); return; }
-      const raw = await callback({ runId: run.runId, findingId }, controller.signal);
-      if (!timely()) return;
-      const outcome = admitGeneration(raw, run, findingId);
-      if (!timely()) return;
-      if (!outcome) { unknown('invalid-result'); return; }
-      update({ status: 'settled', outcome });
-      if (outcome.run) {
-        held.current = { ...held.current, complete: outcome.run };
-        setComplete(outcome.run);
-      }
-      if (outcome.ok || (outcome.persisted && !outcome.cleanupFailed)) {
-        retainedOwner.current = false;
-        setOwnerKnown(false);
-      } else {
-        retainOwner();
-      }
-      setAnnouncement(`${label}. ${generationAnnouncement(run.providerContext, findingId, { status: 'settled', outcome })}`);
-    } catch {
-      unknown('request-failed');
-    } finally {
-      window.clearTimeout(timer);
-      if (stopGeneration.current === stop) stopGeneration.current = null;
-      if (mounted.current && reservation.current === token) {
-        reservation.current = null;
-        setBusy(false);
-      }
-    }
+    stopGeneration.current = request.stop;
+    await request.start();
   }
 
   function reviewBlocked(): boolean {
     return !mounted.current || previewing.current || rescanOwner.current || !!reservation.current || reviewOwner.current || retainedOwner.current;
-  }
-
-  function attachReviewForm(findingId: string, element: HTMLFormElement): () => void {
-    currentReviewForm.current = { findingId, element };
-    return () => {
-      if (currentReviewForm.current?.element === element) currentReviewForm.current = null;
-    };
   }
 
   function reviewFinding(findingId: string, label: string, review: unknown): void {
@@ -428,9 +385,7 @@ export function App(props: AppProps): ReactElement {
         reviewOwner.current = retained;
         setReviewLocked(retained);
         if (result.status === 'saved') {
-          const currentForm = currentReviewForm.current;
-          savedFocus.current = currentForm?.findingId === findingId
-            && currentForm.element.contains(document.activeElement) ? findingId : null;
+          captureSavedReviewFocus(findingId);
           held.current = { ...held.current, complete: result.run };
           setComplete(result.run);
           const finding = result.run.scan.findings.find(item => item.findingId === findingId)!;
@@ -512,8 +467,7 @@ export function App(props: AppProps): ReactElement {
         setOwnerKnown(false);
         reviewOwner.current = false;
         setReviewLocked(false);
-        currentReviewForm.current = null;
-        savedFocus.current = null;
+        resetReviewFocus();
         setRescan(null);
         setError(null);
         setBaselinePreview(captured);
@@ -534,17 +488,10 @@ export function App(props: AppProps): ReactElement {
     if (show && held.current.complete?.comparison && availability.current.status !== 'available') return;
     previewing.current = show;
     if (show) setPreviewSelection(baselinePreview.selection);
-    moveResultsFocus.current = true;
+    requestResultsFocus();
     setPreview(show);
     setAnnouncement(show ? baselineNotice : 'Later results.');
     if (held.current.complete?.comparison) refreshComparison(held.current.complete);
-  }
-
-  function takeSavedFocus(findingId: string): boolean {
-    if (previewing.current) return false;
-    const take = !moveResultsFocus.current && savedFocus.current === findingId;
-    savedFocus.current = null;
-    return take;
   }
 
   function selectResult(selection: ResultSelection, label: string): void {
