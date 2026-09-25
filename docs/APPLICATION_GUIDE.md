@@ -4,11 +4,75 @@
 
 This guide describes the implemented interactions, service boundaries and fixed provider setup. Start with [Run the project locally](DEVELOPMENT.md); consult the [bounded evidence report](BOUNDED_MVP_EVIDENCE.md) for verification limits. Requirements and ADRs remain the controlling authorities.
 
-In this guide: [Get guidance](#getting-guidance-for-one-finding) · [Generate a proposal](#inspecting-generation-for-one-finding) · [Review a proposal](#reviewing-one-proposal) · [Rescan and compare](#intentional-rescans) · [Retrieval APIs](#retrieval-apis) · [Generation APIs](#shared-generation-apis) · [Review APIs](#proposal-review-apis) · [Local setup](#fixed-local-qwen-adapter) · [Groq setup](#fixed-groq-adapter).
+In this guide: [Example walkthrough](#walkthrough-a-form-field-without-a-label) · [Get guidance](#getting-guidance-for-one-finding) · [Generate a proposal](#inspecting-generation-for-one-finding) · [Review a proposal](#reviewing-one-proposal) · [Rescan and compare](#intentional-rescans) · [Retrieval APIs](#retrieval-apis) · [Generation APIs](#shared-generation-apis) · [Review APIs](#proposal-review-apis) · [Local setup](#fixed-local-qwen-adapter) · [Groq setup](#fixed-groq-adapter).
 
 ## Current scope
 
 The [capability summary](../README.md#project-status) distinguishes implemented behavior from later work. Source entry points are the [domain contract](../src/server/domain/run-contract.ts), [run repository](../src/server/persistence/run-repository.ts), [local service](../src/server/service.ts), [scanner](../src/server/scan/scan-page.ts), and [scan minimization](../src/server/scan/normalize-scan.ts). The [retrieval APIs](#retrieval-apis) consume the [closed corpus](CORPUS.md#closed-corpus-snapshot).
+
+For component responsibilities and local/external data flow, see the [implemented system architecture](architecture/SYSTEM_ARCHITECTURE.md).
+
+## Walkthrough: a form field without a label
+
+This reading example uses the project's synthetic [failing form](../fixtures/rd003/form-input-label/failing.html) and [corrected form](../fixtures/rd003/form-input-label/corrected.html). It explains how to interpret the UI; it is not a new recorded run or a promise of a particular AI response. The [evidence report](BOUNDED_MVP_EVIDENCE.md) links the actual observations.
+
+The failing example puts visible text next to an email input without connecting the text to the field:
+
+```html
+<span>Email address</span>
+<input id="rd3-email" type="email">
+```
+
+These files are controlled test inputs. Do not enter a file path or localhost fixture URL into **Analyze**. To follow the steps interactively, use an authorized, non-sensitive public HTTPS page you control with equivalent content and complete the [local setup](DEVELOPMENT.md) first. Keep the frozen repository fixtures unchanged; any page edits belong to your own example page.
+
+### 1. Scan and inspect the finding
+
+Enter the page address, explicitly select Local or Groq, and choose **Analyze**. Scanning itself needs no model or API key. In a successful scan of the failing example, inspect the `label` Finding for the email field. The nearby visible words are not an explicitly associated label in this markup.
+
+Read the captured facts before requesting an AI suggestion. Findings, checks the scanner could not decide automatically, and scan errors are different results. A failed scan is not a result with zero issues.
+
+### 2. Read the guidance
+
+Select the Finding and choose **Get guidance**. This uses local Ollama and EmbeddingGemma in either generation mode when the required evidence is complete. Read the returned passages and their sources.
+
+The app checks whether the required types of guidance are present. That check does not prove that every passage is relevant or that a later AI claim is supported. If evidence or guidance is insufficient, the app explains the missing or conflicting information and does not call a generation model. A retrieval error is shown separately.
+
+### 3. Request and assess a suggestion
+
+If **Generate** becomes available, read the provider/model information and choose Generate once. Local sends the allowed input to the local Ollama runtime; Groq sends it to the fixed external API. A missing prerequisite or failed response remains a failure, with no automatic provider switch.
+
+If a proposal passes validation and is saved, compare each material claim with the scanner evidence and cited guidance. For this example, consider whether a suggested label actually identifies the field and is connected to the intended input. Do not assume that an AI suggestion matches the repository's corrected example. The recorded label-generation cases include unsupported suggestions, as explained in the [Local](BOUNDED_MVP_EVIDENCE.md#local-results) and [Groq](BOUNDED_MVP_EVIDENCE.md#groq-results--inherited-originals) results.
+
+### 4. Save a human decision
+
+Choose **Approve**, **Edit and accept**, or **Reject**. Complete the blocking judgment and then choose **Save decision**. Approval or edit-and-accept also requires confirmation that the resulting proposal's material claims are supported; a contradictory or unresolved judgment cannot be accepted unchanged.
+
+Saving a decision does not change the page. It records your decision alongside the original proposal. A post-change verification reminder remains for later work; it is not completed by approving the proposal. If you select another Finding before saving, unsaved edits are discarded.
+
+### 5. Change your page and compare a later scan
+
+The project-owned corrected example uses an explicit label associated with the same input:
+
+```html
+<label for="rd3-email">Email address</label>
+<input id="rd3-email" type="email">
+```
+
+This is the fixture's authored correction, not an AI-generated or automatically applied edit. If appropriate for your own page, make and publish the equivalent change yourself at the same page address. From the selected baseline Finding, explicitly choose **New scan mode**, then **Start intentional rescan**. You can also take this comparison path without generating or reviewing a proposal.
+
+The later scan is saved as a separate run. Read the **Comparison** region's before/after evidence and explanation. `Resolved` requires a unique matching non-failing scanner observation; disappearance alone is not enough. A changed or ambiguous target can be inconclusive, and incompatible scan context can make the pair not comparable. Even a resolved Finding does not prove whole-page accessibility or that the proposed edit caused the result.
+
+### How to interpret other outcomes
+
+| What you see | Meaning |
+| --- | --- |
+| Abstention | Required evidence or guidance is insufficient. No generation model was called, and there is no proposal to approve. |
+| Guidance or generation failure | That operation did not produce an accepted result. Read the reason; do not treat it as a successful suggestion. |
+| Proposal pending review | Application checks passed, but you still need to assess source support, usefulness and the blocking judgment. |
+| Save outcome unknown | The reply was lost or could not be confirmed; a write may have happened. Do not assume it is safe to submit again. Follow the action-specific limits below. |
+| Later scan saved without comparison | The scan can be valid even when comparison calculation or saving fails. There is no saved comparison outcome to infer. |
+
+Keep the current session open while following the example. Records are saved locally, but the MVP cannot browse or reopen earlier results in the UI after restart. The sections below describe the exact action boundaries; the [architecture guide](architecture/SYSTEM_ARCHITECTURE.md#storage-and-operation-lifetime) explains why saved records and temporary workflow state are different.
 
 ## Getting guidance for one Finding
 

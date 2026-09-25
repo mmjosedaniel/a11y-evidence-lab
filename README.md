@@ -79,9 +79,10 @@ The [documentation index](docs/README.md) lists all guides and explains which do
 
 | Guide | Contents |
 | --- | --- |
-| [Run the project locally](docs/DEVELOPMENT.md) | First-time setup, everyday startup, stopping, and troubleshooting |
+| [Run the project locally](docs/DEVELOPMENT.md) | First-time setup, everyday startup, stopping, troubleshooting, and a [repository map](docs/DEVELOPMENT.md#repository-map) |
 | [Maintainer verification reference](docs/DEVELOPMENT_REFERENCE.md) | Full test instructions, command setup, and deletion of saved runs |
-| [Application workflow and API reference](docs/APPLICATION_GUIDE.md) | Guidance, AI suggestions, human review, scan comparisons, APIs, and provider setup |
+| [Application workflow and API reference](docs/APPLICATION_GUIDE.md) | A [synthetic example walkthrough](docs/APPLICATION_GUIDE.md#walkthrough-a-form-field-without-a-label), user actions, APIs, and provider setup |
+| [System architecture](docs/architecture/SYSTEM_ARCHITECTURE.md) | Component and data-flow diagrams, responsibilities, storage, and local/external boundaries |
 | [Evaluation and evidence inspection](docs/EVALUATION_GUIDE.md) | Fixed evaluation inputs, saved results, and instructions for inspecting them without changes |
 | [Guidance collection and source notices](docs/CORPUS.md) | How the W3C guidance is organized and checked, with attribution and full license notices |
 | [Project concept](docs/PROJECT_CONCEPT.md) and [requirements](docs/PROJECT_REQUIREMENTS.md) | Product goals, detailed workflow, agreed scope, and limits |

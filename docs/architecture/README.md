@@ -1,9 +1,10 @@
 # Architecture
 
-This directory is the entry point for the architecture documentation of A11y Evidence Lab. It separates accepted decisions from proposed designs and remains the architecture authority as the Development-ready project proceeds through its roadmap.
+This directory is the entry point for the architecture documentation of A11y Evidence Lab. It separates the implemented system, accepted decisions and proposed designs. The ADRs retain decision authority; descriptive guides link to source code and evidence.
 
 ## Current documentation
 
+- [Implemented system architecture](SYSTEM_ARCHITECTURE.md) explains components, runtime boundaries, data flow, storage and operation lifetime, with diagrams and source links. Start here to understand how the current application fits together.
 - [Architecture Decision Records](decisions/README.md) document significant accepted technical and architectural decisions, their context, and their consequences.
 - [Candidate architecture](CANDIDATE_ARCHITECTURE.md) organizes proposed system shapes, technology constraints, and adoption gates. Its status is **Proposed**; it is not an accepted decision or implementation authority.
 - [Development literals and execution evidence](../plans/README.md) preserve task-owned implementation choices, reviews, and limitations. Follow the [maintained developer instructions](../../README.md#development-toolchain) for commands and the [capability summary](../../README.md#project-status) for implemented behavior; task completion does not change an ADR's status or establish release qualification.
@@ -41,13 +42,7 @@ OD-019 remains decision history for the three-profile evaluation baseline and it
 
 ## Planned documentation areas
 
-Add architecture documents only when the corresponding design has enough evidence to be useful. Expected areas include:
-
-- System context and component boundaries.
-- Runtime and deployment topology.
-- Data flows, persistence, and lifecycle ownership.
-- Trust boundaries, privacy, and security controls.
-- Architecture diagrams and their supporting explanations.
+The [implemented system guide](SYSTEM_ARCHITECTURE.md) now covers component boundaries, runtime topology, data flow, persistence and local/external data boundaries. Extend it when implementation changes; add another architecture document only for a distinct responsibility that needs its own explanation.
 
 Proposed architecture alternatives remain non-authoritative planning material until accepted. Significant durable decisions belong in an ADR and must be linked from the decision index; candidate documents must not be interpreted as changing the scope or status of an accepted ADR.
 

@@ -209,6 +209,29 @@ For Local proposals, also complete [Local model setup](APPLICATION_GUIDE.md#fixe
 
 Results are saved in `data/runs/<run-id>/run.json`. The app cannot reopen previous results on screen after a restart. See [how to keep or delete saved results](DEVELOPMENT_REFERENCE.md#retained-runs-and-deletion) before removing any files.
 
+## Repository map
+
+Use this map when you want to understand or change the code. The [system architecture](architecture/SYSTEM_ARCHITECTURE.md) explains how the pieces work together; the [application walkthrough](APPLICATION_GUIDE.md#walkthrough-a-form-field-without-a-label) explains what a user sees.
+
+| Location | What it contains |
+| --- | --- |
+| [src/client](../src/client) | React interface, forms, result views and checks on API responses. Start with [App.tsx](../src/client/App.tsx). |
+| [src/server/main.ts](../src/server/main.ts) and [service.ts](../src/server/service.ts) | Application startup and coordination of the local service. |
+| [src/server/local-service](../src/server/local-service) | HTTP routes and operations for scans, guidance, generation, review and rescans. |
+| [src/server/domain](../src/server/domain) | Run/Finding types, allowed data shapes, state validation and evidence-sufficiency rules. |
+| [src/server/scan](../src/server/scan) | Browser scanning, native evidence capture and conversion to allowed records. |
+| [src/server/retrieval](../src/server/retrieval) | Corpus loading, local embeddings, guidance ranking, citations and support checks. |
+| [src/server/generation](../src/server/generation) | Input preparation, Local/Groq adapters and proposal validation. |
+| [src/server/persistence](../src/server/persistence) and [comparison](../src/server/comparison) | Validated local records and conservative comparison rules. |
+| [src/shared](../src/shared) | Small values shared by client and service, such as generation deadlines. |
+| [tests](../tests) | Automated checks and controlled test helpers. Use the [maintained verification commands](DEVELOPMENT_REFERENCE.md#build-and-verify-the-walking-skeleton). |
+| [fixtures/rd003](../fixtures/rd003) | Project-owned failing/corrected HTML for the three fixed scan profiles. These are frozen test inputs, not runtime URL examples. |
+| [corpus](../corpus) and [evaluation](../evaluation) | The fixed W3C guidance collection and versioned evaluation definitions. See the [corpus guide](CORPUS.md) before changing source text or notices. |
+| [docs](README.md) | User/developer guides, requirements, architecture decisions, task evidence and known limitations. |
+| [package.json](../package.json), [package-lock.json](../package-lock.json), [tsconfig.json](../tsconfig.json), [vite.config.ts](../vite.config.ts) | Exact dependencies, commands, independent TypeScript checking and client build settings. |
+
+Generated or local-only files have different purposes: `dist/client` holds the built interface, `data/runs` holds saved analyses, and `temp` holds temporary work and locally retained test/evaluation artifacts. They are not interchangeable with tracked source or portable evidence. Keep credentials and private records out of commits; follow the maintained cleanup instructions rather than deleting these directories blindly.
+
 <details>
 <summary>Maintainer references and older section links</summary>
 
