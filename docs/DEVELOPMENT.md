@@ -2,7 +2,7 @@
 
 [Project overview](../README.md) · [Documentation index](README.md)
 
-Follow this guide to run the project on Windows. The project folder must already be on your computer.
+Follow this guide to run the project on Windows. Use a Git clone of the project, including its `.git` folder. A downloaded source-code ZIP is not enough: startup reads the code version from Git.
 
 | What you want to do | Where to start |
 | --- | --- |
@@ -36,9 +36,11 @@ $PSVersionTable.PSVersion
 node --version
 npm.cmd --version
 git --version
+git rev-parse --is-inside-work-tree
+if ($LASTEXITCODE -ne 0) { throw 'Open a Git clone of the project before continuing.' }
 ```
 
-**Check the result:** PowerShell should show version `7.x`, Node `v24.20.0`, npm `11.19.0`, and Git its version number. The project requires these Node/npm versions, listed in [package.json](../package.json).
+**Check the result:** PowerShell should show version `7.x`, Node `v24.20.0`, npm `11.19.0`, and Git its version number. The last command should print `true`, confirming that you are in a Git repository. The project requires these Node/npm versions, listed in [package.json](../package.json).
 
 `npm.cmd` is the Windows command for npm. It installs the packages the project needs and runs tasks such as building the app.
 
@@ -175,11 +177,22 @@ Scanning needs no AI setup. These later actions need extra tools:
 | Action | What you need |
 | --- | --- |
 | Scan a page | The setup above; no model or API key |
-| Get guidance in either mode | Ollama running on your computer with the `embeddinggemma` model installed |
-| Generate in Local mode | The required Ollama version and `qwen3.5:4b` model, described in the Local setup link below |
+| Get guidance in either mode | Ollama **0.33.3** running on your computer with the required `embeddinggemma` model |
+| Generate in Local mode | The guidance setup above, plus the required `qwen3.5:4b` model described in the Local setup link below |
 | Generate in Groq mode | Your Groq API key in `.env` in the project folder, plus Ollama and `embeddinggemma` for guidance |
 
-The app does not install Ollama or its models for you. Follow [Local setup](APPLICATION_GUIDE.md#fixed-local-qwen-adapter) or [Groq API key setup](APPLICATION_GUIDE.md#fixed-groq-adapter). Then follow the steps to [get guidance](APPLICATION_GUIDE.md#getting-guidance-for-one-finding), [generate a proposal](APPLICATION_GUIDE.md#inspecting-generation-for-one-finding), and [review it](APPLICATION_GUIDE.md#reviewing-one-proposal).
+The app does not install Ollama or its models for you. Use the Ollama version linked in [Local setup](APPLICATION_GUIDE.md#fixed-local-qwen-adapter), even when you plan to generate with Groq. The app expects Ollama at `http://127.0.0.1:11434`. If it is not already running, run `ollama serve` in a separate PowerShell tab and leave that tab open.
+
+In another tab, install the guidance model:
+
+```powershell
+ollama pull embeddinggemma
+if ($LASTEXITCODE -ne 0) { throw 'Guidance model download failed.' }
+```
+
+The app checks the downloaded model against its [fixed embedding model settings](../src/server/retrieval/embedding-profile.ts). A successful download alone does not prove it matches: if a newer download differs, guidance reports a model-identity error. Do not change those settings just to bypass the check.
+
+For Local proposals, also complete [Local model setup](APPLICATION_GUIDE.md#fixed-local-qwen-adapter). For Groq proposals, complete [Groq API key setup](APPLICATION_GUIDE.md#fixed-groq-adapter). Then follow the steps to [get guidance](APPLICATION_GUIDE.md#getting-guidance-for-one-finding), [generate a proposal](APPLICATION_GUIDE.md#inspecting-generation-for-one-finding), and [review it](APPLICATION_GUIDE.md#reviewing-one-proposal).
 
 ## Troubleshooting
 
@@ -188,6 +201,7 @@ The app does not install Ollama or its models for you. Follow [Local setup](APPL
 | `node`, `npm.cmd`, or `git` is not recognized | Install the missing tool, then open a new PowerShell tab. |
 | `client-unavailable` at startup | Repeat setup step 4. The build must finish without errors. |
 | `invalid-configuration` at startup | Run the complete startup block. It reads the code version from Git and sets the values the app needs. |
+| Git reports `not a git repository` | Use a Git clone with its `.git` folder, and open that project folder in PowerShell. |
 | A scan fails with a browser error | Check Chromium as shown in setup step 3. Restart using the complete startup block so the scanner has the correct settings. |
 | The scan temporary directory is not empty | Stop the app. Check `temp/m103-scan` for files left by an interrupted scan. Do not delete files you do not recognize or files another program may still be using. |
 | A restricted environment blocks access to the page | Run the app from PowerShell on your computer, where the page is reachable. A page that failed to load has not been successfully scanned. |
