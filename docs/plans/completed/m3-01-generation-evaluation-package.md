@@ -1,5 +1,7 @@
 # Freeze the generation evaluation package
 
+> Privacy note: Personal directory prefixes in this archived plan have been replaced with `C:/projects/a11y-evidence-lab` and `C:/Users/developer` (or their backslash equivalents). These are illustrative aliases, including in recorded commands and errors. Artifact names, hashes and outcomes are unchanged; the aliases must not be used to authenticate original path-bound evidence or replay historical operations. For current setup, use the [local startup guide](../../DEVELOPMENT.md).
+
 This ExecPlan is a living document. Maintain `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` as work proceeds. This document must be maintained in accordance with `PLANS.md`.
 
 ## Current state
@@ -329,7 +331,7 @@ if ($LASTEXITCODE -ne 0) { throw 'Retained evidence check failed' }
 
 **Historical planning section:** Its unresolved slots were completed by [M301-COMMAND-02](#m301-command-02--resolved-preparation-validation-and-closure-callers). The original heading and steps remain for traceability; they are not the current verification entry point.
 
-Run from `C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab`. Load only the definition block in [README development command preparation](../../../README.md#development-command-preparation) into the actual calling PowerShell session; do not replay the adjacent dependency-restore command. Missing runtime/dependencies stop for reconciliation, not installation.
+Run from `C:/projects/a11y-evidence-lab`. Load only the definition block in [README development command preparation](../../../README.md#development-command-preparation) into the actual calling PowerShell session; do not replay the adjacent dependency-restore command. Missing runtime/dependencies stop for reconciliation, not installation.
 
 ```powershell
 git status --short

@@ -1,5 +1,7 @@
 # Implement the shared generation stage and validation
 
+> Privacy note: Personal directory prefixes in this archived plan have been replaced with `C:/projects/a11y-evidence-lab` and `C:/Users/developer` (or their backslash equivalents). These are illustrative aliases, including in recorded commands and errors. Artifact names, hashes and outcomes are unchanged; the aliases must not be used to authenticate original path-bound evidence or replay historical operations. For current setup, use the [local startup guide](../../DEVELOPMENT.md).
+
 This ExecPlan is a living document. Maintain `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` as work proceeds. This document must be maintained in accordance with `PLANS.md`.
 
 ## Current state
@@ -333,7 +335,7 @@ Allow at most two final decision-artifact correction cycles; R3 corrections reru
 
 ## Concrete Steps
 
-Working directory: `C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab`. Load the definitions from [maintained README preparation](../../../README.md#development-command-preparation) in each actual PowerShell caller. Do not execute adjacent install/restore or historical task commands merely to load the definitions.
+Working directory: `C:/projects/a11y-evidence-lab`. Load the definitions from [maintained README preparation](../../../README.md#development-command-preparation) in each actual PowerShell caller. Do not execute adjacent install/restore or historical task commands merely to load the definitions.
 
 ```powershell
 git status --short

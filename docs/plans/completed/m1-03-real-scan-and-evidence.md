@@ -1,5 +1,7 @@
 # Implement M1-03 real scanning and minimized evidence
 
+> Privacy note: Personal directory prefixes in this archived plan have been replaced with `C:/projects/a11y-evidence-lab` and `C:/Users/developer` (or their backslash equivalents). These are illustrative aliases, including in recorded commands and errors. Artifact names, hashes and outcomes are unchanged; the aliases must not be used to authenticate original path-bound evidence or replay historical operations. For current setup, use the [local startup guide](../../DEVELOPMENT.md).
+
 This ExecPlan is a living document. Maintain `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` as work proceeds. This document must be maintained in accordance with `PLANS.md`.
 
 **Owning task:** [M1-03 — Implement the real exact-three-rule scan and minimized evidence](../../DEVELOPMENT_ROADMAP.md#m1-03--implement-the-real-exact-three-rule-scan-and-minimized-evidence). **Roadmap status:** Complete. The subsequent owner instruction explicitly authorizes this exact task's research, bounded implementation, verification and documentation closure. The original planning-only checkpoint remains history; the R3 literal barrier, both S3 reviews, different final integrated review, exact runtime removal and documentation closure passed. M1-04 and M1-05 remain unselected, and M1 is not complete.
@@ -187,7 +189,7 @@ For lifecycle, compare (B1) direct owned Playwright resources with one operation
 
 Research questions are frozen to the eight rows in Decide before workers; evidence dimensions are native shape/check/contrast integrity, actual-element correspondence and minimization (report `M103-R-NATIVE`), and admission/profile/service compatibility, timeout/abort/late work/cleanup plus exact command and acquisition effects (report `M103-R-BROWSER`). Both share M103-I1 through I8, the common criteria and hard gates above. Source evidence is the actual installed pinned code plus current official upstream API documentation. Runtime proof is deferred only for already-defined semantics, never for an unresolved contract.
 
-The current environment is Windows PowerShell; Node 24.20.0/npm 11.19.0 resolve through `C:/nvm4w/nodejs`; Python 3.12.10 resolves through `C:/Users/mmjos/AppData/Local/Programs/Python/Python312/python.exe`. Repository root is `C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab`. The default `C:/Users/mmjos/AppData/Local/ms-playwright/chromium-1234/chrome-win64/chrome.exe` is absent and must not be acquired globally. Research must resolve a task-owned acquisition root compatible with the guard, which rejects ignored scope roots; no ignore-control change or guard bypass is authorized. Existing `temp/CONVERSATION.md`, `temp/rd002-npm-cache`, all dependencies and prior lease history are preserved.
+The current environment is Windows PowerShell; Node 24.20.0/npm 11.19.0 resolve through `C:/nvm4w/nodejs`; Python 3.12.10 resolves through `C:/Users/developer/AppData/Local/Programs/Python/Python312/python.exe`. Repository root is `C:/projects/a11y-evidence-lab`. The default `C:/Users/developer/AppData/Local/ms-playwright/chromium-1234/chrome-win64/chrome.exe` is absent and must not be acquired globally. Research must resolve a task-owned acquisition root compatible with the guard, which rejects ignored scope roots; no ignore-control change or guard bypass is authorized. Existing `temp/CONVERSATION.md`, `temp/rd002-npm-cache`, all dependencies and prior lease history are preserved.
 
 Budget: the two critical reports may run concurrently, each at most one initial report and one targeted follow-up; mandatory analyst one synthesis and one correction; fresh pre-draft critical research reviewer one checkpoint and one supported correction; a different fresh final critical research reviewer with at most two artifact-correction cycles. The primary drafts directly only after DRAFT READY and the pre-draft PASS. Every assignment is read-only, capsule-scoped, and stops on repeated decisive gaps, unsupported mechanics, exhausted allowance or changed authority. Reports do not authorize execution. Expected output is source-linked disposition, exact implementable recommendations, failure cases, unknowns/reversal conditions and readiness, bounded to the assigned dimension.
 
@@ -395,7 +397,7 @@ Required proof includes before-effect URL/mode rejection; both exact provider co
 
 ### L3.8 Exact commands, environment and effects
 
-All commands run from `C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab`. The selected Node executable is `C:/nvm4w/nodejs/node.exe`; npm.cmd resolves beside it; Python is `C:/Users/mmjos/AppData/Local/Programs/Python/Python312/python.exe`. Expected versions are 24.20.0, 11.19.0 and 3.12.10. No dependency restore is needed or authorized. Reuse the exact `$toolchainOptions` array in Concrete Steps; it confines npm's declared cache to existing `temp/rd002-npm-cache` and disables lifecycle/install/audit/funding/update behavior for these run commands.
+All commands run from `C:/projects/a11y-evidence-lab`. The selected Node executable is `C:/nvm4w/nodejs/node.exe`; npm.cmd resolves beside it; Python is `C:/Users/developer/AppData/Local/Programs/Python/Python312/python.exe`. Expected versions are 24.20.0, 11.19.0 and 3.12.10. No dependency restore is needed or authorized. Reuse the exact `$toolchainOptions` array in Concrete Steps; it confines npm's declared cache to existing `temp/rd002-npm-cache` and disables lifecycle/install/audit/funding/update behavior for these run commands.
 
 **M103-CMD-ENV.** Before Node/npm commands, run this name-only environment check. It is a developer-command prerequisite, not production configuration machinery:
 
@@ -420,7 +422,7 @@ if ($m103Rejected.Count -ne 0) {
   throw ('Unsupported command environment names: ' + ($m103Rejected -join ', '))
 }
 $m103Repo = (Resolve-Path -LiteralPath '.' -ErrorAction Stop).Path
-if ($m103Repo -ine 'C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab') {
+if ($m103Repo -ine 'C:\projects\a11y-evidence-lab') {
   throw 'Wrong M1-03 working directory'
 }
 $m103Runtime = Join-Path $m103Repo 'm103-browser-runtime'

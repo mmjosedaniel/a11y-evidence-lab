@@ -83,7 +83,7 @@ You start the app on your computer and use it in a browser. Follow the [local st
 
 If setup is already complete, go straight to [Start the application](docs/DEVELOPMENT.md#start-the-application).
 
-Scanning needs no AI model. To search for guidance in either mode, install Ollama and the `embeddinggemma` model yourself. Local AI suggestions also require `qwen3.5:4b`; Groq suggestions require an API key configured in the local service. Follow [provider setup and application use](docs/APPLICATION_GUIDE.md) for the required versions and instructions.
+Scanning needs no AI model. To search for guidance in either mode, install Ollama and the `embeddinggemma` model yourself. Local AI suggestions also require `qwen3.5:4b`; Groq suggestions require an API key configured in the local service. Follow [Enable guidance and generation](docs/DEVELOPMENT.md#enable-guidance-and-generation) for setup, then the [application guide](docs/APPLICATION_GUIDE.md) to use these features.
 
 ## Documentation
 

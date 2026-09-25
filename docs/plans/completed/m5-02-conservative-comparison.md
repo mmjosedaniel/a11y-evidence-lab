@@ -1,5 +1,7 @@
 # Compare one baseline Finding conservatively
 
+> Privacy note: Personal directory prefixes in this archived plan have been replaced with `C:/projects/a11y-evidence-lab` and `C:/Users/developer` (or their backslash equivalents). These are illustrative aliases, including in recorded commands and errors. Artifact names, hashes and outcomes are unchanged; the aliases must not be used to authenticate original path-bound evidence or replay historical operations. For current setup, use the [local startup guide](../../DEVELOPMENT.md).
+
 This ExecPlan is a living document. Maintain `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` as work proceeds. This document must be maintained in accordance with `PLANS.md`.
 
 ## Current state
@@ -154,7 +156,7 @@ R1's follow-up verified the exact same-position locators for all six frozen stat
 
 The reviewer also reproduced a descriptor-reinspection hazard: a Proxy can supply different individually valid runs during initial terminal admission and later envelope enumeration. Primary reconciliation requires comparison and publication to use the same detached terminal snapshot; envelope checks never substitute a reread `run`. This is a decide-now identity constraint under I2/I8, not a current implementation defect or a new runtime mechanism.
 
-Working directory: `C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab`. Use the current [README command preparation](../../../README.md#development-command-preparation) in each PowerShell 7 session. Dot-source its first preparation block; do not run restore/acquisition or archived task commands simply to prepare a shell.
+Working directory: `C:/projects/a11y-evidence-lab`. Use the current [README command preparation](../../../README.md#development-command-preparation) in each PowerShell 7 session. Dot-source its first preparation block; do not run restore/acquisition or archived task commands simply to prepare a shell.
 
 ### M502-ENTRY-01 — Planning baseline
 
@@ -367,7 +369,7 @@ Relevant paths: new `src/server/comparison/comparison-contract.ts` owns closed t
 
 **Write scope:** Allowed files None (read-only preflight); allowed roots None; forbidden files All writes; forbidden roots entire repository and external filesystem. Future Red is limited to the two named test files; future Green to the three named source files. No worker Git mutation.
 
-**Validation:** Working directory `C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab`. Use exact README preparation and G7 wrapper. Preflight may inspect source/tests and reuse matching 96-test/strict evidence; no fixture, cache or resource creation. Focused future command: `$m105Node --test --test-timeout=120000 tests/run-contract.test.ts tests/scan-normalization.test.ts tests/comparison-pair.test.ts`; immediate exit check. Task-level command: strict `$m105Node node_modules/typescript/bin/tsc --project tsconfig.json`, then G7 complete suite at D. Expected result: supported preflight classification, exact missing callables and complete assertion design; evidence ID M502-A-PREFLIGHT-01. Relevant-tree fingerprint `c6144a9d0f83a13859f2c898ea4b29f44745ca1cb65984e7052d84bf1ba55d21`. Environment Node 24.20.0/Python 3.14.6, unchanged lock/config, cache disabled. Side effects/cleanup None; pure later tests permit read-only fixture access only.
+**Validation:** Working directory `C:/projects/a11y-evidence-lab`. Use exact README preparation and G7 wrapper. Preflight may inspect source/tests and reuse matching 96-test/strict evidence; no fixture, cache or resource creation. Focused future command: `$m105Node --test --test-timeout=120000 tests/run-contract.test.ts tests/scan-normalization.test.ts tests/comparison-pair.test.ts`; immediate exit check. Task-level command: strict `$m105Node node_modules/typescript/bin/tsc --project tsconfig.json`, then G7 complete suite at D. Expected result: supported preflight classification, exact missing callables and complete assertion design; evidence ID M502-A-PREFLIGHT-01. Relevant-tree fingerprint `c6144a9d0f83a13859f2c898ea4b29f44745ca1cb65984e7052d84bf1ba55d21`. Environment Node 24.20.0/Python 3.14.6, unchanged lock/config, cache disabled. Side effects/cleanup None; pure later tests permit read-only fixture access only.
 
 **Budget and stopping:** Maximum worker turns one preflight, then at most three write turns per unchanged role/phase chain; maximum corrections one ordinary plus conditional final with recorded progress/new evidence. Maximum identical failure two without new evidence; maximum no-diff outcomes two. Validate each coherent write boundary, independently strict after Green; no redundant full suite. Stop on binding-field change, unknown/conflicting classification, path/cohesion expansion, unexpected effects or exhausted allowance. First-module missing-callable Red requires exact agreed imports, complete executable assertion bodies and independently valid environment; no stubs or fabricated assertion failure.
 

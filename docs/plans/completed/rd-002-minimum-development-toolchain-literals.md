@@ -1,5 +1,7 @@
 # Establish the minimum RD-002 development toolchain
 
+> Privacy note: Personal directory prefixes in this archived plan have been replaced with `C:/projects/a11y-evidence-lab` and `C:/Users/developer` (or their backslash equivalents). These are illustrative aliases, including in recorded commands and errors. Artifact names, hashes and outcomes are unchanged; the aliases must not be used to authenticate original path-bound evidence or replay historical operations. For current setup, use the [local startup guide](../../DEVELOPMENT.md).
+
 Completed plan for RD-002. The roadmap owns task status; this archive preserves the original contract, decisions, and verification history.
 
 This ExecPlan is a living document. Maintain `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` as work proceeds. This document must be maintained in accordance with `PLANS.md`.
@@ -350,7 +352,7 @@ After the research barrier, the synthesis owner returns exactly one of:
 
 ## Concrete Steps
 
-All commands run from `C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab` in PowerShell unless stated otherwise.
+All commands run from `C:\projects\a11y-evidence-lab` in PowerShell unless stated otherwise.
 
 Current deterministic preflight commands:
 
@@ -371,7 +373,7 @@ Resumed execution baseline `TREE-BASELINE-002` supersedes only that expected cur
 
 Research uses the current official primary sources named by the frozen Decision Review Contract. Record exact URLs, relevant version/support facts, retrieval date, and uncertainty in stable evidence IDs; do not use a package install as a substitute for upstream lifecycle or compatibility evidence.
 
-The following contract is frozen by `RD002-SYNTH-003` and its untriggered R2 checkpoint. The worker copies it verbatim; no shell preference may replace a command, version, path, or side-effect policy. Working directory for every command is `C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab`. Ordinary nonzero exits stop the assignment; only the designated failing probe expects exit 1.
+The following contract is frozen by `RD002-SYNTH-003` and its untriggered R2 checkpoint. The worker copies it verbatim; no shell preference may replace a command, version, path, or side-effect policy. Working directory for every command is `C:\projects\a11y-evidence-lab`. Ordinary nonzero exits stop the assignment; only the designated failing probe expects exit 1.
 
 #### PROC-MANIFEST-01 and exact executable configuration
 
@@ -461,11 +463,11 @@ The `build` and `start` script literals are deliberately future boundaries. They
 Run this exact prelude in each fresh PowerShell command cell that invokes the selected toolchain. It changes only that shell process's PATH and uses the bundled CLI by absolute path; it does not alter global Node, npm, NVM, user configuration, or persistent environment variables.
 
 ~~~powershell
-$rd002NodeDirectory = 'C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab\temp\rd002-node-runtime\node-v24.20.0-win-x64'
+$rd002NodeDirectory = 'C:\projects\a11y-evidence-lab\temp\rd002-node-runtime\node-v24.20.0-win-x64'
 $rd002Node = Join-Path $rd002NodeDirectory 'node.exe'
 $rd002Npm = Join-Path $rd002NodeDirectory 'node_modules\npm\bin\npm-cli.js'
 $env:Path = $rd002NodeDirectory + ';' + $env:Path
-$rd002NpmFlags = @('--global=false', '--prefix', 'C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab', '--cache', 'C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab\temp\rd002-npm-cache', '--ignore-scripts=true', '--audit=false', '--fund=false', '--update-notifier=false', '--logs-max=0', '--registry=https://registry.npmjs.org/', '--strict-ssl=true', '--package-lock=true', '--include=dev', '--include=optional')
+$rd002NpmFlags = @('--global=false', '--prefix', 'C:\projects\a11y-evidence-lab', '--cache', 'C:\projects\a11y-evidence-lab\temp\rd002-npm-cache', '--ignore-scripts=true', '--audit=false', '--fund=false', '--update-notifier=false', '--logs-max=0', '--registry=https://registry.npmjs.org/', '--strict-ssl=true', '--package-lock=true', '--include=dev', '--include=optional')
 if ((& $rd002Node --version) -ne 'v24.20.0') { throw 'Unexpected Node version.' }
 if ((& $rd002Node $rd002Npm @rd002NpmFlags --version) -ne '11.19.0') { throw 'Unexpected npm version.' }
 ~~~
@@ -475,10 +477,10 @@ if ((& $rd002Node $rd002Npm @rd002NpmFlags --version) -ne '11.19.0') { throw 'Un
 Preconditions: prepared exact manifest/config files; no `package-lock.json` or `node_modules`; the three task-specific temporary targets below are absent (confirmed before this freeze). The worker first obtains the official portable runtime:
 
 ~~~powershell
-$rd002Archive = 'C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab\temp\rd002-node-v24.20.0-win-x64.zip'
-$rd002RuntimeRoot = 'C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab\temp\rd002-node-runtime'
+$rd002Archive = 'C:\projects\a11y-evidence-lab\temp\rd002-node-v24.20.0-win-x64.zip'
+$rd002RuntimeRoot = 'C:\projects\a11y-evidence-lab\temp\rd002-node-runtime'
 if ((Test-Path -LiteralPath $rd002Archive) -or (Test-Path -LiteralPath $rd002RuntimeRoot)) { throw 'Runtime bootstrap target already exists.' }
-New-Item -ItemType Directory -Path 'C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab\temp' -Force | Out-Null
+New-Item -ItemType Directory -Path 'C:\projects\a11y-evidence-lab\temp' -Force | Out-Null
 Invoke-WebRequest -UseBasicParsing -Uri 'https://nodejs.org/dist/v24.20.0/node-v24.20.0-win-x64.zip' -OutFile $rd002Archive -ErrorAction Stop
 if ((Get-FileHash -LiteralPath $rd002Archive -Algorithm SHA256).Hash.ToLowerInvariant() -ne '6cac9ffbca8f6a47091e4b5c772e0606049c3871cb67d900c0cedde630e545ba') { throw 'Node archive checksum mismatch.' }
 Expand-Archive -LiteralPath $rd002Archive -DestinationPath $rd002RuntimeRoot -ErrorAction Stop
@@ -513,12 +515,12 @@ Ignored outputs are outside guard proof. The primary separately inspects them an
 After compliant setup closure, the primary records manifest/lock/config hashes, then establishes the clean dependency state using only:
 
 ~~~powershell
-$rd002DependencyPath = 'C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab\node_modules'
+$rd002DependencyPath = 'C:\projects\a11y-evidence-lab\node_modules'
 if (Test-Path -LiteralPath $rd002DependencyPath) {
   $rd002DependencyItem = Get-Item -LiteralPath $rd002DependencyPath -Force
   if (($rd002DependencyItem.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'Dependency root must not be a reparse point.' }
-  if ((Resolve-Path -LiteralPath $rd002DependencyPath).Path -ne 'C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab\node_modules') { throw 'Unexpected clean target.' }
-  Remove-Item -LiteralPath 'C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab\node_modules' -Recurse -Force -ErrorAction Stop
+  if ((Resolve-Path -LiteralPath $rd002DependencyPath).Path -ne 'C:\projects\a11y-evidence-lab\node_modules') { throw 'Unexpected clean target.' }
+  Remove-Item -LiteralPath 'C:\projects\a11y-evidence-lab\node_modules' -Recurse -Force -ErrorAction Stop
 }
 if (Test-Path -LiteralPath $rd002DependencyPath) { throw 'Clean dependency state was not reached.' }
 ~~~
@@ -634,11 +636,11 @@ git diff --check
 Expected success, no probe, alternate lockfile, or build output, and only the known task paths. Final temporary-runtime/cache cleanup is primary-owned after the integrated review has consumed the selected environment:
 
 ~~~powershell
-foreach ($rd002TemporaryPath in @('C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab\temp\rd002-node-v24.20.0-win-x64.zip', 'C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab\temp\rd002-node-runtime', 'C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab\temp\rd002-npm-cache')) {
+foreach ($rd002TemporaryPath in @('C:\projects\a11y-evidence-lab\temp\rd002-node-v24.20.0-win-x64.zip', 'C:\projects\a11y-evidence-lab\temp\rd002-node-runtime', 'C:\projects\a11y-evidence-lab\temp\rd002-npm-cache')) {
   if (Test-Path -LiteralPath $rd002TemporaryPath) {
     $rd002TemporaryItem = Get-Item -LiteralPath $rd002TemporaryPath -Force
     if (($rd002TemporaryItem.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'Temporary cleanup target must not be a reparse point.' }
-    if ((Resolve-Path -LiteralPath $rd002TemporaryPath).Path -ne $rd002TemporaryPath -or -not $rd002TemporaryPath.StartsWith('C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab\temp\', [StringComparison]::OrdinalIgnoreCase)) { throw 'Unexpected temporary cleanup target.' }
+    if ((Resolve-Path -LiteralPath $rd002TemporaryPath).Path -ne $rd002TemporaryPath -or -not $rd002TemporaryPath.StartsWith('C:\projects\a11y-evidence-lab\temp\', [StringComparison]::OrdinalIgnoreCase)) { throw 'Unexpected temporary cleanup target.' }
     Remove-Item -LiteralPath $rd002TemporaryPath -Recurse -Force -ErrorAction Stop
   }
 }

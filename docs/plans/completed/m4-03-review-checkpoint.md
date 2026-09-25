@@ -1,5 +1,7 @@
 # Integrate and verify human review
 
+> Privacy note: Personal directory prefixes in this archived plan have been replaced with `C:/projects/a11y-evidence-lab` and `C:/Users/developer` (or their backslash equivalents). These are illustrative aliases, including in recorded commands and errors. Artifact names, hashes and outcomes are unchanged; the aliases must not be used to authenticate original path-bound evidence or replay historical operations. For current setup, use the [local startup guide](../../DEVELOPMENT.md).
+
 This ExecPlan is a living document. Maintain `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` as work proceeds. This document must be maintained in accordance with `PLANS.md`.
 
 ## Current state
@@ -162,7 +164,7 @@ Project this contract and I1–I10 into Research Assignment Capsules with exact 
 
 ## Concrete Steps
 
-Working directory: `C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab`. Read and dot-source the maintained [README preparation](../../../README.md#development-command-preparation) in each command session. Do not replay archived task leases, setup grants, process kills, source mutations or Git constants.
+Working directory: `C:/projects/a11y-evidence-lab`. Read and dot-source the maintained [README preparation](../../../README.md#development-command-preparation) in each command session. Do not replay archived task leases, setup grants, process kills, source mutations or Git constants.
 
 ### M403-ENTRY-01 — Planning evidence
 
@@ -281,7 +283,7 @@ Write scope
 - Forbidden directory roots: All roots for writes during preflight; originals under data/runs always read-only.
 
 Validation
-- Working directory: C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab
+- Working directory: C:/projects/a11y-evidence-lab
 - Focused command: G PREFLIGHT commands, each through unchanged README preparation and Invoke-M105Command, stop on nonzero native exit.
 - Task-level command: G CHARACTERIZE/REGRESSION/STRICT/BUILD after their applicable later gates; not authorized by this read-only preflight.
 - Expected decisive result and reusable evidence IDs: Coverage classification, exact gap if any, fresh strict and 16 focused tests; no runtime effects.

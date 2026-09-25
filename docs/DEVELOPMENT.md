@@ -27,10 +27,10 @@ Steps 2 and 3 need an internet connection to download files.
 
 ### 1. Open the project in PowerShell
 
-Open **PowerShell 7** from the Windows Start menu or Windows Terminal. Use a new tab for this project. Paste these commands there:
+Open **PowerShell 7** from the Windows Start menu or Windows Terminal. Use a new tab for this project. In the first command below, replace `C:/projects/a11y-evidence-lab` with the full path to your project folder, keeping the quotes. The path shown is only an example; you do not need to move your project. Then paste and run the commands:
 
 ```powershell
-Set-Location -LiteralPath 'C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab'
+Set-Location -LiteralPath 'C:/projects/a11y-evidence-lab'
 $ErrorActionPreference = 'Stop'
 $PSVersionTable.PSVersion
 node --version
@@ -46,7 +46,7 @@ if ($LASTEXITCODE -ne 0) { throw 'Open a Git clone of the project before continu
 
 If PowerShell shows version `5`, open PowerShell 7 instead. If Node/npm is missing or has a different version, install or switch to [Node.js 24.20.0](https://nodejs.org/en/download/archive/v24.20.0). If Git is missing, install Git. After changing any of these tools, open a new PowerShell tab and repeat this step.
 
-The first command opens your project folder. If your folder is somewhere else, change the path in this step and in the startup commands.
+Use the same project path when you reach the startup commands below.
 
 ### 2. Install the project dependencies
 
@@ -112,12 +112,12 @@ The [maintainer reference](DEVELOPMENT_REFERENCE.md#build-and-verify-the-walking
 
 ### 1. Run the startup block
 
-Use the same PowerShell tab as before, or open a new **PowerShell 7** tab. Paste and run all the commands below. They open the project folder, set up the scanner, and start the app. **Do not start a second copy while this one is running.**
+Use the same PowerShell tab as before, or open a new **PowerShell 7** tab. Replace `C:/projects/a11y-evidence-lab` in the first command with your project's full path, keeping the quotes, then paste and run the whole block. The commands open the project folder, set up the scanner, and start the app. **Do not start a second copy while this one is running.**
 
 If you have already set up and built the app, and nothing has changed, these are the only commands you need to run.
 
 ```powershell
-Set-Location -LiteralPath 'C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab'
+Set-Location -LiteralPath 'C:/projects/a11y-evidence-lab'
 $ErrorActionPreference = 'Stop'
 $projectRoot = (Get-Location).Path
 $scanTemp = Join-Path $projectRoot 'temp/m103-scan'

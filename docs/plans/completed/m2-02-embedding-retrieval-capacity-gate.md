@@ -1,5 +1,7 @@
 # Implement and capacity-screen M2-02 local embedding retrieval
 
+> Privacy note: Personal directory prefixes in this archived plan have been replaced with `C:/projects/a11y-evidence-lab` and `C:/Users/developer` (or their backslash equivalents). These are illustrative aliases, including in recorded commands and errors. Artifact names, hashes and outcomes are unchanged; the aliases must not be used to authenticate original path-bound evidence or replay historical operations. For current setup, use the [local startup guide](../../DEVELOPMENT.md).
+
 This ExecPlan is a living document. Maintain `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` as work proceeds. This document must be maintained in accordance with `PLANS.md`.
 
 ## Purpose / Big Picture
@@ -96,7 +98,7 @@ Historical checkpoint: its metadata-first continuation is superseded by M202-FIN
 
 **Owner authorization and scope.** The owner authorized applying the proposed simplifications and continuing this existing ExecPlan. This is a manual, primary-owned, non-TDD external evaluation checkpoint inside M2-02, not a new roadmap task or an application write lease. Local evidence gathering is R0. Changed command/effect composition receives one focused fresh S3 critical review because it controls executable identities and retained artifacts; unchanged archive/build and metadata/domain evidence is reused. No new research, dependency selection, product exception or architecture decision is introduced.
 
-**Necessary procedural changes.** Resume `C:/Users/mmjos/Tools/EmbeddingVerification/m202-tp3-13` from accepted binary SHA-256 `950A762DBCB78A73EB0D51F155CC438EE078D77F0708889DD997B904B84C7152`. Require only the new phase outputs to be absent, not a new attempt root. Verify consumed immutable inputs and source identities at entry and closure; verify each new phase's outputs before dispatching its dependent phase. Do not repeat tool extraction, source copying, compilation, prior regression suites or reviews of unchanged boundaries. Preserve every historical fence and failed-attempt artifact. Use direct, non-interactive, genuine-owner PowerShell invocations with exact local paths and explicit phase arguments, rather than another chain of root-substitution wrappers or a retained interactive host. Process-local environment sanitization, offline/no-lifecycle installation and exit-code checks remain mandatory. This supersedes the former per-attempt fresh-root/interactive-host restrictions only for this checkpoint; it does not retroactively qualify failed attempts.
+**Necessary procedural changes.** Resume `C:/Users/developer/Tools/EmbeddingVerification/m202-tp3-13` from accepted binary SHA-256 `950A762DBCB78A73EB0D51F155CC438EE078D77F0708889DD997B904B84C7152`. Require only the new phase outputs to be absent, not a new attempt root. Verify consumed immutable inputs and source identities at entry and closure; verify each new phase's outputs before dispatching its dependent phase. Do not repeat tool extraction, source copying, compilation, prior regression suites or reviews of unchanged boundaries. Preserve every historical fence and failed-attempt artifact. Use direct, non-interactive, genuine-owner PowerShell invocations with exact local paths and explicit phase arguments, rather than another chain of root-substitution wrappers or a retained interactive host. Process-local environment sanitization, offline/no-lifecycle installation and exit-code checks remain mandatory. This supersedes the former per-attempt fresh-root/interactive-host restrictions only for this checkpoint; it does not retroactively qualify failed attempts.
 
 **Effects and order.** First create the absent root13 `venv` from the pinned Python using retained uv and the three retained wheels; populate the currently empty root13 `js` with only the retained Tokenizers.js tarball. Both installations are offline, local, without source builds, extra dependencies, lifecycle scripts or global configuration changes. Independently verify installed versions, dependency graph and lock identity before running the existing TP3-F metadata algorithm. Its ignored materialization is `logs/m202-compare-metadata.py`; the only semantic delta records controlled internal failure codes while continuing to suppress external exception messages and private values. Metadata entrywise success alone is not acceptance: complete source-consumption/default review must precede the existing 63-input / 126-sequence finite-domain comparison and required negative evidence. No inference, GPU workload, server startup, new download, deletion, source/index restoration, permanent-input modification or application change is authorized here.
 
@@ -628,7 +630,7 @@ Add only direct dependencies `@langchain/classic: 1.0.46` and `@langchain/core: 
 
 The existing permission exception covers unavoidable `@langchain/openai@1.5.11` and LangSmith installation/static imports in this dependency chain, not their generation or tracing functionality. Do not use root framework barrels, callbacks/tracing entry points, generation SDKs, hosted calls or optional extras. Preserve the existing normal optional platform-dependency graph; `--omit=optional` is prohibited because it could remove required Vite/platform packages. Public source rechecks on this date confirmed the [Classic manifest](https://registry.npmjs.org/@langchain%2fclassic/1.0.46), [Core manifest](https://registry.npmjs.org/@langchain%2fcore/1.2.9) and [versioned memory-store implementation](https://unpkg.com/@langchain/classic@1.0.46/dist/vectorstores/memory.js).
 
-`C-SETUP` uses physical Node `C:/Users/mmjos/AppData/Local/nvm/v24.20.0/node.exe` to execute its sibling `node_modules/npm/bin/npm-cli.js`, from the repository root, with these exact arguments:
+`C-SETUP` uses physical Node `C:/Users/developer/AppData/Local/nvm/v24.20.0/node.exe` to execute its sibling `node_modules/npm/bin/npm-cli.js`, from the repository root, with these exact arguments:
 
     install --save-exact --package-lock-only --ignore-scripts --no-audit --no-fund --registry=https://registry.npmjs.org --cache=temp/m202-npm-cache @langchain/classic@1.0.46 @langchain/core@1.2.9
 
@@ -636,7 +638,7 @@ Only root `package.json` and `package-lock.json` may change tracked state in set
 
 `C-RESTORE` copies those two metadata files into the previously absent, ordinary `temp/m202-dependency-restore` directory and runs the same Node/npm pair there with:
 
-    ci --ignore-scripts --no-audit --no-fund --registry=https://registry.npmjs.org --cache=C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab/temp/m202-npm-cache
+    ci --ignore-scripts --no-audit --no-fund --registry=https://registry.npmjs.org --cache=C:/projects/a11y-evidence-lab/temp/m202-npm-cache
 
 Require unchanged copied manifest/lock bytes, exact resolved versions and successful imports. Inspect the installed import path and exercise actual `addVectors` plus `similaritySearchVectorWithScore` with supplied vectors, an embedding implementation that throws if called, and a network-attempt canary. No hosted-use or inactivity claim follows from import success alone. This is setup replacement evidence, not a model test or Red.
 
@@ -2473,7 +2475,7 @@ function Save-Ar1Fixture($Packet) {
         try {$stream.Write($file.Data)} finally {$stream.Dispose()}
     }
 }
-$arRetained='C:/Users/mmjos/Tools/EmbeddingVerification/m202-tp3-03/downloads'
+$arRetained='C:/Users/developer/Tools/EmbeddingVerification/m202-tp3-03/downloads'
 $arPins=@(
     @('llvm','llvm-mingw-20260826-ucrt-x86_64.zip',190721391,'ae601f4e0f72bbdf441ad2df8bb16f037e2e9251559ea6b37b4057aef39c06c3',9069,1517388),
     @('cmake','cmake-4.4.3-windows-x86_64.zip',54408599,'4d52ebab7193a698651639ed80d8d04fd903358843572cf44c7fd234cb7c26ab',8819,1595233),
@@ -2820,7 +2822,7 @@ foreach($name in 'Assert-TpOrdinary','Assert-TpHash'){
     . ([scriptblock]::Create($matches[0].Extent.Text))
 }
 . ([scriptblock]::Create($co1Copy))
-$tpNode='C:\Users\mmjos\AppData\Local\nvm\v24.20.0\node.exe'
+$tpNode='C:\Users\developer\AppData\Local\nvm\v24.20.0\node.exe'
 $tpGit='C:\Program Files\Git\cmd\git.exe'
 Assert-TpHash $tpNode 93381448 '5c976096e04e5c2c1f091938926234cc9fbebfe9787ddd149351b3b0ecc707b5'
 Assert-TpHash $tpGit 46480 'da240fe9bc24895b3e04150a4990b8a6ff329ecabcd8f19684c2cc310da5ef3f'
@@ -2828,7 +2830,7 @@ $env:NODE_DISABLE_COMPILE_CACHE='1'
 foreach($item in @(Get-ChildItem Env:|Where-Object{$_.Name-like 'GIT_*'})){Remove-Item -LiteralPath ('Env:\'+$item.Name)}
 $env:GIT_CONFIG_NOSYSTEM='1'
 $env:GIT_CONFIG_GLOBAL='NUL'
-$co1Old='C:\Users\mmjos\Tools\EmbeddingVerification\m202-tp3-07'
+$co1Old='C:\Users\developer\Tools\EmbeddingVerification\m202-tp3-07'
 $co1GitRows=@(foreach($entry in @(
     @('ollama','b79067b0db7417f20108363bc22adb97f35c966a'),
     @('llama.cpp','0f3a71be15af836d277c9f918adfafb45732677e'))){
@@ -3032,7 +3034,7 @@ param([Parameter(Mandatory)][string]$Cc1Root)
 $ErrorActionPreference='Stop'
 $PSNativeCommandUseErrorActionPreference=$true
 Set-StrictMode -Version Latest
-$tpProfile='C:\Users\mmjos'
+$tpProfile='C:\Users\developer'
 if(-not [IO.Path]::IsPathFullyQualified($Cc1Root)){throw 'CC1 materialization binding'}
 $tpRoot=[IO.Path]::GetFullPath($Cc1Root)
 $tpGit='C:/Program Files/Git/cmd/git.exe'
@@ -3250,7 +3252,7 @@ $testMatches=@($testFences|Where-Object{$_.Groups[1].Value.StartsWith('# TP3-CC1
 if($testMatches.Count-ne 1){throw 'CC1 materialization test body'}
 $testBody=$testMatches[0].Groups[1].Value
 if([Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes($testBody)))-cne '184D4B77F1157FE7D0DCA014E420C2507A0B8DFC0B2F2B53C27E2F17E3462657'){throw 'CC1 materialization test pin'}
-$oldBase='C:\Users\mmjos\Tools\EmbeddingVerification\m202-tp3-07'
+$oldBase='C:\Users\developer\Tools\EmbeddingVerification\m202-tp3-07'
 $treeSpecs=@(@('tools/llvm',9069),@('tools/cmake',8819),@('tools/ninja',1),@('sources/ollama',24),@('sources/llama.cpp',3526))
 $caseSpecs=@(
  @('valid',''),@('alternate-root',''),@('wrong-hash','TP3 identity mismatch'),
@@ -3435,7 +3437,7 @@ param([Parameter(Mandatory)][string]$Cc1Root)
 $ErrorActionPreference='Stop'
 $PSNativeCommandUseErrorActionPreference=$true
 Set-StrictMode -Version Latest
-$tpProfile='C:\Users\mmjos'
+$tpProfile='C:\Users\developer'
 if(-not [IO.Path]::IsPathFullyQualified($Cc1Root)){throw 'CC1 materialization binding'}
 $tpRoot=[IO.Path]::GetFullPath($Cc1Root)
 $tpGit='C:/Program Files/Git/cmd/git.exe'
@@ -3519,7 +3521,7 @@ $testMatches=@($testFences|Where-Object{$_.Groups[1].Value.StartsWith('# TP3-CC1
 if($testMatches.Count-ne 1){throw 'CC1 materialization test body'}
 $testBody=$testMatches[0].Groups[1].Value
 if([Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes($testBody)))-cne '53F4C6A141407AD09D40A67468FC652C1C0E0485767B8006449D0C22F67FC96F'){throw 'CC1 materialization test pin'}
-$oldBase='C:\Users\mmjos\Tools\EmbeddingVerification\m202-tp3-07'
+$oldBase='C:\Users\developer\Tools\EmbeddingVerification\m202-tp3-07'
 $treeSpecs=@(@('tools/llvm',9069),@('tools/cmake',8819),@('tools/ninja',1),@('sources/ollama',24),@('sources/llama.cpp',3526))
 $caseSpecs=@(
  @('valid',''),@('alternate-root',''),@('zero-directories',''),@('wrong-hash','TP3 identity mismatch'),
@@ -3919,7 +3921,7 @@ foreach($body in $x13Admission,$x13Environment,$x13Identity,$x13Readback){
 # TP3-EXEC13-COPY-CHECK: complete read-only nine-file copy boundary.
 param([Parameter(Mandatory)][string]$Cc1Root)
 if(-not [IO.Path]::IsPathFullyQualified($Cc1Root)){throw 'EXEC13 copy root'}
-$tpProfile='C:\Users\mmjos'
+$tpProfile='C:\Users\developer'
 $tpRoot=[IO.Path]::GetFullPath($Cc1Root)
 $tpGit='C:/Program Files/Git/cmd/git.exe'
 $ErrorActionPreference='Stop'
@@ -4155,7 +4157,7 @@ param(
  [Parameter(Mandatory)][datetime]$Deadline
 )
 if(-not [IO.Path]::IsPathFullyQualified($Cc1Root)-or $ReceiptBytes-le 0-or $ReceiptBytes-gt 1MB-or $MaterialBytes-le 0-or $MaterialBytes-gt 1MB-or $ReceiptSha256-cnotmatch '^[A-F0-9]{64}$'-or $MaterialSha256-cnotmatch '^[A-F0-9]{64}$'){throw 'EXEC13 D binding'}
-$tpProfile='C:\Users\mmjos'
+$tpProfile='C:\Users\developer'
 $tpRoot=[IO.Path]::GetFullPath($Cc1Root)
 $tpGit='C:/Program Files/Git/cmd/git.exe'
 $ErrorActionPreference='Stop'
@@ -4531,7 +4533,7 @@ $rows=@(foreach($name in @('admission.json','prerequisite-versions.json')){
  if(-not $match.Success){throw 'Historical identity table'}
  [pscustomobject]@{Name=$name;Bytes=[long]$match.Groups[1].Value.Replace(',','');Sha256=$match.Groups[2].Value}
 })
-$root='C:\Users\mmjos\Tools\EmbeddingVerification\m202-tp3-09'
+$root='C:\Users\developer\Tools\EmbeddingVerification\m202-tp3-09'
 $a=[IO.File]::ReadAllText((Join-Path $root 'receipts/admission.json'))|ConvertFrom-Json
 $id=[pscustomobject]@{Status='PASS';Phase='admission';Execution='M202-TOOLING-EXEC-10';Root=$root;Pid=$a.Pid;ProcessStart=$a.ProcessStart.ToUniversalTime().ToString('O');Receipts=$rows}
 $positive=Assert-Rh1Admission $root $id $a.Pid $id.ProcessStart 'M202-TOOLING-EXEC-10'
@@ -4563,7 +4565,7 @@ $cases=@(foreach($name in @('hash-length','hash-content','size','phase','root','
  if(-not $rejected){throw ('RH1 negative failed: '+$name)}
  [pscustomobject]@{Name=$name;Rejected=$true}
 })
-[pscustomobject]@{Status='PASS';Actual=$positive;ProducerRoundTrip=$serializedPositive;Negatives=$cases;Root10Exists=(Test-Path -LiteralPath 'C:\Users\mmjos\Tools\EmbeddingVerification\m202-tp3-10');Bodies=@(foreach($code in $rh1Admission,$rh1Environment){[pscustomobject]@{Bytes=[Text.Encoding]::UTF8.GetByteCount($code);Sha256=(Get-Ec1Hash $code)}})}|ConvertTo-Json -Depth 6 -Compress
+[pscustomobject]@{Status='PASS';Actual=$positive;ProducerRoundTrip=$serializedPositive;Negatives=$cases;Root10Exists=(Test-Path -LiteralPath 'C:\Users\developer\Tools\EmbeddingVerification\m202-tp3-10');Bodies=@(foreach($code in $rh1Admission,$rh1Environment){[pscustomobject]@{Bytes=[Text.Encoding]::UTF8.GetByteCount($code);Sha256=(Get-Ec1Hash $code)}})}|ConvertTo-Json -Depth 6 -Compress
 ```
 
 ```javascript
@@ -4677,7 +4679,7 @@ if((& 'C:/Program Files/Git/cmd/git.exe' --no-optional-locks rev-parse HEAD)-cne
 $r9Split=$r9A.IndexOf('# Only after the manual twelve-input/project/prerequisite receipt above passes:')
 if($r9Split-lt 0){throw 'R9 admission marker'}
 . ([scriptblock]::Create($r9A.Substring(0,$r9Split)))
-Assert-TpHash 'C:/Users/mmjos/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe' 301368 '362A356CE7F0940EC74F73A8FC2C990A2CC24A38A11C90BBD8ECA947110AD139'
+Assert-TpHash 'C:/Users/developer/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe' 301368 '362A356CE7F0940EC74F73A8FC2C990A2CC24A38A11C90BBD8ECA947110AD139'
 $r9InputRows=@(
  @('Models/Ollama/manifests/registry.ollama.ai/library/embeddinggemma/latest',741,'85462619ee721b466c5927d109d4cb765861907d5417b9109caebc4e614679f1'),
  @('Models/Ollama/blobs/sha256-0800cbac9c2064dde519420e75e512a83cb360de3ad5df176185dc69652fc515',621867104,'0800cbac9c2064dde519420e75e512a83cb360de3ad5df176185dc69652fc515'),
@@ -8495,9 +8497,9 @@ Use the pinned API's consumed fields: version.version; tags.models[].name/model/
 
 Test ownership is exactly tests/embedding-retrieval.test.ts and tests/helpers/m202-embedding-fixture.ts. Reuse A's synthetic Findings/query cases read-only. Cover no import/constructor effects; all 63 rows and prefixes; unknown/changed/kind-mismatched input; exact native HTTP endpoint/options/bodies and byte/deadline/abort behavior using a fake native request object; loaded/unloaded/cache/restart sequencing; missing/malformed/remote/drifting metadata; wrong model/count/dimension/norm/prompt count; complete singleton build; no partial publication; clean query failure versus identity invalidation; actual library broad filtering, ties spanning rank three under shuffled insertion and canonical result negatives; pre-abort, overlap, timeout, late resolve/reject, closed admission, and immutable safe results. Fake requests/vectors belong only in tests and cannot prove actual model compatibility/capacity. No real socket, server, browser, model, tokenizer, install, generated file or canonical-input mutation is allowed during tests. Use test-owned timer mocks for deadlines, restore every mock, and write the complete test contract before its first C-B run.
 
-The accepted finite receipt is C:/Users/mmjos/Tools/EmbeddingVerification/m202-tp3-13/receipts/finite-sequences.json, SHA-256 F4D4FF0C19DD11A20F03B6C385D27D7F0524C213533F9D9E23D3385A7F94FC57. Primary rehashes it at this entry. Derive only its 63 kind/hash/R/E rows and verify exact row set, uniqueness and domain against A's 16 documents/47 projections before acceptance; do not copy private paths, raw receipts or tokenizer files into tracked fixtures.
+The accepted finite receipt is C:/Users/developer/Tools/EmbeddingVerification/m202-tp3-13/receipts/finite-sequences.json, SHA-256 F4D4FF0C19DD11A20F03B6C385D27D7F0524C213533F9D9E23D3385A7F94FC57. Primary rehashes it at this entry. Derive only its 63 kind/hash/R/E rows and verify exact row set, uniqueness and domain against A's 16 documents/47 projections before acceptance; do not copy private paths, raw receipts or tokenizer files into tracked fixtures.
 
-C-B is physical Node C:/Users/mmjos/AppData/Local/nvm/v24.20.0/node.exe --test --test-timeout=120000 tests/embedding-retrieval.test.ts at the repository root. The barrier additionally runs tests/retrieval-contract.test.ts, tests/run-contract.test.ts and tests/scan-normalization.test.ts, followed by the same physical Node node_modules/typescript/bin/tsc --project tsconfig.json. All commands use process-local NODE_DISABLE_COMPILE_CACHE=1 with exact restoration. Preflight may run strict/A/78 to independently establish the runner. Commands have a two-minute wall bound; each write turn has 35 minutes, with one preflight, one complete Red, separate Green, at most one same-contract correction per role and one S3 correction loop. Stop for wrong or repeated decisive failure, changed contract, unexpected overlap/effects, exhausted budget or two no-diff handoffs. Every write turn gets a fresh primary-opened and closed lease. Workers may write only their exact paths; other source/tests, corpus/evaluation, dependencies/configuration, docs, .codex/.agents, Git state and retained artifacts are forbidden. No UI profile or research panel applies.
+C-B is physical Node C:/Users/developer/AppData/Local/nvm/v24.20.0/node.exe --test --test-timeout=120000 tests/embedding-retrieval.test.ts at the repository root. The barrier additionally runs tests/retrieval-contract.test.ts, tests/run-contract.test.ts and tests/scan-normalization.test.ts, followed by the same physical Node node_modules/typescript/bin/tsc --project tsconfig.json. All commands use process-local NODE_DISABLE_COMPILE_CACHE=1 with exact restoration. Preflight may run strict/A/78 to independently establish the runner. Commands have a two-minute wall bound; each write turn has 35 minutes, with one preflight, one complete Red, separate Green, at most one same-contract correction per role and one S3 correction loop. Stop for wrong or repeated decisive failure, changed contract, unexpected overlap/effects, exhausted budget or two no-diff handoffs. Every write turn gets a fresh primary-opened and closed lease. Workers may write only their exact paths; other source/tests, corpus/evaluation, dependencies/configuration, docs, .codex/.agents, Git state and retained artifacts are forbidden. No UI profile or research panel applies.
 
 ### Slice C — one selected-Finding operation and durable provenance
 
@@ -8539,7 +8541,7 @@ Production ownership is only src/server/persistence/run-repository.ts, specifica
 
 Test ownership is only tests/run-repository.test.ts and tests/retrieval-service.test.ts. Add a coherent accepted--0 repository/service round-trip regression and a focused guard proving canonicalization does not erase an unrelated submitted difference. Reuse existing synthetic fixtures and disposable-root/service cleanup unchanged; no helper, A/B test, other test, source or configuration edit is included in the Red lease. Existing assertions remain intact. Preflight is read-only and runs the existing pure retrieval-contract test plus strict TypeScript; repository/service executions begin only under Red or subsequent accepted validation.
 
-Use the physical Node C:/Users/mmjos/AppData/Local/nvm/v24.20.0/node.exe. The focused command is --test --test-timeout=120000 tests/retrieval-service.test.ts tests/run-contract.test.ts tests/run-repository.test.ts. Red must expose the signed-zero durable-return mismatch, not a syntax, fixture or environment error. Green and primary affected validation add tests/embedding-retrieval.test.ts, tests/retrieval-contract.test.ts and tests/scan-normalization.test.ts, then separately run --test --test-timeout=120000 --test-skip-pattern='^(M102 entry-point|real entry)' tests/local-service.test.ts and node_modules/typescript/bin/tsc --project tsconfig.json. Restore process-local NODE_DISABLE_COMPILE_CACHE in finally and propagate each native exit. Five build-dependent entry groups remain excluded by command only; full integration is still pending.
+Use the physical Node C:/Users/developer/AppData/Local/nvm/v24.20.0/node.exe. The focused command is --test --test-timeout=120000 tests/retrieval-service.test.ts tests/run-contract.test.ts tests/run-repository.test.ts. Red must expose the signed-zero durable-return mismatch, not a syntax, fixture or environment error. Green and primary affected validation add tests/embedding-retrieval.test.ts, tests/retrieval-contract.test.ts and tests/scan-normalization.test.ts, then separately run --test --test-timeout=120000 --test-skip-pattern='^(M102 entry-point|real entry)' tests/local-service.test.ts and node_modules/typescript/bin/tsc --project tsconfig.json. Restore process-local NODE_DISABLE_COMPILE_CACHE in finally and propagate each native exit. Five build-dependent entry groups remain excluded by command only; full integration is still pending.
 
 Effects remain C's existing bounded disk/loopback synthetic tests with exact owned temp/m202-retrieval-*, temp/m102-store-* and temp/m102-service-* disposal after ordinary-path/ownership and service-stop checks. Preserve data/runs, dist, all pre-existing temp children, dependencies, downloads and external artifacts. No browser, model, port 11434, build, network acquisition, tokenizer, runtime startup, broad cleanup or Git mutation is authorized. Filesystem/socket evidence is non-reusable outside the isolated test run. Every worker write receives a fresh primary-opened/closed lease and frozen test boundary; primary owns evidence acceptance and documentation. Complete S3 re-review covers all C integrity, admission, ownership, failure/shutdown and cohesion obligations, not only the named defect. C acceptance and capacity/task completion remain separate gates.
 
@@ -8585,7 +8587,7 @@ Test ownership is exactly tests/retrieval-service.test.ts, new tests/helpers/m20
 
 Cover all valid record states and malformed keys/descriptors/prototypes/arrays/times/query/result relationships; unchanged unprocessed snapshots; native validateScan, scan callback and repository.finish rejection of workflow-bearing initial output; exact expected-current stale/duplicate checks and every unrelated field/sibling mutation; actual staged write/flush/close/rename failure preservation; all service admission and reentry boundaries; selected-only immutable executor input; saved running before execute; successful/failing/invalid result; final publication failure honesty; cleanup uncertainty; stop before/during/after commit; deadline and late resolve/reject; current versus historical active ownership; restart with no resume; new independent scans after settled retrieval; no provider/support fields or model call from startup/read/scan.
 
-Preflight is read-only: inspect C source/tests and run physical Node C:/Users/mmjos/AppData/Local/nvm/v24.20.0/node.exe with --test --test-timeout=120000 against embedding-retrieval, retrieval-contract, run-contract and scan-normalization test files (118 existing groups), then node_modules/typescript/bin/tsc --project tsconfig.json. It must not run disk/service tests, which create disposable fixtures, before a write lease. The existing public facades are present; ordinary behavioral Red must expose missing retrieval validation/methods, not a manufactured first-module import failure.
+Preflight is read-only: inspect C source/tests and run physical Node C:/Users/developer/AppData/Local/nvm/v24.20.0/node.exe with --test --test-timeout=120000 against embedding-retrieval, retrieval-contract, run-contract and scan-normalization test files (118 existing groups), then node_modules/typescript/bin/tsc --project tsconfig.json. It must not run disk/service tests, which create disposable fixtures, before a write lease. The existing public facades are present; ordinary behavioral Red must expose missing retrieval validation/methods, not a manufactured first-module import failure.
 
 C-C uses that physical Node --test --test-timeout=120000 tests/retrieval-service.test.ts tests/run-contract.test.ts tests/run-repository.test.ts. Green's affected barrier adds unchanged tests/embedding-retrieval.test.ts, tests/retrieval-contract.test.ts and tests/scan-normalization.test.ts, then runs tests/local-service.test.ts with --test-skip-pattern='^(M102 entry-point|real entry)' and the same timeout, followed by strict TypeScript. This explicitly excludes only the existing five entry-point groups requiring the currently absent dist/client build; their source is preserved and the complete suite remains due at final M2-02 integration. The original negative name-selection command was ineffective because of ancestor matching, as recorded above. Do not build, skip/condition tests in source, or infer a full-suite pass from this bounded barrier.
 
@@ -8621,7 +8623,7 @@ Before launch, require the port and known model workload absent and both existin
 
 **M202-INTEGRATION-01 — owner-approved final verification.** TDD is not applicable to running the existing complete suite or the manual capacity observation; no production behavior, fixture or test contract is changed. Responsibility/cohesion changes: None. Entry matches the accepted C endpoint exactly: 195 files, 85 historical command fences, the recorded HEAD/branch, empty stage and no active lease. The retained Chromium revision 1234 dependency marker is dated 2026-09-01 and is inside the existing 30-day validation window. The three test scratch roots and dist/client are absent, temp/m104-setup and data/runs are ordinary and empty, and both Vite temporary roots are absent. Initial non-model observations show about 20.93 GiB free RAM, 499.33 GiB free disk, no 11434 listener, no Ollama setting or known model process, and no GPU compute process reported. NVIDIA identifies the RTX 5060 Laptop GPU and driver 577.05. These are preparation observations, not fresh admission with an active app/UI or capacity evidence. CIM is denied in the restricted shell; Node's Windows memory API and .NET listener enumeration provide the stated independent observations without treating denial as zero usage.
 
-For the complete regression, reuse only the existing M105-CMD-PREP definitions and README's exact build/ten-file sequence. Bind m105Node to the already verified physical C:/Users/mmjos/AppData/Local/nvm/v24.20.0/node.exe instead of the historical junction path; do not invoke the historical Git/status/cleanup recipes. Use its unchanged environment-restoring wrapper, strict TypeScript, Vite build --configLoader native and sequential --test --test-timeout=120000 commands. The seven browser-free files are run-contract, run-repository, local-service, scan-normalization, retrieval-contract, embedding-retrieval and retrieval-service; then scan-page and walking-skeleton under temp/m103-scan, and target-results-ui under temp/m104-ui. Create only the missing ordinary temp/m103-scan, temp/m104-ui and temp/m105-integration directories; preserve temp/m104-setup, retained browser/dependencies and all previous temp children. Tests retain their existing bounded synthetic child-process, loopback, browser and exact cleanup behavior, including temporary owned data/runs entries; require the original empty run root and all scratch roots empty afterward. Capture browser-tree/marker and source/test/config/corpus identities before/after. The whole regression has a 20-minute budget, each existing test keeps its 120-second test timeout, and the first decisive failure stops the sequence without source edits or automatic retry. No model call occurs during this phase. Keep generated client output for the following capacity run.
+For the complete regression, reuse only the existing M105-CMD-PREP definitions and README's exact build/ten-file sequence. Bind m105Node to the already verified physical C:/Users/developer/AppData/Local/nvm/v24.20.0/node.exe instead of the historical junction path; do not invoke the historical Git/status/cleanup recipes. Use its unchanged environment-restoring wrapper, strict TypeScript, Vite build --configLoader native and sequential --test --test-timeout=120000 commands. The seven browser-free files are run-contract, run-repository, local-service, scan-normalization, retrieval-contract, embedding-retrieval and retrieval-service; then scan-page and walking-skeleton under temp/m103-scan, and target-results-ui under temp/m104-ui. Create only the missing ordinary temp/m103-scan, temp/m104-ui and temp/m105-integration directories; preserve temp/m104-setup, retained browser/dependencies and all previous temp children. Tests retain their existing bounded synthetic child-process, loopback, browser and exact cleanup behavior, including temporary owned data/runs entries; require the original empty run root and all scratch roots empty afterward. Capture browser-tree/marker and source/test/config/corpus identities before/after. The whole regression has a 20-minute budget, each existing test keeps its 120-second test timeout, and the first decisive failure stops the sequence without source edits or automatic retry. No model call occurs during this phase. Keep generated client output for the following capacity run.
 
 L7 driver source, invocation and runtime ownership still require exact materialization and acceptance before model effects. The existing M105 browser harness cannot be reused unchanged because it fixes different scratch/run roots and synthetic revision; direct production repository/service primitives can implement the frozen seed without Analyze or a scan. Do not change that harness, add a retrieval HTTP/UI route, simulate embeddings or broaden the sole temp/m202-capacity-01 output root. The final fresh critical review covers cross-slice integration and the eventual capacity evidence; it does not repeat already accepted slice reviews merely because they exist.
 
@@ -8639,7 +8641,7 @@ Validation cwd: repository root. Focused command: physical Node v24.20.0 --check
 
 **Accepted driver preparation (2026-09-08 UTC).** M202-CAPACITY-SETUP-01 adds only tests/helpers/m202-capacity-driver.ts, SHA-256 3529943EBD167FBD6DE01DEEADB45F4517D0712A6D730D218BD94B6A51CC14CA. Its contract digest is c2f4fbd01480b3df720972cd752b9d99c17ab1b5b6345ae1b3707f7403c2b4ff and fresh terminal closed-compliant receipt is 8f09f978e4100b342aad61dc6084b799e3fec11a9c46ef028e9d2b4e13ce7c05. Primary inspects the complete source and independently reproduces both syntax and strict TypeScript PASS. The exact trigger is retrieve; EOF/SIGINT/SIGTERM promptly request the existing bounded service stop, including during retrieval. Fresh S1 M202-CAPACITY-SETUP-REVIEW-01 returns PASS without findings after independent source/hash/API inspection. Primary accepts setup and cohesion None. No production or accepted test endpoint changed; full 398-test integration remains fresh for that unchanged behavior. The new helper is included in the independent strict check, not executed or imported during preparation.
 
-The later driver command is the physical C:/Users/mmjos/AppData/Local/nvm/v24.20.0/node.exe with arguments C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab/temp/m202-capacity-01/driver.ts and d95aa6c8fb26d4ab897cc76d1fbe6515c178d051, from the repository root with process-local NODE_DISABLE_COMPILE_CACHE=1. Reconcile HEAD and the source pin first; copy the accepted source byte-identically only after verifying the previously absent ordinary capacity root, preserving the same ../../ import depth. Only the single retrieve stdin line is permitted after the announced actual app URL, active browser, fresh L6 and accepted runtime-session boundary. The driver creates only runs and the content-safe capacity-evidence.json below that root; it does not manage Ollama. Source preparation and source review are now accepted, but the temp root remains absent and no model attempt has been consumed. The owner's normal developer-session choice remains pending. Runtime effects/configuration and current-state admission must be finalized before dispatch; no reuse or modification of the old acquisition launcher is permitted.
+The later driver command is the physical C:/Users/developer/AppData/Local/nvm/v24.20.0/node.exe with arguments C:/projects/a11y-evidence-lab/temp/m202-capacity-01/driver.ts and d95aa6c8fb26d4ab897cc76d1fbe6515c178d051, from the repository root with process-local NODE_DISABLE_COMPILE_CACHE=1. Reconcile HEAD and the source pin first; copy the accepted source byte-identically only after verifying the previously absent ordinary capacity root, preserving the same ../../ import depth. Only the single retrieve stdin line is permitted after the announced actual app URL, active browser, fresh L6 and accepted runtime-session boundary. The driver creates only runs and the content-safe capacity-evidence.json below that root; it does not manage Ollama. Source preparation and source review are now accepted, but the temp root remains absent and no model attempt has been consumed. The owner's normal developer-session choice remains pending. Runtime effects/configuration and current-state admission must be finalized before dispatch; no reuse or modification of the old acquisition launcher is permitted.
 
 **Checkpoint documentation and safe-state closure.** Ten-document validation passes strict UTF-8/final newline/whitespace, 718 local links, 221 fragments and all 82 PowerShell fences. The 196-endpoint comparison contains only the intended ten documentation changes and one new manual helper relative to the accepted integration entry; every existing application/test/config/corpus endpoint, all 85 historical fences, HEAD/branch and empty stage are preserved. No lease, 11434 listener, capacity root or Vite temporary root is active/present. Original data/runs and all four scratch directories remain empty. The build, browser and all retained prerequisite artifacts remain available. This closes integration/driver preparation documentation, not actual capacity or M2-02. Await the owner's runtime-session choice; fresh-use admission, the single real attempt and final integrated review are not inferred from these checks.
 
@@ -8657,7 +8659,7 @@ At closure run the complete current ten-file suite once, including all five buil
 
 ## Concrete Steps
 
-Run from `C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab` in PowerShell. C0–C2 below are historical read-only baseline recipes; current checks use the verified physical Node path and read-only Git options recorded in the accepted checkpoints. The slot table below preserves the original requirements. The accepted [L1–L7 contract](#authored-literals) now resolves C-SETUP/C-RESTORE, C-INPUT-FIT policy, the reused C-METADATA method and C-SMOKE procedure; exact per-worker invocations and actual-use driver/ownership remain due before their respective actions. Neither a resolved slot nor an old command is execution approval or permission to improvise during a lease.
+Run from `C:\projects\a11y-evidence-lab` in PowerShell. C0–C2 below are historical read-only baseline recipes; current checks use the verified physical Node path and read-only Git options recorded in the accepted checkpoints. The slot table below preserves the original requirements. The accepted [L1–L7 contract](#authored-literals) now resolves C-SETUP/C-RESTORE, C-INPUT-FIT policy, the reused C-METADATA method and C-SMOKE procedure; exact per-worker invocations and actual-use driver/ownership remain due before their respective actions. Neither a resolved slot nor an old command is execution approval or permission to improvise during a lease.
 
 ### C0 — reconcile the current endpoint
 

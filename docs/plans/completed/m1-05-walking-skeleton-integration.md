@@ -1,5 +1,7 @@
 # Integrate and verify the walking skeleton (M1-05)
 
+> Privacy note: Personal directory prefixes in this archived plan have been replaced with `C:/projects/a11y-evidence-lab` and `C:/Users/developer` (or their backslash equivalents). These are illustrative aliases, including in recorded commands and errors. Artifact names, hashes and outcomes are unchanged; the aliases must not be used to authenticate original path-bound evidence or replay historical operations. For current setup, use the [local startup guide](../../DEVELOPMENT.md).
+
 This ExecPlan is a living document. Maintain `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` as work proceeds. This document must be maintained in accordance with `PLANS.md`.
 
 This plan owns only [M1-05 — Integrate and verify the walking skeleton](../../DEVELOPMENT_ROADMAP.md#m1-05--integrate-and-verify-the-walking-skeleton). M1-05 is Complete again after the two owner-authorized post-closure corrections at `1f92fe8`, replacement 335-test verification, fresh independent reviews, exact cleanup, and renewed documentation closure. Earlier implementation, failed evidence, review, public smoke, and closure history remain preserved. Correction commands record the completed execution; do not replay one-shot setup or cleanup. Only explicitly identified read-only definitions and verification checks are reusable. No M2 work, public smoke, provider call, new dependency, requirement/ADR change, commit, or push is authorized.
@@ -697,11 +699,11 @@ if ($LASTEXITCODE -ne 0) { throw 'Correction closure whitespace failed' }
 
 ### M105-CMD-PREP — exact shell literals and environment restoration
 
-All commands run in PowerShell from `C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab`. They reuse Node `C:/nvm4w/nodejs/node.exe`, adjacent npm 11.19.0, installed packages, the existing npm cache at `temp/rd002-npm-cache`, and the retained browser at `m104-browser-runtime/browsers`. Bootstrap, dependency restore, package/configuration mutation, browser acquisition, another cache, and a repository helper script are `None`. The generated locations are exactly `dist/client`, `temp/m103-scan`, `temp/m104-ui`, and `temp/m105-integration`; repository-root `.vite-temp` and `node_modules/.vite-temp` must remain absent. Run this preparation text in every new command shell; it defines values and functions but creates or removes nothing.
+All commands run in PowerShell from `C:\projects\a11y-evidence-lab`. They reuse Node `C:/nvm4w/nodejs/node.exe`, adjacent npm 11.19.0, installed packages, the existing npm cache at `temp/rd002-npm-cache`, and the retained browser at `m104-browser-runtime/browsers`. Bootstrap, dependency restore, package/configuration mutation, browser acquisition, another cache, and a repository helper script are `None`. The generated locations are exactly `dist/client`, `temp/m103-scan`, `temp/m104-ui`, and `temp/m105-integration`; repository-root `.vite-temp` and `node_modules/.vite-temp` must remain absent. Run this preparation text in every new command shell; it defines values and functions but creates or removes nothing.
 
 ```powershell
 $ErrorActionPreference = 'Stop'
-$m105Repo = [IO.Path]::GetFullPath('C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab')
+$m105Repo = [IO.Path]::GetFullPath('C:/projects/a11y-evidence-lab')
 if ((Resolve-Path -LiteralPath '.').Path -ine $m105Repo) { throw 'Wrong M1-05 working directory' }
 $m105Node = 'C:/nvm4w/nodejs/node.exe'
 $m105Npm = 'C:/nvm4w/nodejs/npm.cmd'
@@ -1825,7 +1827,7 @@ if ($LASTEXITCODE -ne 0) { throw 'git diff --check failed at documentation closu
 
 ## Concrete Steps
 
-Work from `C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab`.
+Work from `C:\projects\a11y-evidence-lab`.
 
 The four structural slices, their corrections, the App dead-state cleanup, integration, and public-smoke checkpoints are complete. Commands above preserve the reviewed execution and recovery history; do not replay one-shot evidence capture or cleanup.
 

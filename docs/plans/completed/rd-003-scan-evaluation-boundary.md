@@ -1,5 +1,7 @@
 # Freeze the RD-003 scan evaluation boundary
 
+> Privacy note: Personal directory prefixes in this archived plan have been replaced with `C:/projects/a11y-evidence-lab` and `C:/Users/developer` (or their backslash equivalents). These are illustrative aliases, including in recorded commands and errors. Artifact names, hashes and outcomes are unchanged; the aliases must not be used to authenticate original path-bound evidence or replay historical operations. For current setup, use the [local startup guide](../../DEVELOPMENT.md).
+
 This ExecPlan is a living document. Maintain `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` as work proceeds. This document must be maintained in accordance with `PLANS.md`.
 
 - **Owning task:** [RD-003 — Freeze the walking-skeleton evaluation boundary](../../DEVELOPMENT_ROADMAP.md#rd-003--freeze-the-walking-skeleton-evaluation-boundary).
@@ -435,7 +437,7 @@ Bootstrap acquires the exact official Node ZIP with its observed checksum and th
 
 ```powershell
 $ErrorActionPreference = 'Stop'
-$rd003Repo = 'C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab'
+$rd003Repo = 'C:\projects\a11y-evidence-lab'
 if ($PWD.Path -ne $rd003Repo) { throw 'Unexpected working directory.' }
 $rd003Temp = Join-Path $rd003Repo 'temp\rd003-evaluation'
 if (Test-Path -LiteralPath $rd003Temp) { throw 'Preserve and inspect unexpected existing task directory.' }
@@ -487,7 +489,7 @@ This exact inline evaluation command is retained here for reproduction only, nev
 
 ```powershell
 $ErrorActionPreference = 'Stop'
-$rd003Repo = 'C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab'
+$rd003Repo = 'C:\projects\a11y-evidence-lab'
 if ($PWD.Path -ne $rd003Repo) { throw 'Unexpected working directory.' }
 $rd003Temp = Join-Path $rd003Repo 'temp\rd003-evaluation'
 $rd003Source = @'
@@ -778,7 +780,7 @@ The six named fixture files are the complete worker write scope; manifest and do
 Every browser case closes page/context/browser after any result. AxeBuilder also creates an internal same-context blank page during finishRun (integration source lines 345–370); it is processing machinery, not a seventh fixture or scan target, and context/tree cleanup owns it. If cleanup fails, the case fails and the primary investigates owned resources before further work. Bootstrap restores its process-local environment values in `finally`; the scan supervisor changes only each child's environment, leaving its parent unchanged. The child also removes NODE_OPTIONS, NODE_PATH, DEBUG, and PWDEBUG so injected options or debug output cannot change the frozen observation path. Normal cleanup evidence requires the child's successful awaited page/context/browser closes and its timely, consistent exit; process inventory is only an additional diagnostic for visible residuals. The primary runs the inventory below after normal completion and before removing generated paths. Unavailable executable paths are counted explicitly, never treated as absence; an empty visible-owned set proves no global absence. If the query itself is permission-blocked, request narrow read-only inspection permission. Forced termination, failed close, pipe/process uncertainty, or visible residuals always preserve cleanup as unverified and stop the run. No result of this inventory, including a fully visible empty set, can promote a forced-stop result to verified cleanup or authorize deletion/continuation. Recovery after that stop requires separately scoped primary inspection and owner direction; it is not an automatic correction or rerun. A descendant is not considered gone merely because its parent exited. The current PowerShell 7.6.4/.NET 10.0.10 exposes `Process.Kill(Boolean)`; [Microsoft's process termination contract](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.process.kill) explains the descendant caveat, and [redirected output guidance](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.processstartinfo.redirectstandardoutput) supports draining both pipes asynchronously. No generic process service or retained runner is introduced.
 
 ```powershell
-$rd003OwnedRoot = 'C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab\temp\rd003-evaluation\'
+$rd003OwnedRoot = 'C:\projects\a11y-evidence-lab\temp\rd003-evaluation\'
 $rd003ProcessRows = @(Get-CimInstance Win32_Process -ErrorAction Stop)
 $rd003UnreadableCount = @($rd003ProcessRows | Where-Object { -not $_.ExecutablePath }).Count
 $rd003VisibleOwned = @($rd003ProcessRows | Where-Object { $_.ExecutablePath -and $_.ExecutablePath.StartsWith($rd003OwnedRoot,[StringComparison]::OrdinalIgnoreCase) })
@@ -793,11 +795,11 @@ Only after all six cases have normal-close evidence, no failed/unverified cleanu
 
 ```powershell
 $ErrorActionPreference = 'Stop'
-$rd003Repo = 'C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab'
+$rd003Repo = 'C:\projects\a11y-evidence-lab'
 $rd003Target = Join-Path $rd003Repo 'temp\rd003-evaluation'
 if ($PWD.Path -ne $rd003Repo) { throw 'Unexpected working directory.' }
 $rd003Resolved = (Resolve-Path -LiteralPath $rd003Target).Path
-if ($rd003Resolved -ne 'C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab\temp\rd003-evaluation') { throw 'Cleanup containment mismatch.' }
+if ($rd003Resolved -ne 'C:\projects\a11y-evidence-lab\temp\rd003-evaluation') { throw 'Cleanup containment mismatch.' }
 $rd003Entries = @((Get-Item -LiteralPath (Join-Path $rd003Repo 'temp')),(Get-Item -LiteralPath $rd003Target)) + @(Get-ChildItem -LiteralPath $rd003Target -Force -Recurse)
 if ($rd003Entries | Where-Object { $_.Attributes -band [IO.FileAttributes]::ReparsePoint }) { throw 'Cleanup refuses reparse topology.' }
 Remove-Item -LiteralPath $rd003Resolved -Recurse -Force
@@ -879,7 +881,7 @@ Run this exact block once in the worker lease after the correction review passes
 
 ```powershell
 $ErrorActionPreference = 'Stop'
-$rd003Repo = 'C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab'
+$rd003Repo = 'C:\projects\a11y-evidence-lab'
 if ($PWD.Path -ne $rd003Repo) { throw 'Unexpected working directory.' }
 $rd003Temp = Join-Path $rd003Repo 'temp\rd003-evaluation'
 if (-not (Test-Path -LiteralPath $rd003Temp -PathType Container)) { throw 'Expected preserved task directory is missing.' }
@@ -1359,7 +1361,7 @@ Write .gitattributes as UTF-8 with a final newline and precisely this content. O
 
 #### CMD-CHECKOUT — current and checkout-filtered byte verification
 
-Run from C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab. Python 3.12.10 and Git 2.53.0.windows.1 are the verified developer tools. This is read-only and writes no index/configuration or checkout files. All 21 checkout-filter comparisons and six manifest-content comparisons must pass.
+Run from C:\projects\a11y-evidence-lab. Python 3.12.10 and Git 2.53.0.windows.1 are the verified developer tools. This is read-only and writes no index/configuration or checkout files. All 21 checkout-filter comparisons and six manifest-content comparisons must pass.
 
 ```powershell
 @'
@@ -1396,7 +1398,7 @@ Run this complete block once from the same repository root. It uses the correcte
 
 ```powershell
 $ErrorActionPreference = 'Stop'
-$rd003Repo = 'C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab'
+$rd003Repo = 'C:\projects\a11y-evidence-lab'
 if ($PWD.Path -ne $rd003Repo) { throw 'Unexpected working directory.' }
 $rd003Temp = Join-Path $rd003Repo 'temp\rd003-evaluation'
 if (Test-Path -LiteralPath $rd003Temp) { throw 'Preserve and inspect unexpected existing task directory.' }

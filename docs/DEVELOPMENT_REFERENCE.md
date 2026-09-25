@@ -4,7 +4,7 @@
 
 Use this reference when changing the application, running the complete regression suite, reproducing retained evidence, or inspecting run cleanup. For ordinary setup and startup, use [Run the project locally](DEVELOPMENT.md). You do not need to run the regression suite each time you open the application.
 
-The recorded command wrappers below remain available for existing evaluation callers. Their historical names and checkout-specific paths are preserved; they are not required reading for everyday startup. The [roadmap](DEVELOPMENT_ROADMAP.md) and owning task plans retain development status and verification authority.
+The recorded command wrappers below remain available for existing evaluation callers. Their historical names are preserved, while the repository path is a generic example; they are not required reading for everyday startup. The [roadmap](DEVELOPMENT_ROADMAP.md) and owning task plans retain development status and verification authority.
 
 In this guide: [Startup and model setup](#planned-mvp-startup-and-generation-setup) · [Toolchain and shell preparation](#development-toolchain) · [Build and verification](#build-and-verify-the-walking-skeleton) · [Start and stop the service](#run-the-local-service) · [Retained runs and deletion](#retained-runs-and-deletion).
 
@@ -24,15 +24,15 @@ Use exactly [Node.js 24.20.0 with its bundled npm 11.19.0](https://nodejs.org/en
 
 ### Development command preparation
 
-Use PowerShell 7 (`pwsh`; verified here with 7.6.5). The preparation uses `[IO.Path]::GetRelativePath`, which is unavailable in Windows PowerShell 5.1. First run `Set-Location -LiteralPath 'C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab'`.
+Use PowerShell 7 (`pwsh`; verified here with 7.6.5). The preparation uses `[IO.Path]::GetRelativePath`, which is unavailable in Windows PowerShell 5.1. Replace `C:/projects/a11y-evidence-lab` with your project's full path in both the following command and the `$m105Repo` assignment below, keeping the quotes. First run `Set-Location -LiteralPath 'C:/projects/a11y-evidence-lab'`.
 
-The definitions below are maintained for this verified Windows checkout. Run them from the repository root in each new PowerShell command session. When loading the block from a script, dot-source it so its functions remain available in the calling session. They read the location and environment and define values/functions; they do not install, launch, create, or remove anything. The pinned paths are checkout-specific, not a portable installer. Their existing `M105` names preserve compatibility with the commands below.
+The definitions below are maintained for the verified Windows toolchain. Run them from the repository root in each new PowerShell command session. When loading the block from a script, dot-source it so its functions remain available in the calling session. They read the location and environment and define values/functions; they do not install, launch, create, or remove anything. If your Node installation is elsewhere, also set `$m105Node` and `$m105Npm` to its actual executable paths; retain the required versions checked below. These definitions are not an installer. Their existing `M105` names preserve compatibility with the commands below.
 
-This is the current preparation source. Its required definitions are extracted unchanged from the historical [M105-CMD-PREP](plans/completed/m1-05-walking-skeleton-integration.md#m105-cmd-prep--exact-shell-literals-and-environment-restoration); task-specific path contracts, hashes, lease state, and cleanup procedures stay in that archive. Do not replay those historical task procedures for current development.
+This is the current preparation source. Its required definitions come from the historical [M105-CMD-PREP](plans/completed/m1-05-walking-skeleton-integration.md#m105-cmd-prep--exact-shell-literals-and-environment-restoration), with personal directory prefixes replaced by examples. Task-specific path contracts, hashes, lease state, and cleanup procedures stay in that archive. Its privacy note explains the path substitutions; do not replay historical task procedures for current development.
 
 ```powershell
 $ErrorActionPreference = 'Stop'
-$m105Repo = [IO.Path]::GetFullPath('C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab')
+$m105Repo = [IO.Path]::GetFullPath('C:/projects/a11y-evidence-lab')
 if ((Resolve-Path -LiteralPath '.').Path -ine $m105Repo) { throw 'Wrong M1-05 working directory' }
 $m105Node = 'C:/nvm4w/nodejs/node.exe'
 $m105Npm = 'C:/nvm4w/nodejs/npm.cmd'

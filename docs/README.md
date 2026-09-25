@@ -1,6 +1,20 @@
 # Project documentation
 
-This index is the starting point for project work. For initial navigation, read the authority map and applicable task-router entry, then load their controlling sources. The complete catalog and unrelated current-status summaries need not be read for every task. Follow the root [pre-edit reading rule](../AGENTS.md#required-context-and-task-routing), including its narrow routine-ExecPlan exception. Return to the [project overview](../README.md) for the public summary and repository status.
+Choose a guide below to run the app, understand its workflow, or explore the code. Return to the [project overview](../README.md) for a short introduction and project status.
+
+## Choose a guide
+
+| I want to… | Read |
+| --- | --- |
+| Install, build, and start the app | [Run the project locally](DEVELOPMENT.md) |
+| Set up guidance lookup or AI suggestions | [Enable guidance and generation](DEVELOPMENT.md#enable-guidance-and-generation) |
+| Understand what to do in the app | [Example walkthrough](APPLICATION_GUIDE.md#walkthrough-a-form-field-without-a-label), then the [application guide](APPLICATION_GUIDE.md) |
+| Find the code and understand how it works | [Repository map](DEVELOPMENT.md#repository-map) and [system architecture](architecture/SYSTEM_ARCHITECTURE.md) |
+| Run the complete checks or manage saved results | [Maintainer reference](DEVELOPMENT_REFERENCE.md) |
+| Understand what was verified and its limits | [MVP evidence report](BOUNDED_MVP_EVIDENCE.md); use the [evaluation guide](EVALUATION_GUIDE.md) to inspect retained artifacts |
+| Understand the guidance sources and licenses | [Corpus guide and source notices](CORPUS.md) |
+
+For repository changes, start with the authority map and applicable [task-router entry](#read-by-task), then read their controlling sources. You do not need to read the complete catalog for every task. Follow the [pre-edit reading rule](../AGENTS.md#required-context-and-task-routing), including its narrow routine-ExecPlan exception.
 
 ## Authority and status map
 

@@ -1,5 +1,7 @@
 # Start an intentional later scan
 
+> Privacy note: Personal directory prefixes in this archived plan have been replaced with `C:/projects/a11y-evidence-lab` and `C:/Users/developer` (or their backslash equivalents). These are illustrative aliases, including in recorded commands and errors. Artifact names, hashes and outcomes are unchanged; the aliases must not be used to authenticate original path-bound evidence or replay historical operations. For current setup, use the [local startup guide](../../DEVELOPMENT.md).
+
 This ExecPlan is a living document. Maintain `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` as work proceeds. This document must be maintained in accordance with `PLANS.md`.
 
 ## Current state
@@ -151,7 +153,7 @@ Research Assignment Capsules project this contract and I1–I10. Synthesis retur
 
 ## Concrete Steps
 
-Working directory: `C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab`. Dot-source the first PowerShell block in the current [README command preparation](../../../README.md#development-command-preparation) in every new command session; it defines the existing runtime/environment wrapper without effects. Do not execute its dependency restore or archived acquisition commands merely to prepare a shell.
+Working directory: `C:/projects/a11y-evidence-lab`. Dot-source the first PowerShell block in the current [README command preparation](../../../README.md#development-command-preparation) in every new command session; it defines the existing runtime/environment wrapper without effects. Do not execute its dependency restore or archived acquisition commands merely to prepare a shell.
 
 ### M501-ENTRY-01 — Planning baseline
 
@@ -386,7 +388,7 @@ Write scope
 - Forbidden directory roots: Entire repository and external filesystem for writes.
 
 Validation
-- Working directory: C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab
+- Working directory: C:/projects/a11y-evidence-lab
 - Focused command: source/test inspection is primary preflight evidence. If needed, after exact README preparation, `Invoke-M105Command { & $m105Node --test --test-timeout=120000 tests/run-contract.test.ts; if ($LASTEXITCODE -ne 0) { throw 'Run contract preflight failed' } }` only after confirming it creates no files. No service/browser fixture execution in read-only preflight.
 - Task-level command: G exact A five-test commands and independent strict after writes; closure exact README suite plus accepted additions, build and E proof. These commands are not authorized effects in this read-only turn.
 - Expected decisive result and reusable evidence IDs: one workflow classification with exact source/test locations and precise missing assertions; propose smallest cohesive Red set, exact new callable signatures and first-module exception only if required. Do not fabricate Red.
@@ -484,7 +486,7 @@ Write scope
 - Forbidden directory roots: Entire filesystem for writes.
 
 Validation
-- Working directory: C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab
+- Working directory: C:/projects/a11y-evidence-lab
 - Focused command: read-only source/test/fixture inspection; no browser/service/test filesystem effects in preflight. Primary may run missing baseline evidence after your report.
 - Task-level command: after writes exact README preparation (dot-source first Powershell block containing function Invoke-M105Command) and sequential Invoke-M105Command { & $m105Node --test --test-timeout=120000 tests/scan-normalization.test.ts; if($LASTEXITCODE-ne0){throw 'Normalization failed'} }; then Assert-M105EmptyDirectory $m105ScanTemp and same scan-page.test.ts with wrapper second argument $m105ScanTemp; assert empty afterwards. Separate strict: & $m105Node node_modules/typescript/bin/tsc --project tsconfig.json with exitcheck in wrapper. These effects not authorized in preflight.
 - Expected decisive result and reusable evidence IDs: one workflow classification plus precise existing/missing behavior, exact proposed test paths/signatures/resources, meaningful Red reason and first-module exception only if needed. G research is authority/source evidence, not runtime proof.
@@ -557,7 +559,7 @@ Write scope
 - Forbidden directory roots: Entire filesystem for writes.
 
 Validation
-- Working directory: C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab
+- Working directory: C:/projects/a11y-evidence-lab
 - Focused command: source/test inspection only; no writes/browser/service/network in preflight.
 - Task-level command: after writes exact README first powershell preparation and Invoke-M105Command { & $m105Node --experimental-test-module-mocks --test --test-timeout=120000 tests/rescan-admission.test.ts; if($LASTEXITCODE-ne0){throw 'Admission failed'} }; separate strict inwrapper with exitcheck. Fullsuite/build/E later.
 - Expected decisive result and reusable evidence IDs: classify exactmissingbehavior with proposed cohesive tests, full closedtypes/signatures and precise missingmodule first-Red ifneeded; no fabricatedRed.

@@ -1,5 +1,7 @@
 # Present and verify explicit generation for one Finding
 
+> Privacy note: Personal directory prefixes in this archived plan have been replaced with `C:/projects/a11y-evidence-lab` and `C:/Users/developer` (or their backslash equivalents). These are illustrative aliases, including in recorded commands and errors. Artifact names, hashes and outcomes are unchanged; the aliases must not be used to authenticate original path-bound evidence or replay historical operations. For current setup, use the [local startup guide](../../DEVELOPMENT.md).
+
 This ExecPlan is a living document. Maintain `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` as work proceeds. This document must be maintained in accordance with `PLANS.md`.
 
 ## Current state
@@ -216,7 +218,7 @@ Review all invariants below, including artifact completeness, evidence honesty a
 
 ## Concrete Steps
 
-All commands run in PowerShell 7 from `C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab`. Use the complete current [README command preparation](../../../README.md#development-command-preparation); its historic M105 variable names are intentional. Do not replay archived task procedures or clean generated output speculatively.
+All commands run in PowerShell 7 from `C:/projects/a11y-evidence-lab`. Use the complete current [README command preparation](../../../README.md#development-command-preparation); its historic M105 variable names are intentional. Do not replay archived task procedures or clean generated output speculatively.
 
 ### Current safe entry commands
 
@@ -306,7 +308,7 @@ The worker discarded the nested execution session metadata when printing only co
 
 Primary freezes this operational recovery before its effects: read exact PID command lines, creation times and parentage, then their verified descendants; preserve unrelated processes. If no graceful control exists, terminate only the freshly identity-matched test process tree, never a name-wide Node/Chromium/Ollama kill. Confirm every owned process exited and port 5173 closed before moving any residue. This reconciles the worker's narrower no-process-kill packet within the owner's existing test-resource cleanup authority; it grants no product/model action or additional attempt.
 
-The exact retained source leaf is `C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab/temp/m104-ui`. Its only observed children are `m104-test-entry.html`, `m104-test-entry.tsx`, `vite-cache`, `playwright_chromiumdev_profile-d7NdsD`, and `playwright-artifacts-bCGBwY`. After termination, require ordinary contained ancestors, exact child inventory and ordinary recursive contents; preserve them by native PowerShell `Move-Item -LiteralPath` into the previously absent, ignored/untracked ordinary leaf `C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab/temp/m305-b-red01-residue`. Do not delete them or touch other scratch/runtime/run contents. Verify both inventories and restored empty scratch before correction. Unknown contents or identity drift stop the affected action for primary triage.
+The exact retained source leaf is `C:/projects/a11y-evidence-lab/temp/m104-ui`. Its only observed children are `m104-test-entry.html`, `m104-test-entry.tsx`, `vite-cache`, `playwright_chromiumdev_profile-d7NdsD`, and `playwright-artifacts-bCGBwY`. After termination, require ordinary contained ancestors, exact child inventory and ordinary recursive contents; preserve them by native PowerShell `Move-Item -LiteralPath` into the previously absent, ignored/untracked ordinary leaf `C:/projects/a11y-evidence-lab/temp/m305-b-red01-residue`. Do not delete them or touch other scratch/runtime/run contents. Verify both inventories and restored empty scratch before correction. Unknown contents or identity drift stop the affected action for primary triage.
 
 Before corrected Red, the same test worker must resolve primary's concrete witness gaps within the five-file envelope: reuse valid abstention fixtures; keep old/new generation tests inside one mounted App; ensure callback-property reentry actually fires; cover the full bounded attempted and unknown failure matrix; active sibling selection, keyboard activation and proposal-scoped references; representative terminal accessibility/reflow; and exclusive, useful synthetic captures. Missing fixture validity, teardown, import or runner behavior cannot become Red. A remains accepted; C allowances remain unused.
 
@@ -592,12 +594,12 @@ Integrated review Minor M305-IR-01 identified the roadmap opening's stale claim 
 
 ### M305-C-RUNTIME-01 — Authorized retained-runtime startup
 
-The owner explicitly asked the primary to start Ollama. This authorizes one launch of the installed retained runtime with the existing model store; no pull, replacement, upgrade or generation follows from startup. PATH discovery found no Ollama command. The exact previously accepted executable exists at C:/Users/mmjos/Tools/Ollama/v0.33.3/ollama.exe, 36912520 bytes, with unchanged SHA-256 E4FE6BD835FE146659F5C969DCCAFF2E25A9DE63D90EE204CA5D11B9034B0CA5. The existing store is C:/Users/mmjos/Models/Ollama. Before effects, primary freezes the following native hidden launch, ordinary ancestor/executable checks, unused-process/port precondition and exact process-environment restoration. Normal Ollama device discovery and developer-owned runtime state are permitted; the launched server is retained for the developer after application cleanup. Record its returned PID/start time and verify that the 11434 listener belongs to that process before the frozen metadata check. No broad termination or adoption of another server is permitted.
+The owner explicitly asked the primary to start Ollama. This authorizes one launch of the installed retained runtime with the existing model store; no pull, replacement, upgrade or generation follows from startup. PATH discovery found no Ollama command. The exact previously accepted executable exists at C:/Users/developer/Tools/Ollama/v0.33.3/ollama.exe, 36912520 bytes, with unchanged SHA-256 E4FE6BD835FE146659F5C969DCCAFF2E25A9DE63D90EE204CA5D11B9034B0CA5. The existing store is C:/Users/developer/Models/Ollama. Before effects, primary freezes the following native hidden launch, ordinary ancestor/executable checks, unused-process/port precondition and exact process-environment restoration. Normal Ollama device discovery and developer-owned runtime state are permitted; the launched server is retained for the developer after application cleanup. Record its returned PID/start time and verify that the 11434 listener belongs to that process before the frozen metadata check. No broad termination or adoption of another server is permitted.
 
 ```powershell
 $ErrorActionPreference='Stop'
-$m305Exe='C:\Users\mmjos\Tools\Ollama\v0.33.3\ollama.exe'
-$m305Store='C:\Users\mmjos\Models\Ollama'
+$m305Exe='C:\Users\developer\Tools\Ollama\v0.33.3\ollama.exe'
+$m305Store='C:\Users\developer\Models\Ollama'
 foreach($m305Leaf in @($m305Exe,$m305Store)){
  $m305Current=$m305Leaf
  while($m305Current){
@@ -617,7 +619,7 @@ $m305Prior=@{}
 foreach($m305Name in $m305Settings.Keys){$m305Prior[$m305Name]=[Environment]::GetEnvironmentVariable($m305Name,'Process')}
 try {
  foreach($m305Name in $m305Settings.Keys){[Environment]::SetEnvironmentVariable($m305Name,$m305Settings[$m305Name],'Process')}
- $m305Server=Start-Process -FilePath $m305Exe -ArgumentList 'serve' -WorkingDirectory 'C:\Users\mmjos\Tools\Ollama\v0.33.3' -WindowStyle Hidden -PassThru
+ $m305Server=Start-Process -FilePath $m305Exe -ArgumentList 'serve' -WorkingDirectory 'C:\Users\developer\Tools\Ollama\v0.33.3' -WindowStyle Hidden -PassThru
  [pscustomobject]@{Id=$m305Server.Id;StartTimeUtc=$m305Server.StartTime.ToUniversalTime().ToString('o');Executable=$m305Exe;Ownership='Developer-retained runtime'} | ConvertTo-Json
 } finally {
  foreach($m305Name in $m305Settings.Keys){
@@ -771,7 +773,7 @@ Write scope
 - Forbidden directory roots: docs, .codex, .agents, corpus, evaluation; src during Red and tests during Green
 
 Validation
-- Working directory: C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab
+- Working directory: C:/projects/a11y-evidence-lab
 - Focused command: Preflight source-only, no tests/fixtures/effects. Red/Green load README's first definitions-only PowerShell block unchanged using the existing M305 preparation; serial Invoke-M105Command { & $m105Node --test --test-timeout=120000 tests/<suite>.test.ts; if ($LASTEXITCODE -ne 0) { throw '<suite> failed' } } for embedding-retrieval, retrieval-contract, retrieval-service, generation-service. Do not stop before observing the intended behavioral Red; report each suite separately. Helper syntax/CLI-negative checks must not start preparation or actual model calls. Exact negative caller bound after preflight.
 - Task-level command: M305's complete 25-suite serial scratch-qualified regression, independent strict TypeScript and build after D/E; new actual callers frozen after source/helper/build settle.
 - Expected decisive result and reusable evidence IDs: Meaningful selection/provenance Red then passing unchanged tests; malformed/legacy and no-call boundaries preserved; fresh-root option cannot overwrite earlier proof. No claim of live retrieval from deterministic tests.
@@ -871,7 +873,7 @@ Write scope
 - Forbidden directory roots: docs, .codex, .agents, corpus, evaluation; src during Red and tests during Green
 
 Validation
-- Working directory: C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab
+- Working directory: C:/projects/a11y-evidence-lab
 - Focused command: Preflight source-only without effects. Red/Green load maintained README definitions unchanged and run Invoke-M105Command { & $m105Node --test --test-timeout=120000 tests/finding-guidance-ui.test.ts; if ($LASTEXITCODE -ne 0) { throw 'Guidance UI failed' } } $m105UiTemp. Assert the four established scratch roots empty before/after. Use the known permitted elevated route for managed browser effects; no acquisition.
 - Task-level command: M305's complete 25-suite serial scratch-qualified regression, independent strict TypeScript and build after D/E; new actual callers frozen after source/helper/build settle.
 - Expected decisive result and reusable evidence IDs: Meaningful missing policy-copy Red, then full suite passes unchanged, zero axe violations and both policy forms readable without horizontal overflow. Existing synthetic screenshots are fresh evidence, never live provider proof.
