@@ -1,5 +1,7 @@
 # Persist and present comparison evidence — M5-03
 
+> Privacy note: Personal directory prefixes in this archived plan have been replaced with `C:/projects/a11y-evidence-lab` and `C:/Users/developer` (or their backslash equivalents). These are illustrative aliases, including in recorded commands and errors. Artifact names, hashes and outcomes are unchanged; the aliases must not be used to authenticate original path-bound evidence or replay historical operations. For current setup, use the [local startup guide](../../DEVELOPMENT.md).
+
 This ExecPlan is a living document. Maintain `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` as work proceeds. This document must be maintained in accordance with `PLANS.md`.
 
 ## Current state
@@ -160,7 +162,7 @@ Each invariant starts NOT RUN for M5-03; G records decide-now literals separatel
 
 ## Concrete Steps
 
-All commands run from `C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab` in PowerShell 7. Use the complete current [README preparation](../../../README.md#development-command-preparation), dot-sourced in each new session. It defines `$m105Node`, `Invoke-M105Command` and ordinary-path/scratch checks. Do not replay archived acquisition or cleanup commands. No dependency restore, lock mutation or installation is planned.
+All commands run from `C:/projects/a11y-evidence-lab` in PowerShell 7. Use the complete current [README preparation](../../../README.md#development-command-preparation), dot-sourced in each new session. It defines `$m105Node`, `Invoke-M105Command` and ordinary-path/scratch checks. Do not replay archived acquisition or cleanup commands. No dependency restore, lock mutation or installation is planned.
 
 Read-only entry:
 

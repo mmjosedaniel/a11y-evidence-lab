@@ -4,13 +4,95 @@
 
 This guide describes the implemented interactions, service boundaries and fixed provider setup. Start with [Run the project locally](DEVELOPMENT.md); consult the [bounded evidence report](BOUNDED_MVP_EVIDENCE.md) for verification limits. Requirements and ADRs remain the controlling authorities.
 
-In this guide: [Get guidance](#getting-guidance-for-one-finding) · [Generate a proposal](#inspecting-generation-for-one-finding) · [Review a proposal](#reviewing-one-proposal) · [Rescan and compare](#intentional-rescans) · [Retrieval APIs](#retrieval-apis) · [Generation APIs](#shared-generation-apis) · [Review APIs](#proposal-review-apis) · [Local setup](#fixed-local-qwen-adapter) · [Groq setup](#fixed-groq-adapter).
+In this guide: [Example walkthrough](#walkthrough-a-form-field-without-a-label) · [Get guidance](#getting-guidance-for-one-finding) · [Generate a proposal](#inspecting-generation-for-one-finding) · [Review a proposal](#reviewing-one-proposal) · [Rescan and compare](#intentional-rescans) · [Retrieval APIs](#retrieval-apis) · [Generation APIs](#shared-generation-apis) · [Review APIs](#proposal-review-apis) · [Local setup](#fixed-local-qwen-adapter) · [Groq setup](#fixed-groq-adapter).
 
 ## Current scope
 
-The [capability summary](../README.md#project-status) distinguishes implemented behavior from later work. Source entry points are the [domain contract](../src/server/domain/run-contract.ts), [run repository](../src/server/persistence/run-repository.ts), [local service](../src/server/service.ts), [scanner](../src/server/scan/scan-page.ts), and [scan minimization](../src/server/scan/normalize-scan.ts). The [retrieval APIs](#retrieval-apis) consume the [closed corpus](CORPUS.md#closed-corpus-snapshot).
+The [capability summary](../README.md#project-status) distinguishes implemented behavior from later work. A **Finding** is one recorded accessibility issue; a **run** holds one scan and its associated work. **Retrieval** means looking up relevant guidance in the **corpus**, the project's fixed collection of W3C guidance passages. Source entry points are the [domain contract](../src/server/domain/run-contract.ts), [run repository](../src/server/persistence/run-repository.ts), [local service](../src/server/service.ts), [scanner](../src/server/scan/scan-page.ts), and [scan minimization](../src/server/scan/normalize-scan.ts). The [retrieval APIs](#retrieval-apis) consume the [closed corpus](CORPUS.md#closed-corpus-snapshot).
+
+For component responsibilities and local/external data flow, see the [implemented system architecture](architecture/SYSTEM_ARCHITECTURE.md).
+
+## Walkthrough: a form field without a label
+
+This reading example uses the project's synthetic [failing form](../fixtures/rd003/form-input-label/failing.html) and [corrected form](../fixtures/rd003/form-input-label/corrected.html). It explains how to interpret the UI; it is not a new recorded run or a promise of a particular AI response. The [evidence report](BOUNDED_MVP_EVIDENCE.md) links the actual observations.
+
+The failing example puts visible text next to an email input without connecting the text to the field:
+
+```html
+<span>Email address</span>
+<input id="rd3-email" type="email">
+```
+
+These files are controlled test inputs. Do not enter a file path or localhost fixture URL into **Analyze**. To follow the steps interactively, use an authorized, non-sensitive public HTTPS page you control with equivalent content and complete the [local setup](DEVELOPMENT.md) first. Keep the frozen repository fixtures unchanged; any page edits belong to your own example page.
+
+### Example result at a glance
+
+The following is an **authored, hypothetical example**, not an actual model response, retrieved passage, saved review or recorded comparison. It summarizes one possible supported path; a real run can instead abstain or fail. The proposed correction comes from the linked corrected fixture.
+
+| Step | Illustrative content or outcome |
+| --- | --- |
+| Finding | The email field has visible nearby text, but that text is not connected to the input as its label. |
+| Guidance | The reviewer checks the returned guidance for support for an explicit label associated with this input. A citation alone is not proof that it applies. |
+| Proposal | Replace the nearby `span` with `<label for="rd3-email">Email address</label>`, keeping the input's matching `id`. This suggestion assumes the reviewer confirms that “Email address” describes the field's intended purpose. |
+| Human decision | If the proposal's claims and citations are supported and the required judgment is resolved, the reviewer can approve it and save that decision. Otherwise, edit and accept a supported correction or reject it. Approval does not modify the page. |
+| Later comparison | After the developer changes the page, a separate scan may report `Resolved` if it finds a unique matching non-failing observation in compatible scan context. Missing or ambiguous evidence is not a pass. |
+
+The steps below explain the actions, required checks and other outcomes. Actual recorded results, including unsupported suggestions, remain in the [evidence report](BOUNDED_MVP_EVIDENCE.md).
+
+### 1. Scan and inspect the finding
+
+Enter the page address, explicitly select Local or Groq, and choose **Analyze**. Scanning itself needs no model or API key. In a successful scan of the failing example, inspect the `label` Finding for the email field. The nearby visible words are not an explicitly associated label in this markup.
+
+Read the captured facts before requesting an AI suggestion. Findings, checks the scanner could not decide automatically, and scan errors are different results. A failed scan is not a result with zero issues.
+
+### 2. Read the guidance
+
+Select the Finding and choose **Get guidance**. This uses local Ollama and EmbeddingGemma in either generation mode when the required evidence is complete. Ollama runs the local models; EmbeddingGemma produces **embeddings**, numerical representations of text used to rank passages by similarity. Read the returned passages and their sources.
+
+The app checks whether the required types of guidance are present. That check does not prove that every passage is relevant or that a later AI claim is supported. If evidence or guidance is insufficient, the app explains the missing or conflicting information and does not call a generation model. This is an **abstention**. A retrieval error is shown separately.
+
+### 3. Request and assess a suggestion
+
+If **Generate** becomes available, read the provider/model information and choose Generate once. Local sends the allowed input to the local Ollama runtime; Groq sends it to the fixed external API. A missing prerequisite or failed response remains a failure, with no automatic provider switch.
+
+If a proposal passes validation and is saved, compare each material claim with the scanner evidence and cited guidance. For this example, consider whether a suggested label actually identifies the field and is connected to the intended input. Do not assume that an AI suggestion matches the repository's corrected example. The recorded label-generation cases include unsupported suggestions, as explained in the [Local](BOUNDED_MVP_EVIDENCE.md#local-results) and [Groq](BOUNDED_MVP_EVIDENCE.md#groq-results--inherited-originals) results.
+
+**Application validation** checks required structure, allowed values and reference rules. **Semantic assessment** asks whether the proposal's claims are supported and its suggested change is appropriate for this issue. Passing the first does not establish the second.
+
+### 4. Save a human decision
+
+Choose **Approve**, **Edit and accept**, or **Reject**. Complete the **blocking judgment**—the required human check about context the scanner or model cannot settle—and then choose **Save decision**. Approval or edit-and-accept also requires confirmation that the resulting proposal's material claims are supported; a contradictory or unresolved judgment cannot be accepted unchanged.
+
+Saving a decision does not change the page. It records your decision alongside the original proposal. A post-change verification reminder remains for later work; it is not completed by approving the proposal. If you select another Finding before saving, unsaved edits are discarded.
+
+### 5. Change your page and compare a later scan
+
+The project-owned corrected example uses an explicit label associated with the same input:
+
+```html
+<label for="rd3-email">Email address</label>
+<input id="rd3-email" type="email">
+```
+
+This is the fixture's authored correction, not an AI-generated or automatically applied edit. If appropriate for your own page, make and publish the equivalent change yourself at the same page address. From the selected baseline Finding, explicitly choose **New scan mode**, then **Start intentional rescan**. You can also take this comparison path without generating or reviewing a proposal.
+
+The later scan is saved as a separate run. Read the **Comparison** region's before/after evidence and explanation. `Resolved` requires a unique matching non-failing scanner observation; disappearance alone is not enough. A changed or ambiguous target can be inconclusive, and incompatible scan context can make the pair not comparable. Even a resolved Finding does not prove whole-page accessibility or that the proposed edit caused the result.
+
+### How to interpret other outcomes
+
+| What you see | Meaning |
+| --- | --- |
+| Abstention | Required evidence or guidance is insufficient. No generation model was called, and there is no proposal to approve. |
+| Guidance or generation failure | That operation did not produce an accepted result. Read the reason; do not treat it as a successful suggestion. |
+| Proposal pending review | Application checks passed, but you still need to assess source support, usefulness and the blocking judgment. |
+| Save outcome unknown | The reply was lost or could not be confirmed; a write may have happened. Do not assume it is safe to submit again. Follow the action-specific limits below. |
+| Later scan saved without comparison | The scan can be valid even when comparison calculation or saving fails. There is no saved comparison outcome to infer. |
+
+Keep the current session open while following the example. Records are saved locally, but the MVP cannot browse or reopen earlier results in the UI after restart. The sections below describe the exact action boundaries; the [architecture guide](architecture/SYSTEM_ARCHITECTURE.md#storage-and-operation-lifetime) explains why saved records and temporary workflow state are different.
 
 ## Getting guidance for one Finding
+
+Before using **Get guidance**, complete [Enable guidance and generation](DEVELOPMENT.md#enable-guidance-and-generation). Both Local and Groq modes need Ollama running on your computer with `embeddinggemma` installed for guidance lookup.
 
 Follow [Run the local service](DEVELOPMENT.md#start-the-application) to open the Analyze/Results UI. Select a Finding to inspect its native evidence, then activate **Get guidance** once. The application first checks captured evidence; complete evidence uses the developer-managed local embedding runtime. The detail shows complete cited passages and source notices, evidence sufficiency, and supported eligibility, a no-generation-call abstention, or a distinct retrieval failure. Citation links open in a separate tab to preserve the current results session. The exact corpus version remains visible even when retrieval returns no passages. Similarity describes ranking, not support or confidence. Opening the UI and selecting an item do not start model work. Scanner review observations remain evidence-only; no saved-run reopen/import, retry or review control is provided. Supported live eligibility enables the separate [explicit generation action](#inspecting-generation-for-one-finding). A supported unfinished workflow retains ownership and prevents another guidance operation. The [M2-03 closure record](plans/completed/m2-03-sufficiency-abstention-and-detail-ui.md#m203-c-post01-closure--renewed-task-closure) records completed verification and its limits; the [M2-04 observations](plans/completed/m2-04-retrieval-checkpoint.md#m204-b-accept-01--bounded-checkpoint-observations) record the fixed three-profile integration evaluation separately from general retrieval quality.
 
@@ -88,25 +170,35 @@ The service owns canonical `decidedAt`, at least the generation finish time. The
 
 Success returns `{ok: true, run}` only after publication. Failure returns `{ok: false, error, run, persisted: false, cleanupFailed}`; `run` is the last validated read when available and is null for stale-transition failure. Closed errors distinguish request/body validation, eligibility/admission, stored-read failure, publication failure and shutdown. Precommit failure preserves the last valid file. Cleanup uncertainty closes admission and remains visible to stop; a successful rename retains its existing commit meaning. A lost response does not establish whether publication occurred; never automatically resubmit a final decision.
 
-[Client review admission](../src/client/finding-review-admission.ts) requires the returned HTTP status and body to agree and binds success to the captured action, complete edited content, judgment and exact note. Restoring the selected Finding to pending must reproduce the entire captured run, preserving the original proposal, siblings, order, evidence and invocation. Invalid or mismatched responses cannot publish success. [Transport](../tests/finding-review-api.test.ts) and [admission](../tests/finding-review-admission.test.ts) tests use synthetic inputs.
+[Client review admission](../src/client/review/finding-review-admission.ts) requires the returned HTTP status and body to agree and binds success to the captured action, complete edited content, judgment and exact note. Restoring the selected Finding to pending must reproduce the entire captured run, preserving the original proposal, siblings, order, evidence and invocation. Invalid or mismatched responses cannot publish success. [Transport](../tests/finding-review-api.test.ts) and [admission](../tests/finding-review-admission.test.ts) tests use synthetic inputs.
 
 The [pure review](../tests/review-contract.test.ts), [repository](../tests/review-repository.test.ts) and [service](../tests/review-service.test.ts) suites use synthetic proposals, exclusive `temp/m401-review-repository-*` / `temp/m401-review-service-*` leaves and owned loopback ports. They perform no actual provider or retrieval work and do not review retained owner proposals. The [M4-03 checkpoint](plans/completed/m4-03-review-checkpoint.md#m403-a-accept-01--caller-integrity-accepted) adds a source-bound test-only caller. Its ordinary regression uses synthetic data; actual-case commands are finite, require exact human decisions and must follow that plan. All three human-authorized outcomes are saved on isolated copies of one authentic retained proposal; the originals remain unchanged. Integrated critical review, exact cleanup and documentation closure passed. Actual-case allowances are consumed; they must not be replayed.
 
 ## Fixed Local Qwen adapter
 
+Start with the [shared Ollama and embedding setup](DEVELOPMENT.md#enable-guidance-and-generation). Local suggestions also need the exact Qwen model described below.
+
 The service selects [createNativeSchemaOllamaGenerationAdapter](../src/server/generation/ollama-generation.ts) for the current live supported Local retrieval owner. Import, construction, service startup and mode selection perform no generation I/O. Preparation first checks the complete initial messages and schema against the initial-prompt budget, then reads version, model metadata and tags from fixed `127.0.0.1:11434`; dispatch uses one bounded `/api/chat` attempt.
 
 This implementation admits the developer-managed [Ollama v0.33.3 release](https://github.com/ollama/ollama/releases/tag/v0.33.3) and `qwen3.5:4b` Q4_K_M manifest SHA-256 `2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd`. Install the retained official runtime outside the repository and acquire the model through Ollama's own `ollama pull qwen3.5:4b` command only after the [local capacity prefilter](LOCAL_MVP_FEASIBILITY.md) passes; the application performs no acquisition. A fresh pull must match the admitted digest and metadata. Missing prerequisites or drift fail before chat. Preserve the runtime/model configuration while an eligible action is in progress; observed metadata does not lock a mutable model tag atomically.
 
-The ordinary Local request enables reasoning and native schema enforcement within an explicit 32768-token context, with temperature 1 and top-p 0.95. One application request can use up to two native completions, each capped at 12288 tokens, for an aggregate ceiling of 24576. The full case schema appears in the measured system message and in native `format`; streaming, input truncation and context shifting are disabled. Initial admission reserves the first completion only; a later internal prompt can fail capacity after invocation. The [native contract](plans/completed/m6-02-six-fixed-generation-executions.md#m602-native-contract--frozen-implementation-semantics-for-review) owns these limits and the fixed neutral post-change reminder. A fixed300000-ms server budget covers admission through generation; the browser has its own300000-ms wait. Groq and the explicit legacy Local factory retain120000ms. Only the final answer is validated and retained; hidden reasoning is discarded.
+The ordinary Local request enables reasoning and native schema enforcement within an explicit 32768-token context, with temperature 1 and top-p 0.95. One application request can use up to two native completions, each capped at 12288 tokens, for an aggregate ceiling of 24576. The full case schema appears in the measured system message and in native `format`; streaming, input truncation and context shifting are disabled. Initial admission reserves the first completion only; a later internal prompt can fail capacity after invocation. The [native contract](plans/completed/m6-02-six-fixed-generation-executions.md#m602-native-contract--frozen-implementation-semantics-for-review) owns these limits and the fixed neutral post-change reminder. A fixed 300000-ms server budget covers admission through generation; the browser has its own 300000-ms wait. Groq and the explicit legacy Local factory retain 120000 ms. Only the final answer is validated and retained; hidden reasoning is discarded.
 
-The preceding single-pass profile passed [corrected integration](plans/completed/m6-02-six-fixed-generation-executions.md#m602-deadline-pass--corrected-integration-and-live-admission) and a [genuine reasoning capacity smoke](plans/completed/m6-02-six-fixed-generation-executions.md#m602-resolve-capacity-pass--genuine-capacity-accepted). The separate [current native-schema capacity screen](plans/completed/m6-02-six-fixed-generation-executions.md#m602-native-capacity--genuine-current-profile-screen-accepted) now passes for the recorded workload, followed by three runtime-valid fixed Local cases. The explicit legacy factory preserves its4096-token, thinking-disabled profile and historical records. The [M3-03 capacity observation](plans/completed/m3-03-qwen-adapter-and-capacity-screen.md#m303-c-observation-01--successful-full-local-stack-capacity-screen) applies to that earlier profile. Neither controlled tests nor a capacity observation establishes semantic quality or broad hardware support.
+The preceding single-pass profile passed [corrected integration](plans/completed/m6-02-six-fixed-generation-executions.md#m602-deadline-pass--corrected-integration-and-live-admission) and a [genuine reasoning capacity smoke](plans/completed/m6-02-six-fixed-generation-executions.md#m602-resolve-capacity-pass--genuine-capacity-accepted). The separate [current native-schema capacity screen](plans/completed/m6-02-six-fixed-generation-executions.md#m602-native-capacity--genuine-current-profile-screen-accepted) now passes for the recorded workload, followed by three runtime-valid fixed Local cases. The explicit legacy factory preserves its 4096-token, thinking-disabled profile and historical records. The [M3-03 capacity observation](plans/completed/m3-03-qwen-adapter-and-capacity-screen.md#m303-c-observation-01--successful-full-local-stack-capacity-screen) applies to that earlier profile. Neither controlled tests nor a capacity observation establishes semantic quality or broad hardware support.
 
 ## Fixed Groq adapter
 
 The service selects [createUncertaintyGroqGenerationAdapter](../src/server/generation/groq-generation.ts) for the current live supported Groq retrieval owner. Import, construction, startup and mode selection perform no credential or provider I/O. The adapter uses only the fixed `openai/gpt-oss-20b` model and one HTTPS Chat Completions attempt at `api.groq.com`, with normal certificate and hostname verification.
 
-Create your own API key using the [Groq quickstart](https://console.groq.com/docs/quickstart), then set the single `GROQ_API_KEY=` entry in the existing repository-root `.env`. Confirm that `.env` is Git-ignored and untracked before adding the key. Preserve other local content and never paste the key into chat or tracked files. The service reads only this selected file entry when preparing an eligible Groq request; it does not load credentials from the process environment. Missing or invalid credentials fail before a provider attempt.
+Groq still needs the [local Ollama and embedding setup](DEVELOPMENT.md#enable-guidance-and-generation) for guidance lookup. It does not need the local Qwen generation model.
+
+To configure your Groq key:
+
+1. Create your own API key using the [Groq quickstart](https://console.groq.com/docs/quickstart).
+2. Open `.env` in the repository root, beside `package.json`. Create it if it does not exist. Confirm that it is Git-ignored and untracked before adding the key; the repository's [`.gitignore`](../.gitignore) includes this file.
+3. Add one line in the form `GROQ_API_KEY=your_key_here`, replacing `your_key_here` with your actual key. If the entry already exists, update it instead of adding another. Preserve other file contents and save as UTF-8 without a byte-order mark (BOM).
+
+Never paste the key into chat or tracked files. The service reads this file entry only when preparing an eligible Groq request; setting an environment variable alone does not configure it. Missing or invalid credentials fail before a provider attempt.
 
 Preparation preserves both complete shared messages, the strict `m301_proposal_v1` schema and fixed controls. Its versioned policy admits at most 65536 UTF-8 bytes for the complete serialized request body, then sends that exact body with a 4096-token completion limit. The byte cap is an application policy, not a token estimate or proof of hosted context fit or full input consumption. [The accepted contract](plans/completed/m3-04-groq-adapter.md#m304-g-contract-01--authored-groq-adapter-contract) records the exposed defaults and provider-processing limits.
 

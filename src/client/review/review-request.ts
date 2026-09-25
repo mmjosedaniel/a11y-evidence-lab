@@ -1,9 +1,9 @@
-import { validateRun } from '../server/domain/run-contract.ts';
-import type { PageAnalysisRun } from '../server/domain/run-contract.ts';
-import { validateReviewInput } from '../server/domain/review-contract.ts';
+import { validateRun } from '../../server/domain/run-contract.ts';
+import type { PageAnalysisRun } from '../../server/domain/run-contract.ts';
+import { validateReviewInput } from '../../server/domain/review-contract.ts';
 import { admitReview } from './finding-review-admission.ts';
 import type { ReviewIntent } from './finding-review-admission.ts';
-import { snapshot } from './finding-response-snapshot.ts';
+import { snapshot } from '../responses/finding-response-snapshot.ts';
 
 type CompleteRun = Extract<PageAnalysisRun, { status: 'completed' }>;
 export type ReviewCallback = (intent: ReviewIntent, signal: AbortSignal) => Promise<unknown>;

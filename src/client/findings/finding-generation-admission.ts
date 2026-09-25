@@ -1,9 +1,9 @@
-import { validateRun } from '../server/domain/run-contract.ts';
-import type { Finding, PageAnalysisRun } from '../server/domain/run-contract.ts';
-import { readChoice, readObject, requireKeys, requireValid } from '../server/domain/run-contract/contract-value-reader.ts';
-import { invocationMatchesProvider, readProviderInvocation } from '../server/generation/generation-contract.ts';
-import type { GenerationServiceOutcome } from '../server/local-service/contracts.ts';
-import { equal, snapshot } from './finding-response-snapshot.ts';
+import { validateRun } from '../../server/domain/run-contract.ts';
+import type { Finding, PageAnalysisRun } from '../../server/domain/run-contract.ts';
+import { readChoice, readObject, requireKeys, requireValid } from '../../server/domain/run-contract/contract-value-reader.ts';
+import { invocationMatchesProvider, readProviderInvocation } from '../../server/generation/generation-contract.ts';
+import type { GenerationServiceOutcome } from '../../server/local-service/contracts.ts';
+import { equal, snapshot } from '../responses/finding-response-snapshot.ts';
 
 type CompleteRun = Extract<PageAnalysisRun, { status: 'completed' }>;
 export type GenerationIntent = { readonly runId: string; readonly findingId: string };

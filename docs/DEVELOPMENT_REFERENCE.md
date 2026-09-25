@@ -4,9 +4,9 @@
 
 Use this reference when changing the application, running the complete regression suite, reproducing retained evidence, or inspecting run cleanup. For ordinary setup and startup, use [Run the project locally](DEVELOPMENT.md). You do not need to run the regression suite each time you open the application.
 
-The recorded command wrappers below remain available for existing evaluation callers. Their historical names and checkout-specific paths are preserved; they are not required reading for everyday startup. The [roadmap](DEVELOPMENT_ROADMAP.md) and owning task plans retain development status and verification authority.
+The recorded command wrappers below remain available for existing evaluation callers. Their historical names are preserved, while the repository path is a generic example; they are not required reading for everyday startup. The [roadmap](DEVELOPMENT_ROADMAP.md) and owning task plans retain development status and verification authority.
 
-In this guide: [Startup and model setup](#planned-mvp-startup-and-generation-setup) · [Toolchain and shell preparation](#development-toolchain) · [Build and verification](#build-and-verify-the-walking-skeleton) · [Start and stop the service](#run-the-local-service) · [Retained runs and deletion](#retained-runs-and-deletion).
+In this guide: [Startup and model setup](#planned-mvp-startup-and-generation-setup) · [Toolchain and shell preparation](#development-toolchain) · [Build and verification](#build-and-verify-the-walking-skeleton) · [Optional historical checks](#optional-m6-02-retained-input-checks) · [Start and stop the service](#run-the-local-service) · [Retained runs and deletion](#retained-runs-and-deletion).
 
 ## Planned MVP startup and generation setup
 
@@ -24,15 +24,15 @@ Use exactly [Node.js 24.20.0 with its bundled npm 11.19.0](https://nodejs.org/en
 
 ### Development command preparation
 
-Use PowerShell 7 (`pwsh`; verified here with 7.6.5). The preparation uses `[IO.Path]::GetRelativePath`, which is unavailable in Windows PowerShell 5.1. First run `Set-Location -LiteralPath 'C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab'`.
+Use PowerShell 7 (`pwsh`; verified here with 7.6.5). The preparation uses `[IO.Path]::GetRelativePath`, which is unavailable in Windows PowerShell 5.1. Replace `C:/projects/a11y-evidence-lab` with your project's full path in both the following command and the `$m105Repo` assignment below, keeping the quotes. First run `Set-Location -LiteralPath 'C:/projects/a11y-evidence-lab'`.
 
-The definitions below are maintained for this verified Windows checkout. Run them from the repository root in each new PowerShell command session. When loading the block from a script, dot-source it so its functions remain available in the calling session. They read the location and environment and define values/functions; they do not install, launch, create, or remove anything. The pinned paths are checkout-specific, not a portable installer. Their existing `M105` names preserve compatibility with the commands below.
+The definitions below are maintained for the verified Windows toolchain. Run them from the repository root in each new PowerShell command session. When loading the block from a script, dot-source it so its functions remain available in the calling session. They read the location and environment and define values/functions; they do not install, launch, create, or remove anything. If your Node installation is elsewhere, also set `$m105Node` and `$m105Npm` to its actual executable paths; retain the required versions checked below. These definitions are not an installer. Their existing `M105` names preserve compatibility with the commands below.
 
-This is the current preparation source. Its required definitions are extracted unchanged from the historical [M105-CMD-PREP](plans/completed/m1-05-walking-skeleton-integration.md#m105-cmd-prep--exact-shell-literals-and-environment-restoration); task-specific path contracts, hashes, lease state, and cleanup procedures stay in that archive. Do not replay those historical task procedures for current development.
+This is the current preparation source. Its required definitions come from the historical [M105-CMD-PREP](plans/completed/m1-05-walking-skeleton-integration.md#m105-cmd-prep--exact-shell-literals-and-environment-restoration), with personal directory prefixes replaced by examples. Task-specific path contracts, hashes, lease state, and cleanup procedures stay in that archive. Its privacy note explains the path substitutions; do not replay historical task procedures for current development.
 
 ```powershell
 $ErrorActionPreference = 'Stop'
-$m105Repo = [IO.Path]::GetFullPath('C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab')
+$m105Repo = [IO.Path]::GetFullPath('C:/projects/a11y-evidence-lab')
 if ((Resolve-Path -LiteralPath '.').Path -ine $m105Repo) { throw 'Wrong M1-05 working directory' }
 $m105Node = 'C:/nvm4w/nodejs/node.exe'
 $m105Npm = 'C:/nvm4w/nodejs/npm.cmd'
@@ -175,6 +175,8 @@ Invoke-M105Command {
 
 Run the complete fifty-four-file suite sequentially, with no running application service or concurrent browser test. Production-entry, review and rescan integration tests also require the built client. Scanner, walking-skeleton and rescan integration suites use scanner scratch; the nine UI/checkpoint suites use separate UI scratch:
 
+Ordinary M6-02 regression uses synthetic inputs assembled from tracked fixtures and public corpus files. It does not require the ignored historical generation inputs or retained retrieval runs. Exact historical input and request identities are checked separately by the [optional command below](#optional-m6-02-retained-input-checks).
+
 ```powershell
 if ($null -ne [Environment]::GetEnvironmentVariable('A11Y_M305_CAPTURE_PROOF','Process') -or
     $null -ne [Environment]::GetEnvironmentVariable('A11Y_M402_CAPTURE_PROOF','Process') -or
@@ -228,6 +230,24 @@ foreach ($m105Scratch in @($m105ScanTemp,$m105UiTemp,$m105IntegrationTemp)) {
 For whitespace review, replace `<base>` with the reviewed base commit: `git diff <base> --check` checks the cumulative tracked working-tree changes, while `git diff <base> HEAD --check` checks only committed changes. `git diff --check` alone omits changes already committed. These diff checks exclude untracked files, which need separate inspection before they enter a commit. The [M3-05 EOF correction](plans/completed/m3-05-generation-checkpoint.md#m305-eof-01--post-closure-whitespace-correction) records this distinction.
 
 The controlled tests use the six project-owned states and intercepted project-owned HTTPS responses. They are not live-public-site qualification. The separate authorized public-page smoke passed only after the production service and managed browser ran outside a network-restricted sandbox; `net::ERR_NETWORK_ACCESS_DENIED` in that sandbox was an environment failure, not a valid zero result. Do not disable browser isolation or broaden target scope to work around it. Work and cleanup deadlines remain cooperative, not an OS process-kill guarantee.
+
+
+## Optional M6-02 retained-input checks
+
+This check is for maintainers who already have the original evaluation files. It is separate from the ordinary regression suite and is not required to build or start the application.
+
+It requires the nine original files under `temp/m301-generation-freeze-v1/`, plus `seed.json` and `runs/m204-<case>/run.json` under each `temp/m204-retrieval-checkpoint/g1/`, `g2/` and `g3/` directory. The corresponding run IDs are `m204-g1`, `m204-g2` and `m204-g3`. These ignored files are intentionally absent from a fresh checkout; see the [evaluation guide](EVALUATION_GUIDE.md#optional-retained-input-authentication).
+
+After loading the [command preparation](#development-command-preparation), run:
+
+```powershell
+Invoke-M105Command {
+  & $m105Npm @toolchainOptions run test:evidence:m602
+  if ($LASTEXITCODE -ne 0) { throw 'Retained M6-02 input authentication failed. Check the reported prerequisites or integrity mismatch.' }
+}
+```
+
+The command authenticates original inputs and reconstructs request bodies locally for comparison with frozen identities. It makes no model request and does not rerun an evaluation. Missing files or integrity mismatches produce a nonzero exit; no check is silently skipped. Do not regenerate or publish the originals merely to make this optional check pass. The `.evidence.ts` entry is invoked explicitly and is excluded from ordinary test discovery.
 
 
 ## Run the local service

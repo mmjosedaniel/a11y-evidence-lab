@@ -3,7 +3,7 @@ import type { ReactElement, ReactNode } from 'react';
 import type { Finding, PageAnalysisRun } from '../../../server/domain/run-contract.ts';
 import type { CompleteScanContext } from '../../../server/domain/run-contract/run-types.ts';
 import type { Proposal } from '../../../server/generation/proposal-contract.ts';
-import type { ComparisonAvailability } from '../../comparison-request.ts';
+import type { ComparisonAvailability } from '../../comparison/comparison-request.ts';
 import { RuleEvidence } from './RuleEvidence.tsx';
 import { ordinaryText, plainReason, ruleDisplayName } from './resultPresentation.ts';
 import { availabilityText, presentComparison } from './comparisonPresentation.ts';

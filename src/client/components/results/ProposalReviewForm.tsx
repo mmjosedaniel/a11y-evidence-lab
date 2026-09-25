@@ -2,10 +2,10 @@ import { useId, useLayoutEffect, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import type { Finding } from '../../../server/domain/run-contract.ts';
 import { assessFindingEvidence } from '../../../server/domain/finding-sufficiency.ts';
-import { initialReviewDraft, validateReviewDraft } from '../../review-form-validation.ts';
-import type { Judgment, ReviewAction, ReviewDraft, ReviewErrors } from '../../review-form-validation.ts';
-import type { ReviewPresentation } from '../../review-request.ts';
-import { reviewRefusalText } from '../../review-request.ts';
+import { initialReviewDraft, validateReviewDraft } from '../../review/review-form-validation.ts';
+import type { Judgment, ReviewAction, ReviewDraft, ReviewErrors } from '../../review/review-form-validation.ts';
+import type { ReviewPresentation } from '../../review/review-request.ts';
+import { reviewRefusalText } from '../../review/review-request.ts';
 import { ProposalEditor } from './ProposalEditor.tsx';
 
 export interface ReviewControls {

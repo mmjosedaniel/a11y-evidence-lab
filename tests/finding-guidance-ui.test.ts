@@ -148,6 +148,64 @@ describe('selected Finding guidance UI', { concurrency: false, timeout: 120000 }
     await selectedEvidence().getByText('Eligible for generation', { exact: true }).waitFor();
   });
 
+  it('ignores late guidance resolution and rejection after unmount', async () => {
+    for (const settlement of ['resolve', 'reject'] as const) {
+      const runId = `guidance-unmount-${settlement}`;
+      const key = `guidance-unmount-${settlement}`;
+      const outcome = citationOutcome('supported', runId);
+      await show(valid(completedScanRun(runId)));
+      await page.evaluate(key => {
+        window.m104.reads = 0;
+        window.m104.guidance = () => window.m104.hold(key);
+        window.m104.rerender(true, {}, true);
+      }, key);
+      await guidanceButton().click();
+      assert.equal(await guidanceButton().getAttribute('aria-disabled'), 'true');
+
+      await page.evaluate(async ({ key, outcome, settlement }) => {
+        const late = new Proxy(structuredClone(outcome) as Mutable, {
+          ownKeys(target) {
+            window.m104.reads++;
+            return Reflect.ownKeys(target);
+          },
+        });
+        window.m104.unmount();
+        if (settlement === 'resolve') window.m104.resolveKey(key, late);
+        else window.m104.rejectKey(key, late);
+        await Promise.resolve();
+        await Promise.resolve();
+      }, { key, outcome, settlement });
+
+      assert.equal(await page.evaluate(() => window.m104.reads), 0,
+        `Late ${settlement} must not enter guidance response admission`);
+      assert.equal(await page.getByRole('main').count(), 0);
+      assert.equal(await page.evaluate(() => window.m104.calls.filter(call => call.stage === 'guidance').length), 1);
+    }
+  });
+
+  it('prevents guidance publication when response-descriptor reflection unmounts App', async () => {
+    const runId = 'guidance-response-reflection-unmount';
+    const outcome = citationOutcome('supported', runId);
+    await show(valid(completedScanRun(runId)));
+    await page.evaluate(outcome => {
+      window.m104.reads = 0;
+      window.m104.guidance = () => Promise.resolve(new Proxy(structuredClone(outcome) as Mutable, {
+        ownKeys(target) {
+          window.m104.reads++;
+          window.m104.unmount();
+          return Reflect.ownKeys(target);
+        },
+      }));
+      window.m104.rerender(true, {}, true);
+    }, outcome);
+
+    await guidanceButton().click();
+    await paint();
+    assert.equal(await page.evaluate(() => window.m104.reads), 1);
+    assert.equal(await page.getByRole('main').count(), 0,
+      'Unmount during guidance admission reflection must prevent stale publication');
+  });
+
   it('labels processed Finding cards while leaving unprocessed Findings and observations unchanged', async () => {
     await show(valid(completedScanRun('guidance-card-baseline')));
     const baselineFinding = await cardText(0);

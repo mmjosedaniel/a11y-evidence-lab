@@ -7,7 +7,7 @@ import type { Browser, BrowserContext } from 'playwright';
 import { startLocalService } from '../../src/server/service.ts';
 import { validateRun } from '../../src/server/domain/run-contract.ts';
 import { validateReviewInput } from '../../src/server/domain/review-contract.ts';
-import { admitReview } from '../../src/client/finding-review-admission.ts';
+import { admitReview } from '../../src/client/review/finding-review-admission.ts';
 import { withReviewSandbox } from './m401-review-sandbox.ts';
 import { reviewInput, type ReviewAction } from './m401-review-fixture.ts';
 import { reviewProfileStages } from './m402-review-fixture.ts';

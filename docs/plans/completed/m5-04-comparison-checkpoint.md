@@ -1,5 +1,7 @@
 # M5-04 — Comparison checkpoint
 
+> Privacy note: Personal directory prefixes in this archived plan have been replaced with `C:/projects/a11y-evidence-lab` and `C:/Users/developer` (or their backslash equivalents). These are illustrative aliases, including in recorded commands and errors. Artifact names, hashes and outcomes are unchanged; the aliases must not be used to authenticate original path-bound evidence or replay historical operations. For current setup, use the [local startup guide](../../DEVELOPMENT.md).
+
 This ExecPlan is a living document. Maintain `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` as work proceeds. This document must be maintained in accordance with [PLANS.md](../../../PLANS.md).
 
 ## Current state
@@ -120,7 +122,7 @@ Artifact-local outputs: one compact mapping of I1–I9 to exact caller/input/ass
 
 ## Concrete Steps
 
-Working directory for every command: `C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab`, PowerShell 7. Read and dot-source the first PowerShell block under [current development preparation](../../../README.md#development-command-preparation), unchanged. Use its `Invoke-M105Command`; do not replay historical task commands or restore/install dependencies by default.
+Working directory for every command: `C:/projects/a11y-evidence-lab`, PowerShell 7. Read and dot-source the first PowerShell block under [current development preparation](../../../README.md#development-command-preparation), unchanged. Use its `Invoke-M105Command`; do not replay historical task commands or restore/install dependencies by default.
 
 These read-only planning checks already exist and may be repeated after entry reconciliation:
 

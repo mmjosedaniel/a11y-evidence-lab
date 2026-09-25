@@ -1,5 +1,7 @@
 # Integrate the fixed Groq generation adapter
 
+> Privacy note: Personal directory prefixes in this archived plan have been replaced with `C:/projects/a11y-evidence-lab` and `C:/Users/developer` (or their backslash equivalents). These are illustrative aliases, including in recorded commands and errors. Artifact names, hashes and outcomes are unchanged; the aliases must not be used to authenticate original path-bound evidence or replay historical operations. For current setup, use the [local startup guide](../../DEVELOPMENT.md).
+
 This ExecPlan is a living document. Maintain `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` as work proceeds. This document must be maintained in accordance with `PLANS.md`.
 
 ## Current state
@@ -382,7 +384,7 @@ A0/A/B implementation proofs and corrected critical reviews pass; the complete 2
 
 ## Concrete Steps
 
-Working directory for every command is `C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab`. In each PowerShell caller load only the complete definitions block under [README development command preparation](../../../README.md#development-command-preparation), unchanged, and execute the selected Node command inside `Invoke-M105Command`. Do not replay adjacent install, restore, cleanup or historical task commands. Propagate every native exit before dependent work.
+Working directory for every command is `C:/projects/a11y-evidence-lab`. In each PowerShell caller load only the complete definitions block under [README development command preparation](../../../README.md#development-command-preparation), unchanged, and execute the selected Node command inside `Invoke-M105Command`. Do not replay adjacent install, restore, cleanup or historical task commands. Propagate every native exit before dependent work.
 
 Current entry validation commands (the Git/ignore checks are read-only; the focused service suite has the controlled effects described below):
 
@@ -539,7 +541,7 @@ Freeze these server-internal exports: `GROQ_CONFIGURATION`; `prepareGroqGenerati
 
 A0 tests: `tests/generation-stage.test.ts`, optional type-only narrowing in `tests/ollama-generation-contract.test.ts`. A tests: `tests/groq-generation-contract.test.ts` and `tests/helpers/m304-groq-fixture.ts`; B adds `tests/groq-generation.test.ts`, `tests/groq-generation-service.test.ts` and extends that same test-only helper. Existing M302 fixture exports may be reused for input and live-owner setup. Synthetic I/O must fail on any unexpected path and never fall through to native credentials. Native doubles observe exact options, body bytes, request/response/socket lifetimes and counters; no request reaches Groq, Ollama or an unowned endpoint. Real service tests use owned `temp/m304-groq-*` leaves, synthetic run aggregates, actual LocalService/repository and controlled supported retrieval; ephemeral loopback service/probe effects match M303's existing finally settlement and ordinary contained single-leaf cleanup. Inspect absolute containment/topology before recursive deletion; uncertain resources preserve their leaf and fail. No other file, model store, runtime or developer run is disposable.
 
-Every caller runs at `C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab` in PowerShell with pinned Node v24.20.0. Load only README lines 80–173 (the complete unchanged preparation definitions) using `$m304Readme = Get-Content -LiteralPath README.md; . ([scriptblock]::Create(($m304Readme[79..172] -join "`n")))`; verify this exact block still applies before a later README change. Then execute the following command body inside `Invoke-M105Command`, propagating native exits. No install, restore, browser acquisition or cache is needed. Preflight is read-only and uses fresh entry evidence, not fixture-producing commands.
+Every caller runs at `C:/projects/a11y-evidence-lab` in PowerShell with pinned Node v24.20.0. Load only README lines 80–173 (the complete unchanged preparation definitions) using `$m304Readme = Get-Content -LiteralPath README.md; . ([scriptblock]::Create(($m304Readme[79..172] -join "`n")))`; verify this exact block still applies before a later README change. Then execute the following command body inside `Invoke-M105Command`, propagating native exits. No install, restore, browser acquisition or cache is needed. Preflight is read-only and uses fresh entry evidence, not fixture-producing commands.
 
 - A0 focused: `& $m105Node --test --test-timeout=120000 tests/generation-stage.test.ts tests/ollama-generation-contract.test.ts`; fail on nonzero exit. Red runs tests before strict to expose the behavioral failure. Green runs this then independent `& $m105Node node_modules/typescript/bin/tsc --project tsconfig.json`, failing on nonzero exit.
 - A focused: same prepared caller, `& $m105Node --test --test-timeout=120000 tests/groq-generation-contract.test.ts`; then independent strict during Green. The initial absent-module Red exception may apply only after preflight/environment evidence and bounded complete behavioral tests.
@@ -646,7 +648,7 @@ Write scope
 - Forbidden directory roots: src, docs, evaluation, corpus, .codex, .agents, data; preflight forbids all writes everywhere.
 
 Validation
-- Working directory: C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab
+- Working directory: C:/projects/a11y-evidence-lab
 - Focused command: Read-only preflight; do not run fixture-creating tests. Exact prospective Red/Green caller is G4 complete A0 caller: load README[79..172] definitions unchanged, Invoke-M105Command { & $m105Node --test --test-timeout=120000 tests/generation-stage.test.ts tests/ollama-generation-contract.test.ts; if ($LASTEXITCODE -ne 0) { throw 'M304 A0 focused tests failed' }; & $m105Node node_modules/typescript/bin/tsc --project tsconfig.json; if ($LASTEXITCODE -ne 0) { throw 'M304 strict TypeScript failed' } }. Red omits strict after expected behavioral failure.
 - Task-level command: G4 complete22-suite closure with independent strict/build; primary owns later effect.
 - Expected decisive result and reusable evidence IDs: One supported preflight classification with exact production/test locations. Missing branch should lead to behavioral Red through existing callable; no first-module exception anticipated.
@@ -715,7 +717,7 @@ Write scope
 - Forbidden directory roots: src, docs, evaluation, corpus, .codex, .agents, data. All unlisted paths remain outside this lease.
 
 Validation
-- Working directory: C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab
+- Working directory: C:/projects/a11y-evidence-lab
 - Focused command: Load README[79..172] complete preparation unchanged, then Invoke-M105Command { & $m105Node --test --test-timeout=120000 tests/generation-stage.test.ts tests/ollama-generation-contract.test.ts; if ($LASTEXITCODE -ne 0) { throw 'M304 A0 focused tests failed' } }. Expected native test exit1 plus propagated shell failure for meaningful new byte behavior; record exact runner output. Do not run strict to mask behavioral Red.
 - Task-level command: G4 complete22-suite closure with independent strict/build; primary owns later effect.
 - Expected decisive result and reusable evidence IDs: Complete coherent byte-admission tests fail on expected missing acceptance through existing callables. Assert boundary65536/65537, Unicode independent arithmetic where relevant at report level, wrong byte profiles/limits/modes, mixed fields, immutable/copy-reference drift, error precedence and zero native calls on rejection; preserve old token tests. No first-module exception, skipped assertions, production stub or conditional tests.
@@ -783,7 +785,7 @@ Write scope
 - Forbidden directory roots: tests, docs, evaluation, corpus, .codex, .agents, data. All unlisted paths remain outside this lease.
 
 Validation
-- Working directory: C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab
+- Working directory: C:/projects/a11y-evidence-lab
 - Focused command: Exact G4 complete A0 Green caller: load README[79..172] preparation unchanged; Invoke-M105Command { & $m105Node --test --test-timeout=120000 tests/generation-stage.test.ts tests/ollama-generation-contract.test.ts; if ($LASTEXITCODE -ne 0) { throw 'M304 A0 focused tests failed' }; & $m105Node node_modules/typescript/bin/tsc --project tsconfig.json; if ($LASTEXITCODE -ne 0) { throw 'M304 strict TypeScript failed' } }.
 - Task-level command: G4 complete22-suite closure with independent strict/build; primary owns later effect.
 - Expected decisive result and reusable evidence IDs: All61 focused tests execute unchanged and pass, independent strict exit0, old Local behavior retained. M304-A0-RED-ACCEPT-01 reproduced58pass/3expectedfail by primary after closed-compliant test lease, no skips. Do not rerun unchanged Red if full identity still matches; implement full accepted byte contract.
@@ -856,7 +858,7 @@ Write scope
 - Forbidden directory roots: src, docs, evaluation, corpus, .codex, .agents, data; preflight forbids all writes everywhere.
 
 Validation
-- Working directory: C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab
+- Working directory: C:/projects/a11y-evidence-lab
 - Focused command: Read-only preflight; use recorded A0 runner and environment evidence, no fixture-producing commands now. Prospective exact G4 A caller loads README[79..172] definitions and invokes Node --test --test-timeout=120000 tests/groq-generation-contract.test.ts with native exit propagation; Green then independent strict. First-module Red only for the exact missing-callable failure and complete behavioral tests, no skips or stubs.
 - Task-level command: G4 complete22-suite closure with independent strict/build; primary owns later effect.
 - Expected decisive result and reusable evidence IDs: One supported classification with exact missing callables per G4: parseGroqCredential/readGroqCredential/GroqCredentialIO types; GROQ_CONFIGURATION; prepareGroqGenerationWire. No B factory or transport tests yet. Prove all G1/G2 modules coherently; no actual .env reads.
@@ -924,7 +926,7 @@ Write scope
 - Forbidden directory roots: src, docs, evaluation, corpus, .codex, .agents, data. All other paths remain outside lease.
 
 Validation
-- Working directory: C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab
+- Working directory: C:/projects/a11y-evidence-lab
 - Focused command: Exact G4 A Red caller: $m304Readme = Get-Content -LiteralPath README.md; . ([scriptblock]::Create(($m304Readme[79..172] -join "`n"))); Invoke-M105Command { & $m105Node --test --test-timeout=120000 tests/groq-generation-contract.test.ts; if ($LASTEXITCODE -ne 0) { throw 'M304 A focused tests failed' } }. No strict command masks expected first-module Red.
 - Task-level command: G4 complete22-suite closure with independent strict/build; primary owns later effect.
 - Expected decisive result and reusable evidence IDs: Complete G1/G2 behavioral tests at frozen exports; expected initial ERR_MODULE_NOT_FOUND or missing-export failure naming one of groq-credential.ts/groq-generation-configuration.ts/groq-generation-fit.ts. Record that behavioral assertions remain unexecuted. No production stubs, skips, conditional import/assertions or existence-only tests. Tests cover grammar/UTF8/duplicates/size, unsafe topology/identity/close and abort/late work/debug, fixed configuration/reference/closed exact body/cap/Unicode preservation. Do not include B factory/native transport behavior.
@@ -992,7 +994,7 @@ Write scope
 - Forbidden directory roots: src, docs, evaluation, corpus, .codex, .agents, data. All other paths remain outside lease.
 
 Validation
-- Working directory: C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab
+- Working directory: C:/projects/a11y-evidence-lab
 - Focused command: Exact G4 A Red caller: $m304Readme = Get-Content -LiteralPath README.md; . ([scriptblock]::Create(($m304Readme[79..172] -join "`n"))); Invoke-M105Command { & $m105Node --test --test-timeout=120000 tests/groq-generation-contract.test.ts; if ($LASTEXITCODE -ne 0) { throw 'M304 A focused tests failed' } }. No strict command masks expected first-module Red.
 - Task-level command: G4 complete22-suite closure with independent strict/build; primary owns later effect.
 - Expected decisive result and reusable evidence IDs: Same exact missing groq-credential.ts module/export failure with complete corrected G1/G2 tests; no assertions executed yet. Move OTHER value plus valid selected key from invalid table into accepted-ignore cases. Add bounded loader growth/overflow read (at most65537 bytes) with zeroed buffers/closed descriptor; read failure cleanup; late rejected open/read/close promises after abort remain bounded without unhandled errors. Add copied-equivalent controls rejection to exact-reference cases. Keep helper controls virtual only; no B behavior or real files. Syntax-check both tests with pinned Node; no production stubs/skips.
@@ -1059,7 +1061,7 @@ Write scope
 - Forbidden directory roots: tests, docs, evaluation, corpus, .codex, .agents, data. All other paths remain outside lease.
 
 Validation
-- Working directory: C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab
+- Working directory: C:/projects/a11y-evidence-lab
 - Focused command: Load README[79..172] preparation definitions, then Invoke-M105Command { & $m105Node --test --test-timeout=120000 tests/groq-generation-contract.test.ts; if ($LASTEXITCODE -ne 0) { throw 'M304 A focused tests failed' }; & $m105Node node_modules/typescript/bin/tsc --project tsconfig.json; if ($LASTEXITCODE -ne 0) { throw 'M304 strict TypeScript failed' } }. Preserve independent strict exit.
 - Task-level command: G4 complete22-suite closure with independent strict/build; primary owns later effect.
 - Expected decisive result and reusable evidence IDs: All 21 accepted G1/G2 tests execute and pass; independent strict TypeScript passes. Implement complete authored contract, not only visible examples. No test changes. Return for primary triage if accepted tests conflict with authority.
@@ -1133,7 +1135,7 @@ Write scope
 - Forbidden directory roots: src, docs, evaluation, corpus, .codex, .agents, data. All other paths remain outside lease.
 
 Validation
-- Working directory: C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab
+- Working directory: C:/projects/a11y-evidence-lab
 - Focused command: Exact G4 A Red caller: $m304Readme = Get-Content -LiteralPath README.md; . ([scriptblock]::Create(($m304Readme[79..172] -join "`n"))); Invoke-M105Command { & $m105Node --test --test-timeout=120000 tests/groq-generation-contract.test.ts; if ($LASTEXITCODE -ne 0) { throw 'M304 A focused tests failed' } }. No strict command masks expected first-module Red.
 - Task-level command: G4 complete22-suite closure with independent strict/build; primary owns later effect.
 - Expected decisive result and reusable evidence IDs: Behavioral failures for both U+2028/U+2029: sole malformed selected value; malformed selected assignment before/after a valid duplicate; valid quoted/unquoted selected key with separator in trailing comment. Positive unrelated values/full comments preserve selected key. Add a coherent matrix, no production change or test weakening. Exact focused caller must execute the other accepted tests and report named assertion mismatches, not module failure.
@@ -1201,7 +1203,7 @@ Write scope
 - Forbidden directory roots: tests, docs, evaluation, corpus, .codex, .agents, data. All other paths remain outside lease.
 
 Validation
-- Working directory: C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab
+- Working directory: C:/projects/a11y-evidence-lab
 - Focused command: Load README[79..172] preparation definitions, then Invoke-M105Command { & $m105Node --test --test-timeout=120000 tests/groq-generation-contract.test.ts; if ($LASTEXITCODE -ne 0) { throw 'M304 A focused tests failed' }; & $m105Node node_modules/typescript/bin/tsc --project tsconfig.json; if ($LASTEXITCODE -ne 0) { throw 'M304 strict TypeScript failed' } }. Preserve independent strict exit.
 - Task-level command: G4 complete22-suite closure with independent strict/build; primary owns later effect.
 - Expected decisive result and reusable evidence IDs: All 22 tests pass, including every14-case physical-line separator vector; independent strict passes. Correct existing G1 recognition/remainder/comment handling for U+2028/U+2029 without globally banning allowed comments or unrelated values. No test changes or broader production refactor.
@@ -1275,7 +1277,7 @@ Write scope
 - Forbidden directory roots: All writes forbidden during preflight.
 
 Validation
-- Working directory: C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab
+- Working directory: C:/projects/a11y-evidence-lab
 - Focused command: Read-only preflight only; no fixture-producing command. Prospective G4 B runner loads README[79..172], then Invoke-M105Command { foreach ($m304Test in @('groq-generation-contract','groq-generation','groq-generation-service','generation-stage','generation-service','ollama-generation-contract','ollama-generation','ollama-generation-service')) { & $m105Node --test --test-timeout=120000 ('tests/' + $m304Test + '.test.ts'); if ($LASTEXITCODE -ne 0) { throw 'M304 B focused suite failed' } }; & $m105Node node_modules/typescript/bin/tsc --project tsconfig.json; if ($LASTEXITCODE -ne 0) { throw 'M304 strict TypeScript failed' } }. Red omits strict; first-module failure may stop array at groq-generation.
 - Task-level command: G4 complete22-suite closure with independent strict/build; primary owns later effect.
 - Expected decisive result and reusable evidence IDs: One supported preflight classification from exact code/exports, harness and runtime evidence. Proposed complete native and service matrix covers G1/G3/G4, no existence-only tests. Identify direct missing dispatchGroqGeneration/GroqNativeRequest and createGroqGenerationAdapter if absent.
@@ -1343,7 +1345,7 @@ Write scope
 - Forbidden directory roots: src, docs, evaluation, corpus, .codex, .agents, data. All other paths remain outside lease.
 
 Validation
-- Working directory: C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab
+- Working directory: C:/projects/a11y-evidence-lab
 - Focused command: Load README[79..172] preparation; Invoke-M105Command { foreach ($m304Test in @('groq-generation-contract','groq-generation','groq-generation-service','generation-stage','generation-service','ollama-generation-contract','ollama-generation','ollama-generation-service')) { & $m105Node --test --test-timeout=120000 ('tests/' + $m304Test + '.test.ts'); if ($LASTEXITCODE -ne 0) { throw 'M304 B focused suite failed' } } }. Red omits strict; A22 must pass, then exact missing B module/export may stop the array at groq-generation. Syntax-check both B tests and helper using pinned Node; no alternate/stub imports.
 - Task-level command: G4 complete22-suite closure with independent strict/build; primary owns later effect.
 - Expected decisive result and reusable evidence IDs: Complete G1/G3/G4 native/factory/stage/service behavioral tests at frozen exports. Exact ERR_MODULE_NOT_FOUND naming groq-generation-http.ts or groq-generation.ts only; report declarations/assertions unexecuted, including service file not reached by fail-fast runner. No existence-only tests, skips or production stubs. Cover exact options/body, zero-call gates, private secret echo/property/escaped rejection, status precedence including qualifying quota with echo, complete envelope matrix/1MiBcap, all sockets and late callbacks/abort/deadline, actual service selected-only preservation and persistence failures.
@@ -1410,7 +1412,7 @@ Write scope
 - Forbidden directory roots: src, docs, evaluation, corpus, .codex, .agents, data. All other paths remain outside lease.
 
 Validation
-- Working directory: C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab
+- Working directory: C:/projects/a11y-evidence-lab
 - Focused command: Load README[79..172] preparation; Invoke-M105Command { foreach ($m304Test in @('groq-generation-contract','groq-generation','groq-generation-service','generation-stage','generation-service','ollama-generation-contract','ollama-generation','ollama-generation-service')) { & $m105Node --test --test-timeout=120000 ('tests/' + $m304Test + '.test.ts'); if ($LASTEXITCODE -ne 0) { throw 'M304 B focused suite failed' } } }. Red omits strict; A22 must pass, then exact missing B module/export may stop the array at groq-generation. Syntax-check both B tests and helper using pinned Node; no alternate/stub imports.
 - Task-level command: G4 complete22-suite closure with independent strict/build; primary owns later effect.
 - Expected decisive result and reusable evidence IDs: Correct one coherent B test boundary: (1) valid envelope metadata and candidate string/property echoes with genuinely Unicode-escaped key; prove raw encoded representation lacks literal key and decoded target contains it, without unrelated invalid envelope fields; (2) native timeout event/callback semantics; (3) precise zero-attempt error classes via actual stage or accepted prepare/pre-entry exception, outbound property-name collision and admitted invalid config; (4) credential preparation abort/deadline and post-prepare abort, cleared terminal credential prevents fresh-capability replay; (5) network/synchronous failures, non200 after response/socket/request errors, incomplete qualifying400 stays provider; (6) late assigned sockets/errors destroyed/absorbed after abort; (7) allowed null/absent refusal and null/empty/absent reasoning plus invalid types and candidate echoes; (8) remove vacuous exclusion sentinels absent from source fixture, retain actual present-value and closed outbound structure proof. Preserve all valid current B tests and A helper semantics. Exact first-module Red remains expected; all complete B assertions still unexecuted. Keep body fixtures synthetic and full suite out of scope.
@@ -1479,7 +1481,7 @@ Write scope
 - Forbidden directory roots: src, docs, evaluation, corpus, .codex, .agents, data. All other paths remain outside lease.
 
 Validation
-- Working directory: C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab
+- Working directory: C:/projects/a11y-evidence-lab
 - Focused command: Load README[79..172] preparation; Invoke-M105Command { foreach ($m304Test in @('groq-generation-contract','groq-generation','groq-generation-service','generation-stage','generation-service','ollama-generation-contract','ollama-generation','ollama-generation-service')) { & $m105Node --test --test-timeout=120000 ('tests/' + $m304Test + '.test.ts'); if ($LASTEXITCODE -ne 0) { throw 'M304 B focused suite failed' } } }. Red omits strict; A22 must pass, then exact missing B module/export may stop the array at groq-generation. Syntax-check both B tests and helper using pinned Node; no alternate/stub imports.
 - Task-level command: G4 complete22-suite closure with independent strict/build; primary owns later effect.
 - Expected decisive result and reusable evidence IDs: Finish only bounded Red02 issues: define bounded waitUntil using captured native timer and performance clock; remove raw AUTHORED_PREENTRY_EXCEPTION propagation expectation (G3 promises zero invocation/configuration via stage, not arbitrary exception identity); for debug/outbound stage gates assert failed/configuration, no invocation, zero native requests, and honest boolean cleanupFailed without forcing dispatch instead of allowed early preparation. Preserve meaningful exact error checks. Extend existing post-prepare abort case to retain and abort the original preparation signal, then prove no later native start with fresh non-aborted dispatch signal/capability; allow contract-compatible closed failure or pre-entry rejection, not raw diagnostic identity. Preserve all other accepted G1/G3 vectors and A semantics. Run exact missing-module Red/syntax checks; diagnostic strict may still report missing modules and dependent contextual types, but no unknown helper/name errors. No production stub or tests for hypothetical scope.
@@ -1548,7 +1550,7 @@ Write scope
 - Forbidden directory roots: tests, docs, evaluation, corpus, .codex, .agents, data. All other paths remain outside lease.
 
 Validation
-- Working directory: C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab
+- Working directory: C:/projects/a11y-evidence-lab
 - Focused command: Load README[79..172] preparation; Invoke-M105Command { foreach ($m304Test in @('groq-generation-contract','groq-generation','groq-generation-service','generation-stage','generation-service','ollama-generation-contract','ollama-generation','ollama-generation-service')) { & $m105Node --test --test-timeout=120000 ('tests/' + $m304Test + '.test.ts'); if ($LASTEXITCODE -ne 0) { throw 'M304 B focused suite failed' } }; & $m105Node node_modules/typescript/bin/tsc --project tsconfig.json; if ($LASTEXITCODE -ne 0) { throw 'M304 strict TypeScript failed' } }. All eight suites sequential; verify owned service fixture cleanup.
 - Task-level command: G4 complete22-suite closure with independent strict/build; primary owns later effect.
 - Expected decisive result and reusable evidence IDs: Every accepted B behavioral test executes and passes unchanged, along with all eight focused suites and independent strict. Implement full authored G1/G3/G4 beyond visible tests; no source outside the two named B owners. Exact single native attempt and admitted bytes, private credential echo/lifetime, status precedence and honest cleanup, actual selected-only durable integration without new shared/service code.
@@ -1629,7 +1631,7 @@ Write scope
 - Forbidden directory roots: tests, docs, evaluation, corpus, .codex, .agents, data. All other paths remain outside lease.
 
 Validation
-- Working directory: C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab
+- Working directory: C:/projects/a11y-evidence-lab
 - Focused command: Load README[79..172] preparation; Invoke-M105Command { foreach ($m304Test in @('groq-generation-contract','groq-generation','groq-generation-service','generation-stage','generation-service','ollama-generation-contract','ollama-generation','ollama-generation-service')) { & $m105Node --test --test-timeout=120000 ('tests/' + $m304Test + '.test.ts'); if ($LASTEXITCODE -ne 0) { throw 'M304 B focused suite failed' } }; & $m105Node node_modules/typescript/bin/tsc --project tsconfig.json; if ($LASTEXITCODE -ne 0) { throw 'M304 strict TypeScript failed' } }. All eight suites sequential; verify owned service fixture cleanup.
 - Task-level command: G4 complete22-suite closure with independent strict/build; primary owns later effect.
 - Expected decisive result and reusable evidence IDs: Every accepted B behavioral test, including B1/B2 regression, executes and passes unchanged, along with all eight focused suites and independent strict. Implement full authored G1/G3/G4 beyond visible tests; no source outside the two named B owners. Exact single native attempt and admitted bytes, private credential echo/lifetime, status precedence and honest cleanup, actual selected-only durable integration without new shared/service code.

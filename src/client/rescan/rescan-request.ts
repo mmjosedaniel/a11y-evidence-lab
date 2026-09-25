@@ -1,8 +1,8 @@
-import type { PageAnalysisRun } from '../server/domain/run-contract.ts';
-import type { ComparisonFailure } from '../server/local-service/contracts.ts';
+import type { PageAnalysisRun } from '../../server/domain/run-contract.ts';
+import type { ComparisonFailure } from '../../server/local-service/contracts.ts';
 import { admitRescan, readRescanSelection } from './rescan-admission.ts';
 import type { RescanIntent } from './rescan-admission.ts';
-import { snapshot } from './finding-response-snapshot.ts';
+import { snapshot } from '../responses/finding-response-snapshot.ts';
 
 type CompleteRun = Extract<PageAnalysisRun, { status: 'completed' }>;
 type FailedRun = Extract<PageAnalysisRun, { status: 'failed' }>;

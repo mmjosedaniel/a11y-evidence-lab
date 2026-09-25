@@ -1,5 +1,5 @@
-import { validateRun } from '../server/domain/run-contract.ts';
-import type { PageAnalysisRun, ProviderContext } from '../server/domain/run-contract.ts';
+import { validateRun } from '../../server/domain/run-contract.ts';
+import type { PageAnalysisRun, ProviderContext } from '../../server/domain/run-contract.ts';
 
 type FailedRun = Extract<PageAnalysisRun, { status: 'failed' }>;
 type CompleteRun = Extract<PageAnalysisRun, { status: 'completed' }>;

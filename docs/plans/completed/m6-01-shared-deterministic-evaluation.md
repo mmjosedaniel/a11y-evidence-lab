@@ -1,5 +1,7 @@
 # M6-01 — Shared deterministic evaluation
 
+> Privacy note: Personal directory prefixes in this archived plan have been replaced with `C:/projects/a11y-evidence-lab` and `C:/Users/developer` (or their backslash equivalents). These are illustrative aliases, including in recorded commands and errors. Artifact names, hashes and outcomes are unchanged; the aliases must not be used to authenticate original path-bound evidence or replay historical operations. For current setup, use the [local startup guide](../../DEVELOPMENT.md).
+
 This ExecPlan is a living document. Maintain Current state, Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospective as work proceeds. Follow [PLANS.md](../../../PLANS.md), the [agent workflow](../../../.codex/README.md), the [implementation workflow](../../../.codex/execplan-implementation-workflow.md), and the [write-lease guard](../../../.codex/write-lease-guard.md).
 
 ## Current state
@@ -442,11 +444,11 @@ The later A-only correction supersedes that command's two A results with its fre
 
 After the explicit request for a replacement G1 in `temp/m601-retrieval-g1-02` with the same ceiling, the owner authorized running the needed Ollama runtime and continuing. This grants one startup of the existing retained installation and one replacement G1 attempt; it does not reset any earlier budget or change G2/G3's original one-each allowances. The first failure, its occupied root, frozen no-call observation and every historical artifact remain preserved. No acquisition, upgrade, new model, generation, credential read, public navigation or capacity rerun is authorized. The exact re-entry contract received critical PASS with no unresolved findings; separate startup permission review allowed the explicitly authorized action. Current status returned to In progress; final integrated review follows the renewed observations.
 
-**Startup critical PASS accepted; executed once.** Reuse the existing developer procedure's `serve` only, with executable `C:/Users/mmjos/Tools/Ollama/v0.33.3/ollama.exe` (36,912,520 bytes; current SHA-256 `e4fe6bd835fe146659f5c969dccaff2e25a9de63d90ee204ca5d11b9034b0ca5`) and existing `C:/Users/mmjos/Models/Ollama` store. Fresh ordinary ancestor checks pass; executable is absent from PATH, so use its absolute path. No inherited OLLAMA variables were observed. Check hash/path and absent listener again immediately before startup. Launch one hidden developer-owned process, record returned PID/path, and observe at most 20 seconds for its exact listener on 127.0.0.1:11434. No HTTP readiness probe: each retrieval's existing metadata checks own that accounting. Stop dependent work if launch/ownership/readiness fails; no takeover, restart, process kill or cleanup deletion. Leave the server for the developer after this task. Runtime may use its ordinary external logs/cache/key state; never read keys or private logs. Two exclusive repository diagnostic outputs are retained without dumping them.
+**Startup critical PASS accepted; executed once.** Reuse the existing developer procedure's `serve` only, with executable `C:/Users/developer/Tools/Ollama/v0.33.3/ollama.exe` (36,912,520 bytes; current SHA-256 `e4fe6bd835fe146659f5c969dccaff2e25a9de63d90ee204ca5d11b9034b0ca5`) and existing `C:/Users/developer/Models/Ollama` store. Fresh ordinary ancestor checks pass; executable is absent from PATH, so use its absolute path. No inherited OLLAMA variables were observed. Check hash/path and absent listener again immediately before startup. Launch one hidden developer-owned process, record returned PID/path, and observe at most 20 seconds for its exact listener on 127.0.0.1:11434. No HTTP readiness probe: each retrieval's existing metadata checks own that accounting. Stop dependent work if launch/ownership/readiness fails; no takeover, restart, process kill or cleanup deletion. Leave the server for the developer after this task. Runtime may use its ordinary external logs/cache/key state; never read keys or private logs. Two exclusive repository diagnostic outputs are retained without dumping them.
 
 ```powershell
 $ErrorActionPreference = 'Stop'
-$m601Exe = 'C:/Users/mmjos/Tools/Ollama/v0.33.3/ollama.exe'
+$m601Exe = 'C:/Users/developer/Tools/Ollama/v0.33.3/ollama.exe'
 if ((Get-FileHash -LiteralPath $m601Exe -Algorithm SHA256).Hash -ine 'e4fe6bd835fe146659f5c969dccaff2e25a9de63d90ee204ca5d11b9034b0ca5') { throw 'Runtime identity mismatch' }
 if (@(Get-NetTCPConnection -LocalPort 11434 -State Listen -ErrorAction SilentlyContinue).Count) { throw 'Runtime port occupied; no takeover' }
 if (Get-Process -Name ollama -ErrorAction SilentlyContinue) { throw 'Unexpected existing runtime; reconcile ownership' }
@@ -458,10 +460,10 @@ $m601Saved = @{}
 foreach ($name in $m601Names) { $m601Saved[$name] = [Environment]::GetEnvironmentVariable($name,'Process') }
 try {
   $env:OLLAMA_HOST = '127.0.0.1:11434'
-  $env:OLLAMA_MODELS = 'C:/Users/mmjos/Models/Ollama'
+  $env:OLLAMA_MODELS = 'C:/Users/developer/Models/Ollama'
   $env:OLLAMA_NO_CLOUD = '1'
   $env:OLLAMA_NOPRUNE = '1'
-  $m601Server = Start-Process -FilePath $m601Exe -ArgumentList 'serve' -WorkingDirectory 'C:/Users/mmjos/Tools/Ollama/v0.33.3' -WindowStyle Hidden -RedirectStandardOutput $m601Out -RedirectStandardError $m601Err -PassThru
+  $m601Server = Start-Process -FilePath $m601Exe -ArgumentList 'serve' -WorkingDirectory 'C:/Users/developer/Tools/Ollama/v0.33.3' -WindowStyle Hidden -RedirectStandardOutput $m601Out -RedirectStandardError $m601Err -PassThru
   $m601Deadline = [DateTime]::UtcNow.AddSeconds(20)
   do {
     $m601Server.Refresh()

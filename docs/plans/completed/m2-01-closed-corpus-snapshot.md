@@ -1,5 +1,7 @@
 # M2-01 — Closed corpus snapshot
 
+> Privacy note: Personal directory prefixes in this archived plan have been replaced with `C:/projects/a11y-evidence-lab` and `C:/Users/developer` (or their backslash equivalents). These are illustrative aliases, including in recorded commands and errors. Artifact names, hashes and outcomes are unchanged; the aliases must not be used to authenticate original path-bound evidence or replay historical operations. For current setup, use the [local startup guide](../../DEVELOPMENT.md).
+
 This ExecPlan is a living document. Maintain `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` as work proceeds. This document must be maintained in accordance with `PLANS.md`.
 
 This living ExecPlan follows [PLANS.md](../../../PLANS.md) and owns only [M2-01](../../DEVELOPMENT_ROADMAP.md#m2-01--prepare-the-authorized-closed-corpus-snapshot). The roadmap owns status; requirements and Accepted ADRs control scope. Read the [authority map](../../README.md), [agent workflow](../../../.codex/README.md), [worker-first workflow](../../../.codex/execplan-implementation-workflow.md), and [write-lease guard](../../../.codex/write-lease-guard.md) before execution.
@@ -146,14 +148,14 @@ After accepted review, primary removes only the eight verified temporary capture
 
 ## Concrete Steps
 
-All commands run in PowerShell from `C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab`. PREP and the authorized second ACQUIRE attempt passed after the preserved first connection failure. VALIDATE passed on the static candidate; CLEANUP passed after accepted final review. Blocks remain the bounded recipes and must not be replayed automatically. Use no bare npm, package installation, build, application service, or browser launch.
+All commands run in PowerShell from `C:/projects/a11y-evidence-lab`. PREP and the authorized second ACQUIRE attempt passed after the preserved first connection failure. VALIDATE passed on the static candidate; CLEANUP passed after accepted final review. Blocks remain the bounded recipes and must not be replayed automatically. Use no bare npm, package installation, build, application service, or browser launch.
 
 ### M201-CMD-PREP — read-only baseline and fixed acquisition table
 
 ```powershell
 $ErrorActionPreference = 'Stop'
 $m201Root = (Get-Location).Path
-if ($m201Root -ne 'C:\Users\mmjos\Desktop\workbeanch\a11y-evidence-lab') { throw 'Wrong checkout.' }
+if ($m201Root -ne 'C:\projects\a11y-evidence-lab') { throw 'Wrong checkout.' }
 $m201Node = 'C:/nvm4w/nodejs/node.exe'
 $m201Curl = 'C:/Windows/System32/curl.exe'
 $m201ExecutionHead = (git rev-parse HEAD).Trim()

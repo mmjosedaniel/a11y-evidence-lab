@@ -12,6 +12,7 @@
   "scripts": {
     "typecheck": "tsc --project tsconfig.json",
     "test:focused": "node --test",
+    "test:evidence:m602": "node --test --test-timeout=120000 tests/evidence/m602-retained-inputs.evidence.ts",
     "build": "vite build",
     "start": "node src/server/main.ts"
   },

@@ -1,4 +1,4 @@
-import { readArray, readObject, requireValid } from '../server/domain/run-contract/contract-value-reader.ts';
+import { readArray, readObject, requireValid } from '../../server/domain/run-contract/contract-value-reader.ts';
 
 // Detach every value before validation, including nested views. Accessors are never evaluated.
 export function snapshot(value: unknown, ancestors = new Set<object>()): unknown {

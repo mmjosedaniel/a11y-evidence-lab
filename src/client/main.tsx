@@ -2,11 +2,11 @@
 import { createRoot } from 'react-dom/client';
 import { App } from './App.tsx';
 import type { AnalyzeIntent } from './App.tsx';
-import type { GuidanceIntent } from './finding-guidance-admission.ts';
-import type { GenerationIntent } from './finding-generation-admission.ts';
-import type { ReviewIntent } from './finding-review-admission.ts';
-import { postRescan } from './rescan-transport.ts';
-import { getComparisonRun } from './comparison-request.ts';
+import type { GuidanceIntent } from './findings/finding-guidance-admission.ts';
+import type { GenerationIntent } from './findings/finding-generation-admission.ts';
+import type { ReviewIntent } from './review/finding-review-admission.ts';
+import { postRescan } from './rescan/rescan-transport.ts';
+import { getComparisonRun } from './comparison/comparison-request.ts';
 import './styles.css';
 
 const root = document.getElementById('root');

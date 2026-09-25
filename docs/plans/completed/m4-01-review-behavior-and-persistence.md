@@ -1,5 +1,7 @@
 # Implement proposal-only review behavior and persistence
 
+> Privacy note: Personal directory prefixes in this archived plan have been replaced with `C:/projects/a11y-evidence-lab` and `C:/Users/developer` (or their backslash equivalents). These are illustrative aliases, including in recorded commands and errors. Artifact names, hashes and outcomes are unchanged; the aliases must not be used to authenticate original path-bound evidence or replay historical operations. For current setup, use the [local startup guide](../../DEVELOPMENT.md).
+
 This ExecPlan is a living document. Maintain `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` as work proceeds. This document must be maintained in accordance with `PLANS.md`.
 
 ## Current state
@@ -153,7 +155,7 @@ Each assignment receives a Research Assignment Capsule projecting this contract,
 
 ## Concrete Steps
 
-Working directory for every command: `C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab`. Use the maintained [README preparation](../../../README.md#development-command-preparation), not an archived task's runtime or lease baseline. Current pinned Node is 24.20.0. No install/restore is needed for planning; if execution prerequisites are missing, stop and freeze an authorized bounded restoration command before changing them.
+Working directory for every command: `C:/projects/a11y-evidence-lab`. Use the maintained [README preparation](../../../README.md#development-command-preparation), not an archived task's runtime or lease baseline. Current pinned Node is 24.20.0. No install/restore is needed for planning; if execution prerequisites are missing, stop and freeze an authorized bounded restoration command before changing them.
 
 ### M401-ENTRY-01 — Planning evidence
 
@@ -246,7 +248,7 @@ A responsibility placement is pure review types/body readers → existing value/
 
 #### M401-CMD-PREFLIGHT / RED-A / GREEN-A / RED-B / GREEN-B
 
-Every caller runs from `C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab` in PowerShell 7.6.5 with Node24.20.0 and Python3.12.10. Load the exact maintained preparation, without running README installation/setup commands:
+Every caller runs from `C:/projects/a11y-evidence-lab` in PowerShell 7.6.5 with Node24.20.0 and Python3.12.10. Load the exact maintained preparation, without running README installation/setup commands:
 
 ```powershell
 $ErrorActionPreference = 'Stop'

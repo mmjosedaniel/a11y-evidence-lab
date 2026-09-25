@@ -1,10 +1,10 @@
-import { snapshot, equal } from './finding-response-snapshot.ts';
-import { validateRun } from '../server/domain/run-contract.ts';
-import type { Finding, PageAnalysisRun } from '../server/domain/run-contract.ts';
-import type { Citation, FindingGuidanceView, NoticeKind } from '../server/domain/finding-analysis-types.ts';
-import { readArray, readObject, requireKeys, requireValid } from '../server/domain/run-contract/contract-value-reader.ts';
-import { CORPUS_IDENTITY, findPassageReference } from '../server/retrieval/corpus-identity.ts';
-import { SOURCE_NOTICES } from '../server/retrieval/source-notices.ts';
+import { snapshot, equal } from '../responses/finding-response-snapshot.ts';
+import { validateRun } from '../../server/domain/run-contract.ts';
+import type { Finding, PageAnalysisRun } from '../../server/domain/run-contract.ts';
+import type { Citation, FindingGuidanceView, NoticeKind } from '../../server/domain/finding-analysis-types.ts';
+import { readArray, readObject, requireKeys, requireValid } from '../../server/domain/run-contract/contract-value-reader.ts';
+import { CORPUS_IDENTITY, findPassageReference } from '../../server/retrieval/corpus-identity.ts';
+import { SOURCE_NOTICES } from '../../server/retrieval/source-notices.ts';
 
 export type GuidanceIntent = { readonly runId: string; readonly findingId: string };
 type CompleteRun = Extract<PageAnalysisRun, { status: 'completed' }>;

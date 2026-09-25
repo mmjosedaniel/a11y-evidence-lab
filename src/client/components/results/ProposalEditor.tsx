@@ -1,8 +1,8 @@
 import type { ReactElement } from 'react';
 import type { Proposal } from '../../../server/generation/proposal-contract.ts';
 import type { EvidencePath } from '../../../server/domain/finding-analysis-types.ts';
-import { claimFields, proseFields } from '../../review-form-validation.ts';
-import type { ReviewErrors } from '../../review-form-validation.ts';
+import { claimFields, proseFields } from '../../review/review-form-validation.ts';
+import type { ReviewErrors } from '../../review/review-form-validation.ts';
 
 export function ProposalEditor({ id, proposal, assumptions, evidence, passages, frozen, errors, onChange }: {
   readonly id: string;

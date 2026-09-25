@@ -59,6 +59,7 @@ import { resolveGenerationAdapter } from '../src/server/local-service/generation
 import { cloneCandidate, generationFixture } from './helpers/m302-generation-fixture.ts';
 import { nativeHarness, ollamaChatBody, validMetadata } from './helpers/m303-ollama-fixture.ts';
 import { loadM602Package, type M602CaseLabel } from './helpers/m602-package.ts';
+import { canonicalSyntheticBundle } from './helpers/m602-synthetic-package.ts';
 
 const serial = { concurrency: false };
 const labels = [
@@ -67,6 +68,7 @@ const labels = [
 ] as const satisfies readonly M602CaseLabel[];
 const rules = ['image-alt', 'label', 'color-contrast'] as const;
 type RuleId = typeof rules[number];
+const syntheticPackageEnvironment = canonicalSyntheticBundle().environment;
 
 const ruleByLabel: Readonly<Record<M602CaseLabel, RuleId>> = Object.freeze({
   'local-image': 'image-alt',
@@ -78,7 +80,7 @@ const ruleByLabel: Readonly<Record<M602CaseLabel, RuleId>> = Object.freeze({
 });
 
 function ready(label: M602CaseLabel) {
-  const loaded = loadM602Package(label);
+  const loaded = loadM602Package(label, syntheticPackageEnvironment);
   assert.equal(loaded.status, 'ready');
   if (loaded.status !== 'ready') throw new Error(`M6-02 package ${label} is unavailable`);
   return loaded.value;

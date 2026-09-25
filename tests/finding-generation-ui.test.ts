@@ -5,8 +5,8 @@ import { after, before, beforeEach, describe, it } from 'node:test';
 import { AxeBuilder } from '@axe-core/playwright';
 import type { Locator, Page } from 'playwright';
 import { assessedMissingRetrievalRun } from './helpers/m202-retrieval-service-fixture.ts';
-import { admitGeneration } from '../src/client/finding-generation-admission.ts';
-import { admitGuidance } from '../src/client/finding-guidance-admission.ts';
+import { admitGeneration } from '../src/client/findings/finding-generation-admission.ts';
+import { admitGuidance } from '../src/client/findings/finding-guidance-admission.ts';
 import { validateRun } from '../src/server/domain/run-contract.ts';
 import {
   failedGenerationEnvelope,
@@ -395,6 +395,81 @@ describe('M3-05 explicit Finding generation UI', { concurrency: false, timeout: 
         const saved = window.m104.raw;
         Date.now = saved.originalDate;
         if (saved.ownPerformance) Object.defineProperty(performance, 'now', saved.ownPerformance);
+        else delete (performance as any).now;
+        window.m104.raw = null;
+      });
+    }
+  });
+
+  it('aborts pending generation on unmount and ignores its late settlement', async () => {
+    const runId = 'generation-unmount-pending';
+    const key = 'generation-unmount-pending';
+    await openEligible(runId);
+    await setGeneration('hold', key);
+    await generationButton().click();
+    assert.equal(await generationCalls(), 1);
+
+    const aborted = await page.evaluate(() => {
+      window.m104.reads = 0;
+      window.m104.unmount();
+      const call = window.m104.calls.find(item => item.stage === 'generation');
+      return call?.stage === 'generation' && call.signal.aborted;
+    });
+    assert.equal(aborted, true);
+    await page.evaluate(async ({ key, outcome }) => {
+      const late = new Proxy(structuredClone(outcome), {
+        ownKeys(target) {
+          window.m104.reads++;
+          return Reflect.ownKeys(target);
+        },
+      });
+      window.m104.resolveKey(key, late);
+      await Promise.resolve();
+      await Promise.resolve();
+    }, { key, outcome: successfulGenerationEnvelope(runId) });
+
+    assert.equal(await page.evaluate(() => window.m104.reads), 0,
+      'Late generation success must not enter response admission');
+    assert.equal(await generationCalls(), 1);
+    assert.equal(await page.getByRole('main').count(), 0);
+  });
+
+  it('times out when generation expires during response admission reflection', async () => {
+    const runId = 'generation-response-reflection-deadline';
+    const outcome = successfulGenerationEnvelope(runId);
+    await openEligible(runId);
+    await page.evaluate(outcome => {
+      const descriptor = Object.getOwnPropertyDescriptor(performance, 'now');
+      const original = performance.now.bind(performance);
+      window.m104.raw = { descriptor };
+      window.m104.reads = 0;
+      window.m104.generation = () => Promise.resolve(new Proxy(structuredClone(outcome), {
+        ownKeys(target) {
+          window.m104.reads++;
+          Object.defineProperty(performance, 'now', {
+            configurable: true,
+            value: () => original() + 300001,
+          });
+          return Reflect.ownKeys(target);
+        },
+      }));
+      window.m104.rerender(true, {}, true, true);
+    }, outcome);
+
+    try {
+      await generationButton().click();
+      await page.waitForFunction(() => /time|unknown|uncertain/i.test(document.querySelector('[role=status]')?.textContent ?? ''));
+      assert.equal(await page.evaluate(() => window.m104.reads), 1);
+      assert.equal(await page.evaluate(() => {
+        const call = window.m104.calls.find(item => item.stage === 'generation');
+        return call?.stage === 'generation' && call.signal.aborted;
+      }), true);
+      assert.equal(await detail().getByText('The scanner recorded a bounded issue for the selected element.', { exact: true }).count(), 0,
+        'A response admitted after expiry must not publish generation success');
+    } finally {
+      await page.evaluate(() => {
+        const descriptor = window.m104.raw?.descriptor;
+        if (descriptor) Object.defineProperty(performance, 'now', descriptor);
         else delete (performance as any).now;
         window.m104.raw = null;
       });

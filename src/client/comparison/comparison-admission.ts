@@ -1,11 +1,11 @@
-import { validateRun } from '../server/domain/run-contract.ts';
-import type { CompletedRun } from '../server/persistence/run-repository.ts';
-import { comparisonObservation } from '../server/comparison/target-correlation.ts';
-import { readChoice, readObject, requireKeys, requireValid } from '../server/domain/run-contract/contract-value-reader.ts';
-import type { ComparisonLineage } from '../server/local-service/contracts.ts';
-import { equal, snapshot } from './finding-response-snapshot.ts';
+import { validateRun } from '../../server/domain/run-contract.ts';
+import type { CompletedRun } from '../../server/persistence/run-repository.ts';
+import { comparisonObservation } from '../../server/comparison/target-correlation.ts';
+import { readChoice, readObject, requireKeys, requireValid } from '../../server/domain/run-contract/contract-value-reader.ts';
+import type { ComparisonLineage } from '../../server/local-service/contracts.ts';
+import { equal, snapshot } from '../responses/finding-response-snapshot.ts';
 
-export type { ComparisonLineage } from '../server/local-service/contracts.ts';
+export type { ComparisonLineage } from '../../server/local-service/contracts.ts';
 
 function immutableSource(run: CompletedRun) {
   return { ...run, scan: { ...run.scan, findings: run.scan.findings.map(finding =>

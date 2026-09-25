@@ -1,5 +1,7 @@
 # Add deterministic sufficiency, abstention, and Finding detail
 
+> Privacy note: Personal directory prefixes in this archived plan have been replaced with `C:/projects/a11y-evidence-lab` and `C:/Users/developer` (or their backslash equivalents). These are illustrative aliases, including in recorded commands and errors. Artifact names, hashes and outcomes are unchanged; the aliases must not be used to authenticate original path-bound evidence or replay historical operations. For current setup, use the [local startup guide](../../DEVELOPMENT.md).
+
 This completed ExecPlan preserves original M2-03 execution, closure, reopening and correction history under `PLANS.md`. Current state and M203-C-POST01 record renewed closure; earlier grants remain consumed.
 
 ## Current state
@@ -395,7 +397,7 @@ Run one automated accessibility check over the new regions and one bounded keybo
 
 ## Concrete Steps
 
-All commands run from `C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab` in PowerShell. Before any Node command, load exactly the first PowerShell block under [maintained developer preparation](../../../README.md#development-command-preparation); it defines values/functions without effects. Do not execute the adjacent `npm ci` block. Current installed dependencies and retained browser/build may be reused after inspection; this task plans no acquisition or dependency restore.
+All commands run from `C:/projects/a11y-evidence-lab` in PowerShell. Before any Node command, load exactly the first PowerShell block under [maintained developer preparation](../../../README.md#development-command-preparation); it defines values/functions without effects. Do not execute the adjacent `npm ci` block. Current installed dependencies and retained browser/build may be reused after inspection; this task plans no acquisition or dependency restore.
 
 ### C0 — read-only execution entry
 
@@ -740,7 +742,7 @@ Write scope:
 - Forbidden directory roots: Red src/docs; Green tests/docs. All other files outside exact allowed file remain forbidden.
 
 Validation:
-- Working directory: C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab.
+- Working directory: C:/projects/a11y-evidence-lab.
 - Focused command: use README Development command preparation through its exact heading/fence; Invoke-M105Command { & $m105Node --test --test-timeout=120000 tests/finding-guidance-ui.test.ts; if ($LASTEXITCODE -ne 0) { throw 'Guidance UI suite failed' } } $m105UiTemp.
 - Task-level command: primary independent tsc --project tsconfig.json; preserve inventoried dist/client at temp/m203-build-before-post01 then Vite build --configLoader native; complete README thirteen-suite sequence once after Green. No C-REAL replay.
 - Expected decisive result and reusable evidence IDs: Red fails exactly the two missing behaviors; Green both regressions and prior UI pass; fresh strict/build/full suite and reviewer accept same final source/test identities.

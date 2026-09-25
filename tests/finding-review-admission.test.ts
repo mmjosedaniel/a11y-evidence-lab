@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { admitReview } from '../src/client/finding-review-admission.ts';
+import { admitReview } from '../src/client/review/finding-review-admission.ts';
 import { validateRun } from '../src/server/domain/run-contract.ts';
 import { selectedFinding, retrievalStartedAt } from './helpers/m202-retrieval-service-fixture.ts';
 import { durableReview, reviewInput, type ReviewAction } from './helpers/m401-review-fixture.ts';

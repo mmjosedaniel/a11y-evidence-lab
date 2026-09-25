@@ -1,5 +1,7 @@
 # Verify the closed-corpus retrieval checkpoint
 
+> Privacy note: Personal directory prefixes in this archived plan have been replaced with `C:/projects/a11y-evidence-lab` and `C:/Users/developer` (or their backslash equivalents). These are illustrative aliases, including in recorded commands and errors. Artifact names, hashes and outcomes are unchanged; the aliases must not be used to authenticate original path-bound evidence or replay historical operations. For current setup, use the [local startup guide](../../DEVELOPMENT.md).
+
 This ExecPlan is a living document. Maintain `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` as work proceeds. This document must be maintained in accordance with `PLANS.md`.
 
 ## Current state
@@ -134,7 +136,7 @@ Reuse current UI suites for keyboard/focus/announcement semantics, in-flight sel
 
 ## Concrete Steps
 
-All commands use PowerShell 7 from `C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab`. Load only the first definitions block under [README development preparation](../../../README.md#development-command-preparation) in each shell; do not run the adjacent install block. The maintained `Invoke-M105Command` disables compilation caching and restores its environment; browser commands also use its approved scratch. Existing dependencies/browser are prerequisites, not a download grant.
+All commands use PowerShell 7 from `C:/projects/a11y-evidence-lab`. Load only the first definitions block under [README development preparation](../../../README.md#development-command-preparation) in each shell; do not run the adjacent install block. The maintained `Invoke-M105Command` disables compilation caching and restores its environment; browser commands also use its approved scratch. Existing dependencies/browser are prerequisites, not a download grant.
 
 ### C-BASE — safe entry check
 
@@ -421,10 +423,10 @@ Primary caller triage: its first invocation rejected `Wrong cwd` before any effe
 
 ```powershell
 $ErrorActionPreference='Stop'
-$repo='C:/Users/mmjos/Desktop/workbeanch/a11y-evidence-lab'
-$runtime='C:/Users/mmjos/Tools/Ollama/v0.33.3'
+$repo='C:/projects/a11y-evidence-lab'
+$runtime='C:/Users/developer/Tools/Ollama/v0.33.3'
 $exe=Join-Path $runtime 'ollama.exe'
-$models='C:/Users/mmjos/Models/Ollama'
+$models='C:/Users/developer/Models/Ollama'
 $owned=Join-Path $repo 'temp/m204-retrieval-checkpoint/runtime-start'
 if([IO.Path]::GetFullPath((Get-Location).Path) -ine [IO.Path]::GetFullPath($repo)){throw 'Wrong cwd'}
 if(Test-Path -LiteralPath $owned){throw 'Runtime-start root already exists'}

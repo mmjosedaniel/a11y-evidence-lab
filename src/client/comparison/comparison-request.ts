@@ -1,8 +1,8 @@
-import { validateRun } from '../server/domain/run-contract.ts';
-import type { CompletedRun } from '../server/persistence/run-repository.ts';
+import { validateRun } from '../../server/domain/run-contract.ts';
+import type { CompletedRun } from '../../server/persistence/run-repository.ts';
 import type { ComparisonLineage } from './comparison-admission.ts';
 import { admitComparisonRead } from './comparison-admission.ts';
-import { snapshot } from './finding-response-snapshot.ts';
+import { snapshot } from '../responses/finding-response-snapshot.ts';
 
 export type ComparisonReadCallback = (runId: string, signal: AbortSignal) => Promise<unknown>;
 export type ComparisonAvailability = ComparisonLineage | { readonly status: 'unverified' };
