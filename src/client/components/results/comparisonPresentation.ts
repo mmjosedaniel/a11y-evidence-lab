@@ -1,5 +1,5 @@
 import type { StoredComparison } from '../../../server/domain/run-contract/comparison-types.ts';
-import type { ComparisonAvailability } from '../../comparison-request.ts';
+import type { ComparisonAvailability } from '../../comparison/comparison-request.ts';
 import { plainReason } from './resultPresentation.ts';
 
 export function availabilityText(availability: ComparisonAvailability): string | null {

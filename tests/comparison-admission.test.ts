@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { admitComparisonRead } from '../src/client/comparison-admission.ts';
+import { admitComparisonRead } from '../src/client/comparison/comparison-admission.ts';
 import type { PageAnalysisRun } from '../src/server/domain/run-contract.ts';
 import { completedRun } from './helpers/m102-run-fixture.ts';
 import { assessedSupportedRetrievalRun } from './helpers/m202-retrieval-service-fixture.ts';
 import { mutate, remove, withComparison } from './helpers/m503-comparison-fixture.ts';
 
-const { createComparisonRequest, getComparisonRun } = await import('../src/client/comparison-request.ts');
+const { createComparisonRequest, getComparisonRun } = await import('../src/client/comparison/comparison-request.ts');
 
 type CompleteRun = Extract<PageAnalysisRun, { status: 'completed' }>;
 const serial = { concurrency: false };

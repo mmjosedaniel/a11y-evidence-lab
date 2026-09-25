@@ -1,8 +1,8 @@
-import { validateRun } from '../server/domain/run-contract.ts';
-import { validateReviewInput } from '../server/domain/review-contract.ts';
-import { readChoice, readId, readObject, requireKeys, requireValid } from '../server/domain/run-contract/contract-value-reader.ts';
-import type { ReviewOutcome } from '../server/local-service/contracts.ts';
-import { equal, snapshot } from './finding-response-snapshot.ts';
+import { validateRun } from '../../server/domain/run-contract.ts';
+import { validateReviewInput } from '../../server/domain/review-contract.ts';
+import { readChoice, readId, readObject, requireKeys, requireValid } from '../../server/domain/run-contract/contract-value-reader.ts';
+import type { ReviewOutcome } from '../../server/local-service/contracts.ts';
+import { equal, snapshot } from '../responses/finding-response-snapshot.ts';
 
 export type ReviewIntent = { readonly runId: string; readonly findingId: string; readonly review: unknown };
 

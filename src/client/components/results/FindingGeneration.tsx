@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import type { Finding, ProviderContext } from '../../../server/domain/run-contract.ts';
-import type { GenerationOutcome } from '../../finding-generation-admission.ts';
+import type { GenerationOutcome } from '../../findings/finding-generation-admission.ts';
 
 export type GenerationPresentation =
   | { readonly status: 'pending' }

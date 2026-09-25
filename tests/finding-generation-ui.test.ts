@@ -5,8 +5,8 @@ import { after, before, beforeEach, describe, it } from 'node:test';
 import { AxeBuilder } from '@axe-core/playwright';
 import type { Locator, Page } from 'playwright';
 import { assessedMissingRetrievalRun } from './helpers/m202-retrieval-service-fixture.ts';
-import { admitGeneration } from '../src/client/finding-generation-admission.ts';
-import { admitGuidance } from '../src/client/finding-guidance-admission.ts';
+import { admitGeneration } from '../src/client/findings/finding-generation-admission.ts';
+import { admitGuidance } from '../src/client/findings/finding-guidance-admission.ts';
 import { validateRun } from '../src/server/domain/run-contract.ts';
 import {
   failedGenerationEnvelope,

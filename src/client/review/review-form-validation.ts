@@ -1,7 +1,7 @@
-import { validateProposal } from '../server/generation/proposal-contract.ts';
-import type { Proposal } from '../server/generation/proposal-contract.ts';
-import { validateReviewInput } from '../server/domain/review-contract.ts';
-import type { ReviewContext } from '../server/domain/review-contract.ts';
+import { validateProposal } from '../../server/generation/proposal-contract.ts';
+import type { Proposal } from '../../server/generation/proposal-contract.ts';
+import { validateReviewInput } from '../../server/domain/review-contract.ts';
+import type { ReviewContext } from '../../server/domain/review-contract.ts';
 
 export type ReviewAction = '' | 'approve' | 'edit-and-accept' | 'reject';
 export type Judgment = 'supports-proposal' | 'not-applicable' | 'unresolved' | 'contradicts-proposal';

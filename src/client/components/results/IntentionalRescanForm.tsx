@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
-import type { RescanPresentation } from '../../rescan-request.ts';
-import type { RescanSettlement } from '../../rescan-request.ts';
+import type { RescanPresentation } from '../../rescan/rescan-request.ts';
+import type { RescanSettlement } from '../../rescan/rescan-request.ts';
 
 export interface RescanControls {
   readonly blocked: boolean;

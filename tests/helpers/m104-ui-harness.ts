@@ -12,7 +12,7 @@ import { completedRun } from './m102-run-fixture.ts';
 import { validateRun } from '../../src/server/domain/run-contract.ts';
 import type { PageAnalysisRun, ProviderContext } from '../../src/server/domain/run-contract.ts';
 import type { AnalyzeIntent, AppProps } from '../../src/client/App.tsx';
-import type { RescanIntent } from '../../src/client/rescan-admission.ts';
+import type { RescanIntent } from '../../src/client/rescan/rescan-admission.ts';
 import { buildFindingAnalysis } from '../../src/server/domain/finding-analysis.ts';
 import { resolveCitations } from '../../src/server/retrieval/citation-resolution.ts';
 import { classifyGuidanceSupport } from '../../src/server/retrieval/support-policy.ts';

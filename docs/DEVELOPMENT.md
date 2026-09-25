@@ -232,6 +232,22 @@ Use this map when you want to understand or change the code. The [system archite
 
 Generated or local-only files have different purposes: `dist/client` holds the built interface, `data/runs` holds saved analyses, and `temp` holds temporary work and locally retained test/evaluation artifacts. They are not interchangeable with tracked source or portable evidence. Keep credentials and private records out of commits; follow the maintained cleanup instructions rather than deleting these directories blindly.
 
+### Client code
+
+The root of `src/client` contains [main.tsx](../src/client/main.tsx) for startup, [App.tsx](../src/client/App.tsx) for application composition and [styles.css](../src/client/styles.css) for shared styles. Supporting modules are grouped by responsibility:
+
+| Folder | Responsibility |
+| --- | --- |
+| [components](../src/client/components) | React forms and views, grouped into analysis and results. |
+| [analysis](../src/client/analysis) | Validate the response to an initial page analysis. |
+| [findings](../src/client/findings) | Validate guidance and generation responses for a selected Finding. |
+| [review](../src/client/review) | Validate review forms and responses, and manage review requests. |
+| [rescan](../src/client/rescan) | Send, manage and validate intentional rescan requests. |
+| [comparison](../src/client/comparison) | Read and validate the availability of saved comparison evidence. |
+| [responses](../src/client/responses) | Shared detached response snapshots and equality checks. |
+
+These folders organize existing client behavior; the service continues to own scanning, model calls and persistence. Archived plans and frozen evaluation manifests retain their original source paths and identities. Use this map for current code locations; moving a file does not renew historical evaluation evidence.
+
 <details>
 <summary>Maintainer references and older section links</summary>
 

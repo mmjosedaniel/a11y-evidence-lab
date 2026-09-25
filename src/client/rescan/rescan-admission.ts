@@ -1,8 +1,8 @@
-import { validateRun } from '../server/domain/run-contract.ts';
-import { readChoice, readId, readObject, requireKeys, requireValid } from '../server/domain/run-contract/contract-value-reader.ts';
-import type { ComparisonFailure, RescanOutcome } from '../server/local-service/contracts.ts';
-import { comparisonObservation } from '../server/comparison/target-correlation.ts';
-import { equal, snapshot } from './finding-response-snapshot.ts';
+import { validateRun } from '../../server/domain/run-contract.ts';
+import { readChoice, readId, readObject, requireKeys, requireValid } from '../../server/domain/run-contract/contract-value-reader.ts';
+import type { ComparisonFailure, RescanOutcome } from '../../server/local-service/contracts.ts';
+import { comparisonObservation } from '../../server/comparison/target-correlation.ts';
+import { equal, snapshot } from '../responses/finding-response-snapshot.ts';
 
 export type RescanIntent = {
   readonly runId: string;

@@ -7,7 +7,7 @@ import { FindingsPanel } from './FindingsPanel.tsx';
 import { ResultDetail } from './ResultDetail.tsx';
 import { ResultsOverview } from './ResultsOverview.tsx';
 import { ComparisonDetail } from './ComparisonDetail.tsx';
-import type { ComparisonAvailability } from '../../comparison-request.ts';
+import type { ComparisonAvailability } from '../../comparison/comparison-request.ts';
 import { limitation, presentResults, selectedResult as findSelectedResult } from './resultPresentation.ts';
 import type { ResultSelection } from './resultPresentation.ts';
 import type { GuidanceControls } from './FindingGuidance.tsx';

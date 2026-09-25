@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { admitGeneration } from '../src/client/finding-generation-admission.ts';
+import { admitGeneration } from '../src/client/findings/finding-generation-admission.ts';
 import { validateRun } from '../src/server/domain/run-contract.ts';
 import { selectedFinding } from './helpers/m202-retrieval-service-fixture.ts';
 import {

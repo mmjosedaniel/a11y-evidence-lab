@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import type { Browser, BrowserContext, Locator, Page } from 'playwright';
 import { validateRun } from '../../src/server/domain/run-contract.ts';
-import { admitGuidance } from '../../src/client/finding-guidance-admission.ts';
+import { admitGuidance } from '../../src/client/findings/finding-guidance-admission.ts';
 import { openRunRepository } from '../../src/server/persistence/run-repository.ts';
 import { createLoopbackApiServer } from '../../src/server/local-service/loopback-api.ts';
 import { loadClientResponses } from '../../src/server/local-service/client-assets.ts';

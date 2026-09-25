@@ -1,14 +1,14 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { admitRescan } from '../src/client/rescan-admission.ts';
-import type { RescanIntent } from '../src/client/rescan-admission.ts';
-import { createRescanRequest } from '../src/client/rescan-request.ts';
+import { admitRescan } from '../src/client/rescan/rescan-admission.ts';
+import type { RescanIntent } from '../src/client/rescan/rescan-admission.ts';
+import { createRescanRequest } from '../src/client/rescan/rescan-request.ts';
 import type {
   RescanCallback,
   RescanPresentation,
   RescanSettlement,
-} from '../src/client/rescan-request.ts';
-import { postRescan } from '../src/client/rescan-transport.ts';
+} from '../src/client/rescan/rescan-request.ts';
+import { postRescan } from '../src/client/rescan/rescan-transport.ts';
 import { validateRun } from '../src/server/domain/run-contract.ts';
 import type { PageAnalysisRun } from '../src/server/domain/run-contract.ts';
 import type { RescanOutcome } from '../src/server/local-service/contracts.ts';
