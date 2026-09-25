@@ -8,7 +8,7 @@ In this guide: [Example walkthrough](#walkthrough-a-form-field-without-a-label) 
 
 ## Current scope
 
-The [capability summary](../README.md#project-status) distinguishes implemented behavior from later work. Source entry points are the [domain contract](../src/server/domain/run-contract.ts), [run repository](../src/server/persistence/run-repository.ts), [local service](../src/server/service.ts), [scanner](../src/server/scan/scan-page.ts), and [scan minimization](../src/server/scan/normalize-scan.ts). The [retrieval APIs](#retrieval-apis) consume the [closed corpus](CORPUS.md#closed-corpus-snapshot).
+The [capability summary](../README.md#project-status) distinguishes implemented behavior from later work. A **Finding** is one recorded accessibility issue; a **run** holds one scan and its associated work. **Retrieval** means looking up relevant guidance in the **corpus**, the project's fixed collection of W3C guidance passages. Source entry points are the [domain contract](../src/server/domain/run-contract.ts), [run repository](../src/server/persistence/run-repository.ts), [local service](../src/server/service.ts), [scanner](../src/server/scan/scan-page.ts), and [scan minimization](../src/server/scan/normalize-scan.ts). The [retrieval APIs](#retrieval-apis) consume the [closed corpus](CORPUS.md#closed-corpus-snapshot).
 
 For component responsibilities and local/external data flow, see the [implemented system architecture](architecture/SYSTEM_ARCHITECTURE.md).
 
@@ -25,6 +25,20 @@ The failing example puts visible text next to an email input without connecting 
 
 These files are controlled test inputs. Do not enter a file path or localhost fixture URL into **Analyze**. To follow the steps interactively, use an authorized, non-sensitive public HTTPS page you control with equivalent content and complete the [local setup](DEVELOPMENT.md) first. Keep the frozen repository fixtures unchanged; any page edits belong to your own example page.
 
+### Example result at a glance
+
+The following is an **authored, hypothetical example**, not an actual model response, retrieved passage, saved review or recorded comparison. It summarizes one possible supported path; a real run can instead abstain or fail. The proposed correction comes from the linked corrected fixture.
+
+| Step | Illustrative content or outcome |
+| --- | --- |
+| Finding | The email field has visible nearby text, but that text is not connected to the input as its label. |
+| Guidance | The reviewer checks the returned guidance for support for an explicit label associated with this input. A citation alone is not proof that it applies. |
+| Proposal | Replace the nearby `span` with `<label for="rd3-email">Email address</label>`, keeping the input's matching `id`. This suggestion assumes the reviewer confirms that “Email address” describes the field's intended purpose. |
+| Human decision | If the proposal's claims and citations are supported and the required judgment is resolved, the reviewer can approve it and save that decision. Otherwise, edit and accept a supported correction or reject it. Approval does not modify the page. |
+| Later comparison | After the developer changes the page, a separate scan may report `Resolved` if it finds a unique matching non-failing observation in compatible scan context. Missing or ambiguous evidence is not a pass. |
+
+The steps below explain the actions, required checks and other outcomes. Actual recorded results, including unsupported suggestions, remain in the [evidence report](BOUNDED_MVP_EVIDENCE.md).
+
 ### 1. Scan and inspect the finding
 
 Enter the page address, explicitly select Local or Groq, and choose **Analyze**. Scanning itself needs no model or API key. In a successful scan of the failing example, inspect the `label` Finding for the email field. The nearby visible words are not an explicitly associated label in this markup.
@@ -33,9 +47,9 @@ Read the captured facts before requesting an AI suggestion. Findings, checks the
 
 ### 2. Read the guidance
 
-Select the Finding and choose **Get guidance**. This uses local Ollama and EmbeddingGemma in either generation mode when the required evidence is complete. Read the returned passages and their sources.
+Select the Finding and choose **Get guidance**. This uses local Ollama and EmbeddingGemma in either generation mode when the required evidence is complete. Ollama runs the local models; EmbeddingGemma produces **embeddings**, numerical representations of text used to rank passages by similarity. Read the returned passages and their sources.
 
-The app checks whether the required types of guidance are present. That check does not prove that every passage is relevant or that a later AI claim is supported. If evidence or guidance is insufficient, the app explains the missing or conflicting information and does not call a generation model. A retrieval error is shown separately.
+The app checks whether the required types of guidance are present. That check does not prove that every passage is relevant or that a later AI claim is supported. If evidence or guidance is insufficient, the app explains the missing or conflicting information and does not call a generation model. This is an **abstention**. A retrieval error is shown separately.
 
 ### 3. Request and assess a suggestion
 
@@ -43,9 +57,11 @@ If **Generate** becomes available, read the provider/model information and choos
 
 If a proposal passes validation and is saved, compare each material claim with the scanner evidence and cited guidance. For this example, consider whether a suggested label actually identifies the field and is connected to the intended input. Do not assume that an AI suggestion matches the repository's corrected example. The recorded label-generation cases include unsupported suggestions, as explained in the [Local](BOUNDED_MVP_EVIDENCE.md#local-results) and [Groq](BOUNDED_MVP_EVIDENCE.md#groq-results--inherited-originals) results.
 
+**Application validation** checks required structure, allowed values and reference rules. **Semantic assessment** asks whether the proposal's claims are supported and its suggested change is appropriate for this issue. Passing the first does not establish the second.
+
 ### 4. Save a human decision
 
-Choose **Approve**, **Edit and accept**, or **Reject**. Complete the blocking judgment and then choose **Save decision**. Approval or edit-and-accept also requires confirmation that the resulting proposal's material claims are supported; a contradictory or unresolved judgment cannot be accepted unchanged.
+Choose **Approve**, **Edit and accept**, or **Reject**. Complete the **blocking judgment**—the required human check about context the scanner or model cannot settle—and then choose **Save decision**. Approval or edit-and-accept also requires confirmation that the resulting proposal's material claims are supported; a contradictory or unresolved judgment cannot be accepted unchanged.
 
 Saving a decision does not change the page. It records your decision alongside the original proposal. A post-change verification reminder remains for later work; it is not completed by approving the proposal. If you select another Finding before saving, unsaved edits are discarded.
 

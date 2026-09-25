@@ -2,36 +2,48 @@
 
 [Project overview](../../README.md) · [Architecture index](README.md) · [Application walkthrough](../APPLICATION_GUIDE.md#walkthrough-a-form-field-without-a-label)
 
-This guide describes how the implemented portfolio MVP fits together. The linked source files show the responsibilities; [ADRs](decisions/README.md) explain the accepted decisions. This guide adds no new design or product requirement. The [bounded evidence report](../BOUNDED_MVP_EVIDENCE.md) records verification and known limitations.
+This guide describes how the implemented portfolio MVP fits together. A **Finding** is one recorded accessibility issue. The linked source files show the responsibilities; [architecture decision records (ADRs)](decisions/README.md) explain the accepted decisions. This guide adds no new design or product requirement. The [bounded evidence report](../BOUNDED_MVP_EVIDENCE.md) records verification and known limitations.
 
 ## Main components
 
 The app has a React interface in Chrome or Edge and one Node.js service on the developer's computer. The service serves the built interface and its HTTP API on `127.0.0.1`. It coordinates one operation at a time and owns access to files, the scanner and model providers.
 
+### Local components
+
+Every component in this diagram runs or is stored on the developer's computer. The fixed guidance collection is called the **corpus**. **Embeddings** are numerical representations of text used to rank guidance passages by similarity.
+
 ```mermaid
 flowchart TB
-    subgraph machine["Developer computer"]
-        ui["React interface<br/>Chrome or Edge"]
-        service["One Node.js service<br/>HTTP API and workflow coordination"]
-        chromium["Scanner browser<br/>Managed Chromium"]
-        ollama["Ollama<br/>EmbeddingGemma and Qwen"]
-        files["Local files<br/>Fixed guidance corpus and run records"]
-    end
-    subgraph external["External connections"]
-        page["Trusted public HTTPS page<br/>and its resources"]
-        groq["Groq API<br/>Groq mode only"]
-    end
+    accTitle: Local application components
+    accDescr: The browser interface exchanges actions and results with one Node.js service. That service accesses a separate Chromium scanner, local Ollama models and local files.
+    ui["React interface<br/>Chrome or Edge"]
+    service["Node.js service<br/>API and coordination"]
+    chromium["Scanner browser<br/>Chromium"]
+    ollama["Ollama<br/>EmbeddingGemma and Qwen"]
+    files["Local files<br/>Guidance and run records"]
     ui <-->|"Actions / results"| service
     service -->|"Launch and capture"| chromium
-    service -->|"Embeddings; Local generation"| ollama
-    service -->|"Read corpus; read/write runs"| files
-    chromium -->|"Navigate and load resources"| page
-    service -->|"Groq generation"| groq
+    service -->|"Request model work"| ollama
+    service -->|"Read / write"| files
 ```
 
-**Reading the arrows:** the two-way link shows interface actions and service replies. Every one-way arrow points from the caller to the process, service or files it accesses; replies are implicit. The boxes group local components and external connections, not execution steps. The fixed corpus is read-only; run records are read and updated.
+**Reading the arrows:** the two-way link shows interface actions and service replies. Every one-way arrow points from the caller to the process, service or files it accesses; replies are implicit. The fixed corpus is read-only; run records are read and updated.
 
 The table below details responsibilities inside the single Node.js service. Ollama and the scanner browser are separate local processes. Model responses return to their calling adapters; those adapters validate them before the service publishes results. Embeddings stay local in both modes. Choosing Local or Groq changes the generation provider, not scanning or guidance search.
+
+### External connections
+
+These are the same local scanner and Node.js service shown above. Each row shows one connection from the computer to an external destination; it is not a sequence of workflow steps.
+
+```mermaid
+flowchart LR
+    accTitle: External scan and generation connections
+    accDescr: The local Chromium scanner contacts the trusted public page in either mode. The local Node.js service contacts the external Groq API only for generation in Groq mode.
+    chromium["Local Chromium"] -->|"Scan: either mode"| page["Public HTTPS page<br/>and its resources"]
+    service["Local Node.js service"] -->|"Generate: Groq mode"| groq["External Groq API"]
+```
+
+Scanning contacts the trusted public page and its resources in either mode. Groq generation sends only the permitted input for the selected issue to the external API. Local generation stays with Ollama. Citation links and setup downloads can also use the network, as explained under [data flow and boundaries](#data-flow-and-boundaries).
 
 ## Who owns each responsibility
 
@@ -50,10 +62,12 @@ The service calls these owners; the browser sends explicit actions rather than c
 
 ## Data flow and boundaries
 
-The service reduces page data before saving or using it in later steps. A guidance query uses selected, categorized facts rather than a copy of the page. Generation receives only the allowed facts for one Finding, selected guidance passages, notices, and application-owned instructions and output rules.
+The service reduces page data before saving or using it in later steps. A guidance query uses selected, categorized facts about one Finding rather than a copy of the page. Generation receives only the allowed facts for one Finding, selected guidance passages, notices, and application-owned instructions and output rules. An **abstention** means the app explains why the available evidence or guidance is insufficient and does not call a generation model.
 
 ```mermaid
 flowchart TB
+    accTitle: From scan evidence to a proposal for human review
+    accDescr: Minimized evidence is saved and used to find guidance locally. Insufficient support leads to abstention. Eligible input can go to Local Qwen or Groq after an explicit request. A returned proposal must pass validation and be saved before successful display.
     capture["Transient scanner data"] --> minimize["Validate and minimize evidence"]
     minimize --> scanRecord["Save scan evidence<br/>Local run.json"]
     scanRecord --> query["Build query from selected Finding facts"]

@@ -10,6 +10,16 @@ This portfolio's **minimum viable product (MVP)** analyzes one trusted public HT
 
 The app does not crawl websites, access pages that require a login, or change source code. It cannot certify accessibility or determine legal compliance. It is not designed to safely handle malicious pages.
 
+## Start here
+
+For a first look, follow this reading order:
+
+1. [Understand the workflow](#why-this-matters): what the app helps you do.
+2. [Run it locally](docs/DEVELOPMENT.md): prerequisites and startup commands.
+3. [Follow one example](docs/APPLICATION_GUIDE.md#walkthrough-a-form-field-without-a-label): from a missing form label to human review and a later comparison. You can read it without running the app.
+4. [See the architecture](docs/architecture/SYSTEM_ARCHITECTURE.md): local components, external connections and data flow.
+5. [Read the evidence and limits](docs/BOUNDED_MVP_EVIDENCE.md): what the recorded checks establish and where results fell short.
+
 ## Why this matters
 
 A scanner can flag an issue, but a developer still needs to understand the evidence, choose a suitable fix, and decide what to check manually. A11y Evidence Lab connects those steps:
@@ -40,6 +50,8 @@ The app implements scanning, local storage of results, guidance lookup and AI su
 
 In the fixed evaluation, six AI proposals passed the application's format and validation checks. Some claims still lacked support, and some suggested fixes were unsuitable. Finding all required types of guidance does not guarantee that the guidance is relevant to the issue.
 
+**The MVP workflow is implemented; the correctness and usefulness of each AI suggestion still need human assessment.** Application validation checks the required structure and rules. Semantic assessment checks whether the claims make sense, are supported by the evidence, and address the actual issue.
+
 These results do not prove whole-page accessibility, compatibility with other models or hardware, or readiness for public release. Browsing saved runs, installers, and security work needed for production use remain outside the MVP.
 
 ## Technology
@@ -49,7 +61,7 @@ These results do not prove whole-page accessibility, compatibility with other mo
 | Browser interface | React and TypeScript, built with Vite |
 | Local service | Node.js and TypeScript; manages local files, checks data and sends model requests |
 | Accessibility scanning | Playwright with a fixed Chromium version and axe-core |
-| Guidance search | LangChain MemoryVectorStore for exact vector search; EmbeddingGemma creates the search vectors locally through Ollama |
+| Guidance search | LangChain MemoryVectorStore compares numerical representations of text, called embeddings; EmbeddingGemma creates them locally through Ollama to rank guidance passages by similarity |
 | AI suggestions | Qwen through Ollama in Local mode, or the fixed Groq API connection; the app never switches providers automatically |
 
 Exact dependency versions are recorded in [package.json](package.json) and [package-lock.json](package-lock.json). The [architecture decisions](docs/architecture/decisions/README.md) explain the choices and where they apply.
